@@ -37,6 +37,13 @@ RUN yum -y install mysql-devel
 #
 # gcc
 RUN yum -y install gcc
+RUN yum -y install patch
+
+# Starman
+RUN cpanm -i Starman
+
+# daemontools
+RUN mkdir -p /package;chmod 1755 /package;cd /package;wget http://cr.yp.to/daemontools/daemontools-0.76.tar.gz;tar xvzf daemontools-0.76.tar.gz;cd admin/daemontools-0.76;wget http://www.qmail.org/moni.csi.hu/pub/glibc-2.3.1/daemontools-0.76.errno.patch;patch -p1 < daemontools-0.76.errno.patch;package/install
 
 # Install Perl Module (Catalyst)
 RUN cpanm -i YAML
@@ -78,8 +85,19 @@ RUN cpanm -i Catalyst::Plugin::I18N
 # cpanm work削除
 RUN rm -rf .cpanm/*
 
+#nginx設定
+ADD doccnf/nginx.conf /etc/nginx/nginx.conf
+
+# daemontools設定
+RUN mkdir -p /service/conkan
+ADD doccnf/conkan_run /service/conkan/run
+RUN chmod 755 /service/conkan/run
+RUN mkdir -p /service/nginx
+ADD doccnf/nginx_run /service/nginx/run
+RUN chmod 755 /service/nginx/run
+
 #----------------------------------------------------------
 # 起動
 #----------------------------------------------------------
 EXPOSE 80 443
-CMD [ "/usr/sbin/nginx", "-g", "daemon off;" ]
+CMD [ "/usr/local/bin/svscanboot" ]
