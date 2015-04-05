@@ -53,3 +53,4 @@ export TERM="xterm"
 export PATH
 export CLICOLOR="1"
 export PS1="\[\033[34m\][\u@\H:\[\033[36m\]\w\[\033[34m\]]$\[\033[0m\] "
+export LANG="ja_JP.UTF8"

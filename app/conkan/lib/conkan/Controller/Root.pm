@@ -18,7 +18,7 @@ conkan::Controller::Root - Root Controller for conkan
 
 =head1 DESCRIPTION
 
-[enter your description here]
+初期設定のみ組み込み。それ以外は別のコントローラ
 
 =head1 METHODS
 
@@ -30,6 +30,8 @@ The root page (/)
 
 sub index :Path :Args(0) {
     my ( $self, $c ) = @_;
+
+    $c->go( '/initialize' ) unless (exists($c->config->{inited}));
 
     # Hello World
     $c->response->body( $c->welcome_message );
@@ -47,6 +49,30 @@ sub default :Path {
     $c->response->status(404);
 }
 
+=head2 initialize
+
+Initialize
+
+=cut
+
+sub initialize :Private {
+    my ( $self, $c ) = @_;
+    # Do Nothing;
+}
+
+=head2 initialsetup
+
+Initial setup
+
+=cut
+
+sub initialsetup :Path {
+    my ( $self, $c ) = @_;
+
+    $c->response->body( "Already Initialized" )
+        if (exists($c->config->{inited}));
+}
+
 =head2 end
 
 Attempt to render a view, if needed.
@@ -57,7 +83,7 @@ sub end : ActionClass('RenderView') {}
 
 =head1 AUTHOR
 
-root
+Stadio REM
 
 =head1 LICENSE
 

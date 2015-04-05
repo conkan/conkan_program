@@ -57,7 +57,7 @@ conkan - Catalyst based application
 
 =head1 DESCRIPTION
 
-[enter your description here]
+汎用コンベンション管理システム conkan
 
 =head1 SEE ALSO
 
@@ -65,7 +65,7 @@ L<conkan::Controller::Root>, L<Catalyst>
 
 =head1 AUTHOR
 
-root
+Studio REM
 
 =head1 LICENSE
 

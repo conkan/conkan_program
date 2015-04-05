@@ -17,6 +17,7 @@ ENV HOSTNAME conkan
 
 # shell環境等設定
 ADD doccnf/bashrc /root/.bashrc
+ADD doccnf/vimrc /root/.vimrc
 ADD doccnf/clock /etc/sysconfig/clock
 ADD doccnf/i18n /etc/sysconfig/i18n
 RUN rm -f /etc/localtime
@@ -58,10 +59,14 @@ RUN cpanm -in FormValidator::Simple::Plugin::Japanese
 RUN cpanm -i HTTP::Server::Simple
 RUN cpanm -i Moose
 RUN cpanm -in MooseX::Daemonize
+RUN cpanm -i Catalyst::Runtime
+RUN cpanm -in Test::Expect
+RUN cpanm -in CatalystX::REPL
 RUN cpanm -i Task::Catalyst
 RUN cpanm -i Catalyst::Devel
 RUN cpanm -i Catalyst::Engine::Apache
 RUN cpanm -i Catalyst::View::TT
+RUN cpanm -i Catalyst::View::TT::ForceUTF8
 RUN cpanm -i Catalyst::View::JSON
 RUN cpanm -i Catalyst::Model::DBI
 RUN cpanm -i Catalyst::Model::DBIC::Schema
