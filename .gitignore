@@ -22,4 +22,5 @@ nytprof.out
 *.json
 .~*.*#
 *~
+*.mwb.bak
 Thumbs.db
