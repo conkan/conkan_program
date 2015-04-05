@@ -86,12 +86,17 @@ RUN cpanm -i Catalyst::Plugin::FormValidator::Simple
 RUN cpanm -i Catalyst::Plugin::FormValidator::Simple::Auto
 RUN cpanm -i Catalyst::Plugin::FillInForm
 RUN cpanm -i Catalyst::Plugin::I18N
+RUN cpanm -i DBIx::Class::Schema::Loader
+RUN cpanm -i MooseX::NonMoose
 
 # cpanm work削除
 RUN rm -rf .cpanm/*
 
 #nginx設定
 ADD doccnf/nginx.conf /etc/nginx/nginx.conf
+
+#mysqlクライアント設定
+ADD doccnf/my.cnf /etc/my.cnf
 
 # daemontools設定
 RUN mkdir -p /service/conkan

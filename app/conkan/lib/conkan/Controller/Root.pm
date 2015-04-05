@@ -2,6 +2,8 @@ package conkan::Controller::Root;
 use Moose;
 use namespace::autoclean;
 
+use conkan::Schema;
+
 BEGIN { extends 'Catalyst::Controller' }
 
 #
@@ -71,6 +73,30 @@ sub initialsetup :Path {
 
     $c->response->body( "Already Initialized" )
         if (exists($c->config->{inited}));
+
+    # パラメータをconfigに設定する
+    # $adpw -> conkan->config( adpw )
+    # $dbsv $dbus $dbpw $dbnm
+    #   -> conkan::Model::ConkanDB->config( connect_infoa )
+
+    # deployだとどうしても日本語がうまくいかないので、mysqlを叩く
+
+    # conkan_init.sql の DB名を $dbnm に置き換えて、
+    # /usr/bin/mysql -u $dbus -p $dbpw --host=$dbsv < app/initializer/conkan_init.sql
+
+    # deploy,
+    # ↓でいいはずなんだがなあ
+    # my $schema = conkan::Schema->connect(
+    #     'dbi:mysql:conkan:192.168.24.22', 'conkan', 'conkan',
+    #     {
+    #         mysql_enable_utf8 => 1,
+    #         on_connect_do => ['SET NAMES utf8'],
+    #     }
+    # );
+    # $schema->deploy;
+
+    # $c->config->{inited} を設定して、
+    # 書き出す
 }
 
 =head2 end
