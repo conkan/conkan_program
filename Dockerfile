@@ -59,6 +59,9 @@ RUN cpanm -in FormValidator::Simple::Plugin::Japanese
 RUN cpanm -i HTTP::Server::Simple
 RUN cpanm -i Moose
 RUN cpanm -in MooseX::Daemonize
+RUN cpanm -i Catalyst::Runtime
+RUN cpanm -in Test::Expect
+RUN cpanm -in CatalystX::REPL
 RUN cpanm -i Task::Catalyst
 RUN cpanm -i Catalyst::Devel
 RUN cpanm -i Catalyst::Engine::Apache
