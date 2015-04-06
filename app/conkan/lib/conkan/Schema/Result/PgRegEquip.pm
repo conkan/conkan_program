@@ -6,7 +6,7 @@ package conkan::Schema::Result::PgRegEquip;
 
 =head1 NAME
 
-conkan::Schema::Result::PgRegEquip - æ©æåä»ãã¼ãã«
+conkan::Schema::Result::PgRegEquip - equipment registration data
 
 =cut
 
@@ -50,7 +50,7 @@ __PACKAGE__->table("pg_reg_equip");
   data_type: 'integer'
   extra: {unsigned => 1}
   is_foreign_key: 1
-  is_nullable: 1
+  is_nullable: 0
 
 =head2 name
 
@@ -103,7 +103,7 @@ __PACKAGE__->add_columns(
     data_type => "integer",
     extra => { unsigned => 1 },
     is_foreign_key => 1,
-    is_nullable => 1,
+    is_nullable => 0,
   },
   "name",
   { data_type => "varchar", is_nullable => 0, size => 64 },
@@ -145,17 +145,12 @@ __PACKAGE__->belongs_to(
   "pgid",
   "conkan::Schema::Result::PgRegProgram",
   { pgid => "pgid" },
-  {
-    is_deferrable => 1,
-    join_type     => "LEFT",
-    on_delete     => "NO ACTION",
-    on_update     => "NO ACTION",
-  },
+  { is_deferrable => 1, on_delete => "NO ACTION", on_update => "NO ACTION" },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-05 21:14:25
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:LnSQc1fN0niUbfuRW9e2zA
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-06 19:57:15
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:UHUQMlzWKhy1EZqiNYRAEw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

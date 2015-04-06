@@ -79,21 +79,17 @@ sub initialsetup :Path {
     # $dbsv $dbus $dbpw $dbnm
     #   -> conkan::Model::ConkanDB->config( connect_infoa )
 
-    # deployだとどうしても日本語がうまくいかないので、mysqlを叩く
+    # DBスキーマをdeploy
+    my $schema = conkan::Schema->connect(
+        'dbi:mysql:conkan:192.168.24.22', 'conkan', 'conkan',
+        {
+            mysql_enable_utf8 => 1,
+            on_connect_do => ['SET NAMES utf8'],
+        }
+    );
+    $schema->deploy;
 
-    # conkan_init.sql の DB名を $dbnm に置き換えて、
-    # /usr/bin/mysql -u $dbus -p $dbpw --host=$dbsv < app/initializer/conkan_init.sql
-
-    # deploy,
-    # ↓でいいはずなんだがなあ
-    # my $schema = conkan::Schema->connect(
-    #     'dbi:mysql:conkan:192.168.24.22', 'conkan', 'conkan',
-    #     {
-    #         mysql_enable_utf8 => 1,
-    #         on_connect_do => ['SET NAMES utf8'],
-    #     }
-    # );
-    # $schema->deploy;
+    # pg_system_conf と pg_regist_info を登録
 
     # $c->config->{inited} を設定して、
     # 書き出す

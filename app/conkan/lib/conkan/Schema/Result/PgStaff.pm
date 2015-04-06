@@ -6,7 +6,7 @@ package conkan::Schema::Result::PgStaff;
 
 =head1 NAME
 
-conkan::Schema::Result::PgStaff - ã¹ã¿ããæå ±
+conkan::Schema::Result::PgStaff - staff info
 
 =cut
 
@@ -57,12 +57,6 @@ __PACKAGE__->table("pg_staff");
   is_nullable: 0
   size: 64
 
-=head2 authtype
-
-  data_type: 'enum'
-  extra: {list => ["PW","CY"]}
-  is_nullable: 1
-
 =head2 passwd
 
   data_type: 'varchar'
@@ -72,8 +66,8 @@ __PACKAGE__->table("pg_staff");
 =head2 role
 
   data_type: 'enum'
-  extra: {list => ["ROOT","PG"]}
-  is_nullable: 1
+  extra: {list => ["NORM","ROOT","PG"]}
+  is_nullable: 0
 
 =head2 ma
 
@@ -143,19 +137,13 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 0, size => 64 },
   "account",
   { data_type => "varchar", is_nullable => 0, size => 64 },
-  "authtype",
-  {
-    data_type => "enum",
-    extra => { list => ["PW", "CY"] },
-    is_nullable => 1,
-  },
   "passwd",
   { data_type => "varchar", is_nullable => 1, size => 64 },
   "role",
   {
     data_type => "enum",
-    extra => { list => ["ROOT", "PG"] },
-    is_nullable => 1,
+    extra => { list => ["NORM", "ROOT", "PG"] },
+    is_nullable => 0,
   },
   "ma",
   { data_type => "varchar", is_nullable => 1, size => 64 },
@@ -226,8 +214,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-05 21:21:45
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:feSVKdPiBltkpd9xYvl3Xw
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-06 20:22:44
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:x397IYvEIrW2hFB/BeCwEw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

@@ -6,7 +6,7 @@ package conkan::Schema::Result::PgSystemConf;
 
 =head1 NAME
 
-conkan::Schema::Result::PgSystemConf - å¤§ä¼ç¬èªå®æ°è¨­å®
+conkan::Schema::Result::PgSystemConf - Define value for THIS convention
 
 =cut
 
@@ -80,8 +80,8 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key("pg_conf_code");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-05 21:14:26
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:cLConDshKPW6/xbbAvkbDA
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-06 16:49:48
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:WnSosT1zlhMFjd6OPrvEvw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

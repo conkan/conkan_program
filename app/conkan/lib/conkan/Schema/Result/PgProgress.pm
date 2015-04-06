@@ -6,7 +6,7 @@ package conkan::Schema::Result::PgProgress;
 
 =head1 NAME
 
-conkan::Schema::Result::PgProgress - ä¼ç»é²æå ±åãã¼ãã«
+conkan::Schema::Result::PgProgress - Progress data
 
 =cut
 
@@ -149,8 +149,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-05 21:21:45
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:BM8H6kNxd/k3WbM8WlYV5g
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-06 16:49:48
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:ZnwZ40WvKe3PL/ZvPrYOOQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

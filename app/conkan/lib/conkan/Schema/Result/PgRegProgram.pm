@@ -6,7 +6,7 @@ package conkan::Schema::Result::PgRegProgram;
 
 =head1 NAME
 
-conkan::Schema::Result::PgRegProgram - ä¼ç»åä»ãã¼ãã«
+conkan::Schema::Result::PgRegProgram - program registration data
 
 =cut
 
@@ -112,9 +112,9 @@ __PACKAGE__->table("pg_reg_program");
 
 =head2 expmaxcnt
 
-  data_type: 'enum'
-  extra: {list => ["\344\270\215\346\230\216","20\344\272\272\343\201\276\343\201\247","50\344\272\272\343\201\276\343\201\247","100\344\272\272\343\201\276\343\201\247","200\344\272\272\343\201\276\343\201\247","200\344\272\272\350\266\205"]}
+  data_type: 'varchar'
   is_nullable: 0
+  size: 64
 
 =head2 content
 
@@ -124,21 +124,21 @@ __PACKAGE__->table("pg_reg_program");
 
 =head2 contentpub
 
-  data_type: 'enum'
-  extra: {list => ["\344\272\213\345\211\215\345\205\254\351\226\213\345\217\257","\344\272\213\345\211\215\345\205\254\351\226\213\344\270\215\345\217\257"]}
+  data_type: 'varchar'
   is_nullable: 0
+  size: 64
 
 =head2 realpub
 
-  data_type: 'enum'
-  extra: {list => ["UST\347\255\211\345\213\225\347\224\273\343\202\222\345\220\253\343\202\200\345\205\250\343\201\246\350\250\261\345\217\257","twitter\347\255\211\343\203\206\343\202\255\343\202\271\343\203\210\343\201\250\351\235\231\346\255\242\347\224\273\345\205\254\351\226\213\345\217\257","\343\203\206\343\202\255\343\202\271\343\203\210\343\201\256\343\201\277\345\205\254\351\226\213\345\217\257","\345\205\254\351\226\213\344\270\215\345\217\257","\343\201\235\343\201\256\344\273\226"]}
+  data_type: 'varchar'
   is_nullable: 0
+  size: 64
 
 =head2 afterpub
 
-  data_type: 'enum'
-  extra: {list => ["UST\347\255\211\345\213\225\347\224\273\343\202\222\345\220\253\343\202\200\345\205\250\343\201\246\350\250\261\345\217\257","blog\347\255\211\343\203\206\343\202\255\343\202\271\343\203\210\343\201\250\351\235\231\346\255\242\347\224\273\345\205\254\351\226\213\345\217\257","\343\203\206\343\202\255\343\202\271\343\203\210\343\201\256\343\201\277\345\205\254\351\226\213\345\217\257","\345\205\254\351\226\213\344\270\215\345\217\257","\343\201\235\343\201\256\344\273\226"]}
+  data_type: 'varchar'
   is_nullable: 0
+  size: 64
 
 =head2 avoiddup
 
@@ -148,9 +148,9 @@ __PACKAGE__->table("pg_reg_program");
 
 =head2 experience
 
-  data_type: 'enum'
-  extra: {list => ["\345\210\235\343\202\201\343\201\246","\346\230\250\345\271\264\343\201\253\347\266\232\343\201\204\343\201\2462\345\233\236\347\233\256","\347\266\231\347\266\232\343\201\227\343\201\2463\357\275\2365\345\233\236\347\233\256","\343\201\262\343\201\225\343\201\227\343\201\266\343\202\212","6\345\233\236\347\233\256\344\273\245\344\270\212"]}
+  data_type: 'varchar'
   is_nullable: 0
+  size: 64
 
 =head2 comment
 
@@ -191,77 +191,19 @@ __PACKAGE__->add_columns(
   "classlen",
   { data_type => "varchar", is_nullable => 0, size => 64 },
   "expmaxcnt",
-  {
-    data_type => "enum",
-    extra => {
-      list => [
-        "\xE4\xB8\x8D\xE6\x98\x8E",
-        "20\xE4\xBA\xBA\xE3\x81\xBE\xE3\x81\xA7",
-        "50\xE4\xBA\xBA\xE3\x81\xBE\xE3\x81\xA7",
-        pack("H*","313030e4babae381bee381a7"),
-        pack("H*","323030e4babae381bee381a7"),
-        "200\xE4\xBA\xBA\xE8\xB6\x85",
-      ],
-    },
-    is_nullable => 0,
-  },
+  { data_type => "varchar", is_nullable => 0, size => 64 },
   "content",
   { data_type => "varchar", is_nullable => 0, size => 128 },
   "contentpub",
-  {
-    data_type => "enum",
-    extra => {
-      list => [
-        pack("H*","e4ba8be5898de585ace9968be58faf"),
-        pack("H*","e4ba8be5898de585ace9968be4b88de58faf"),
-      ],
-    },
-    is_nullable => 0,
-  },
+  { data_type => "varchar", is_nullable => 0, size => 64 },
   "realpub",
-  {
-    data_type => "enum",
-    extra => {
-      list => [
-        pack("H*","555354e7ad89e58b95e794bbe38292e590abe38280e585a8e381a6e8a8b1e58faf"),
-        pack("H*","74776974746572e7ad89e38386e382ade382b9e38388e381a8e99d99e6ada2e794bbe585ace9968be58faf"),
-        pack("H*","e38386e382ade382b9e38388e381aee381bfe585ace9968be58faf"),
-        pack("H*","e585ace9968be4b88de58faf"),
-        "\xE3\x81\x9D\xE3\x81\xAE\xE4\xBB\x96",
-      ],
-    },
-    is_nullable => 0,
-  },
+  { data_type => "varchar", is_nullable => 0, size => 64 },
   "afterpub",
-  {
-    data_type => "enum",
-    extra => {
-      list => [
-        pack("H*","555354e7ad89e58b95e794bbe38292e590abe38280e585a8e381a6e8a8b1e58faf"),
-        pack("H*","626c6f67e7ad89e38386e382ade382b9e38388e381a8e99d99e6ada2e794bbe585ace9968be58faf"),
-        pack("H*","e38386e382ade382b9e38388e381aee381bfe585ace9968be58faf"),
-        pack("H*","e585ace9968be4b88de58faf"),
-        "\xE3\x81\x9D\xE3\x81\xAE\xE4\xBB\x96",
-      ],
-    },
-    is_nullable => 0,
-  },
+  { data_type => "varchar", is_nullable => 0, size => 64 },
   "avoiddup",
   { data_type => "varchar", is_nullable => 1, size => 128 },
   "experience",
-  {
-    data_type => "enum",
-    extra => {
-      list => [
-        "\xE5\x88\x9D\xE3\x82\x81\xE3\x81\xA6",
-        pack("H*","e698a8e5b9b4e381abe7b69ae38184e381a632e59b9ee79bae"),
-        pack("H*","e7b699e7b69ae38197e381a633efbd9e35e59b9ee79bae"),
-        pack("H*","e381b2e38195e38197e381b6e3828a"),
-        pack("H*","36e59b9ee79baee4bba5e4b88a"),
-      ],
-    },
-    is_nullable => 0,
-  },
+  { data_type => "varchar", is_nullable => 0, size => 64 },
   "comment",
   { data_type => "varchar", is_nullable => 1, size => 128 },
 );
@@ -371,8 +313,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-05 21:21:45
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:ibSS8SL7QAfrIxI9UO+SIA
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-06 19:57:15
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:aGvsag82VhyhX2YZb1qAIA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

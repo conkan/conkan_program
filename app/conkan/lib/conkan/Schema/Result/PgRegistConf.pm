@@ -6,7 +6,7 @@ package conkan::Schema::Result::PgRegistConf;
 
 =head1 NAME
 
-conkan::Schema::Result::PgRegistConf - ä¼ç»ã¡ã¿æå ±è¨­å®
+conkan::Schema::Result::PgRegistConf - Program META structure
 
 =cut
 
@@ -134,8 +134,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-05 22:49:36
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:rmQAFJjZtr31vNvEy6D3wg
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-06 16:49:48
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:woSe2u8T3U6rc3nyswbzKQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

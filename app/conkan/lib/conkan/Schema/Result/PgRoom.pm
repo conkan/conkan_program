@@ -6,7 +6,7 @@ package conkan::Schema::Result::PgRoom;
 
 =head1 NAME
 
-conkan::Schema::Result::PgRoom - é¨å±æå ±
+conkan::Schema::Result::PgRoom - room info
 
 =cut
 
@@ -64,10 +64,9 @@ __PACKAGE__->table("pg_room");
 
 =head2 type
 
-  data_type: 'enum'
-  default_value: 'R'
-  extra: {list => ["R","J","H"]}
+  data_type: 'varchar'
   is_nullable: 0
+  size: 64
 
 =head2 size
 
@@ -99,8 +98,8 @@ __PACKAGE__->table("pg_room");
 =head2 net
 
   data_type: 'enum'
-  extra: {list => ["W","E"]}
-  is_nullable: 1
+  extra: {list => ["NONE","W","E"]}
+  is_nullable: 0
 
 =head2 rmdate
 
@@ -125,12 +124,7 @@ __PACKAGE__->add_columns(
   "max",
   { data_type => "integer", is_nullable => 1 },
   "type",
-  {
-    data_type => "enum",
-    default_value => "R",
-    extra => { list => ["R", "J", "H"] },
-    is_nullable => 0,
-  },
+  { data_type => "varchar", is_nullable => 0, size => 64 },
   "size",
   { data_type => "integer", is_nullable => 1 },
   "tablecnt",
@@ -142,7 +136,11 @@ __PACKAGE__->add_columns(
   "useabletime",
   { data_type => "varchar", is_nullable => 1, size => 64 },
   "net",
-  { data_type => "enum", extra => { list => ["W", "E"] }, is_nullable => 1 },
+  {
+    data_type => "enum",
+    extra => { list => ["NONE", "W", "E"] },
+    is_nullable => 0,
+  },
   "rmdate",
   {
     data_type => "datetime",
@@ -181,8 +179,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-05 21:14:26
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:6f3nFlahB9pNr1n4RTEIDA
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-06 19:57:15
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:TuqJZFeyPYdyPhUWgVr4iA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

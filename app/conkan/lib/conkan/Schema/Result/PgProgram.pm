@@ -6,7 +6,7 @@ package conkan::Schema::Result::PgProgram;
 
 =head1 NAME
 
-conkan::Schema::Result::PgProgram - ä¼ç»ç®¡çãã¼ãã«
+conkan::Schema::Result::PgProgram - Program Management Master
 
 =cut
 
@@ -232,8 +232,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-05 21:14:25
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:6SyAQD+44xnX+Qv3rrPYmw
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-06 16:49:48
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:qL6frvADwQue85hoENElwQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

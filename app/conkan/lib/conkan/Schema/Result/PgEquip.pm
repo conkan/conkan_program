@@ -6,7 +6,7 @@ package conkan::Schema::Result::PgEquip;
 
 =head1 NAME
 
-conkan::Schema::Result::PgEquip - æ©æç®¡çãã¼ãã«
+conkan::Schema::Result::PgEquip - Equipment Management master
 
 =cut
 
@@ -143,8 +143,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-05 21:21:45
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:iOLKeWdazwKi1ehSCDzXYg
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-06 16:49:48
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:JcYmzDI8+kHLpcBy26iigA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

@@ -6,7 +6,7 @@ package conkan::Schema::Result::PgRegCast;
 
 =head1 NAME
 
-conkan::Schema::Result::PgRegCast - åºæ¼èåä»ãã¼ãã«
+conkan::Schema::Result::PgRegCast - cast registration data
 
 =cut
 
@@ -73,13 +73,13 @@ __PACKAGE__->table("pg_reg_cast");
 =head2 needreq
 
   data_type: 'enum'
-  extra: {list => ["\344\272\244\346\270\211\343\202\222\345\244\247\344\274\232\343\201\253\344\276\235\351\240\274","\345\207\272\346\274\224\344\272\206\346\211\277\346\270\210","\344\272\244\346\270\211\344\270\255","\346\234\252\344\272\244\346\270\211"]}
+  extra: {list => ["req","accepted","innego","yetnego"]}
   is_nullable: 0
 
 =head2 needguest
 
   data_type: 'enum'
-  extra: {list => ["\343\201\231\343\202\213","\343\201\227\343\201\252\343\201\204"]}
+  extra: {list => ["Y","N"]}
   is_nullable: 0
 
 =cut
@@ -108,27 +108,11 @@ __PACKAGE__->add_columns(
   "needreq",
   {
     data_type => "enum",
-    extra => {
-      list => [
-        pack("H*","e4baa4e6b889e38292e5a4a7e4bc9ae381abe4be9de9a0bc"),
-        pack("H*","e587bae6bc94e4ba86e689bfe6b888"),
-        "\xE4\xBA\xA4\xE6\xB8\x89\xE4\xB8\xAD",
-        "\xE6\x9C\xAA\xE4\xBA\xA4\xE6\xB8\x89",
-      ],
-    },
+    extra => { list => ["req", "accepted", "innego", "yetnego"] },
     is_nullable => 0,
   },
   "needguest",
-  {
-    data_type => "enum",
-    extra => {
-      list => [
-        "\xE3\x81\x99\xE3\x82\x8B",
-        "\xE3\x81\x97\xE3\x81\xAA\xE3\x81\x84",
-      ],
-    },
-    is_nullable => 0,
-  },
+  { data_type => "enum", extra => { list => ["Y", "N"] }, is_nullable => 0 },
 );
 
 =head1 PRIMARY KEY
@@ -161,8 +145,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-05 21:14:25
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:dKztuYpZl8EeCVJGhK0zGg
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-06 19:57:15
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:/lXmI6ltpBCDok0DKA4YxA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

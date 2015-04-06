@@ -6,7 +6,7 @@ package conkan::Schema::Result::PgAllEquip;
 
 =head1 NAME
 
-conkan::Schema::Result::PgAllEquip - æ©ææå ±
+conkan::Schema::Result::PgAllEquip - all equipment info
 
 =cut
 
@@ -113,6 +113,20 @@ __PACKAGE__->add_columns(
 
 __PACKAGE__->set_primary_key("equipid");
 
+=head1 UNIQUE CONSTRAINTS
+
+=head2 C<equipNo_UNIQUE>
+
+=over 4
+
+=item * L</equipno>
+
+=back
+
+=cut
+
+__PACKAGE__->add_unique_constraint("equipNo_UNIQUE", ["equipno"]);
+
 =head1 RELATIONS
 
 =head2 pgs_equip
@@ -131,8 +145,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-05 21:21:45
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:tU0T1601fnof2ykZwhKONA
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-06 19:57:15
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:43rdLsoa8ffTq/iZbM3YDg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
