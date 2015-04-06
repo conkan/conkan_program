@@ -1,3 +1,3 @@
-リンクだけ貼ったのでは、バージョン管理する意味が無いので、PDF化したものもリポジトリに含める
+Mysql Workbenchを使って作成
 (DataBase_ER図.PDF)
-https://cacoo.com/diagrams/TGmbHQbJBI4EXMq4
+ソースファイルは、conkan.mwb
