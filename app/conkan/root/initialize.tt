@@ -13,7 +13,7 @@
 <div class="container">
 <H1>conkan初期化ページ</H1>
 
-<FORM class="well" method="POST" action="/initialsetup">
+<FORM class="well" method="POST" action="/initialprocess">
 <div>
 <label>adminパスワード</label><br/>
 <input type="password" name="adpw" class="input-small" placeholder="Password">
@@ -39,7 +39,7 @@
 </TD></TR>
 <TR><TH>DBパスワード</TH>
 <TD>
-    <input type="text" name="dbpw" class="span4" placeholder="Password">
+    <input type="password" name="dbpw" class="span4" placeholder="Password">
     <span class="help-inline">DB管理ユーザのパスワード</span>
 </TD></TR>
 </table>

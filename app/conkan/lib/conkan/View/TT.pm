@@ -1,4 +1,7 @@
-package conkan::View::Initialize;
+package conkan::View::TT;
+use strict;
+use warnings;
+use utf8;
 use Moose;
 use namespace::autoclean;
 
@@ -6,12 +9,13 @@ extends 'Catalyst::View::TT::ForceUTF8';
 
 __PACKAGE__->config(
     TEMPLATE_EXTENSION => '.tt',
+    ENCODING   => 'utf8',
     render_die => 1,
 );
 
 =head1 NAME
 
-conkan::View::Initialize - TT View for conkan
+conkan::View::TT - TT View for conkan
 
 =head1 DESCRIPTION
 
