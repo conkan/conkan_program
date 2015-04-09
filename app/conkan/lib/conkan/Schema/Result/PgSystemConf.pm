@@ -42,7 +42,7 @@ __PACKAGE__->table("pg_system_conf");
 
   data_type: 'varchar'
   is_nullable: 0
-  size: 10
+  size: 64
 
 =head2 pg_conf_name
 
@@ -52,19 +52,18 @@ __PACKAGE__->table("pg_system_conf");
 
 =head2 pg_conf_value
 
-  data_type: 'varchar'
+  data_type: 'text'
   is_nullable: 0
-  size: 128
 
 =cut
 
 __PACKAGE__->add_columns(
   "pg_conf_code",
-  { data_type => "varchar", is_nullable => 0, size => 10 },
+  { data_type => "varchar", is_nullable => 0, size => 64 },
   "pg_conf_name",
   { data_type => "varchar", is_nullable => 0, size => 64 },
   "pg_conf_value",
-  { data_type => "varchar", is_nullable => 0, size => 128 },
+  { data_type => "text", is_nullable => 0 },
 );
 
 =head1 PRIMARY KEY
@@ -80,8 +79,8 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key("pg_conf_code");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-06 16:49:48
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:WnSosT1zlhMFjd6OPrvEvw
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-09 12:14:22
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:gdElFRnmfojLbbS935POzw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

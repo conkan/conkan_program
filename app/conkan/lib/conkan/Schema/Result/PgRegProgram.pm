@@ -118,9 +118,8 @@ __PACKAGE__->table("pg_reg_program");
 
 =head2 content
 
-  data_type: 'varchar'
+  data_type: 'text'
   is_nullable: 0
-  size: 128
 
 =head2 contentpub
 
@@ -142,9 +141,8 @@ __PACKAGE__->table("pg_reg_program");
 
 =head2 avoiddup
 
-  data_type: 'varchar'
+  data_type: 'text'
   is_nullable: 1
-  size: 128
 
 =head2 experience
 
@@ -154,9 +152,8 @@ __PACKAGE__->table("pg_reg_program");
 
 =head2 comment
 
-  data_type: 'varchar'
+  data_type: 'text'
   is_nullable: 1
-  size: 128
 
 =cut
 
@@ -193,7 +190,7 @@ __PACKAGE__->add_columns(
   "expmaxcnt",
   { data_type => "varchar", is_nullable => 0, size => 64 },
   "content",
-  { data_type => "varchar", is_nullable => 0, size => 128 },
+  { data_type => "text", is_nullable => 0 },
   "contentpub",
   { data_type => "varchar", is_nullable => 0, size => 64 },
   "realpub",
@@ -201,11 +198,11 @@ __PACKAGE__->add_columns(
   "afterpub",
   { data_type => "varchar", is_nullable => 0, size => 64 },
   "avoiddup",
-  { data_type => "varchar", is_nullable => 1, size => 128 },
+  { data_type => "text", is_nullable => 1 },
   "experience",
   { data_type => "varchar", is_nullable => 0, size => 64 },
   "comment",
-  { data_type => "varchar", is_nullable => 1, size => 128 },
+  { data_type => "text", is_nullable => 1 },
 );
 
 =head1 PRIMARY KEY
@@ -313,8 +310,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-06 19:57:15
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:aGvsag82VhyhX2YZb1qAIA
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-09 12:02:10
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:B13nWRPqOxjHeTXF54GpSA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

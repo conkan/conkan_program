@@ -112,9 +112,8 @@ __PACKAGE__->table("pg_program");
 
 =head2 progressprp
 
-  data_type: 'varchar'
+  data_type: 'text'
   is_nullable: 1
-  size: 64
 
 =cut
 
@@ -164,7 +163,7 @@ __PACKAGE__->add_columns(
   "layerno",
   { data_type => "integer", default_value => 0, is_nullable => 1 },
   "progressprp",
-  { data_type => "varchar", is_nullable => 1, size => 64 },
+  { data_type => "text", is_nullable => 1 },
 );
 
 =head1 PRIMARY KEY
@@ -232,8 +231,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-06 16:49:48
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:qL6frvADwQue85hoENElwQ
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-09 12:02:10
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:ilegJNol/0RZ7Tg+OhyIWg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

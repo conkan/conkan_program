@@ -42,7 +42,7 @@ __PACKAGE__->table("pg_regist_conf");
 
   data_type: 'varchar'
   is_nullable: 0
-  size: 10
+  size: 64
 
 =head2 hashkey
 
@@ -60,28 +60,28 @@ __PACKAGE__->table("pg_regist_conf");
 
   data_type: 'varchar'
   is_nullable: 0
-  size: 32
+  size: 64
 
 =head2 upperkeyid
 
   data_type: 'varchar'
   is_foreign_key: 1
   is_nullable: 1
-  size: 10
+  size: 64
 
 =cut
 
 __PACKAGE__->add_columns(
   "jsonkeyid",
-  { data_type => "varchar", is_nullable => 0, size => 10 },
+  { data_type => "varchar", is_nullable => 0, size => 64 },
   "hashkey",
   { data_type => "varchar", is_nullable => 0, size => 64 },
   "db_name",
   { data_type => "varchar", is_nullable => 0, size => 128 },
   "valtype",
-  { data_type => "varchar", is_nullable => 0, size => 32 },
+  { data_type => "varchar", is_nullable => 0, size => 64 },
   "upperkeyid",
-  { data_type => "varchar", is_foreign_key => 1, is_nullable => 1, size => 10 },
+  { data_type => "varchar", is_foreign_key => 1, is_nullable => 1, size => 64 },
 );
 
 =head1 PRIMARY KEY
@@ -134,8 +134,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-06 16:49:48
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:woSe2u8T3U6rc3nyswbzKQ
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-09 12:14:22
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:8CU95TzFsoJ2A6pL5KBvxg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

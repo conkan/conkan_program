@@ -113,9 +113,8 @@ __PACKAGE__->table("pg_staff");
 
 =head2 comment
 
-  data_type: 'varchar'
+  data_type: 'text'
   is_nullable: 1
-  size: 128
 
 =head2 rmdate
 
@@ -160,7 +159,7 @@ __PACKAGE__->add_columns(
   "onamef",
   { data_type => "varchar", is_nullable => 1, size => 64 },
   "comment",
-  { data_type => "varchar", is_nullable => 1, size => 128 },
+  { data_type => "text", is_nullable => 1 },
   "rmdate",
   {
     data_type => "datetime",
@@ -214,8 +213,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-06 20:22:44
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:x397IYvEIrW2hFB/BeCwEw
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-09 12:02:10
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:wDEmmFU9wEBhWjnd0lIoGw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

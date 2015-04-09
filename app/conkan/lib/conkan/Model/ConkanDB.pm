@@ -1,20 +1,17 @@
 package conkan::Model::ConkanDB;
-use strict;
-use warnings;
-use utf8;
 
+use strict;
 use base 'Catalyst::Model::DBIC::Schema';
 
 __PACKAGE__->config(
-   schema_class => 'conkan::Schema',
-#    
-#    connect_info => {
-#        dsn => 'dbi:mysql:conkan:192.168.24.22',
-#        # user => 'conkan',
-#        # password => 'conkan',
-#        mysql_enable_utf8 => 1,
-#        on_connect_do => ["SET NAMES utf8"],
-#    }
+    schema_class => 'conkan::Schema',
+    
+    connect_info => {
+        dsn => 'dbi:mysql:conkan:192.168.24.22',
+        user => 'conkan',
+        password => 'conkan',
+        on_connect_do => ["SET NAMES utf8"],
+    }
 );
 
 =head1 NAME
