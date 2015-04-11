@@ -100,6 +100,7 @@ ADD doccnf/my.cnf /etc/my.cnf
 
 # daemontools設定
 RUN mkdir -p /service/conkan
+RUN mkdir -p /var/log/conkan
 ADD doccnf/conkan_run /service/conkan/run
 RUN chmod 755 /service/conkan/run
 RUN mkdir -p /service/nginx

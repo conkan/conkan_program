@@ -20,6 +20,9 @@ use Catalyst qw/
     -Debug
     ConfigLoader
     Static::Simple
+    Session
+    Session::Store::FastMmap
+    Session::State::Cookie
 /;
 
 extends 'Catalyst';
@@ -42,6 +45,14 @@ __PACKAGE__->config(
     enable_catalyst_header => 1, # Send X-Catalyst header
     default_model => 'conkanDB',
     default_view  => 'TT',
+
+    'Plugin::Session' => {
+        expires => 3600,
+        verify_address => 1,
+        verify_user_agent => 1,
+        cookie_name => 'conkan_session',
+        cookie_expires => 0,
+    },
 );
 
 # Start the application
