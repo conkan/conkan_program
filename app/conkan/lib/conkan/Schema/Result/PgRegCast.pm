@@ -73,14 +73,16 @@ __PACKAGE__->table("pg_reg_cast");
 =head2 needreq
 
   data_type: 'enum'
+  default_value: 'accepted'
   extra: {list => ["req","accepted","innego","yetnego"]}
-  is_nullable: 0
+  is_nullable: 1
 
 =head2 needguest
 
   data_type: 'enum'
+  default_value: 'N'
   extra: {list => ["Y","N"]}
-  is_nullable: 0
+  is_nullable: 1
 
 =cut
 
@@ -108,11 +110,17 @@ __PACKAGE__->add_columns(
   "needreq",
   {
     data_type => "enum",
+    default_value => "accepted",
     extra => { list => ["req", "accepted", "innego", "yetnego"] },
-    is_nullable => 0,
+    is_nullable => 1,
   },
   "needguest",
-  { data_type => "enum", extra => { list => ["Y", "N"] }, is_nullable => 0 },
+  {
+    data_type => "enum",
+    default_value => "N",
+    extra => { list => ["Y", "N"] },
+    is_nullable => 1,
+  },
 );
 
 =head1 PRIMARY KEY
@@ -145,8 +153,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-09 12:02:10
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:2Viq3m+hHHi+D+pV2o/lAA
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-11 15:59:00
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:W9xsbhZ8EiDI82Ki/ZtEMA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

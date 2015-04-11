@@ -4,14 +4,21 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="conkan initialize">
+<meta name="description" content="conkan error page">
 <meta name="author" content="Studio REM">
-<title>Conkan Initializing...</title>
+<title>Conkan Error</title>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
 <body>
 <div class="container">
-<H1>conkan初期化完了&gt;&gt;管理者登録</H1>
+  <H1>エラーが発生しました</H1>
+
+  下記エラー内容と発生時刻を、システム管理者に連絡してください。
+  <ul>
+    [%- FOREACH item = errors %]
+      <li>[% item | html %]</li>
+    [% END -%]
+  </ul>
+</div>
 </body>
 </html>
-

@@ -80,6 +80,24 @@ __PACKAGE__->table("pg_reg_program");
   data_type: 'integer'
   is_nullable: 0
 
+=head2 telno
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 64
+
+=head2 faxno
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 64
+
+=head2 celno
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 64
+
 =head2 type
 
   data_type: 'varchar'
@@ -177,6 +195,12 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 0, size => 64 },
   "regno",
   { data_type => "integer", is_nullable => 0 },
+  "telno",
+  { data_type => "varchar", is_nullable => 1, size => 64 },
+  "faxno",
+  { data_type => "varchar", is_nullable => 1, size => 64 },
+  "celno",
+  { data_type => "varchar", is_nullable => 1, size => 64 },
   "type",
   { data_type => "varchar", is_nullable => 0, size => 64 },
   "place",
@@ -310,8 +334,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-09 12:02:10
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:B13nWRPqOxjHeTXF54GpSA
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-11 14:49:44
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:z+2S2MpqXBAD9CxI/fGgNw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

@@ -11,44 +11,64 @@
 </head>
 <body>
 <div class="container">
-<H1>conkan初期化ページ</H1>
+  <H1>conkan初期化ページ</H1>
 
-<FORM class="well" method="POST" action="/initialprocess">
-<div>
-<label>adminパスワード</label><br/>
-<input type="password" name="adpw" class="input-small" placeholder="Password">
-<span class="help-inline">スタッフ登録専用アカウントのパスワード</span>
-</div>
-<BR/>
-<label>DB接続情報</label><br/>
-<table border="0">
-<TR><TH>DBサーバ</TH>
-<TD>
-    <input type="text" name="dbsv" class="span4" placeholder="FQDN or IP Addr">
-    <span class="help-inline">DBサーバのFQDNまたはIPアドレス</span>
-</TD></TR>
-<TR><TH>DB名</TH>
-<TD>
-    <input type="text" name="dbnm" class="span4" placeholder="DatabaseName">
-    <span class="help-inline">作成したDB名</span>
-</TD></TR>
-<TR><TH>DBユーザ</TH>
-<TD>
-    <input type="text" name="dbus" class="span4" placeholder="user">
-    <span class="help-inline">DB管理ユーザ名</span>
-</TD></TR>
-<TR><TH>DBパスワード</TH>
-<TD>
-    <input type="password" name="dbpw" class="span4" placeholder="Password">
-    <span class="help-inline">DB管理ユーザのパスワード</span>
-</TD></TR>
-</table>
-<BR/>
-<button type="submit" class="btn btn-primary btn-large">初期化実行</button>
-</FORM>
+  <!-- 初期化パラメータ入力ページ -->
+  <div class="well" id="init">
+    <FORM method="POST" action="/initialprocess">
+      <div>
+        <label>adminパスワード</label><br/>
+        <input type="password" name="adpw" class="input-small" placeholder="Password">
+        <span class="help-inline">スタッフ登録専用アカウントのパスワード</span>
+      </div>
+      <BR/>
+      <label>DB接続情報</label><br/>
+      <table border="0">
+        <TR><TH>DBサーバ</TH>
+          <TD>
+            <input type="text" name="dbsv" class="span4" placeholder="FQDN or IP Addr">
+            <span class="help-inline">DBサーバのFQDNまたはIPアドレス</span>
+          </TD>
+        </TR>
+        <TR><TH>DB名</TH>
+          <TD>
+            <input type="text" name="dbnm" class="span4" placeholder="DatabaseName">
+            <span class="help-inline">作成したDB名</span>
+          </TD>
+        </TR>
+        <TR><TH>DBユーザ</TH>
+          <TD>
+            <input type="text" name="dbus" class="span4" placeholder="user">
+            <span class="help-inline">DB管理ユーザ名</span>
+          </TD>
+        </TR>
+        <TR><TH>DBパスワード</TH>
+          <TD>
+            <input type="password" name="dbpw" class="span4" placeholder="Password">
+            <span class="help-inline">DB管理ユーザのパスワード</span>
+          </TD>
+        </TR>
+      </table>
+      <BR/>
+      <button type="submit" class="btn btn-primary btn-large" id="initbtn">
+        初期化実行
+      </button>
+    </FORM>
+  </div>
+
+  <!-- 初期化実行中ページ -->
+  <div class="well" style="display:none;" id="do_init">
+    <H1>conkan初期化中...</H1>
+  </div>
 </div>
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<script>
+  $('#initbtn').click(function() {
+    $('#init').hide();
+    $('#do_init').show();
+  });
+</script>
 </body>
 </html>
