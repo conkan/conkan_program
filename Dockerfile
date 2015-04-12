@@ -82,6 +82,7 @@ RUN cpanm -i Catalyst::Plugin::Session::Store::FastMmap
 RUN cpanm -i Catalyst::Plugin::Session::State::Cookie
 RUN cpanm -i Catalyst::Plugin::Authentication
 RUN cpanm -i Catalyst::Plugin::Authorization::Roles
+RUN cpanm -i Catalyst::Authentication::Credential::OAuth
 RUN cpanm -i Catalyst::Plugin::FormValidator::Simple
 RUN cpanm -i Catalyst::Plugin::FormValidator::Simple::Auto
 RUN cpanm -i Catalyst::Plugin::FillInForm

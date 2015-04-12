@@ -3,9 +3,37 @@ Model::ConkanDB:
   connect_info:
     dsn: 
     mysql_enable_utf8: 1
-    on_connect_do: SET NAMES utf8
+    on_connect_do:
+      - SET NAMES utf8
     password: 
     user: 
   schema_class: conkan::Schema
-adpw: 
+Plugin::Authentication:
+  default:
+    credential:
+      class: Password
+      password_field: passwd
+      password_hash_type: SHA-1
+      password_type: crypted
+    store:
+      class: DBIx::Class
+      ignore_fields_in_find: []
+      store_user_class: Catalyst::Authentication::Store::DBIx::Class::User
+      use_userdata_from_session: 1
+      user_model: conkanDB::PgStaff
+    use_session: 1
+  oauth:
+    credential:
+      class: OAuth
+      providers:
+        api.cybozulive.com:
+          access_token_endpoint: https://api.cybozulive.com/oauth/token
+          consumer_key: ~
+          consumer_secret: 
+          request_token_endpoint: https://api.cybozulive.com/oauth/initiate
+          user_auth_endpoint: https://api.cybozulive.com/oauth/authorize
+    store:
+      class: +Catalyst::Authentication::Store::Null
+    use_session: 1
+  use_session: 1
 name: conkan

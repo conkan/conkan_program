@@ -78,12 +78,12 @@ sub initialprocess :Path {
     my ( $self, $c ) = @_;
 
     if (exists($c->config->{inited})) {
-        $c->response->body( "Already Initialized" );
+        $c->response->body( 'Already Initialized' );
         return;
     }
 
     if ( $c->session->{roll} ne 'initial' ) {
-        $c->response->body( "Cannot Initialize (Direct Access)" );
+        $c->response->body( 'Cannot Initialize (Direct Access)' );
         return;
     }
 
@@ -92,6 +92,8 @@ sub initialprocess :Path {
     my $dbsv = $c->request->body_params->{dbsv};
     my $dbus = $c->request->body_params->{dbus};
     my $dbpw = $c->request->body_params->{dbpw};
+    my $oakey= $c->request->body_params->{oakey};
+    my $oasec= $c->request->body_params->{oasec};
     my $dsn  = "dbi:mysql:$dbnm:$dbsv";
 
     # 接続可否確認
@@ -120,17 +122,16 @@ sub initialprocess :Path {
         my $system_conf_f = $c->config->{home} . '/../initializer/system_conf.csv';
         my $regist_conf_f = $c->config->{home} . '/../initializer/regist_conf.csv';
         $dbh->do( "LOAD DATA LOCAL INFILE '$system_conf_f' " .
-                    "INTO TABLE pg_system_conf " .
+                    'INTO TABLE pg_system_conf ' .
                     "FIELDS TERMINATED BY ',' ENCLOSED BY '\"';" );
-        $dbh->do( "SET FOREIGN_KEY_CHECKS=0;" );
+        $dbh->do( 'SET FOREIGN_KEY_CHECKS=0;' );
         $dbh->do( "LOAD DATA LOCAL INFILE '$regist_conf_f' " .
-                    "INTO TABLE pg_regist_conf " .
+                    'INTO TABLE pg_regist_conf ' .
                     "FIELDS TERMINATED BY ',' ENCLOSED BY '\"';" );
-        $dbh->do( "SET FOREIGN_KEY_CHECKS=1;" );
+        $dbh->do( 'SET FOREIGN_KEY_CHECKS=1;' );
         $dbh->disconnect;
 
         # config設定
-        $c->config->{adpw} = $adpw;
         $c->config->{inited} =1;
         $c->config->{'Model::ConkanDB'}->{schema_class} = 'conkan::Schema';
         $c->config->{'Model::ConkanDB'}->{connect_info} =
@@ -142,25 +143,28 @@ sub initialprocess :Path {
                 on_connect_do => ["SET NAMES utf8"],
             };
 
+        # 初期登録専用パスワード
+        $c->session->{adpw} = $adpw;
         # conkan.ymlを書き出す(必要な物だけ)
         my $conkan_yml_f = $c->config->{home} . '/conkan.yml';
         my $conkan_yml = {
-            "name" => "conkan",
-            "adpw" => $adpw,
-            "inited" => 1,
-            "Model::ConkanDB" => {
-                "schema_class" => "conkan::Schema",
-                "connect_info" => {
-                    "dsn" => $dsn,
-                    "user" => $dbus,
-                    "password" => $dbpw,
-                    "mysql_enable_utf8" => 1,
-                    "on_connect_do" => "SET NAMES utf8",
-                }
-            }
+            'name' => 'conkan',
+            'inited' => 1,
+            'Model::ConkanDB' => $c->config->{'Model::ConkanDB'},
+            'Plugin::Authentication' => $c->config->{'Plugin::Authentication'},
         };
+        my $ymlwk = $conkan_yml->{'Model::ConkanDB'}->{'connect_info'};
+        $ymlwk->{'dsn'} = $dsn;
+        $ymlwk->{'user'} = $dbus;
+        $ymlwk->{'password'} = $dbpw;
+        $ymlwk = $conkan_yml->{'Plugin::Authentication'}->{'oauth'}->{'credential'}->{'providers'}->{'api.cybozulive.com'};
+        $ymlwk->{'consumer_key'} = $oakey;
+        $ymlwk->{'consumer_secret'} = $oasec;
         YAML::DumpFile( $conkan_yml_f, $conkan_yml );
-        # もしかしたらサーバ再起動が必要かも・・・pkill starman
+        # サーバ再起動
+        unless ( 0 == system('/usr/bin/pkill starman') ) {
+            $c->error('conkan再起動失敗 at ' . scalar localtime );
+        }
     } catch {
         my $e = shift;
         $c->log->error($e);
