@@ -7,8 +7,7 @@ MAINTAINER Studio-REM <rem@s-rem.jp>
 # 基本設定
 #----------------------------------------------------------
 RUN yum -y install https://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
-RUN yum -y install witch curl git htop man vim sudo unzip wget tar less
-RUN yum -y install perl-CPAN
+RUN yum -y install witch curl git htop man vim sudo unzip wget tar less perl-CPAN
 RUN yum -y update
 RUN curl -L http://cpanmin.us | perl - -- App::cpanminus
 
@@ -20,8 +19,7 @@ ADD doccnf/bashrc /root/.bashrc
 ADD doccnf/vimrc /root/.vimrc
 ADD doccnf/clock /etc/sysconfig/clock
 ADD doccnf/i18n /etc/sysconfig/i18n
-RUN rm -f /etc/localtime
-RUN ln -fs /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
+RUN rm -f /etc/localtime; ln -fs /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
 ENV HOME /root
 ENV TERM xterm
 WORKDIR /root
@@ -33,12 +31,10 @@ WORKDIR /root
 RUN yum install -y nginx
 
 # mysql-client
-RUN yum -y install mysql
-RUN yum -y install mysql-devel
+RUN yum -y install mysql mysql-devel
 #
 # gcc
-RUN yum -y install gcc
-RUN yum -y install patch
+RUN yum -y install gcc patch
 
 # Starman
 RUN cpanm -i Starman
@@ -72,21 +68,10 @@ RUN cpanm -i Catalyst::Model::DBI
 RUN cpanm -i Catalyst::Model::DBIC::Schema
 RUN cpanm -i Catalyst::Model::Adaptor
 RUN cpanm -i Catalyst::Helper::Model::Email
-RUN cpanm -i Catalyst::Plugin::FormValidator
-RUN cpanm -i Catalyst::Plugin::ConfigLoader
-RUN cpanm -i Catalyst::Plugin::Static::Simple
-RUN cpanm -i Catalyst::Plugin::AutoRestart
-RUN cpanm -i Catalyst::Plugin::Session
 RUN cpanm -i Catalyst::Plugin::Session::FastMmap
 RUN cpanm -i Catalyst::Plugin::Session::Store::FastMmap
-RUN cpanm -i Catalyst::Plugin::Session::State::Cookie
-RUN cpanm -i Catalyst::Plugin::Authentication
-RUN cpanm -i Catalyst::Plugin::Authorization::Roles
 RUN cpanm -i Catalyst::Authentication::Credential::OAuth
-RUN cpanm -i Catalyst::Plugin::FormValidator::Simple
-RUN cpanm -i Catalyst::Plugin::FormValidator::Simple::Auto
 RUN cpanm -i Catalyst::Plugin::FillInForm
-RUN cpanm -i Catalyst::Plugin::I18N
 RUN cpanm -i DBIx::Class::Schema::Loader
 RUN cpanm -i MooseX::NonMoose
 
@@ -100,13 +85,10 @@ ADD doccnf/nginx.conf /etc/nginx/nginx.conf
 ADD doccnf/my.cnf /etc/my.cnf
 
 # daemontools設定
-RUN mkdir -p /service/conkan
-RUN mkdir -p /var/log/conkan
+RUN mkdir -p /service/conkan; mkdir -p /var/log/conkan; mkdir -p /service/nginx
 ADD doccnf/conkan_run /service/conkan/run
-RUN chmod 755 /service/conkan/run
-RUN mkdir -p /service/nginx
 ADD doccnf/nginx_run /service/nginx/run
-RUN chmod 755 /service/nginx/run
+RUN chmod 755 /service/nginx/run; chmod 755 /service/conkan/run
 
 #----------------------------------------------------------
 # 起動
