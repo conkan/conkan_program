@@ -11,7 +11,17 @@
 </head>
 <body>
 <div class="container">
-<H1>conkan初期化完了&gt;&gt;管理者登録</H1>
+  <H1>conkan初期化完了&gt;&gt;管理者登録</H1>
+  <div class="well" id="init">
+    <FORM method="POST" action="/login">
+      <input type="hidden" name="account" value="admin"></input>
+      <button type="submit" class="btn btn-primary btn-large">
+        管理者login
+      </button>
+      <span class="help-inline"><B>admin</B>としてloginし、管理者を登録</span>
+    </FORM>
+  </div>
+</div>
 </body>
 </html>
 

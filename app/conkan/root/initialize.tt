@@ -19,7 +19,7 @@
       <div>
         <label>adminパスワード</label><br/>
         <input type="password" name="adpw" class="input-small" placeholder="Password">
-        <span class="help-inline">初期スタッフ登録専用アカウントのパスワード<br/>このセッションのみ有効</span>
+        <span class="help-inline">緊急用アカウントのパスワード</span>
       </div>
       <BR/>
       <label>DB接続情報</label><br/>
@@ -54,13 +54,13 @@
       <table border="0">
         <TR><TH>コンシュマートークンキー</TH>
           <TD>
-            <input type="text" name="oakey" class="span4" placeholder="consumer_key">
+            <input type="text" name="oakey" class="span10" placeholder="consumer_key">
             <span class="help-inline">CybouzuLiveが発行したConsumerKey</span>
           </TD>
         </TR>
         <TR><TH>コンシュマーシークレット</TH>
           <TD>
-            <input type="text" name="oasec" class="span4" placeholder="consumer_secret">
+            <input type="text" name="oasec" class="span10" placeholder="consumer_secret">
             <span class="help-inline">CybouzuLiveが発行したConsumerSecret</span>
           </TD>
         </TR>

@@ -9,7 +9,8 @@ Model::ConkanDB:
     user: 
   schema_class: conkan::Schema
 Plugin::Authentication:
-  default:
+  default_realm: passwd
+  passwd:
     credential:
       class: Password
       password_field: passwd
@@ -19,6 +20,7 @@ Plugin::Authentication:
       class: DBIx::Class
       ignore_fields_in_find: []
       store_user_class: Catalyst::Authentication::Store::DBIx::Class::User
+      id_field: account
       use_userdata_from_session: 1
       user_model: conkanDB::PgStaff
     use_session: 1
@@ -28,7 +30,7 @@ Plugin::Authentication:
       providers:
         api.cybozulive.com:
           access_token_endpoint: https://api.cybozulive.com/oauth/token
-          consumer_key: ~
+          consumer_key:
           consumer_secret: 
           request_token_endpoint: https://api.cybozulive.com/oauth/initiate
           user_auth_endpoint: https://api.cybozulive.com/oauth/authorize

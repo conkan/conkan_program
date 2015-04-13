@@ -7,6 +7,7 @@ use namespace::autoclean;
 use DBI;
 use Try::Tiny;
 
+use Data::Dumper;
 use conkan::Schema;
 
 BEGIN { extends 'Catalyst::Controller' }
@@ -29,6 +30,40 @@ conkan::Controller::Root - Root Controller for conkan
 
 =head1 METHODS
 
+=head2 auto
+
+すべてのアクションで実施する処理
+
+=cut
+
+sub auto :Private {
+    my ( $self, $c ) = @_;
+
+    # 初期化済判断
+    unless (exists($c->config->{inited})) {
+        if ( ( $c->action->reverse eq 'index'  )        ||
+             ( $c->action->reverse eq 'initialize' )    ||
+             ( $c->action->reverse eq 'initialprocess' )
+           ) {
+            return 1;
+        }
+        $c->response->status(500);
+        $c->response->body( 'Do not Initialize Yet' );
+        return 0;
+    }
+    # login->login ループ回避
+    if ( $c->action->reverse eq 'login' ) {
+        return 1;
+    }
+    # 強制login処理
+    unless ( $c->user_exists ) {
+        # $c->response->redirect( $c->uri_for('/login') );
+        $c->go( '/login' );
+        return 0;
+    }
+    return 1;
+}
+
 =head2 index
 
 The root page (/)
@@ -40,8 +75,7 @@ sub index :Path :Args(0) {
 
     $c->go( '/initialize' ) unless (exists($c->config->{inited}));
 
-    # Hello World
-    $c->response->body( $c->welcome_message );
+    $c->response->body( Data::Dumper->Dump( $c->user ) );
 }
 
 =head2 default
@@ -54,6 +88,55 @@ sub default :Path {
     my ( $self, $c ) = @_;
     $c->response->body( 'Page not found' );
     $c->response->status(404);
+}
+
+=head2 login
+
+login
+
+=cut
+
+sub login :Local {
+    my ( $self, $c ) = @_;
+
+    my $account = $c->request->body_params->{account};
+    my $passwd  = $c->request->body_params->{passwd};
+    my $realm   = $c->request->body_params->{realm};
+    my $userinfo;
+
+    $c->delete_session('login');
+    if ( !$realm ) {
+        $c->stash->{account} = $account;
+        return;
+    }
+    elsif ( $realm eq 'passwd' ) {
+        $userinfo = { account => $account, passwd => $passwd };
+    }
+    elsif ( $realm eq 'oauth' ) {
+        $Net::OAuth::PROTOCOL_VERSION = Net::OAuth::PROTOCOL_VERSION_1_0A;
+        $userinfo = { provider => 'api.cybozulive.com' };
+    }
+    else {
+        $c->error('Fatal access at '. scalar localtime );
+    }
+
+    if ( $c->authenticate( $userinfo, $realm ) ) {
+        $c->response->body( Data::Dumper->Dump( $c->user ) );
+    } else {
+        $c->stash->{errmsg} = '認証失敗 再度loginしてください';
+    }
+}
+
+=head2 logout
+
+logout
+
+=cut
+
+sub logout :Local {
+    my ( $self, $c ) = @_;
+    $c->logout;
+    $c->response->redirect( $c->uri_for('/login') );
 }
 
 =head2 initialize
@@ -78,11 +161,13 @@ sub initialprocess :Path {
     my ( $self, $c ) = @_;
 
     if (exists($c->config->{inited})) {
+        $c->response->status(409);
         $c->response->body( 'Already Initialized' );
         return;
     }
 
     if ( $c->session->{roll} ne 'initial' ) {
+        $c->response->status(405);
         $c->response->body( 'Cannot Initialize (Direct Access)' );
         return;
     }
@@ -94,15 +179,35 @@ sub initialprocess :Path {
     my $dbpw = $c->request->body_params->{dbpw};
     my $oakey= $c->request->body_params->{oakey};
     my $oasec= $c->request->body_params->{oasec};
+
+    unless ($adpw && $dbnm && $dbsv && $dbus && $dbpw && $oakey && $oasec ) {
+        $c->stash->{template} = 'wrongParam.tt';
+        return;
+    }
+
+    $c->detach( '/_doInitialProc',
+                [ $adpw, $dbnm, $dbsv, $dbus, $dbpw, $oakey, $oasec ],
+              );
+}
+
+=head2 _doInitialproc
+
+Doing Initialize
+
+=cut
+
+sub _doInitialProc :Private {
+    my ( $self, $c, $adpw, $dbnm, $dbsv, $dbus, $dbpw, $oakey, $oasec) = @_;
+
     my $dsn  = "dbi:mysql:$dbnm:$dbsv";
 
     # 接続可否確認
-    # 初期化処理
     my $dbh = DBI->connect( $dsn, $dbus, $dbpw, { mysql_enable_utf8 => 1, } );
     unless ( $dbh ) {
         $c->stash->{template} = 'wrongParam.tt';
         return;
     }
+    # 初期化処理
     try {
         # DBスキーマをdeploy
         my $schema = conkan::Schema->connect(
@@ -129,10 +234,16 @@ sub initialprocess :Path {
                     'INTO TABLE pg_regist_conf ' .
                     "FIELDS TERMINATED BY ',' ENCLOSED BY '\"';" );
         $dbh->do( 'SET FOREIGN_KEY_CHECKS=1;' );
+        # adminレコード登録
+        $schema->resultset('PgStaff')->create({
+            'name'      => 'admin',
+            'account'   => 'admin',
+            'passwd'    => crypt( $adpw, 'admin' ),
+            'role'      => 'ROOT',
+        });
         $dbh->disconnect;
 
         # config設定
-        $c->config->{inited} =1;
         $c->config->{'Model::ConkanDB'}->{schema_class} = 'conkan::Schema';
         $c->config->{'Model::ConkanDB'}->{connect_info} =
             {
@@ -143,8 +254,6 @@ sub initialprocess :Path {
                 on_connect_do => ["SET NAMES utf8"],
             };
 
-        # 初期登録専用パスワード
-        $c->session->{adpw} = $adpw;
         # conkan.ymlを書き出す(必要な物だけ)
         my $conkan_yml_f = $c->config->{home} . '/conkan.yml';
         my $conkan_yml = {
@@ -162,6 +271,7 @@ sub initialprocess :Path {
         $ymlwk->{'consumer_secret'} = $oasec;
         YAML::DumpFile( $conkan_yml_f, $conkan_yml );
         # サーバ再起動
+        # これにより、$c->config->{inited} が設定される
         unless ( 0 == system('/usr/bin/pkill starman') ) {
             $c->error('conkan再起動失敗 at ' . scalar localtime );
         }
@@ -188,6 +298,7 @@ sub end : ActionClass('RenderView') {
     my ( $self, $c ) = @_;
     # エラー発生時のみ実施
     if ( scalar @{ $c->error } ) {
+        $c->response->status(500);
         $c->stash->{errors}   = $c->error;
         $c->stash->{template} = 'error.tt';
         $c->clear_errors();

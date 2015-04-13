@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="conkan initialize">
+<meta name="author" content="Studio REM">
+<title>Conkan login</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container">
+  <H1>conkan loginページ</H1>
+
+  [% IF! c.user_exists %]
+  <!-- パスワードlogin -->
+  <div class="well" id="passwd">
+    <FORM method="POST" action="/login">
+      <label>パスワード認証</label><br/>
+      <input type="hidden" name="realm", value="passwd"></input>
+      <table border="0">
+        <TR><TH>アカウント</TH>
+          <TD>
+            <input type="text" name="account" class="span6" placeholder="account" value="[%- account -%]" >
+          </TD>
+        </TR>
+        <TR><TH>パスワード</TH>
+          <TD>
+            <input type="password" name="passwd" class="input-small" placeholder="Password">
+          </TD>
+        </TR>
+      </table>
+      <BR/>
+      <button type="submit" class="btn btn-primary btn-large">
+        パスワード認証実施
+      </button>
+    </FORM>
+  </div>
+  <BR/>
+  <div class="well" id="oauth">
+    <FORM method="POST" action="/login">
+      <label>サイボウズ認証</label><br/>
+      <input type="hidden" name="realm", value="oauth"></input>
+      <BR/>
+      <button type="submit" class="btn btn-primary btn-large">
+        サイボウズ認証実施
+      </button>
+    </FORM>
+  </div>
+  <div style="COLOR:Red;">[% errmsg %]</div>
+  [% ELSE %]
+  <div class="well" id="logout">
+    <FORM method="POST" action="/logout">
+      <label>login済です</label><br/>
+      アカウントを切り替えるには一旦logoutしてください<BR/>
+      <button type="submit" class="btn btn-primary btn-large">
+        logoutする
+      </button>
+    </FORM>
+  [% END %]
+</div>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -74,6 +74,7 @@ RUN cpanm -i Catalyst::Authentication::Credential::OAuth
 RUN cpanm -i Catalyst::Plugin::FillInForm
 RUN cpanm -i DBIx::Class::Schema::Loader
 RUN cpanm -i MooseX::NonMoose
+RUN cpanm -i LWP::Protocol::https
 
 # cpanm work削除
 RUN rm -rf .cpanm/*
