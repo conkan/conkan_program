@@ -1,12 +1,12 @@
 ---
 Model::ConkanDB:
   connect_info:
-    dsn: dbi:mysql:conkan:192.168.24.22
+    dsn: 
     mysql_enable_utf8: 1
     on_connect_do:
       - SET NAMES utf8
-    password: conkan
-    user: conkan
+    password: 
+    user: 
   schema_class: conkan::Schema
 Plugin::Authentication:
   default_realm: passwd
@@ -30,13 +30,12 @@ Plugin::Authentication:
       providers:
         api.cybozulive.com:
           access_token_endpoint: https://api.cybozulive.com/oauth/token
-          consumer_key: 7cac5e7938d5b983251b4637836a660f14b1486
-          consumer_secret: b7a813680b32fd85cfc6c659d070537cf92e47
+          consumer_key:
+          consumer_secret: 
           request_token_endpoint: https://api.cybozulive.com/oauth/initiate
           user_auth_endpoint: https://api.cybozulive.com/oauth/authorize
     store:
       class: +Catalyst::Authentication::Store::Null
     use_session: 1
   use_session: 1
-inited: 1
 name: conkan

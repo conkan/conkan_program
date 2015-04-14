@@ -26,7 +26,7 @@ conkan::Controller::Root - Root Controller for conkan
 
 =head1 DESCRIPTION
 
-初期設定のみ組み込み。それ以外は別のコントローラ
+login処理と初期設定のみ組み込み。それ以外は別のコントローラ
 
 =head1 METHODS
 
@@ -57,8 +57,7 @@ sub auto :Private {
     }
     # 強制login処理
     unless ( $c->user_exists ) {
-        # $c->response->redirect( $c->uri_for('/login') );
-        $c->go( '/login' );
+        $c->response->redirect( '/login' );
         return 0;
     }
     return 1;
@@ -75,7 +74,7 @@ sub index :Path :Args(0) {
 
     $c->go( '/initialize' ) unless (exists($c->config->{inited}));
 
-    $c->response->body( Data::Dumper->Dump( $c->user ) );
+    $c->response->redirect( '/mypage' );
 }
 
 =head2 default
@@ -104,13 +103,21 @@ sub login :Local {
     my $realm   = $c->request->body_params->{realm};
     my $userinfo;
 
+    if ( $c->user_exists ) {
+        return;
+    }
     $c->delete_session('login');
     if ( !$realm ) {
-        $c->stash->{account} = $account;
+        $c->stash->{init_role} = $c->request->body_params->{init_role};
         return;
     }
     elsif ( $realm eq 'passwd' ) {
-        $userinfo = { account => $account, passwd => $passwd };
+        if ( $c->authenticate( { account => $account, passwd => $passwd },
+                               $realm ) ) {
+            $c->response->redirect( '/mypage' );
+        } else {
+            $c->stash->{errmsg} = '認証失敗 再度loginしてください';
+        }
     }
     elsif ( $realm eq 'oauth' ) {
         $Net::OAuth::PROTOCOL_VERSION = Net::OAuth::PROTOCOL_VERSION_1_0A;
@@ -118,12 +125,6 @@ sub login :Local {
     }
     else {
         $c->error('Fatal access at '. scalar localtime );
-    }
-
-    if ( $c->authenticate( $userinfo, $realm ) ) {
-        $c->response->body( Data::Dumper->Dump( $c->user ) );
-    } else {
-        $c->stash->{errmsg} = '認証失敗 再度loginしてください';
     }
 }
 
@@ -136,7 +137,7 @@ logout
 sub logout :Local {
     my ( $self, $c ) = @_;
     $c->logout;
-    $c->response->redirect( $c->uri_for('/login') );
+    $c->response->redirect( '/login' );
 }
 
 =head2 initialize
@@ -148,7 +149,7 @@ Initialize
 sub initialize :Private {
     my ( $self, $c ) = @_;
     # 初期化セッション開始
-    $c->session->{roll} = 'initial';
+    $c->session->{role} = 'initial';
 }
 
 =head2 initialprocess
@@ -166,7 +167,7 @@ sub initialprocess :Path {
         return;
     }
 
-    if ( $c->session->{roll} ne 'initial' ) {
+    if ( $c->session->{role} ne 'initial' ) {
         $c->response->status(405);
         $c->response->body( 'Cannot Initialize (Direct Access)' );
         return;

@@ -10,6 +10,7 @@ __PACKAGE__->config(
         dsn => 'dbi:mysql:conkan:192.168.24.22',
         user => 'conkan',
         password => 'conkan',
+        AutoCommit => q{1},
         on_connect_do => ["SET NAMES utf8"],
     }
 );

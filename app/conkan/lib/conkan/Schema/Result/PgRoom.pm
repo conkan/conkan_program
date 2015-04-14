@@ -161,6 +161,32 @@ __PACKAGE__->add_columns(
 
 __PACKAGE__->set_primary_key("roomid");
 
+=head1 UNIQUE CONSTRAINTS
+
+=head2 C<name_UNIQUE>
+
+=over 4
+
+=item * L</name>
+
+=back
+
+=cut
+
+__PACKAGE__->add_unique_constraint("name_UNIQUE", ["name"]);
+
+=head2 C<roomNo_UNIQUE>
+
+=over 4
+
+=item * L</roomno>
+
+=back
+
+=cut
+
+__PACKAGE__->add_unique_constraint("roomNo_UNIQUE", ["roomno"]);
+
 =head1 RELATIONS
 
 =head2 pg_programs
@@ -179,8 +205,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-09 12:02:10
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:2g5W1t1jmV3g8IHu7BvKtg
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-14 17:05:10
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:JUiTg46zm7Tj1kNCrMGQDw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

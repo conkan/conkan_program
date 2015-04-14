@@ -96,6 +96,20 @@ __PACKAGE__->add_columns(
 
 __PACKAGE__->set_primary_key("jsonkeyid");
 
+=head1 UNIQUE CONSTRAINTS
+
+=head2 C<HashKey_UNIQUE>
+
+=over 4
+
+=item * L</hashkey>
+
+=back
+
+=cut
+
+__PACKAGE__->add_unique_constraint("HashKey_UNIQUE", ["hashkey"]);
+
 =head1 RELATIONS
 
 =head2 pg_regist_confs
@@ -134,8 +148,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-09 12:14:22
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:8CU95TzFsoJ2A6pL5KBvxg
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-14 17:05:10
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:lRIlKyJTnq5Ym2GfHAp7qQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
