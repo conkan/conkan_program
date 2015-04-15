@@ -11,9 +11,15 @@
 </head>
 <body>
 <div class="container">
+  [%- IF wrongtype == 'connect' %]
   <H1>データベース接続失敗</H1>
 
   DB接続情報が間違っています。<br/>
+  [%- ELSE %]
+  <H1>パラメータ不正</H1>
+
+  必要な項目が設定されていません。<br/>
+  [% END %]
   再度入力してください<br>
 
   <div class="well">

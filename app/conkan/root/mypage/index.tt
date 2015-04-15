@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="conkan initialize">
+<meta name="author" content="Studio REM">
+<title>Conkan MyPage</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container">
+  <div class="well">
+    <header class="header">
+    <h1>コンベンション管理システム ConKan</h1>
+      <p class="lead">汎用コンベンション運営管理システム</p>
+    </header>
+    <div class="subnav">
+      <ul class="nav nav-pills">
+        <li><a href="#">[% c.user.get('name') %]</a></li>
+        <li class="active"><a href="#">MyPage</a></li>
+        [%- IF c.session.init_role == 'addroot' -%]
+          [%- SET addroot = 1 -%]
+        [%- END -%]
+        [%- IF! addroot -%]
+          <li><a href="/program/list">企画管理</a></li>
+          <li><a href="/program/progress">進捗報告</a></li>
+          [%- IF c.user.get('role') == 'ROOT' -%]
+            <li><a href="/config/staff">スタッフ管理</a></li>
+            <li><a href="/config/room">企画部屋管理</a></li>
+            <li><a href="/config/equip">機材管理</a></li>
+          [%- END -%]
+          <li class="pull-right"><a href="/logout" class="btn btn-info">logout</a></li>
+        [%- ELSE -%]
+          <li><a href="/config/addroot">管理者登録</a></li>
+        [%- END %]
+      </ul>
+    </div>
+  </div>
+  [%- IF addroot %]
+    <div class="well">
+      最初の管理者を登録してください。<BR/>
+      最初の管理者の登録のためには、CybozeLiveへのloginが必要です。
+    </div>
+  [% END %]
+  [% IF debug %]
+    <br/>
+    <div class="well">
+      <H3>Debug情報</H3>
+      [%- USE dumper(indent=3 terse=1) -%]
+      <B>session:</B><br/>
+      <pre>
+      [% dumper.dump(c.session) %]
+      </pre>
+    </div>
+  [% END %]
+</div>
+</body>
+</html>
+

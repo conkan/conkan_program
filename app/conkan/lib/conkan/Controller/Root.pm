@@ -39,6 +39,7 @@ login処理と初期設定のみ組み込み。それ以外は別のコントロ
 sub auto :Private {
     my ( $self, $c ) = @_;
 
+    $c->log->debug('>>>>アクション内部パス:[' . $c->action->reverse . ']' );
     # 初期化済判断
     unless (exists($c->config->{inited})) {
         if ( ( $c->action->reverse eq 'index'  )        ||
@@ -47,8 +48,8 @@ sub auto :Private {
            ) {
             return 1;
         }
-        $c->response->status(500);
-        $c->response->body( 'Do not Initialize Yet' );
+        $c->stash->{template} = 'yetinit.tt';
+        $c->detach( '/yetinit' );
         return 0;
     }
     # login->login ループ回避
@@ -57,8 +58,7 @@ sub auto :Private {
     }
     # 強制login処理
     unless ( $c->user_exists ) {
-        $c->response->redirect( '/login' );
-        return 0;
+        $c->visit( '/login' );
     }
     return 1;
 }
@@ -77,6 +77,17 @@ sub index :Path :Args(0) {
     $c->response->redirect( '/mypage' );
 }
 
+=head2 yetinit
+
+custum 404 error page (初期化していない)
+
+=cut
+
+sub yetinit :Local {
+    my ( $self, $c ) = @_;
+    $c->response->status(404);
+}
+
 =head2 default
 
 Standard 404 error page
@@ -85,7 +96,7 @@ Standard 404 error page
 
 sub default :Path {
     my ( $self, $c ) = @_;
-    $c->response->body( 'Page not found' );
+    $c->response->body( '<H1>Page not found</H1>(開発中)' );
     $c->response->status(404);
 }
 
@@ -103,26 +114,35 @@ sub login :Local {
     my $realm   = $c->request->body_params->{realm};
     my $userinfo;
 
-    if ( $c->user_exists ) {
+    if ( ( $c->session->{role} ne 'initial' ) && ( $c->user_exists ) ) {
         return;
     }
+    # session->{init_role} は引き継ぐ
+    # session->{init_role} が空の時は、req->bodyparam->{init_role}を設定
+    # (bodyparam->{init_role}は、initialprocessでのみ設定)
+    my $init_role = $c->session->{init_role} ||
+                    $c->request->body_params->{init_role};
     $c->delete_session('login');
+    $c->session->{init_role} = $init_role;
     if ( !$realm ) {
-        $c->stash->{init_role} = $c->request->body_params->{init_role};
         return;
     }
     elsif ( $realm eq 'passwd' ) {
         if ( $c->authenticate( { account => $account, passwd => $passwd },
                                $realm ) ) {
+            my $r = $c->model('ConkanDB::PgSystemConf')->find('acces_token');
+            unless ( $r ) {
+                $c->session->{init_role} = 'addroot';
+            }
             $c->response->redirect( '/mypage' );
         } else {
             $c->stash->{errmsg} = '認証失敗 再度loginしてください';
         }
     }
-    elsif ( $realm eq 'oauth' ) {
-        $Net::OAuth::PROTOCOL_VERSION = Net::OAuth::PROTOCOL_VERSION_1_0A;
-        $userinfo = { provider => 'api.cybozulive.com' };
-    }
+#    elsif ( $realm eq 'oauth' ) {
+#        $Net::OAuth::PROTOCOL_VERSION = Net::OAuth::PROTOCOL_VERSION_1_0A;
+#        $userinfo = { provider => 'api.cybozulive.com' };
+#    }
     else {
         $c->error('Fatal access at '. scalar localtime );
     }
@@ -149,6 +169,7 @@ Initialize
 sub initialize :Private {
     my ( $self, $c ) = @_;
     # 初期化セッション開始
+    $c->delete_session('initialize');
     $c->session->{role} = 'initial';
 }
 
@@ -158,7 +179,7 @@ Initial process
 
 =cut
 
-sub initialprocess :Path {
+sub initialprocess :Local {
     my ( $self, $c ) = @_;
 
     if (exists($c->config->{inited})) {
@@ -182,6 +203,7 @@ sub initialprocess :Path {
     my $oasec= $c->request->body_params->{oasec};
 
     unless ($adpw && $dbnm && $dbsv && $dbus && $dbpw && $oakey && $oasec ) {
+        $c->stash->{wrongtype} = 'param';
         $c->stash->{template} = 'wrongParam.tt';
         return;
     }
@@ -205,6 +227,7 @@ sub _doInitialProc :Private {
     # 接続可否確認
     my $dbh = DBI->connect( $dsn, $dbus, $dbpw, { mysql_enable_utf8 => 1, } );
     unless ( $dbh ) {
+        $c->stash->{wrongtype} = 'connect';
         $c->stash->{template} = 'wrongParam.tt';
         return;
     }

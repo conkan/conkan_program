@@ -11,6 +11,9 @@ else
 fi
 docker $AZDO stop conkan
 docker $AZDO rm conkan
+if [ -f `pwd`/app/conkan/conkan.yml ] ; then
+    cp `pwd`/app/conkan/conkan.yml_default `pwd`/app/conkan/conkan.yml
+fi
 docker $AZDO run -d --name conkan -p $HP:80 -p $HS:443 -v `pwd`/app:/root/app srem/conkan
 unset AZDO
 unset HP

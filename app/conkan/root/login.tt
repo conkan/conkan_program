@@ -23,7 +23,7 @@
         <TR><TH>アカウント</TH>
           <TD>
             <input type="text" name="account" class="span6" placeholder="account"
-            [%- IF init_role == 'initial' -%]
+            [%- IF c.session.init_role == 'initial' -%]
                 value="admin" readonly="readonly"
             [%- END -%]
             >
@@ -64,6 +64,7 @@
         logoutする
       </button>
     </FORM>
+  </div>
   [%- END %]
 </div>
 
