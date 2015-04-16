@@ -10,6 +10,19 @@ Model::ConkanDB:
   schema_class: conkan::Schema
 Plugin::Authentication:
   default_realm: passwd
+  oauth:
+    credential:
+      class: OAuth
+      providers:
+        api.cybozulive.com:
+          access_token_endpoint: https://api.cybozulive.com/oauth/token
+          consumer_key: 
+          consumer_secret: 
+          request_token_endpoint: https://api.cybozulive.com/oauth/initiate
+          user_auth_endpoint: https://api.cybozulive.com/oauth/authorize
+    store:
+      class: +Catalyst::Authentication::Store::Null
+    use_session: 1
   passwd:
     credential:
       class: Password
@@ -18,24 +31,14 @@ Plugin::Authentication:
       password_type: crypted
     store:
       class: DBIx::Class
+      id_field: account
       ignore_fields_in_find: []
       store_user_class: Catalyst::Authentication::Store::DBIx::Class::User
-      id_field: account
       use_userdata_from_session: 1
       user_model: conkanDB::PgStaff
     use_session: 1
-  oauth:
-    credential:
-      class: OAuth
-      providers:
-        api.cybozulive.com:
-          access_token_endpoint: https://api.cybozulive.com/oauth/token
-          consumer_key:
-          consumer_secret: 
-          request_token_endpoint: https://api.cybozulive.com/oauth/initiate
-          user_auth_endpoint: https://api.cybozulive.com/oauth/authorize
-    store:
-      class: +Catalyst::Authentication::Store::Null
-    use_session: 1
   use_session: 1
+addroot:
+  group: 
+  type: 
 name: conkan

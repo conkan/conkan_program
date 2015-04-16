@@ -50,21 +50,42 @@
         </TR>
       </table>
       <BR/>
-      <label>CybozuLive OAuth情報</label><br/>
-      <table border="0">
-        <TR><TH>コンシュマートークンキー</TH>
-          <TD>
-            <input type="text" name="oakey" class="span10" placeholder="consumer_key">
-            <span class="help-inline">CybouzuLiveが発行したConsumerKey</span>
-          </TD>
-        </TR>
-        <TR><TH>コンシュマーシークレット</TH>
-          <TD>
-            <input type="text" name="oasec" class="span10" placeholder="consumer_secret">
-            <span class="help-inline">CybouzuLiveが発行したConsumerSecret</span>
-          </TD>
-        </TR>
-      </table>
+      <label>スタッフ登録方法</label>
+      <select class="span6" name="addroot" id="addroot">
+        <option value="plain">個別入力</option>
+        <option value="cybozu" selected>CybouzuLive情報流用</option>
+      </select>
+      <div class="well">
+        <div id="addroot_plain" style="display:none;">
+          個々にスタッフを登録します。<BR/>
+          新たに登録したスタッフへの連絡は、E-Mailを使用します。<BR/>
+          (E-Mailに初期パスワードが含まれるため、セキュリティ上望ましくありません)
+        </div>
+        <div id="addroot_cybozu">
+          CybouzeLiveの特定のグループに参加しているユーザ情報を流用します。<BR/>
+          新たに登録したスタッフへの連絡は、CybouzeLiveのチャットを使用します。<BR/>
+          <br/>
+          <table border="0">
+            <TR><TH>コンシュマートークンキー</TH>
+              <TD>
+                <input type="text" name="oakey" class="span10" placeholder="consumer_key">
+                <span class="help-inline">CybouzuLiveが発行したConsumerKey</span>
+              </TD>
+            </TR>
+            <TR><TH>コンシュマーシークレット</TH>
+              <TD>
+                <input type="text" name="oasec" class="span10" placeholder="consumer_secret">
+                <span class="help-inline">CybouzuLiveが発行したConsumerSecret</span>
+              </TD>
+            </TR>
+            <TR><TH>グループ名</TH>
+              <TD>
+                <input type="text" name="cygr" class="span10" placeholder="Group Name">
+                <span class="help-inline">参照するCybouzuLiveのグループ名</span>
+              </TD>
+          </table>
+        </div>
+      </div>
       <BR/>
       <button type="submit" class="btn btn-primary btn-large" id="initbtn">
         初期化実行
@@ -84,6 +105,15 @@
   $('#initbtn').click(function() {
     $('#init').hide();
     $('#do_init').show();
+  });
+  $('#addroot').change(function() {
+    if ( $('#addroot').val() == 'plain' ) {
+      $('#addroot_plain').show();
+      $('#addroot_cybozu').hide();
+    } else {
+      $('#addroot_plain').hide();
+      $('#addroot_cybozu').show();
+    }
   });
 </script>
 </body>

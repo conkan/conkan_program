@@ -130,7 +130,7 @@ sub login :Local {
     elsif ( $realm eq 'passwd' ) {
         if ( $c->authenticate( { account => $account, passwd => $passwd },
                                $realm ) ) {
-            my $r = $c->model('ConkanDB::PgSystemConf')->find('acces_token');
+            my $r = $c->model('ConkanDB::PgStaff')->search({account=>{'!='=>'admin'}});
             unless ( $r ) {
                 $c->session->{init_role} = 'addroot';
             }
@@ -139,10 +139,6 @@ sub login :Local {
             $c->stash->{errmsg} = '認証失敗 再度loginしてください';
         }
     }
-#    elsif ( $realm eq 'oauth' ) {
-#        $Net::OAuth::PROTOCOL_VERSION = Net::OAuth::PROTOCOL_VERSION_1_0A;
-#        $userinfo = { provider => 'api.cybozulive.com' };
-#    }
     else {
         $c->error('Fatal access at '. scalar localtime );
     }
@@ -199,17 +195,21 @@ sub initialprocess :Local {
     my $dbsv = $c->request->body_params->{dbsv};
     my $dbus = $c->request->body_params->{dbus};
     my $dbpw = $c->request->body_params->{dbpw};
+    my $adrt = $c->request->body_params->{addroot};
     my $oakey= $c->request->body_params->{oakey};
     my $oasec= $c->request->body_params->{oasec};
+    my $cygr = $c->request->body_params->{cygr};
 
-    unless ($adpw && $dbnm && $dbsv && $dbus && $dbpw && $oakey && $oasec ) {
+    if ( ( !$adpw || !$dbnm || !$dbsv || !$dbus || !$dbpw ) ||
+         ( ( $adrt eq 'cybozu' ) && ( !$oakey || !$oasec || !$cygr ) ) ) {
         $c->stash->{wrongtype} = 'param';
         $c->stash->{template} = 'wrongParam.tt';
         return;
     }
 
     $c->detach( '/_doInitialProc',
-                [ $adpw, $dbnm, $dbsv, $dbus, $dbpw, $oakey, $oasec ],
+                [ $adpw, $dbnm, $dbsv, $dbus, $dbpw,
+                  $adrt, $oakey, $oasec, $cygr ],
               );
 }
 
@@ -220,7 +220,17 @@ Doing Initialize
 =cut
 
 sub _doInitialProc :Private {
-    my ( $self, $c, $adpw, $dbnm, $dbsv, $dbus, $dbpw, $oakey, $oasec) = @_;
+    my ( $self, $c, 
+         $adpw,     # adminパスワード
+         $dbnm,     # DB名
+         $dbsv,     # DBサーバ
+         $dbus,     # DBユーザ
+         $dbpw,     # DBユーザパスワード
+         $adrt,     # スタッフ登録方法 plain | cybozu
+         $oakey,    # CybozuLive oAuthキー
+         $oasec,    # CybozuLive oAuthシークレット
+         $cygr,     # CybozuLive 参照グループ名
+       ) = @_;
 
     my $dsn  = "dbi:mysql:$dbnm:$dbsv";
 
@@ -283,6 +293,9 @@ sub _doInitialProc :Private {
         my $conkan_yml = {
             'name' => 'conkan',
             'inited' => 1,
+            'addroot' => {
+                'type' => $adrt,
+            },
             'Model::ConkanDB' => $c->config->{'Model::ConkanDB'},
             'Plugin::Authentication' => $c->config->{'Plugin::Authentication'},
         };
@@ -290,9 +303,13 @@ sub _doInitialProc :Private {
         $ymlwk->{'dsn'} = $dsn;
         $ymlwk->{'user'} = $dbus;
         $ymlwk->{'password'} = $dbpw;
-        $ymlwk = $conkan_yml->{'Plugin::Authentication'}->{'oauth'}->{'credential'}->{'providers'}->{'api.cybozulive.com'};
-        $ymlwk->{'consumer_key'} = $oakey;
-        $ymlwk->{'consumer_secret'} = $oasec;
+        if ( $adrt eq 'cybozu' ) {
+            $conkan_yml->{'addroot'}->{'group'} = $cygr;
+            $ymlwk = $conkan_yml->{'Plugin::Authentication'}->{'oauth'}
+                    ->{'credential'}->{'providers'}->{'api.cybozulive.com'};
+            $ymlwk->{'consumer_key'} = $oakey;
+            $ymlwk->{'consumer_secret'} = $oasec;
+        }
         YAML::DumpFile( $conkan_yml_f, $conkan_yml );
         # サーバ再起動
         # これにより、$c->config->{inited} が設定される
