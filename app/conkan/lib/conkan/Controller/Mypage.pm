@@ -26,7 +26,19 @@ sub index :Path :Args(0) {
 
 }
 
+=head2 profile
 
+=cut
+
+sub profile :Local {
+    my ( $self, $c ) = @_;
+
+    $c->stash->{name}  = $c->flash->{name};
+    $c->stash->{email} = $c->flash->{email};
+    $c->stash->{cyid}  = $c->flash->{cyid};
+    $c->stash->{role}  = $c->flash->{role};
+
+}
 
 =encoding utf8
 

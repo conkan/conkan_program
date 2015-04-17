@@ -37,7 +37,7 @@ https://developer.cybozulive.com にて登録
 ----------------------- | ---------------------------
 アプリケーション名 | 任意の値
 アプリケーションの種類 | ウェブブラウザ
-コールバックURL | https://<conkanトップURL>/login
+コールバックURL | https://<conkanトップURL>/addroot/cybozu
 アクセスレベル | レベルA
 
 登録すると、ConsumerKey と ConsumerSecret が表示される。
@@ -51,7 +51,7 @@ conkan初期化処理
 1. 初期化アクセス
 
 https://<conkanトップURL>/ にアクセスする。
-初回のみ、conkan初期化ページ が表示される。
+初回のみ、【conkan初期化ページ】 が表示される。
 
 すべての値を設定し、「初期化実行」をクリックすると、conkan初期化処理を実施する。
 
@@ -65,4 +65,15 @@ DBパスワード | データベース設定で使用した パスワード
 コンシュマートークンキー | CybozuLiveアプリケーション登録 で取得した ConsumerKey
 コンシュマーシークレット | CybozuLiveアプリケーション登録 で取得した ConsumerSecret
 
+1. adminとして再login
+
+初期化完了後、【conkan初期化完了>>管理者登録ページ】が表示される。
+「管理者login」をクリックして、改めて admin としてloginする。
+(loginする際のパスワードは、<<初期化アクセス>>で指定したもの
+
+1. 最初の管理者登録
+
+admin としてlogin後、タブ「管理者登録」をクリックする。
+必要に応じて、CybozuLive認証画面を経由し、
+【管理者登録ページ】が表示されるので、必要な項目を入力し、登録する。
 

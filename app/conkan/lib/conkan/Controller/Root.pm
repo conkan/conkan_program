@@ -130,8 +130,8 @@ sub login :Local {
     elsif ( $realm eq 'passwd' ) {
         if ( $c->authenticate( { account => $account, passwd => $passwd },
                                $realm ) ) {
-            my $r = $c->model('ConkanDB::PgStaff')->search({account=>{'!='=>'admin'}});
-            unless ( $r ) {
+            my @r = $c->model('ConkanDB::PgStaff')->search({account=>{'!='=>'admin'}});
+            unless ( scalar @r ) {
                 $c->session->{init_role} = 'addroot';
             }
             $c->response->redirect( '/mypage' );

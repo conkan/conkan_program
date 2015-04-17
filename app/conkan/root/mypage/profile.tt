@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="conkan initialize">
+<meta name="author" content="Studio REM">
+<title>Conkan Profile</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container">
+  <div class="well">
+    <header class="header">
+    <h1>コンベンション管理システム ConKan</h1>
+      <p class="lead">汎用コンベンション運営管理システム</p>
+    </header>
+    <div class="subnav">
+      <ul class="nav nav-tabs">
+        <li><a href="/mypage">[% c.user.get('name') %] MyPage</a></li>
+        [%- SET addroot = 0 -%]
+        [%- IF c.session.init_role == 'addroot' -%]
+          [%- SET addroot = 1 -%]
+        [%- END -%]
+        [%- IF! addroot == 1 -%]
+          <li><a href="/program/list">企画管理</a></li>
+          <li><a href="/program/progress">進捗報告</a></li>
+          <li class="active"><a href="#">プロファイル設定</a></li>
+          [%- IF c.user.get('role') == 'ROOT' -%]
+            <li><a href="/config/staff">スタッフ管理</a></li>
+            <li><a href="/config/room">企画部屋管理</a></li>
+            <li><a href="/config/equip">機材管理</a></li>
+          [%- END -%]
+          <li class="pull-right"><a href="/logout" class="btn btn-info">logout</a></li>
+        [%- ELSE -%]
+          <li class="active"><a href="/mypage/profile">管理者プロファイル設定</a></li>
+        [%- END %]
+      </ul>
+    </div>
+  </div>
+  <div class="well" id="form">
+    <FORM method="POST" action="/mypage/profile">
+      <input type="hidden" name="staffid", value="[% staffid %]"></input>
+      <input type="hidden" name="cyid", value="[% cyid %]"></input>
+      <table border="0">
+        <TR><TH>名前</TH>
+          <TD>
+            <input type="text" name="name" class="span6" placeholder="name"
+                value="[% name %]">
+          </TD>
+        </TR>
+        <TR><TH>アカウント</TH>
+          <TD>
+            <input type="text" name="account" class="span6" placeholder="account"
+                value="[% account %]">
+                <span class="help-inline">Loginアカウント</span>
+          </TD>
+        </TR>
+        <TR><TH>パスワード</TH>
+          <TD>
+            <input type="password" name="passwd" class="span6" placeholder="Password">
+          </TD>
+        </TR>
+        <TR><TH>パスワード(確認)</TH>
+          <TD>
+            <input type="password" name="passwd2" class="span6" placeholder="Password">
+          </TD>
+        </TR>
+        <TR><TH>役割</TH>
+          <TD>
+            <input type="text" name="role" class="span6" placeholder="role"
+                value="[% role %]"> ※選択リスト
+          </TD>
+        </TR>
+        <TR><TH>メールアドレス</TH>
+          <TD>
+            <input type="text" name="email" class="span6" value="[% email %]">
+          </TD>
+        </TR>
+        <TR><TH>電話番号</TH>
+          <TD>
+            <input type="text" name="telno" class="span6" value="[% telno %]">
+          </TD>
+        </TR>
+        <TR><TH>米魂番号</TH>
+          <TD>
+            <input type="text" name="regno" class="span6" value="[% regno %]">
+          </TD>
+        </TR>
+        <TR><TH>担当名</TH>
+          <TD>
+            <input type="text" name="tname" class="span6" value="[% tname %]">
+          </TD>
+        </TR>
+        <TR><TH>ふりがな</TH>
+          <TD>
+            <input type="text" name="tnamef" class="span6" value="[% tnamef %]">
+          </TD>
+        </TR>
+        <TR><TH>別名</TH>
+          <TD>
+            <input type="text" name="oname" class="span6" value="[% oname %]">
+          </TD>
+        </TR>
+        <TR><TH>ふりがな</TH>
+          <TD>
+            <input type="text" name="onamef" class="span6" value="[% onamef %]">
+          </TD>
+        </TR>
+        <TR><TH>備考</TH>
+          <TD>
+            <input type="text" name="comment" class="span6" value="[% comment %]">
+          </TD>
+        </TR>
+      </table>
+      <BR/>
+      <button type="submit" class="btn btn-primary btn-large" id="initbtn">
+        登録
+      </button>
+    </FORM>
+  </div>
+</div>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script>
+/* バリデーション */ 
+</script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+</body>
+</html>
+

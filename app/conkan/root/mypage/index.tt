@@ -19,15 +19,14 @@
     <div class="subnav">
       <ul class="nav nav-tabs">
         <li class="active"><a href="#">[% c.user.get('name') %] MyPage</a></li>
-        [%- IF c.user.get('account') == 'admin' -%]
-          [%- SET addroot = 1 -%]
-        [%- END -%]
+        [%- SET addroot = 0 -%]
         [%- IF c.session.init_role == 'addroot' -%]
           [%- SET addroot = 1 -%]
         [%- END -%]
-        [%- IF! addroot -%]
+        [%- IF! addroot == 1 -%]
           <li><a href="/program/list">企画管理</a></li>
           <li><a href="/program/progress">進捗報告</a></li>
+          <li><a href="/mypage/profile">プロファイル設定</a></li>
           [%- IF c.user.get('role') == 'ROOT' -%]
             <li><a href="/config/staff">スタッフ管理</a></li>
             <li><a href="/config/room">企画部屋管理</a></li>
@@ -61,7 +60,13 @@
       [%- END -%]
     </div>
   [% END %]
+  [% SET debug = 0 %]
+  [% IF debug %]
+    [%- USE dumper(indent=1) -%]
+    <pre>
+    [% dumper.dump(c.session) %]
+    <pre>
+  [% END %]
 </div>
 </body>
 </html>
-

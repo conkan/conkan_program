@@ -41,19 +41,6 @@
       </button>
     </FORM>
   </div>
-[% IF 0 %]
-  <BR/>
-  <div class="well" id="oauth">
-    <FORM method="POST" action="/login">
-      <label>サイボウズ認証</label><br/>
-      <input type="hidden" name="realm", value="oauth"></input>
-      <BR/>
-      <button type="submit" class="btn btn-primary btn-large">
-        サイボウズ認証実施
-      </button>
-    </FORM>
-  </div>
-[% END %]
   <div style="COLOR:Red;">[% errmsg %]</div>
   [%- ELSE %]
   <div class="well" id="logout">

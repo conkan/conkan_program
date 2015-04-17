@@ -20,6 +20,7 @@ Plugin::Authentication:
           consumer_secret: 
           request_token_endpoint: https://api.cybozulive.com/oauth/initiate
           user_auth_endpoint: https://api.cybozulive.com/oauth/authorize
+          group_info_endpoint: https://api.cybozulive.com/api/group/V2
     store:
       class: +Catalyst::Authentication::Store::Null
     use_session: 1

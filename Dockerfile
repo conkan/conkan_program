@@ -75,6 +75,9 @@ RUN cpanm -i Catalyst::Plugin::FillInForm
 RUN cpanm -i DBIx::Class::Schema::Loader
 RUN cpanm -i MooseX::NonMoose
 RUN cpanm -i LWP::Protocol::https
+RUN cpanm -i Term::Size::Any
+RUN yum -y install expat-devel libxml2-devel
+RUN cpanm -i XML::LibXML XML::RSS XML::Atom XML::Feed
 
 # cpanm work削除
 RUN rm -rf .cpanm/*

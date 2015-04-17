@@ -10,6 +10,8 @@ use String::Random qw/ random_string /;
 use Catalyst::Exception ();
 use namespace::autoclean;
 
+use Data::Dumper;
+
 our $VERSION = '0.04';
 
 has debug => ( is => 'ro', isa => Bool );
@@ -55,11 +57,9 @@ sub authenticate {
         request_method => 'GET',
         signature_method => 'HMAC-SHA1',
 	oauth_version => '1.0a',
-        callback => $c->uri_for( $c->action, $c->req->captures, @{ $c->req->args } )->as_string
+        callback => '',                         # fix rem
     );
-#>fix rem
-	$c->log->debug( "authenticate() called from " . $c->request->uri ) if $self->debug;
-#<fix rem
+	$c->log->debug( "authenticate() called from " . $c->request->uri ) if $self->debug;     # fix rem
 
     my $oauth_token = $c->req->method eq 'GET'
         ? $c->req->query_params->{oauth_token}
@@ -72,9 +72,7 @@ sub authenticate {
 		my $request = Net::OAuth->request( 'access token' )->new(
 			%defaults,
 			token => $response->token,
-#>fix rem
-			token_secret => $c->session->{req_token_sec},
-#<fix rem
+			token_secret => $c->flash->{req_token_sec},      # fix rem
 			request_url => $provider->{access_token_endpoint},
 			verifier => $c->req->params->{oauth_verifier},
 		);
@@ -84,9 +82,6 @@ sub authenticate {
 		Catalyst::Exception->throw( $ua_response->status_line.' '.$ua_response->content )
 			unless $ua_response->is_success;
 
-#>fix rem
-		$c->session->{req_token_sec} = undef;
-#<fix rem
 		$response = Net::OAuth->response( 'access token' )->from_post_body( $ua_response->content );
 
 		my $user = +{
@@ -121,9 +116,7 @@ sub authenticate {
 			%defaults,
 			token => $response->token,
 		);
-#>fix rem
-                $c->session->{req_token_sec} = $response->token_secret;
-#<fix rem
+        $c->flash->{req_token_sec} = $response->token_secret;   # fix rem
 		$c->res->redirect( $request->to_url( $provider->{user_auth_endpoint} ) );
 	}
 
