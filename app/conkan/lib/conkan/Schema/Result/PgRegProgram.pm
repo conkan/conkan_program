@@ -173,6 +173,12 @@ __PACKAGE__->table("pg_reg_program");
   data_type: 'text'
   is_nullable: 1
 
+=head2 updateflg
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 64
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -227,6 +233,8 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 0, size => 64 },
   "comment",
   { data_type => "text", is_nullable => 1 },
+  "updateflg",
+  { data_type => "varchar", is_nullable => 1, size => 64 },
 );
 
 =head1 PRIMARY KEY
@@ -235,11 +243,13 @@ __PACKAGE__->add_columns(
 
 =item * L</pgid>
 
+=item * L</layout>
+
 =back
 
 =cut
 
-__PACKAGE__->set_primary_key("pgid");
+__PACKAGE__->set_primary_key("pgid", "layout");
 
 =head1 RELATIONS
 
@@ -334,8 +344,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-11 14:49:44
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:z+2S2MpqXBAD9CxI/fGgNw
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-18 12:18:22
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:AVkX/wZ7T5DQfA//BKVIuQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

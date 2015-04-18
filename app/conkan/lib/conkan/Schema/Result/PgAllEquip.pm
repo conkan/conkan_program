@@ -69,6 +69,12 @@ __PACKAGE__->table("pg_all_equip");
   is_nullable: 1
   size: 64
 
+=head2 updateflg
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 64
+
 =head2 rmdate
 
   data_type: 'datetime'
@@ -92,6 +98,8 @@ __PACKAGE__->add_columns(
   "spec",
   { data_type => "varchar", is_nullable => 1, size => 64 },
   "comment",
+  { data_type => "varchar", is_nullable => 1, size => 64 },
+  "updateflg",
   { data_type => "varchar", is_nullable => 1, size => 64 },
   "rmdate",
   {
@@ -145,8 +153,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-09 12:02:10
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:WOZgqxjzJ4gapQ52D1A7Vg
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-18 12:18:22
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:IwIbRwg6x7LA1QFSffArnw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

@@ -9,64 +9,30 @@
 <title>Conkan MyPage</title>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
-<body>
+[% PROCESS 'tthead.tt' %]
 <div class="container">
+[%- IF addroot %]
   <div class="well">
-    <header class="header">
-    <h1>コンベンション管理システム ConKan</h1>
-      <p class="lead">汎用コンベンション運営管理システム</p>
-    </header>
-    <div class="subnav">
-      <ul class="nav nav-tabs">
-        <li class="active"><a href="#">[% c.user.get('name') %] MyPage</a></li>
-        [%- SET addroot = 0 -%]
-        [%- IF c.session.init_role == 'addroot' -%]
-          [%- SET addroot = 1 -%]
-        [%- END -%]
-        [%- IF! addroot == 1 -%]
-          <li><a href="/program/list">企画管理</a></li>
-          <li><a href="/program/progress">進捗報告</a></li>
-          <li><a href="/mypage/profile">プロファイル設定</a></li>
-          [%- IF c.user.get('role') == 'ROOT' -%]
-            <li><a href="/config/staff">スタッフ管理</a></li>
-            <li><a href="/config/room">企画部屋管理</a></li>
-            <li><a href="/config/equip">機材管理</a></li>
-          [%- END -%]
-          <li class="pull-right"><a href="/logout" class="btn btn-info">logout</a></li>
-        [%- ELSE -%]
-          <li><a href="/addroot/[% c.config.addroot.type %]">管理者登録</a></li>
-        [%- END %]
-      </ul>
-    </div>
+    最初の管理者を登録してください。<BR/>
+    [%- SWITCH c.config.addroot.type -%]
+      [%- CASE 'cybozu' -%]
+        最初の管理者の登録のためには、CybozeLiveへのloginが必要です。<BR/>
+        新規スタッフ登録に関連するCybozeLiveへのアクセスは、<BR/>
+        ここで登録する<B>最初の管理者</B>の権限で実行します。(チャット送信など)
+      [%- CASE 'plain' -%]
+        管理情報は完全にConkan内部に閉じます。<BR/>
+        そのため、スタッフ追加時には初期パスワードを別途通知する必要があります。<br/>
+        (スタッフのメールアドレスを登録すれば、Conkanからメールで通知することは可能ですが、メールの中に初期パスワードが含まれるためセキュリティ上望ましくありません)
+      [%- CASE DEFAULT -%]
+        <div style="COLOR:Red;">
+        初期設定で何か問題が起こったようです。<BR/>
+        管理者または開発者に連絡してください。<BR/>
+        (上記「管理者登録」を選んでもエラーになります)
+        </div>
+    [%- END -%]
   </div>
-  [%- IF addroot %]
-    <div class="well">
-      最初の管理者を登録してください。<BR/>
-      [%- SWITCH c.config.addroot.type -%]
-        [%- CASE 'cybozu' -%]
-          最初の管理者の登録のためには、CybozeLiveへのloginが必要です。<BR/>
-          新規スタッフ登録に関連するCybozeLiveへのアクセスは、<BR/>
-          ここで登録する<B>最初の管理者</B>の権限で実行します。(チャット送信など)
-        [%- CASE 'plain' -%]
-          管理情報は完全にConkan内部に閉じます。<BR/>
-          そのため、スタッフ追加時には初期パスワードを別途通知する必要があります。<br/>
-          (スタッフのメールアドレスを登録すれば、Conkanからメールで通知することは可能ですが、メールの中に初期パスワードが含まれるためセキュリティ上望ましくありません)
-        [%- CASE DEFAULT -%]
-          <div style="COLOR:Red;">
-          初期設定で何か問題が起こったようです。<BR/>
-          管理者または開発者に連絡してください。<BR/>
-          (上記「管理者登録」を選んでもエラーになります)
-          </div>
-      [%- END -%]
-    </div>
-  [% END %]
-  [% SET debug = 0 %]
-  [% IF debug %]
-    [%- USE dumper(indent=1) -%]
-    <pre>
-    [% dumper.dump(c.session) %]
-    <pre>
-  [% END %]
+[% END %]
 </div>
+[% PROCESS 'tttail.tt' self_li_id = 'mypage' %]
 </body>
 </html>

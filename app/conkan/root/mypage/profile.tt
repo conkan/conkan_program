@@ -9,123 +9,106 @@
 <title>Conkan Profile</title>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
-<body>
+[% PROCESS 'tthead.tt' %]
+[% DEFAULT state = 'inputform' %]
 <div class="container">
-  <div class="well">
-    <header class="header">
-    <h1>コンベンション管理システム ConKan</h1>
-      <p class="lead">汎用コンベンション運営管理システム</p>
-    </header>
-    <div class="subnav">
-      <ul class="nav nav-tabs">
-        <li><a href="/mypage">[% c.user.get('name') %] MyPage</a></li>
-        [%- SET addroot = 0 -%]
-        [%- IF c.session.init_role == 'addroot' -%]
-          [%- SET addroot = 1 -%]
-        [%- END -%]
-        [%- IF! addroot == 1 -%]
-          <li><a href="/program/list">企画管理</a></li>
-          <li><a href="/program/progress">進捗報告</a></li>
-          <li class="active"><a href="#">プロファイル設定</a></li>
-          [%- IF c.user.get('role') == 'ROOT' -%]
-            <li><a href="/config/staff">スタッフ管理</a></li>
-            <li><a href="/config/room">企画部屋管理</a></li>
-            <li><a href="/config/equip">機材管理</a></li>
-          [%- END -%]
-          <li class="pull-right"><a href="/logout" class="btn btn-info">logout</a></li>
-        [%- ELSE -%]
-          <li class="active"><a href="/mypage/profile">管理者プロファイル設定</a></li>
-        [%- END %]
-      </ul>
-    </div>
-  </div>
-  <div class="well" id="form">
+[% state %]<br/>
+  <div class="well" id="inputform" style="display:none;">
     <FORM method="POST" action="/mypage/profile">
-      <input type="hidden" name="staffid", value="[% staffid %]"></input>
-      <input type="hidden" name="cyid", value="[% cyid %]"></input>
-      <table border="0">
-        <TR><TH>名前</TH>
-          <TD>
-            <input type="text" name="name" class="span6" placeholder="name"
-                value="[% name %]">
-          </TD>
-        </TR>
-        <TR><TH>アカウント</TH>
-          <TD>
-            <input type="text" name="account" class="span6" placeholder="account"
-                value="[% account %]">
-                <span class="help-inline">Loginアカウント</span>
-          </TD>
-        </TR>
-        <TR><TH>パスワード</TH>
-          <TD>
-            <input type="password" name="passwd" class="span6" placeholder="Password">
-          </TD>
-        </TR>
-        <TR><TH>パスワード(確認)</TH>
-          <TD>
-            <input type="password" name="passwd2" class="span6" placeholder="Password">
-          </TD>
-        </TR>
-        <TR><TH>役割</TH>
-          <TD>
-            <input type="text" name="role" class="span6" placeholder="role"
-                value="[% role %]"> ※選択リスト
-          </TD>
-        </TR>
-        <TR><TH>メールアドレス</TH>
-          <TD>
-            <input type="text" name="email" class="span6" value="[% email %]">
-          </TD>
-        </TR>
-        <TR><TH>電話番号</TH>
-          <TD>
-            <input type="text" name="telno" class="span6" value="[% telno %]">
-          </TD>
-        </TR>
-        <TR><TH>米魂番号</TH>
-          <TD>
-            <input type="text" name="regno" class="span6" value="[% regno %]">
-          </TD>
-        </TR>
-        <TR><TH>担当名</TH>
-          <TD>
-            <input type="text" name="tname" class="span6" value="[% tname %]">
-          </TD>
-        </TR>
-        <TR><TH>ふりがな</TH>
-          <TD>
-            <input type="text" name="tnamef" class="span6" value="[% tnamef %]">
-          </TD>
-        </TR>
-        <TR><TH>別名</TH>
-          <TD>
-            <input type="text" name="oname" class="span6" value="[% oname %]">
-          </TD>
-        </TR>
-        <TR><TH>ふりがな</TH>
-          <TD>
-            <input type="text" name="onamef" class="span6" value="[% onamef %]">
-          </TD>
-        </TR>
-        <TR><TH>備考</TH>
-          <TD>
-            <input type="text" name="comment" class="span6" value="[% comment %]">
-          </TD>
-        </TR>
-      </table>
+      <input type="hidden" name="staffid", value="[% rs.staffid %]"></input>
+      <input type="hidden" name="cyid", value="[% rs.cyid %]"></input>
+      <div class="row">
+        <label class="col-md-2 text-right">名前</label>
+        <input type="text" name="name" class="col-md-3" value="[% rs.name %]">
+      </div>
+      <div class="row">
+        <label class="col-md-2 text-right">アカウント</label>
+        <input type="text" name="account" class="col-md-3" value="[% rs.account %]">
+      </div>
+      <div class="row">
+        <label class="col-md-2 text-right">パスワード</label>
+        <input type="password" name="passwd" class="col-md-3">
+      </div>
+      <div class="row">
+        <label class="col-md-2 text-right">パスワード(確認) </label>
+        <input type="password" name="passwd2" class="col-md-3">
+      </div>
+      <div class="row">
+        <label class="col-md-2 text-right">役割[% rs.role %]</label>
+            <select class="col-md-2" name="role" id="role">
+              <option id="NORM" value="NORM">企画スタッフ</option>
+              <option id="PG"   value="PG">企画管理スタッフ</option>
+              <option id="ROOT" value="ROOT">システム管理者</option>
+            </select>
+      </div>
+      <div class="row">
+        <label class="col-md-2 text-right">メールアドレス</label>
+        <input type="text" name="ma" class="col-md-3" value="[% rs.ma %]">
+      </div>
+      <div class="row">
+        <label class="col-md-2 text-right">電話番号</label>
+        <input type="text" name="telno" class="col-md-3" value="[% rs.telno %]">
+      </div>
+      <div class="row">
+        <label class="col-md-2 text-right">米魂番号</label>
+        <input type="text" name="regno" class="col-md-3" value="[% rs.regno %]">
+      </div>
+      <div class="row">
+        <label class="col-md-2 text-right">担当名</label>
+        <input type="text" name="tname" class="col-md-3" value="[% rs.tname %]">
+      </div>
+      <div class="row">
+        <label class="col-md-2 text-right">担当名ふりがな</label>
+        <input type="text" name="tnamef" class="col-md-3" value="[% rs.tnamef %]">
+      </div>
+      <div class="row">
+        <label class="col-md-2 text-right">別名</label>
+        <input type="text" name="oname" class="col-md-3" value="[% rs.oname %]">
+      </div>
+      <div class="row">
+        <label class="col-md-2 text-right">別名ふりがな</label>
+        <input type="text" name="onamef" class="col-md-3" value="[% rs.onamef %]">
+      </div>
+      <div class="row">
+        <label class="col-md-2 text-right">備考</label>
+        <textarea name="comment" class="col-md-3" rows="3">[% rs.comment %]
+        </textarea>
+      </div>
       <BR/>
-      <button type="submit" class="btn btn-primary btn-large" id="initbtn">
-        登録
-      </button>
+      <div class="row">
+        <button type="submit" class="col-md-3 text-center btn btn-primary btn-large" id="initbtn">
+          登録
+        </button>
+        <span class="col-md-1"></span>
+        <a class="col-md-3 text-center btn btn-primary btn-large" href="/mypage">マイページに戻る</a>
+      </div>
     </FORM>
   </div>
+  <div class="well" id="success" style="display:none;">
+    <H1>登録/更新しました</H1>
+    <a class="btn btn-primary btn-large" href="/mypage">マイページに戻る</a>
+  </div>
+  <div class="well" id="deny" style="display:none;">
+    <H1>更新できませんでした</H1>
+    更新を始めてから登録するまでの間に、他のスタッフが更新しました。
+    改めて実施してください
+    <a class="btn btn-primary btn-large" href="/mypage">マイページに戻る</a>
+  </div>
+  <div class="well" id="initadd" style="display:none;">
+    <H1>管理者を登録しました</H1>
+    loginしなおしてください
+    <a class="btn btn-primary btn-large" href="/logout">logout</a>
+  </div>
 </div>
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+[% PROCESS 'tttail.tt' self_li_id = 'mypage_profile' %]
 <script>
-/* バリデーション */ 
+  // 役割 選択リスト アクティベイト, 有効なdivを表示
+  $(document).ready(function() {
+    $('#[%- rs.role -%]').prop('selected', true);
+    $('#[%- state -%]').show();
+  } );
+  // バリデーション
 </script>
-<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 </body>
 </html>
 

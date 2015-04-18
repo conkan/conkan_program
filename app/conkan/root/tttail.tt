@@ -1,0 +1,17 @@
+[% SET debug = 0 %]
+[% IF debug %]
+  <HR/>
+  [%- USE dumper(indent=1) -%]
+  <pre>
+  [% dumper.dump(c.session) %]
+  <pre>
+[% END %]
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<script>
+  // ナビのタブ アクティベイト
+  $(document).ready(function() {
+    $('#[%- self_li_id -%]').addClass('active');
+  });
+</script>
+

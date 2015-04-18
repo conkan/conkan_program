@@ -6,6 +6,7 @@ use Moose;
 use namespace::autoclean;
 use DBI;
 use Try::Tiny;
+use String::Random qw/ random_string /;
 
 use Data::Dumper;
 use conkan::Schema;
@@ -133,6 +134,9 @@ sub login :Local {
             my @r = $c->model('ConkanDB::PgStaff')->search({account=>{'!='=>'admin'}});
             unless ( scalar @r ) {
                 $c->session->{init_role} = 'addroot';
+            }
+            else {
+                $c->session->{init_role} = undef;
             }
             $c->response->redirect( '/mypage' );
         } else {
@@ -272,7 +276,7 @@ sub _doInitialProc :Private {
         $schema->resultset('PgStaff')->create({
             'name'      => 'admin',
             'account'   => 'admin',
-            'passwd'    => crypt( $adpw, 'admin' ),
+            'passwd'    => crypt( $adpw, random_string( 'cccc' ) ),
             'role'      => 'ROOT',
         });
         $dbh->disconnect;

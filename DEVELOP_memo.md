@@ -7,7 +7,8 @@
 データベース"conkan"を作成し、
 管理ユーザにその全権を与えておく
 
-下記DBサーバは、開発用DBサーバである
+conkanをdeployしたサーバで、データベースconkanを展開する。
+下記[DBサーバ]は、開発用DBサーバである
 
 ````
 $> cd [conkan_root]/..
@@ -15,6 +16,8 @@ $> mysql -u [管理ユーザ名] -p --host=[DBサーバ] < initializer/conkan_in
 Enter password:[管理パスワード]
 ````
 1. スキーマ作成
+
+conkanをdeployしたサーバで、conkan::Schema を含むモデルクラスを作成する
 
 ````
 $> cd [conkan_root]

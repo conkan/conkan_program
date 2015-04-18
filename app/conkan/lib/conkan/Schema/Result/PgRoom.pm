@@ -101,6 +101,12 @@ __PACKAGE__->table("pg_room");
   extra: {list => ["NONE","W","E"]}
   is_nullable: 0
 
+=head2 updateflg
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 64
+
 =head2 rmdate
 
   data_type: 'datetime'
@@ -141,6 +147,8 @@ __PACKAGE__->add_columns(
     extra => { list => ["NONE", "W", "E"] },
     is_nullable => 0,
   },
+  "updateflg",
+  { data_type => "varchar", is_nullable => 1, size => 64 },
   "rmdate",
   {
     data_type => "datetime",
@@ -205,8 +213,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-14 17:05:10
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:JUiTg46zm7Tj1kNCrMGQDw
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-18 12:18:22
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:LwgVr9SU1Nyipvxm/5ajPg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

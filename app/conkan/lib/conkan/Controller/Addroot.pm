@@ -55,7 +55,8 @@ sub cybozu :Local {
     my $api_fqdn = 'api.cybozulive.com';
     my $sysconfM = $c->model('ConkanDB::PgSystemConf');
 
-    my $token = [ $sysconfM->find('CybozuToken')->pg_conf_value ]->[0];
+    my $rs = $sysconfM->find('CybozuToken');
+    my $token = [ $rs->pg_conf_value ]->[0] if $rs;
     unless ( $token ) {
         # サイボウズOAuth認証開始
         my $auth = $c->authenticate( { 'provider' => $api_fqdn }, 'oauth' );
@@ -71,41 +72,41 @@ sub cybozu :Local {
                 'pg_conf_name'  => 'サイボウズライブ Access Token Secret',
                 'pg_conf_value' => $c->user->token_secret,
             });
-            $c->response->redirect('addroot/cybozu');
+            $c->response->redirect('cybozu');
         }
     } else {
         my $provider = $c->config->{'Plugin::Authentication'}->{'oauth'}
                             ->{'credential'}->{'providers'}->{$api_fqdn};
         my $tokensec = [ $sysconfM->find('CybozuSecret')->pg_conf_value ]->[0];
         my %defaults = (
-	        'consumer_key'      => $provider->{consumer_key},
-	        'consumer_secret'   => $provider->{consumer_secret},
+            'consumer_key'      => $provider->{consumer_key},
+            'consumer_secret'   => $provider->{consumer_secret},
             'token'             => $token,
-			'token_secret'      => $tokensec,
+            'token_secret'      => $tokensec,
             'timestamp'         => time,
             'nonce'             => random_string( 'ccccccccccccccccccc' ),
             'signature_method'  => 'HMAC-SHA1',
-	        'oauth_version'     => '1.0a',
+            'oauth_version'     => '1.0a',
         );
 
         # グループ情報取得
-		my $request = Net::OAuth->request( 'protected resource' )->new(
-			%defaults,
+        my $request = Net::OAuth->request( 'protected resource' )->new(
+            %defaults,
             'request_method'    => 'GET',
-			'request_url'   => $provider->{group_info_endpoint},
-		);
-		$request->sign;
+            'request_url'   => $provider->{group_info_endpoint},
+        );
+        $request->sign;
 
         my $ua = LWP::UserAgent->new;
-		my $ua_response = $ua->request( GET $request->to_url );
-		Catalyst::Exception->throw( $ua_response->status_line.' '. $ua_response->content )
-			unless $ua_response->is_success;
+        my $ua_response = $ua->request( GET $request->to_url );
+        Catalyst::Exception->throw( $ua_response->status_line.' '. $ua_response->content )
+            unless $ua_response->is_success;
 
         # グループ情報解析
         local $XML::Atom::ForceUnicode = 1;
         my $grfeed = XML::Atom::Feed->new(\$ua_response->content);
-		Catalyst::Exception->throw( XML::Feed->errstr )
-			unless $grfeed;
+        Catalyst::Exception->throw( XML::Feed->errstr )
+            unless $grfeed;
 
         # グループに属していることに確認
         my $groupid;
@@ -116,14 +117,22 @@ sub cybozu :Local {
                 last;
             }
         }
-		Catalyst::Exception->throw( "412 Precondition Failed\nグループに参加していません" )
+        Catalyst::Exception->throw( "412 Precondition Failed\nグループに参加していません" )
             unless $groupid;
 
+        # GroupID登録
+        $groupid =~ s/^.*,//;   # IDのみにtrancate
+        $sysconfM->update_or_create( {
+            'pg_conf_code'  => 'CybozuGID',
+            'pg_conf_name'  => 'サイボウズライブ グループID',
+            'pg_conf_value' => $groupid,
+        });
+
         # ユーザ情報を元に、プロファイル設定画面へリダイレクト
-        $c->flash->{name}  = $grfeed->author->name;
-        $c->flash->{email} = $grfeed->author->email;
-        $c->flash->{cyid}  = $grfeed->author->uri;
-        $c->flash->{role}  = 'ROOT';
+        $c->flash->{name} = $grfeed->author->name;
+        $c->flash->{ma}   = $grfeed->author->email;
+        $c->flash->{cyid} = $grfeed->author->uri;
+        $c->flash->{role} = 'ROOT';
 
         $c->response->redirect('/mypage/profile');
     }
