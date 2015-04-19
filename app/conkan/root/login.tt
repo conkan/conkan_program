@@ -41,7 +41,7 @@
       </button>
     </FORM>
   </div>
-  <div style="COLOR:Red;">[% errmsg %]</div>
+  <div style="COLOR:Red;">[% errmsg | html %]</div>
   [%- ELSE %]
   <div class="well" id="logout">
     <FORM method="POST" action="/logout">

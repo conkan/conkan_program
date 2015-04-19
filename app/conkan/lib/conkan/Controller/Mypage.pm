@@ -45,7 +45,6 @@ sub profile :Local {
     }
     my $staffM = $c->model('ConkanDB::PgStaff');
     my $staffid = $value->{'staffid'};
-
     unless ( $staffid || ( $c->user->get('account') eq 'admin' ) ) {
         $staffid = $c->user->get('staffid');
     }
@@ -63,8 +62,11 @@ sub profile :Local {
                 'updateflg' =>  $c->sessionid
             } );
             $c->stash->{'rs'} = $rowprof;
-            $c->stash->{'rs'}->{'cyid'}
-                = decode_json( $rowprof->otheruid )->{'cybozuID'};
+            if ( $rowprof->otheruid ) {
+                $c->stash->{'rs'}->{'cyid'}
+                    = decode_json( $rowprof->otheruid )->{'cybozuID'};
+            }
+            $c->stash->{'rs'}->{'passwd'} = undef;
         }
         else {
             # 更新実施

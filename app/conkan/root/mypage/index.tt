@@ -9,6 +9,7 @@
 <title>Conkan MyPage</title>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
+[% SET self_li_id = 'mypage' %]
 [% PROCESS 'tthead.tt' %]
 <div class="container">
 [%- IF addroot %]
@@ -31,8 +32,16 @@
         </div>
     [%- END -%]
   </div>
+[%- ELSE -%]
+  <div class="well">
+    [%- IF acname == 'admin' %]
+      <H2>既に管理者登録済です。</H2>
+      登録済の管理者でloginしなおしてください。
+    [%- ELSE %]
+    [% END %]
+  </div>
 [% END %]
 </div>
-[% PROCESS 'tttail.tt' self_li_id = 'mypage' %]
+[% PROCESS 'tttail.tt' %]
 </body>
 </html>

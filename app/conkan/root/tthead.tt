@@ -1,3 +1,15 @@
+[%- # TT制御パラメータの設定;
+SET acname = c.user.get('name');
+IF! acname;
+  SET acname = 'admin';
+END;
+SET addroot = 0;
+IF c.session.init_role == 'addroot';
+  SET addroot = 1;
+END;
+DEFAULT self_li_id = 'mypage';
+SET cuRole = c.user.get('role') -%]
+
 <body style="padding-top:200px;">
 <div class="navbar navbar-default navbar-fixed-top">
   <div class="container-fluid">
@@ -5,28 +17,22 @@
       <h1>コンベンション管理システム Conkan</h1>
       <p class="lead">汎用コンベンション運営管理システム</p>
     </header>
-    [%- SET acname = c.user.get('name') -%]
-    [%- IF! acname -%]
-      [%- SET acname = 'admin' -%]
-    [%- END -%]
     <div class="navbar-header">
-      <a class="navbar-brand" href="#">[% acname %]</a>
+      <a class="navbar-brand" href="#">[% acname | html %]</a>
     </div>
     <div class="navbar-collapse" id="navbar-collapse">
       <ul class="nav nav-tabs">
         <li id="mypage"><a href="/mypage">MyPage</a></li>
-        [%- SET addroot = 0 -%]
-        [%- IF c.session.init_role == 'addroot' -%]
-          [%- SET addroot = 1 -%]
-        [%- END -%]
-        [%- IF! addroot == 1 -%]
-          <li id="program_list"><a href="/program/list">企画管理</a></li>
-          <li id="program_progress"><a href="/program/progress">進捗報告</a></li>
-          <li id="mypage_profile"><a href="/mypage/profile">プロファイル設定</a></li>
-          [%- IF c.user.get('role') == 'ROOT' -%]
-            <li id="config_staff"><a href="/config/staff">スタッフ管理</a></li>
-            <li id="config_room"><a href="/config/room">企画部屋管理</a></li>
-            <li id="config_equip"><a href="/config/equip">機材管理</a></li>
+        [%- IF addroot != 1 -%]
+          [%- IF acname != 'admin' %]
+            <li id="program_list"><a href="/program/list">企画管理</a></li>
+            <li id="program_progress"><a href="/program/progress">進捗報告</a></li>
+            <li id="mypage_profile"><a href="/mypage/profile">プロファイル設定</a></li>
+            [%- IF cuRole == 'ROOT' %]
+              <li id="config_staff"><a href="/config/staff">スタッフ管理</a></li>
+              <li id="config_room"><a href="/config/room">企画部屋管理</a></li>
+              <li id="config_equip"><a href="/config/equip">機材管理</a></li>
+            [%- END -%]
           [%- END -%]
           <li class="pull-right"><a href="/logout" class="btn btn-info">logout</a></li>
         [%- ELSE -%]
