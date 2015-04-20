@@ -85,6 +85,7 @@ sub profile :Local {
         }
     }
     else {  # 新規登録
+        $c->stash->{'addstaff'} = 1;
         my $cyid = $c->flash->{'cyid'} || $param->{'cyid'};
         if ( $c->request->method eq 'GET' ) {
             # 登録表示

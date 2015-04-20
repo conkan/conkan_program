@@ -32,9 +32,12 @@ RUN yum install -y nginx
 
 # mysql-client
 RUN yum -y install mysql mysql-devel
-#
+
 # gcc
 RUN yum -y install gcc patch
+
+# XML:Feedインストールのためのライブラリ
+RUN yum -y install expat-devel libxml2-devel
 
 # Starman
 RUN cpanm -i Starman
@@ -63,20 +66,17 @@ RUN cpanm -i Catalyst::Devel
 RUN cpanm -i Catalyst::Engine::Apache
 RUN cpanm -i Catalyst::View::TT
 RUN cpanm -i Catalyst::View::TT::ForceUTF8
-RUN cpanm -i Catalyst::View::JSON
 RUN cpanm -i Catalyst::Model::DBI
 RUN cpanm -i Catalyst::Model::DBIC::Schema
-RUN cpanm -i Catalyst::Model::Adaptor
 RUN cpanm -i Catalyst::Helper::Model::Email
 RUN cpanm -i Catalyst::Plugin::Session::FastMmap
 RUN cpanm -i Catalyst::Plugin::Session::Store::FastMmap
+# 独自拡張版を使用するが、オリジナルも入れておかないと依存モジュールが入らない
 RUN cpanm -i Catalyst::Authentication::Credential::OAuth
-RUN cpanm -i Catalyst::Plugin::FillInForm
 RUN cpanm -i DBIx::Class::Schema::Loader
 RUN cpanm -i MooseX::NonMoose
 RUN cpanm -i LWP::Protocol::https
 RUN cpanm -i Term::Size::Any
-RUN yum -y install expat-devel libxml2-devel
 RUN cpanm -i XML::LibXML XML::RSS XML::Atom XML::Feed
 
 # cpanm work削除

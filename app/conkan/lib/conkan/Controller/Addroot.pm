@@ -129,10 +129,11 @@ sub cybozu :Local {
         });
 
         # ユーザ情報を元に、プロファイル設定画面へリダイレクト
-        $c->flash->{name} = $grfeed->author->name;
-        $c->flash->{ma}   = $grfeed->author->email;
-        $c->flash->{cyid} = $grfeed->author->uri;
-        $c->flash->{role} = 'ROOT';
+        $c->flash->{name}    = $grfeed->author->name;
+        $c->flash->{account} = $grfeed->author->email;
+        $c->flash->{ma}      = $grfeed->author->email;
+        $c->flash->{cyid}    = $grfeed->author->uri;
+        $c->flash->{role}    = 'ROOT';
 
         $c->response->redirect('/mypage/profile');
     }

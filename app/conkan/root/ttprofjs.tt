@@ -1,0 +1,34 @@
+<script>
+  // 役割 選択リスト アクティベイト, 有効なdivを表示
+  $(document).ready(function() {
+    $('#[%- rs.role | html -%]').prop('selected', true);
+    $('#[%- state | html -%]').show();
+    if ( '[% cuRole -%]' != 'ROOT' && ![% addroot %]) {
+      $('#account').prop('readonly', 'readonly');
+      $('#role').prop('readonly', 'readonly');
+    }
+  } );
+  // バリデーション
+  $('#dobtn').click(function(){
+    if (!$('#account').val()) {
+        $('#valerr').text('アカウントは必須です');
+        return false;
+    }
+    if ( $('#passwd').val() ) {
+        if ( $('#passwd').val() != $('#passwd2').val() ) {
+            $('#valerr').text('パスワードとパスワード(確認)が一致しません');
+            return false;
+        }
+    }
+    [%- IF addstaff %]
+    else {
+        $('#valerr').text('パスワードは必須です');
+        return false;
+    }
+    [% END -%]
+  } );
+  // キャンセル(管理者による更新の場合のみ)
+  $('#cancel').click(function(){
+  } );
+</script>
+

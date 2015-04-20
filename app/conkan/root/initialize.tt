@@ -18,43 +18,40 @@
     <FORM method="POST" action="/initialprocess">
       <div>
         <label>adminパスワード</label><br/>
-        <input type="password" name="adpw" class="input-small" placeholder="Password">
-        <span class="help-inline">緊急用アカウントのパスワード</span>
+        <input type="password" name="adpw" class="col-md-3 input-small" placeholder="Password">
+        <span class="col-md-4 help-inline"> 緊急用アカウントのパスワード</span>
+      </div>
+      <HR/>
+      <label>DB接続情報</label><br/>
+      <div class="row">
+        <label class="col-md-2 text-right">DBサーバ</label>
+        <input type="text" name="dbsv" class="col-md-3" placeholder="FQDN or IP Addr">
+        <span class="col-md-4 help-inline"> DBサーバのFQDNまたはIPアドレス</span>
+      </div>
+      <div class="row">
+        <label class="col-md-2 text-right">DB名</label>
+        <input type="text" name="dbnm" class="col-md-3" placeholder="DatabaseName">
+        <span class="col-md-4 help-inline"> 作成したDB名</span>
+      </div>
+      <div class="row">
+        <label class="col-md-2 text-right">DBユーザ</label>
+        <input type="text" name="dbus" class="col-md-3" placeholder="user">
+        <span class="col-md-4 help-inline"> DB管理ユーザ名</span>
+      </div>
+      <div class="row">
+        <label class="col-md-2 text-right">DBパスワード</label>
+        <input type="password" name="dbpw" class="col-md-3" placeholder="Password">
+        <span class="col-md-4 help-inline"> DB管理ユーザのパスワード</span>
+      </div>
+      <HR/>
+      <label>スタッフ登録方法</label><br/>
+      <div class="row">
+        <select class="col-md-3" name="addroot" id="addroot">
+          <option value="plain">個別入力</option>
+          <option value="cybozu" selected>CybouzuLive情報流用</option>
+        </select>
       </div>
       <BR/>
-      <label>DB接続情報</label><br/>
-      <table border="0">
-        <TR><TH>DBサーバ</TH>
-          <TD>
-            <input type="text" name="dbsv" class="span4" placeholder="FQDN or IP Addr">
-            <span class="help-inline">DBサーバのFQDNまたはIPアドレス</span>
-          </TD>
-        </TR>
-        <TR><TH>DB名</TH>
-          <TD>
-            <input type="text" name="dbnm" class="span4" placeholder="DatabaseName">
-            <span class="help-inline">作成したDB名</span>
-          </TD>
-        </TR>
-        <TR><TH>DBユーザ</TH>
-          <TD>
-            <input type="text" name="dbus" class="span4" placeholder="user">
-            <span class="help-inline">DB管理ユーザ名</span>
-          </TD>
-        </TR>
-        <TR><TH>DBパスワード</TH>
-          <TD>
-            <input type="password" name="dbpw" class="span4" placeholder="Password">
-            <span class="help-inline">DB管理ユーザのパスワード</span>
-          </TD>
-        </TR>
-      </table>
-      <BR/>
-      <label>スタッフ登録方法</label>
-      <select class="span6" name="addroot" id="addroot">
-        <option value="plain">個別入力</option>
-        <option value="cybozu" selected>CybouzuLive情報流用</option>
-      </select>
       <div class="well">
         <div id="addroot_plain" style="display:none;">
           個々にスタッフを登録します。<BR/>
@@ -65,25 +62,21 @@
           CybouzeLiveの特定のグループに参加しているユーザ情報を流用します。<BR/>
           新たに登録したスタッフへの連絡は、CybouzeLiveのチャットを使用します。<BR/>
           <br/>
-          <table border="0">
-            <TR><TH>コンシュマートークンキー</TH>
-              <TD>
-                <input type="text" name="oakey" class="span10" placeholder="consumer_key">
-                <span class="help-inline">CybouzuLiveが発行したConsumerKey</span>
-              </TD>
-            </TR>
-            <TR><TH>コンシュマーシークレット</TH>
-              <TD>
-                <input type="text" name="oasec" class="span10" placeholder="consumer_secret">
-                <span class="help-inline">CybouzuLiveが発行したConsumerSecret</span>
-              </TD>
-            </TR>
-            <TR><TH>グループ名</TH>
-              <TD>
-                <input type="text" name="cygr" class="span10" placeholder="Group Name">
-                <span class="help-inline">参照するCybouzuLiveのグループ名</span>
-              </TD>
-          </table>
+          <div class="row">
+            <label class="col-md-3 text-right">コンシュマートークンキー</label>
+            <input type="text" name="oakey" class="col-md-5" placeholder="consumer_key">
+            <span class="col-md-4 help-inline"> CybouzuLiveが発行したConsumerKey</span>
+          </div>
+          <div class="row">
+            <label class="col-md-3 text-right">コンシュマーシークレット</label>
+            <input type="text" name="oasec" class="col-md-5" placeholder="consumer_secret">
+            <span class="col-md-4 help-inline"> CybouzuLiveが発行したConsumerSecret</span>
+          </div>
+          <div class="row">
+            <label class="col-md-3 text-right">グループ名</label>
+            <input type="text" name="cygr" class="col-md-5" placeholder="Group Name">
+            <span class="col-md-4 help-inline"> 参照するCybouzuLiveのグループ名</span>
+          </div>
         </div>
       </div>
       <BR/>

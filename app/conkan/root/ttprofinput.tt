@@ -1,0 +1,80 @@
+<div style="COLOR:Red;" id="valerr"></div>
+<FORM method="POST" action="/mypage/profile">
+  <input type="hidden" name="staffid", value="[% rs.staffid | html %]"/>
+  <input type="hidden" name="cyid", value="[% rs.cyid | html %]"/>
+  <div class="row">
+    <label class="col-md-2 text-right">名前</label>
+    <input type="text" name="name" id="name" class="col-md-3" value="[% rs.name | html %]"/>
+  </div>
+  <div class="row">
+    <label class="col-md-2 text-right">アカウント</label>
+    <input type="text" name="account" id="account" class="col-md-3" value="[% rs.account |html %]"/>
+  </div>
+  <div class="row">
+    <label class="col-md-2 text-right">パスワード</label>
+    <input type="password" name="passwd" id="passwd" class="col-md-3">
+  </div>
+  <div class="row">
+    <label class="col-md-2 text-right">パスワード(確認) </label>
+    <input type="password" name="passwd2" id="passwd2" class="col-md-3">
+  </div>
+  <div class="row">
+    <label class="col-md-2 text-right">役割</label>
+        <select class="col-md-2" name="role" id="role">
+          <option id="NORM" value="NORM">企画スタッフ</option>
+          <option id="PG"   value="PG">企画管理スタッフ</option>
+          <option id="ROOT" value="ROOT">システム管理者</option>
+        </select>
+  </div>
+  <div class="row">
+    <label class="col-md-2 text-right">メールアドレス</label>
+    <input type="text" name="ma" id="ma" class="col-md-3" value="[% rs.ma | html %]"/>
+  </div>
+  <div class="row">
+    <label class="col-md-2 text-right">電話番号</label>
+    <input type="text" name="telno" id="telno" class="col-md-3" value="[% rs.telno | html %]"/>
+  </div>
+  <div class="row">
+    <label class="col-md-2 text-right">米魂番号</label>
+    <input type="text" name="regno" id="regno" class="col-md-3" value="[% rs.regno | html %]"/>
+  </div>
+  <div class="row">
+    <label class="col-md-2 text-right">担当名</label>
+    <input type="text" name="tname" id="tname" class="col-md-3" value="[% rs.tname | html %]"/>
+  </div>
+  <div class="row">
+    <label class="col-md-2 text-right">担当名ふりがな</label>
+    <input type="text" name="tnamef" id="tnamef" class="col-md-3" value="[% rs.tnamef | html %]"/>
+  </div>
+  <div class="row">
+    <label class="col-md-2 text-right">別名</label>
+    <input type="text" name="oname" id="oname" class="col-md-3" value="[% rs.oname | html %]"/>
+  </div>
+  <div class="row">
+    <label class="col-md-2 text-right">別名ふりがな</label>
+    <input type="text" name="onamef" id="onamef" class="col-md-3" value="[% rs.onamef |html %]"/>
+  </div>
+  <div class="row">
+    <label class="col-md-2 text-right">備考</label>
+    <textarea name="comment" id="comment" class="col-md-8" rows="3">[% rs.comment | html %]
+    </textarea>
+  </div>
+  <BR/>
+  <div class="row">
+    <button type="submit" class="col-md-3 text-center btn btn-primary btn-large" id="dobtn">
+      [%- IF addstaff %]
+      登録
+      [%- ELSE %]
+      更新
+      [% END %]
+    </button>
+    <span class="col-md-1"></span>
+    [%- IF! addroot %]
+      [%- IF rs.staffid == c.user.get('staffid') %]
+        <a class="col-md-3 text-center btn btn-primary btn-large" href="/mypage">マイページに戻る</a>
+      [%- ELSE %]
+        <button id="cancel" class="col-md-3 text-center btn btn-primary btn-large">キャンセル</a>
+      [% END %]
+    [% END %]
+  </div>
+</FORM>
