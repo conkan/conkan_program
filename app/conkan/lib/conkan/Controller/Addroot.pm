@@ -40,6 +40,11 @@ sub index :Path :Args(0) {
 
 sub plain :Local {
     my ( $self, $c ) = @_;
+        
+    # プロファイル設定画面へリダイレクト
+    $c->flash->{role}    = 'ROOT';
+
+    $c->response->redirect('/mypage/profile');
 }
 
 =head2 cybozu
@@ -48,13 +53,14 @@ CybouzuLive情報流用登録
 
 =cut
 
+my $api_fqdn = 'api.cybozulive.com';
+
 sub cybozu :Local {
     my ( $self, $c ) = @_;
 
     $Net::OAuth::PROTOCOL_VERSION = Net::OAuth::PROTOCOL_VERSION_1_0A;
-    my $api_fqdn = 'api.cybozulive.com';
-    my $sysconfM = $c->model('ConkanDB::PgSystemConf');
 
+    my $sysconfM = $c->model('ConkanDB::PgSystemConf');
     my $rs = $sysconfM->find('CybozuToken');
     my $token = [ $rs->pg_conf_value ]->[0] if $rs;
     unless ( $token ) {
@@ -75,25 +81,12 @@ sub cybozu :Local {
             $c->response->redirect('cybozu');
         }
     } else {
-        my $provider = $c->config->{'Plugin::Authentication'}->{'oauth'}
-                            ->{'credential'}->{'providers'}->{$api_fqdn};
-        my $tokensec = [ $sysconfM->find('CybozuSecret')->pg_conf_value ]->[0];
-        my %defaults = (
-            'consumer_key'      => $provider->{consumer_key},
-            'consumer_secret'   => $provider->{consumer_secret},
-            'token'             => $token,
-            'token_secret'      => $tokensec,
-            'timestamp'         => time,
-            'nonce'             => random_string( 'ccccccccccccccccccc' ),
-            'signature_method'  => 'HMAC-SHA1',
-            'oauth_version'     => '1.0a',
-        );
-
         # グループ情報取得
+        my $authprm = $c->forward('/addroot/getprm');
         my $request = Net::OAuth->request( 'protected resource' )->new(
-            %defaults,
+            %{$authprm->{'defaults'}},
             'request_method'    => 'GET',
-            'request_url'   => $provider->{group_info_endpoint},
+            'request_url'   => $authprm->{'provider'}->{'group_info_endpoint'},
         );
         $request->sign;
 
@@ -139,6 +132,42 @@ sub cybozu :Local {
     }
 }
 
+=head2 getprm
+
+CybouzuLive情報取得パラメータ設定
+
+戻り値 $ret->{'provider'} : プロバイダ情報ハッシュリファレンス
+       $ret->{'default'}  : デフォルトパラメータハッシュリファレンス
+       $ret->{'groupid'}  : 参照グループのグループID
+
+=cut
+
+sub getprm :Private {
+    my ( $self, $c ) = @_;
+
+    my $sysconfM = $c->model('ConkanDB::PgSystemConf');
+    my $retprm = {};
+
+    my $token    = [ $sysconfM->find('CybozuToken' )->pg_conf_value ]->[0];
+    my $tokensec = [ $sysconfM->find('CybozuSecret')->pg_conf_value ]->[0];
+    $retprm->{'provider'} =
+         $c->config->{'Plugin::Authentication'}->{'oauth'}
+                        ->{'credential'}->{'providers'}->{$api_fqdn};
+    $retprm->{'defaults'} = {
+        'consumer_key'      => $retprm->{'provider'}->{'consumer_key'},
+        'consumer_secret'   => $retprm->{'provider'}->{'consumer_secret'},
+        'token'             => $token,
+        'token_secret'      => $tokensec,
+        'timestamp'         => time,
+        'nonce'             => random_string( 'ccccccccccccccccccc' ),
+        'signature_method'  => 'HMAC-SHA1',
+        'oauth_version'     => '1.0a',
+    };
+    my $gidrs = $sysconfM->find('CybozuGID');
+    $retprm->{'groupid'} = [ $gidrs->pg_conf_value ]->[0] if ( $gidrs );
+
+    return $retprm;
+}
 =encoding utf8
 
 =head1 AUTHOR

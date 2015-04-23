@@ -59,7 +59,9 @@ sub auto :Private {
     }
     # 強制login処理
     unless ( $c->user_exists ) {
+        $c->log->debug('>>>> 強制login' );
         $c->visit( '/login' );
+        return 0;
     }
     return 1;
 }
@@ -138,10 +140,12 @@ sub login :Local {
             else {
                 $c->session->{init_role} = undef;
             }
-            $c->response->redirect( '/mypage' );
-        } else {
-            $c->stash->{errmsg} = '認証失敗 再度loginしてください';
+            unless ( $c->user->get('rmdata') ) {
+                $c->response->redirect( '/mypage' );
+                return;
+            }
         }
+        $c->stash->{errmsg} = '認証失敗 再度loginしてください';
     }
     else {
         $c->error('Fatal access at '. scalar localtime );

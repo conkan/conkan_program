@@ -38,7 +38,7 @@ https://developer.cybozulive.com にて登録
 アプリケーション名 | 任意の値
 アプリケーションの種類 | ウェブブラウザ
 コールバックURL | https://<conkanトップURL>/addroot/cybozu
-アクセスレベル | レベルA
+アクセスレベル | レベルB
 
 登録すると、ConsumerKey と ConsumerSecret が表示される。
 

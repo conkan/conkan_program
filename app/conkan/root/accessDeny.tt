@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="conkan yet initialized">
+<meta name="author" content="Studio REM">
+<title>412 Access Deny</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container">
+  <H1>412 Access Deny</H1>
+  アクセスする権限がありません
+</div>
+</body>
+</html>
