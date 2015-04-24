@@ -1,7 +1,9 @@
 <div style="COLOR:Red;" id="valerr"></div>
 <FORM method="POST" action="/mypage/profile">
-  <input type="hidden" name="staffid", value="[% rs.staffid | html %]"/>
-  <input type="hidden" name="cyid", value="[% rs.cyid | html %]"/>
+  <input type="hidden" name="staffid", value="[% rs.staffid %]"/>
+  <input type="hidden" name="cyid", value="[% rs.cyid %]"/>
+  <input type="hidden" name="CybozuToken",  value="[% rs.CybozuToken  %]"/>
+  <input type="hidden" name="CybozuSecret", value="[% rs.CybozuSecret %]"/>
   <div class="row">
     <label class="col-md-2 text-right">名前</label>
     <input type="text" name="name" id="name" class="col-md-3" value="[% rs.name | html %]"/>
@@ -20,11 +22,21 @@
   </div>
   <div class="row">
     <label class="col-md-2 text-right">役割</label>
-        <select class="col-md-2" name="role" id="role">
-          <option id="NORM" value="NORM">企画スタッフ</option>
-          <option id="PG"   value="PG">企画管理スタッフ</option>
-          <option id="ROOT" value="ROOT">システム管理者</option>
-        </select>
+    [% IF cuRole == 'ROOT' %]
+      <select class="col-md-3" name="role" id="role">
+        <option id="NORM" value="NORM">企画スタッフ</option>
+        <option id="PG"   value="PG">企画管理スタッフ</option>
+        <option id="ROOT" value="ROOT">システム管理者</option>
+      </select>
+    [% ELSE %]
+      <input type=text class="col-md-3" name="role" value="
+      [%- SWITCH rs.role -%]
+        [%- CASE 'NORM' -%] 企画スタッフ
+        [%- CASE 'PG'   -%] 企画管理スタッフ
+        [%- CASE 'ROOT' -%] システム管理者
+      [%- END -%]
+      " readonly="readonly">
+    [% END %]
   </div>
   <div class="row">
     <label class="col-md-2 text-right">メールアドレス</label>
@@ -47,14 +59,6 @@
     <input type="text" name="tnamef" id="tnamef" class="col-md-3" value="[% rs.tnamef | html %]"/>
   </div>
   <div class="row">
-    <label class="col-md-2 text-right">別名</label>
-    <input type="text" name="oname" id="oname" class="col-md-3" value="[% rs.oname | html %]"/>
-  </div>
-  <div class="row">
-    <label class="col-md-2 text-right">別名ふりがな</label>
-    <input type="text" name="onamef" id="onamef" class="col-md-3" value="[% rs.onamef |html %]"/>
-  </div>
-  <div class="row">
     <label class="col-md-2 text-right">備考</label>
     <textarea name="comment" id="comment" class="col-md-8" rows="3">[% rs.comment | html %]
     </textarea>
@@ -69,7 +73,7 @@
       [% END %]
     </button>
     <span class="col-md-1"></span>
-    [%- IF! addroot %]
+    [%- IF! addstaff %]
       [%- IF rs.staffid == c.user.get('staffid') %]
         <a class="col-md-3 text-center btn btn-primary btn-large" href="/mypage">マイページに戻る</a>
       [%- ELSE %]

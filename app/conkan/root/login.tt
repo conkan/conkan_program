@@ -17,28 +17,32 @@
   <!-- パスワードlogin -->
   <div class="well" id="passwd">
     <FORM method="POST" action="/login">
-      <label>パスワード認証</label><br/>
-      <input type="hidden" name="realm", value="passwd"></input>
-      <table border="0">
-        <TR><TH>アカウント</TH>
-          <TD>
-            <input type="text" name="account" class="span6" placeholder="account"
-            [%- IF c.session.init_role == 'initial' -%]
-                value="admin" readonly="readonly"
-            [%- END -%]
-            >
-          </TD>
-        </TR>
-        <TR><TH>パスワード</TH>
-          <TD>
-            <input type="password" name="passwd" class="input-small" placeholder="Password">
-          </TD>
-        </TR>
-      </table>
+      <div class="row">
+        <label>パスワード認証</label>
+      </div>
+      <input type="hidden" name="realm", value="passwd"/>
+      <div class="row">
+        <label class="col-md-2 text-right">アカウント</label>
+        <input type="text" name="account" class="col-md-3" placeholder="account"
+        [%- IF c.session.init_role == 'initial' -%]
+          value="admin" readonly="readonly"
+        [%- END -%]
+        >
+      </div>
+      <div class="row">
+        <label class="col-md-2 text-right">パスワード</label>
+        <input type="password" name="passwd" class="input-small col-md-3" placeholder="Password"/>
+      </div>
       <BR/>
-      <button type="submit" class="btn btn-primary btn-large">
-        パスワード認証実施
-      </button>
+      <div class="row">
+        <button type="submit" class="btn btn-primary btn-large col-md-3">
+          パスワード認証実施
+        </button>
+        [%- IF canaddstaff %]
+          <span class="col-md-1"></span>
+          <a class="col-md-3 text-center btn btn-primary btn-large" href="/addstaff">スタッフ登録</a>
+        [% END %]
+      </div>
     </FORM>
   </div>
   <div style="COLOR:Red;">[% errmsg | html %]</div>

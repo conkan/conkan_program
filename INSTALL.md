@@ -37,8 +37,8 @@ https://developer.cybozulive.com にて登録
 ----------------------- | ---------------------------
 アプリケーション名 | 任意の値
 アプリケーションの種類 | ウェブブラウザ
-コールバックURL | https://<conkanトップURL>/addroot/cybozu
-アクセスレベル | レベルB
+コールバックURL | https://<conkanトップURL>/addstaff/cybozu
+アクセスレベル | レベルA
 
 登録すると、ConsumerKey と ConsumerSecret が表示される。
 
@@ -64,6 +64,7 @@ DBユーザ | データベース設定で使用した 管理ユーザ名
 DBパスワード | データベース設定で使用した パスワード
 コンシュマートークンキー | CybozuLiveアプリケーション登録 で取得した ConsumerKey
 コンシュマーシークレット | CybozuLiveアプリケーション登録 で取得した ConsumerSecret
+グループ | 登録可否を判断するCybozuLiveグループ名
 
 1. adminとして再login
 

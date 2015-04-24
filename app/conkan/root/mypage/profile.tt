@@ -12,7 +12,7 @@
 [%- SET self_li_id = 'mypage_profile' -%]
 [%- PROCESS 'tthead.tt' -%]
 [%- DEFAULT state = 'inputform' -%]
-[%- IF addroot && state == 'success';
+[%- IF addstaff && state == 'success';
     SET state = 'initadd';
 END -%]
 <div class="container">
@@ -21,7 +21,7 @@ END -%]
   </div>
   <div class="well" id="success" style="display:none;">
     <H1>
-      [%- IF addstaff -%]
+      [%- IF addroot || addstaff -%]
       登録
       [%- ELSE -%]
       更新
@@ -36,9 +36,14 @@ END -%]
     <a class="btn btn-primary btn-large" href="/mypage">マイページに戻る</a>
   </div>
   <div class="well" id="initadd" style="display:none;">
-    <H1>管理者を登録しました</H1>
-    loginしなおしてください
-    <a class="btn btn-primary btn-large" href="/logout">logout</a>
+    <H1>登録しました</H1>
+    [% IF c.user_exist %]
+      loginしなおしてください
+      <a class="btn btn-primary btn-large" href="/logout">logout</a>
+    [% ELSE %]
+      loginしてください
+      <a class="btn btn-primary btn-large" href="/login">login</a>
+    [% END %]
   </div>
 </div>
 [% PROCESS 'tttail.tt' %]

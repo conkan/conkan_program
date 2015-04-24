@@ -11,7 +11,7 @@ DEFAULT self_li_id = 'mypage';
 SET cuRole = c.user.get('role') -%]
 
 <body style="padding-top:200px;">
-<div class="navbar navbar-default navbar-fixed-top">
+<div class="navbar navbar-default navbar-fixed-top" id="navbar">
   <div class="container-fluid">
     <header class="header">
       <h1>コンベンション管理システム Conkan</h1>
@@ -22,7 +22,9 @@ SET cuRole = c.user.get('role') -%]
     </div>
     <div class="navbar-collapse" id="navbar-collapse">
       <ul class="nav nav-tabs">
-        <li id="mypage"><a href="/mypage">MyPage</a></li>
+        [% IF c.user_exists %]
+          <li id="mypage"><a href="/mypage">MyPage</a></li>
+        [% END %]
         [%- IF addroot != 1 -%]
           [%- IF acname != 'admin' %]
             <li id="program_list"><a href="/program/list/list">企画管理</a></li>
@@ -37,7 +39,7 @@ SET cuRole = c.user.get('role') -%]
           [%- END -%]
           <li class="pull-right"><a href="/logout" class="btn btn-info">logout</a></li>
         [%- ELSE -%]
-          <li id="mypage_profile"><a href="/addroot">システム管理者登録</a></li>
+          <li id="mypage_profile"><a href="/addstaff">システム管理者登録</a></li>
         [%- END %]
       </ul>
     </div>

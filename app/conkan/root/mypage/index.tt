@@ -15,7 +15,7 @@
 [%- IF addroot %]
   <div class="well">
     最初の管理者を登録してください。<BR/>
-    [%- SWITCH c.config.addroot.type -%]
+    [%- SWITCH c.config.addstaff.type -%]
       [%- CASE 'cybozu' -%]
         最初の管理者の登録のためには、CybozeLiveへのloginが必要です。<BR/>
         新規スタッフ登録に関連するCybozeLiveへのアクセスは、<BR/>

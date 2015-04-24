@@ -40,7 +40,7 @@ sub profile :Local {
     my $value = {};
     for my $item qw/name role ma
                     passwd staffid account telno regno
-                    tname tnamef oname onamef comment / {
+                    tname tnamef comment / {
         $value->{$item} = $c->flash->{$item} || $param->{$item};
     }
     my $staffM = $c->model('ConkanDB::PgStaff');
@@ -63,8 +63,10 @@ sub profile :Local {
             } );
             $c->stash->{'rs'} = $rowprof;
             if ( $rowprof->otheruid ) {
-                $c->stash->{'rs'}->{'cyid'}
-                    = decode_json( $rowprof->otheruid )->{'cybozuID'};
+                my $cybozu = decode_json( $rowprof->otheruid );
+                while ( my( $key, $val ) = each( %$cybozu )) {
+                    $c->stash->{'rs'}->{$key} = $val;
+                }
             }
             $c->stash->{'rs'}->{'passwd'} = undef;
         }
@@ -86,15 +88,20 @@ sub profile :Local {
     }
     else {  # 新規登録
         $c->stash->{'addstaff'} = 1;
-        my $cyid = $c->flash->{'cyid'} || $param->{'cyid'};
+        my $cybozu = {};
+        for my $item qw/cyid CybozuToken CybozuSecret/ {
+            $cybozu->{$item} = $c->flash->{$item} || $param->{$item};
+        }
         if ( $c->request->method eq 'GET' ) {
             # 登録表示
-            $value->{'cyid'} = $cyid;
+            while ( my( $key, $val ) = each( %$cybozu ) ) {
+                $value->{$key} = $val;
+            }
             $c->stash->{'rs'} = $value;
         }
         else {
             # 登録実施
-            $value->{'otheruid'} = '{"cybozuID":' . '"' . $cyid . '"}';
+            $value->{'otheruid'} = encode_json( $cybozu );
             $staffM->create( $value );
             $c->stash->{'rs'} = undef;
             $c->stash->{'state'} = 'success';

@@ -28,3 +28,5 @@ $> ./script/conkan_create.pl model ConkanDB DBIC::Schema conkan::Schema create=s
 - Catalyst内部での例外発生時、実際にどこで発生したかを知るには
 $Carp::Verbose =1;
 
+- Catalystが発行するSQLを観るには
+サーバ起動前に環境変数 DBIC_TRACEを1に設定する

@@ -9,15 +9,10 @@
 <title>Conkan StaffList</title>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
-[%- SET self_li_id = 'mypage_profile' -%]
+[%- SET self_li_id = 'config_staff' -%]
 [%- PROCESS 'tthead.tt' -%]
 <div class="container">
   <div class="well" id="stafflist">
-    <div class="row">
-      <div class="col-md-12">
-        <a class="btn btn-small pull-right" href="add">スタッフ追加</a>
-      </div>
-    </div>
     <table class="table table-striped table-bordered table-hover">
       <colgroup>
         <col class="col-md-3">
@@ -36,7 +31,13 @@
         [% FOREACH item = list %]
           <tr>
             <td>[% item.name  | html %]</td>
-            <td>[% item.role  | html %]</td>
+            <td>
+            [%- SWITCH item.role -%]
+              [%- CASE 'NORM' -%] 企画スタッフ
+              [%- CASE 'PG'   -%] 企画管理スタッフ
+              [%- CASE 'ROOT' -%] システム管理者
+            [%- END -%]
+            </td>
             <td>[% item.tname | html %]</td>
             <td><a href="[% item.staffid %]">更新</a></td>
           </tr>

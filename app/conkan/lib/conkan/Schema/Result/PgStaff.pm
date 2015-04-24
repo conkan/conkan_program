@@ -66,7 +66,7 @@ __PACKAGE__->table("pg_staff");
 =head2 role
 
   data_type: 'enum'
-  extra: {list => ["NORM","ROOT","PG"]}
+  extra: {list => ["NORM","ROOT","PG","ADMIN"]}
   is_nullable: 0
 
 =head2 ma
@@ -94,18 +94,6 @@ __PACKAGE__->table("pg_staff");
   size: 64
 
 =head2 tnamef
-
-  data_type: 'varchar'
-  is_nullable: 1
-  size: 64
-
-=head2 oname
-
-  data_type: 'varchar'
-  is_nullable: 1
-  size: 64
-
-=head2 onamef
 
   data_type: 'varchar'
   is_nullable: 1
@@ -153,7 +141,8 @@ __PACKAGE__->add_columns(
   "role",
   {
     data_type => "enum",
-    extra => { list => ["NORM", "ROOT", "PG"] },
+    extra => { list => ["NORM", "ROOT", "PG", "ADMIN"] },
+    extra => { list => ["NORM", "ROOT", "PG", "ADMIN"] },
     is_nullable => 0,
   },
   "ma",
@@ -165,10 +154,6 @@ __PACKAGE__->add_columns(
   "tname",
   { data_type => "varchar", is_nullable => 1, size => 64 },
   "tnamef",
-  { data_type => "varchar", is_nullable => 1, size => 64 },
-  "oname",
-  { data_type => "varchar", is_nullable => 1, size => 64 },
-  "onamef",
   { data_type => "varchar", is_nullable => 1, size => 64 },
   "comment",
   { data_type => "text", is_nullable => 1 },
@@ -243,8 +228,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-18 12:18:22
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:MO8/yQu78B243frlm+wtQQ
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-24 17:45:09
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:N4CqGz4NIEYCEoqWajlM9w
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

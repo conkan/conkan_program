@@ -14,4 +14,8 @@
   $(document).ready(function() {
     $('#[%- self_li_id | html -%]').addClass('active');
   });
+  // ナビのリサイズでBody開始位置を変える
+  $(window).resize(function() {
+    $(document.body).css('padding-top', $('#navbar').height()+30 );
+  });
 </script>

@@ -20,7 +20,7 @@
             return false;
         }
     }
-    [%- IF addstaff %]
+    [%- IF addroot || addstaff %]
     else {
         $('#valerr').text('パスワードは必須です');
         return false;

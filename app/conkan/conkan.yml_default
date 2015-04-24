@@ -21,9 +21,6 @@ Plugin::Authentication:
           request_token_endpoint: https://api.cybozulive.com/oauth/initiate
           user_auth_endpoint: https://api.cybozulive.com/oauth/authorize
           group_info_endpoint: https://api.cybozulive.com/api/group/V2
-          gw_memberList_endpoint: https://api.cybozulive.com/api/gwMemberList/V2
-          mp_chatpush_endpoint: https://api.cybozulive.com/api/comet/mpChatPush/V2
-          mp_chat_endpoint: https://api.cybozulive.com/api/comet/mpChat/V2
     store:
       class: +Catalyst::Authentication::Store::Null
     use_session: 1
@@ -42,7 +39,7 @@ Plugin::Authentication:
       user_model: conkanDB::PgStaff
     use_session: 1
   use_session: 1
-addroot:
+addstaff:
   group: 
   type: 
 name: conkan

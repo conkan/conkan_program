@@ -53,8 +53,32 @@ sub auto :Private {
         $c->detach( '/yetinit' );
         return 0;
     }
+    else {
+        # DBスキーマアップデート
+        my $coninfo = $c->config->{'Model::ConkanDB'}->{connect_info};
+        my $schema = conkan::Schema->connect(
+            $coninfo->{'dsn'}, $coninfo->{'user'}, $coninfo->{'password'},
+            {
+                RaiseError        => 1,
+                mysql_enable_utf8 => $coninfo->{'mysql_enable_utf8'},
+                on_connect_do     => $coninfo->{'on_connect_do'},
+            }
+        );
+        if (!$schema->get_db_version()) {
+            $schema->deploy( { add_drop_table => 1, } );
+            $c->log->debug('>>> DB Update : deploy');
+        } else {
+            $schema->upgrade();
+            $c->log->debug('>>> DB Update : upgrade ['
+                             . $schema->get_db_version() . ']');
+        }
+    }
     # login->login ループ回避
     if ( $c->action->reverse eq 'login' ) {
+        return 1;
+    }
+    # addstaffはlogin不要
+    if ( $c->action->reverse =~ /^addstaff/ ) {
         return 1;
     }
     # 強制login処理
@@ -127,13 +151,16 @@ sub login :Local {
                     $c->request->body_params->{init_role};
     $c->delete_session('login');
     $c->session->{init_role} = $init_role;
+    my @r = $c->model('ConkanDB::PgStaff')->search({account=>{'!='=>'admin'}});
+    if ( scalar @r ) {
+        $c->stash->{'canaddstaff'} = 1;
+    }
     if ( !$realm ) {
         return;
     }
     elsif ( $realm eq 'passwd' ) {
         if ( $c->authenticate( { account => $account, passwd => $passwd },
                                $realm ) ) {
-            my @r = $c->model('ConkanDB::PgStaff')->search({account=>{'!='=>'admin'}});
             unless ( scalar @r ) {
                 $c->session->{init_role} = 'addroot';
             }
@@ -203,7 +230,7 @@ sub initialprocess :Local {
     my $dbsv = $c->request->body_params->{dbsv};
     my $dbus = $c->request->body_params->{dbus};
     my $dbpw = $c->request->body_params->{dbpw};
-    my $adrt = $c->request->body_params->{addroot};
+    my $adrt = $c->request->body_params->{addstaff};
     my $oakey= $c->request->body_params->{oakey};
     my $oasec= $c->request->body_params->{oasec};
     my $cygr = $c->request->body_params->{cygr};
@@ -260,7 +287,13 @@ sub _doInitialProc :Private {
                 on_connect_do => ["SET NAMES utf8"],
             }
         );
-        $schema->deploy( { add_drop_table => 1, } );
+        if (!$schema->get_db_version()) {
+            $schema->deploy( { add_drop_table => 1, } );
+            $c->log->debug('>>> Initial : deploy');
+        } else {
+            $schema->upgrade( { add_drop_table => 1, } );
+            $c->log->debug('>>> Initial : upgrade');
+        }
 
         # 規定値一括登録
         $dbh->do( 'SET NAMES utf8' );
@@ -281,7 +314,7 @@ sub _doInitialProc :Private {
             'name'      => 'admin',
             'account'   => 'admin',
             'passwd'    => crypt( $adpw, random_string( 'cccc' ) ),
-            'role'      => 'ROOT',
+            'role'      => 'ADMIN',
         });
         $dbh->disconnect;
 
@@ -301,7 +334,7 @@ sub _doInitialProc :Private {
         my $conkan_yml = {
             'name' => 'conkan',
             'inited' => 1,
-            'addroot' => {
+            'addstaff' => {
                 'type' => $adrt,
             },
             'Model::ConkanDB' => $c->config->{'Model::ConkanDB'},
@@ -312,7 +345,7 @@ sub _doInitialProc :Private {
         $ymlwk->{'user'} = $dbus;
         $ymlwk->{'password'} = $dbpw;
         if ( $adrt eq 'cybozu' ) {
-            $conkan_yml->{'addroot'}->{'group'} = $cygr;
+            $conkan_yml->{'addstaff'}->{'group'} = $cygr;
             $ymlwk = $conkan_yml->{'Plugin::Authentication'}->{'oauth'}
                     ->{'credential'}->{'providers'}->{'api.cybozulive.com'};
             $ymlwk->{'consumer_key'} = $oakey;

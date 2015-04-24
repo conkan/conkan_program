@@ -1,4 +1,4 @@
-package conkan::Controller::Addroot;
+package conkan::Controller::Addstaff;
 use Moose;
 use Net::OAuth;
 use HTTP::Request::Common;
@@ -11,11 +11,11 @@ BEGIN { extends 'Catalyst::Controller'; }
 
 =head1 NAME
 
-conkan::Controller::Addroot - Catalyst Controller
+conkan::Controller::Addstaff - Catalyst Controller
 
 =head1 DESCRIPTION
 
-最初の管理者登録
+スタッフ登録
 
 =head1 METHODS
 
@@ -29,7 +29,7 @@ sub index :Path :Args(0) {
     my ( $self, $c ) = @_;
 
     # 初期設定で選択したスタッフ登録方法に従ってジャンプ
-    $c->response->redirect( 'addroot/' . $c->config->{'addroot'}->{'type'} );
+    $c->response->redirect( 'addstaff/' . $c->config->{'addstaff'}->{'type'} );
 }
 
 =head2 plain
@@ -42,7 +42,9 @@ sub plain :Local {
     my ( $self, $c ) = @_;
         
     # プロファイル設定画面へリダイレクト
-    $c->flash->{role}    = 'ROOT';
+    $c->flash->{role}    = $c->session->{'init_role'} eq 'addroot'
+                                 ? 'ROOT'
+                                 : 'NORM';
 
     $c->response->redirect('/mypage/profile');
 }
@@ -60,29 +62,19 @@ sub cybozu :Local {
 
     $Net::OAuth::PROTOCOL_VERSION = Net::OAuth::PROTOCOL_VERSION_1_0A;
 
-    my $sysconfM = $c->model('ConkanDB::PgSystemConf');
-    my $rs = $sysconfM->find('CybozuToken');
-    my $token = [ $rs->pg_conf_value ]->[0] if $rs;
+    my $token = $c->flash->{'CybozuToken'};
     unless ( $token ) {
         # サイボウズOAuth認証開始
         my $auth = $c->authenticate( { 'provider' => $api_fqdn }, 'oauth' );
         if ( $auth ) {
-            # access-token,secret登録
-            $sysconfM->update_or_create( {
-                'pg_conf_code'  => 'CybozuToken',
-                'pg_conf_name'  => 'サイボウズライブ Access Token',
-                'pg_conf_value' => $c->user->token,
-            });
-            $sysconfM->update_or_create({
-                'pg_conf_code'  => 'CybozuSecret',
-                'pg_conf_name'  => 'サイボウズライブ Access Token Secret',
-                'pg_conf_value' => $c->user->token_secret,
-            });
+            # access-token,secretをflashで引き渡す
+            $c->flash->{'CybozuToken'}  = $c->user->token;
+            $c->flash->{'CybozuSecret'} = $c->user->token_secret;
             $c->response->redirect('cybozu');
         }
     } else {
         # グループ情報取得
-        my $authprm = $c->forward('/addroot/getprm');
+        my $authprm = $c->forward('/addstaff/getprm');
         my $request = Net::OAuth->request( 'protected resource' )->new(
             %{$authprm->{'defaults'}},
             'request_method'    => 'GET',
@@ -101,9 +93,9 @@ sub cybozu :Local {
         Catalyst::Exception->throw( XML::Feed->errstr )
             unless $grfeed;
 
-        # グループに属していることに確認
+        # グループに属していることを確認
         my $groupid;
-        my $grtitle = $c->config->{'addroot'}->{'group'};
+        my $grtitle = $c->config->{'addstaff'}->{'group'};
         for my $entry ( $grfeed->entries ) {
             if ( $entry->title eq $grtitle ) {
                 $groupid = $entry->id;
@@ -113,20 +105,16 @@ sub cybozu :Local {
         Catalyst::Exception->throw( "412 Precondition Failed\nグループに参加していません" )
             unless $groupid;
 
-        # GroupID登録
-        $groupid =~ s/^.*,//;   # IDのみにtrancate
-        $sysconfM->update_or_create( {
-            'pg_conf_code'  => 'CybozuGID',
-            'pg_conf_name'  => 'サイボウズライブ グループID',
-            'pg_conf_value' => $groupid,
-        });
-
         # ユーザ情報を元に、プロファイル設定画面へリダイレクト
-        $c->flash->{name}    = $grfeed->author->name;
-        $c->flash->{account} = $grfeed->author->email;
-        $c->flash->{ma}      = $grfeed->author->email;
-        $c->flash->{cyid}    = $grfeed->author->uri;
-        $c->flash->{role}    = 'ROOT';
+        $c->flash->{'name'}    = $grfeed->author->name;
+        $c->flash->{'account'} = $grfeed->author->email;
+        $c->flash->{'ma'}      = $grfeed->author->email;
+        $c->flash->{'role'}    = $c->session->{'init_role'} eq 'addroot' 
+                                 ? 'ROOT'
+                                 : 'NORM';
+        $c->flash->{'cyid'}    = $grfeed->author->uri;
+        $c->flash->{'CybozuToken'}  = $c->flash->{'CybozuToken'};
+        $c->flash->{'CybozuSecret'} = $c->flash->{'CybozuSecret'};
 
         $c->response->redirect('/mypage/profile');
     }
@@ -138,18 +126,15 @@ CybouzuLive情報取得パラメータ設定
 
 戻り値 $ret->{'provider'} : プロバイダ情報ハッシュリファレンス
        $ret->{'default'}  : デフォルトパラメータハッシュリファレンス
-       $ret->{'groupid'}  : 参照グループのグループID
 
 =cut
 
 sub getprm :Private {
     my ( $self, $c ) = @_;
 
-    my $sysconfM = $c->model('ConkanDB::PgSystemConf');
     my $retprm = {};
-
-    my $token    = [ $sysconfM->find('CybozuToken' )->pg_conf_value ]->[0];
-    my $tokensec = [ $sysconfM->find('CybozuSecret')->pg_conf_value ]->[0];
+    my $token    = $c->flash->{'CybozuToken'};
+    my $tokensec = $c->flash->{'CybozuSecret'};
     $retprm->{'provider'} =
          $c->config->{'Plugin::Authentication'}->{'oauth'}
                         ->{'credential'}->{'providers'}->{$api_fqdn};
@@ -163,8 +148,6 @@ sub getprm :Private {
         'signature_method'  => 'HMAC-SHA1',
         'oauth_version'     => '1.0a',
     };
-    my $gidrs = $sysconfM->find('CybozuGID');
-    $retprm->{'groupid'} = [ $gidrs->pg_conf_value ]->[0] if ( $gidrs );
 
     return $retprm;
 }
