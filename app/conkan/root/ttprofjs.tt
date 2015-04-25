@@ -5,7 +5,9 @@
     $('#[%- state | html -%]').show();
     if ( '[% cuRole -%]' != 'ROOT' && ![% addroot %]) {
       $('#account').prop('readonly', 'readonly');
+      $('#account').addClass('bg-mute');
       $('#role').prop('readonly', 'readonly');
+      $('#role').addClass('bg-mute');
     }
   } );
   // バリデーション

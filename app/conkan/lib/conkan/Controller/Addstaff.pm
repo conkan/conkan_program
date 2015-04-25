@@ -112,9 +112,12 @@ sub cybozu :Local {
         $c->flash->{'role'}    = $c->session->{'init_role'} eq 'addroot' 
                                  ? 'ROOT'
                                  : 'NORM';
-        $c->flash->{'cyid'}    = $grfeed->author->uri;
-        $c->flash->{'CybozuToken'}  = $c->flash->{'CybozuToken'};
-        $c->flash->{'CybozuSecret'} = $c->flash->{'CybozuSecret'};
+        # flashは同じ名前だと消されてしまうので、別名で引き渡す
+        $c->flash->{'oainfo'}  = {
+            'cyid'          => $grfeed->author->uri,
+            'CybozuToken'   => $c->flash->{'CybozuToken'},
+            'CybozuSecret'  => $c->flash->{'CybozuSecret'},
+        };
 
         $c->response->redirect('/mypage/profile');
     }
@@ -125,6 +128,7 @@ sub cybozu :Local {
 CybouzuLive情報取得パラメータ設定
 
 戻り値 $ret->{'provider'} : プロバイダ情報ハッシュリファレンス
+       $ret->{'oatoken'}  : OAuthアクセス情報
        $ret->{'default'}  : デフォルトパラメータハッシュリファレンス
 
 =cut
@@ -135,6 +139,10 @@ sub getprm :Private {
     my $retprm = {};
     my $token    = $c->flash->{'CybozuToken'};
     my $tokensec = $c->flash->{'CybozuSecret'};
+    $retprm->{'oatoken'} = {
+        'CybozuToken'   => $token,
+        'CybozuSecret'  => $tokensec,
+    };
     $retprm->{'provider'} =
          $c->config->{'Plugin::Authentication'}->{'oauth'}
                         ->{'credential'}->{'providers'}->{$api_fqdn};

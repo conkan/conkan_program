@@ -63,11 +63,15 @@ sub auto :Private {
                 mysql_enable_utf8 => $coninfo->{'mysql_enable_utf8'},
                 on_connect_do     => $coninfo->{'on_connect_do'},
             }
-        );
-        if (!$schema->get_db_version()) {
+        ); 
+        my $newdbv = $schema->schema_version();
+        my $olddbv = $schema->get_db_version();
+
+        if (!$olddbv) {
             $schema->deploy( { add_drop_table => 1, } );
             $c->log->debug('>>> DB Update : deploy');
-        } else {
+        } elsif ( $newdbv != $olddbv ) {
+            $schema->create_ddl_dir( 'MySQL', $newdbv, './sql', $olddbv );
             $schema->upgrade();
             $c->log->debug('>>> DB Update : upgrade ['
                              . $schema->get_db_version() . ']');
@@ -141,7 +145,9 @@ sub login :Local {
     my $realm   = $c->request->body_params->{realm};
     my $userinfo;
 
-    if ( ( $c->session->{role} ne 'initial' ) && ( $c->user_exists ) ) {
+    if ( ( !defined($c->session->{'role'})
+          || ( $c->session->{'role'} ne 'initial' ) )
+       && ( $c->user_exists ) ) {
         return;
     }
     # session->{init_role} は引き継ぐ
@@ -167,11 +173,12 @@ sub login :Local {
             else {
                 $c->session->{init_role} = undef;
             }
-            unless ( $c->user->get('rmdata') ) {
+            unless ( $c->user->get('rmdate') ) {
                 $c->response->redirect( '/mypage' );
                 return;
             }
         }
+        $c->logout;
         $c->stash->{errmsg} = '認証失敗 再度loginしてください';
     }
     else {
@@ -201,7 +208,7 @@ sub initialize :Private {
     my ( $self, $c ) = @_;
     # 初期化セッション開始
     $c->delete_session('initialize');
-    $c->session->{role} = 'initial';
+    $c->session->{'role'} = 'initial';
 }
 
 =head2 initialprocess
@@ -219,7 +226,8 @@ sub initialprocess :Local {
         return;
     }
 
-    if ( $c->session->{role} ne 'initial' ) {
+    if (  !defined($c->session->{'role'})
+       || ( $c->session->{'role'} ne 'initial' ) ) {
         $c->response->status(405);
         $c->response->body( 'Cannot Initialize (Direct Access)' );
         return;
@@ -287,13 +295,11 @@ sub _doInitialProc :Private {
                 on_connect_do => ["SET NAMES utf8"],
             }
         );
-        if (!$schema->get_db_version()) {
-            $schema->deploy( { add_drop_table => 1, } );
-            $c->log->debug('>>> Initial : deploy');
-        } else {
-            $schema->upgrade( { add_drop_table => 1, } );
-            $c->log->debug('>>> Initial : upgrade');
+        if ($schema->get_db_version()) {
+            $dbh->do( 'DROP TABLE dbix_class_schema_versions' );
         }
+        $schema->deploy( { add_drop_table => 1, } );
+        $c->log->debug('>>> Initial : deploy');
 
         # 規定値一括登録
         $dbh->do( 'SET NAMES utf8' );

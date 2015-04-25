@@ -106,9 +106,8 @@ __PACKAGE__->table("pg_staff");
 
 =head2 otheruid
 
-  data_type: 'varchar'
+  data_type: 'text'
   is_nullable: 1
-  size: 64
 
 =head2 updateflg
 
@@ -142,7 +141,6 @@ __PACKAGE__->add_columns(
   {
     data_type => "enum",
     extra => { list => ["NORM", "ROOT", "PG", "ADMIN"] },
-    extra => { list => ["NORM", "ROOT", "PG", "ADMIN"] },
     is_nullable => 0,
   },
   "ma",
@@ -158,7 +156,7 @@ __PACKAGE__->add_columns(
   "comment",
   { data_type => "text", is_nullable => 1 },
   "otheruid",
-  { data_type => "varchar", is_nullable => 1, size => 64 },
+  { data_type => "text", is_nullable => 1 },
   "updateflg",
   { data_type => "varchar", is_nullable => 1, size => 64 },
   "rmdate",
@@ -228,8 +226,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-24 17:45:09
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:N4CqGz4NIEYCEoqWajlM9w
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-25 21:37:17
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:lhhFuCQqo4UN7gqRSNUGzA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

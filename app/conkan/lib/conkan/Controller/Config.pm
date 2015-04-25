@@ -1,13 +1,15 @@
 package conkan::Controller::Config;
 use Moose;
-use Encode;
+use utf8;
 use JSON;
 use Net::OAuth;
 use HTTP::Request::Common;
 use String::Random qw/ random_string /;
 use XML::Feed;
-use Data::Dumper;
+use Try::Tiny;
+use DateTime;
 use namespace::autoclean;
+use Data::Dumper;
 
 BEGIN { extends 'Catalyst::Controller'; }
 
@@ -90,7 +92,7 @@ sub staff_list : Chained('staff_base') : PathPart('list') : Args(0) {
 
 =head2 staff/*
 
-スタッフ管理 staff_show  : スタッフ情報更新のための表示
+スタッフ管理 staff_show  : スタッフ情報更新のための表示起点
 
 =cut
 
@@ -98,8 +100,9 @@ sub staff_show : Chained('staff_base') :PathPart('') :CaptureArgs(1) {
     my ( $self, $c, $staffid ) = @_;
     
     my $rowprof = [ $c->stash->{'RS'}->find($staffid) ]->[0];
+    $c->session->{'updtic'} = time;
     $rowprof->update( { 
-        'updateflg' =>  $c->sessionid
+        'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
     } );
     $c->stash->{'rs'} = $rowprof;
     if ( $rowprof->otheruid ) {
@@ -111,6 +114,16 @@ sub staff_show : Chained('staff_base') :PathPart('') :CaptureArgs(1) {
     $c->stash->{'rs'}->{'passwd'} = undef;
 }
 
+=head2 staff/*
+
+スタッフ管理staff_detail  : スタッフ情報更新表示
+
+=cut
+
+sub staff_detail : Chained('staff_show') : PathPart('') : Args(0) {
+    my ( $self, $c ) = @_;
+}
+
 =head2 staff/*/edit
 
 スタッフ管理staff_edit  : スタッフ情報更新
@@ -120,33 +133,52 @@ sub staff_show : Chained('staff_base') :PathPart('') :CaptureArgs(1) {
 sub staff_edit : Chained('staff_show') : PathPart('edit') : Args(0) {
     my ( $self, $c ) = @_;
 
-    my $staffid = $c->stash->{'rs'}->{'staffid'};
+    my $staffid = $c->stash->{'rs'}->staffid;
     # GETはおそらく直打ちとかなので再度
-    if ( $c->req->method eq 'GET' ) {
+    if ( $c->request->method eq 'GET' ) {
         $c->go->( '/config/staff/' . $staffid );
     }
     else {
         # 更新実施
         my $rowprof = [ $c->stash->{'RS'}->find($staffid) ]->[0];
-        if ( $rowprof->updateflg eq $c->sessionid ) {
+        if ( $rowprof->updateflg eq 
+                +( $c->sessionid . $c->session->{'updtic'}) ) {
             my $value = {};
             for my $item qw/name role ma
                             passwd staffid account telno regno
-                            tname tnamef oname onamef comment / {
+                            tname tnamef comment / {
                 $value->{$item} = $c->request->body_params->{$item};
             }
             $value->{'staffid'}  = $rowprof->staffid;
             $value->{'otheruid'} = $rowprof->otheruid;
-            $value->{'passwd'}   = $rowprof->passwd
-                unless $value->{'passwd'};
-            $rowprof->update( $value ); 
-            $c->stash->{'rs'} = undef;
-            $c->stash->{'state'} = 'success';
+            if ( $value->{'passwd'} ) {
+                $value->{'passwd'} =
+                    crypt( $value->{'passwd'}, random_string( 'cccc' ));
+            }
+            else {
+                $value->{'passwd'}   = $rowprof->passwd
+            }
+            try {
+                $rowprof->update( $value ); 
+                $c->response->body('<FORM><H1>更新しました</H1></FORM>');
+            } catch {
+                my $e = shift;
+                $c->log->error('>>> dbexp : [' . $e . ']');
+                if ( scalar @{ $c->error } ) {
+                    foreach my $err (@{ $c->error }) {
+                        $c->log->error('>>> dbexp : [' . $err . ']');
+                    }
+                    $c->clear_errors();
+                }
+                $c->response->body('<FORM>更新失敗</FORM>');
+            };
         }
         else {
             $c->stash->{'rs'} = undef;
-            $c->stash->{'state'} = 'deny';
+            $c->response->body = '<FORM><H1>更新できませんでした</H1></FORM>';
         }
+        $c->stash->{'rs'} = undef;
+        $c->response->status(200);
     }
 }
 
@@ -158,23 +190,36 @@ sub staff_edit : Chained('staff_show') : PathPart('edit') : Args(0) {
 
 sub staff_del : Chained('staff_show') : PathPart('del') : Args(0) {
     my ( $self, $c ) = @_;
-    my $staffid = $c->stash->{'rs'}->{'staffid'};
+    my $staffid = $c->stash->{'rs'}->staffid;
     # GETはおそらく直打ちとかなので再度
-    if ( $c->req->method eq 'GET' ) {
+    if ( $c->request->method eq 'GET' ) {
         $c->go->( '/config/staff/' . $staffid );
     }
     else {
         # 削除実施
         my $rowprof = [ $c->stash->{'RS'}->find($staffid) ]->[0];
-        if ( $rowprof->updateflg eq $c->sessionid ) {
-            $rowprof->update( { 'rmdate'   => "'NOW()'" } );
-            $c->stash->{'rs'} = undef;
-            $c->stash->{'state'} = 'success';
+        if ( $rowprof->updateflg eq 
+                +( $c->sessionid . $c->session->{'updtic'}) ) {
+            try {
+                $rowprof->update( { 'rmdate'   => DateTime->now() } );
+                $c->response->body('<FORM><H1>削除しました</H1></FORM>');
+            } catch {
+                my $e = shift;
+                $c->log->error('>>> dbexp : [' . $e . ']');
+                if ( scalar @{ $c->error } ) {
+                    foreach my $err (@{ $c->error }) {
+                        $c->log->error('>>> dbexp : [' . $err . ']');
+                    }
+                    $c->clear_errors();
+                }
+                $c->response->body('<FORM>削除失敗</FORM>');
+            };
         }
         else {
-            $c->stash->{'rs'} = undef;
-            $c->stash->{'state'} = 'deny';
+            $c->response->body = '<FORM><H1>削除できませんでした</H1></FORM>';
         }
+        $c->stash->{'rs'} = undef;
+        $c->response->status(200);
     }
 }
 

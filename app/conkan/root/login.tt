@@ -22,25 +22,26 @@
       </div>
       <input type="hidden" name="realm", value="passwd"/>
       <div class="row">
-        <label class="col-md-2 text-right">アカウント</label>
-        <input type="text" name="account" class="col-md-3" placeholder="account"
+        <label class="col-sm-2 text-right">アカウント</label>
+        <input type="text" name="account" class="col-sm-3" placeholder="account"
         [%- IF c.session.init_role == 'initial' -%]
-          value="admin" readonly="readonly"
+          value="admin" readonly="readonly" class="bg-muted"
         [%- END -%]
         >
       </div>
       <div class="row">
-        <label class="col-md-2 text-right">パスワード</label>
-        <input type="password" name="passwd" class="input-small col-md-3" placeholder="Password"/>
+        <label class="col-sm-2 text-right">パスワード</label>
+        <input type="password" name="passwd" class="input-small col-sm-3" placeholder="Password"/>
       </div>
       <BR/>
       <div class="row">
-        <button type="submit" class="btn btn-primary btn-large col-md-3">
+        <span class="col-sm-2"></span>
+        <button type="submit" class="btn btn-primary btn-large col-sm-3">
           パスワード認証実施
         </button>
         [%- IF canaddstaff %]
-          <span class="col-md-1"></span>
-          <a class="col-md-3 text-center btn btn-primary btn-large" href="/addstaff">スタッフ登録</a>
+          <span class="col-sm-5"></span>
+          <a class="col-sm-2 text-center btn" href="/addstaff">スタッフ登録</a>
         [% END %]
       </div>
     </FORM>

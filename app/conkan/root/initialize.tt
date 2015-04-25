@@ -18,35 +18,35 @@
     <FORM method="POST" action="/initialprocess">
       <div>
         <label>adminパスワード</label><br/>
-        <input type="password" name="adpw" class="col-md-3 input-small" placeholder="Password">
-        <span class="col-md-4 help-inline"> 緊急用アカウントのパスワード</span>
+        <input type="password" name="adpw" class="col-sm-3 input-small" placeholder="Password">
+        <span class="col-sm-4 help-inline"> 緊急用アカウントのパスワード</span>
       </div>
       <HR/>
       <label>DB接続情報</label><br/>
       <div class="row">
-        <label class="col-md-2 text-right">DBサーバ</label>
-        <input type="text" name="dbsv" class="col-md-3" placeholder="FQDN or IP Addr">
-        <span class="col-md-4 help-inline"> DBサーバのFQDNまたはIPアドレス</span>
+        <label class="col-sm-2 text-right">DBサーバ</label>
+        <input type="text" name="dbsv" class="col-sm-3" placeholder="FQDN or IP Addr">
+        <span class="col-sm-4 help-inline"> DBサーバのFQDNまたはIPアドレス</span>
       </div>
       <div class="row">
-        <label class="col-md-2 text-right">DB名</label>
-        <input type="text" name="dbnm" class="col-md-3" placeholder="DatabaseName">
-        <span class="col-md-4 help-inline"> 作成したDB名</span>
+        <label class="col-sm-2 text-right">DB名</label>
+        <input type="text" name="dbnm" class="col-sm-3" placeholder="DatabaseName">
+        <span class="col-sm-4 help-inline"> 作成したDB名</span>
       </div>
       <div class="row">
-        <label class="col-md-2 text-right">DBユーザ</label>
-        <input type="text" name="dbus" class="col-md-3" placeholder="user">
-        <span class="col-md-4 help-inline"> DB管理ユーザ名</span>
+        <label class="col-sm-2 text-right">DBユーザ</label>
+        <input type="text" name="dbus" class="col-sm-3" placeholder="user">
+        <span class="col-sm-4 help-inline"> DB管理ユーザ名</span>
       </div>
       <div class="row">
-        <label class="col-md-2 text-right">DBパスワード</label>
-        <input type="password" name="dbpw" class="col-md-3" placeholder="Password">
-        <span class="col-md-4 help-inline"> DB管理ユーザのパスワード</span>
+        <label class="col-sm-2 text-right">DBパスワード</label>
+        <input type="password" name="dbpw" class="col-sm-3" placeholder="Password">
+        <span class="col-sm-4 help-inline"> DB管理ユーザのパスワード</span>
       </div>
       <HR/>
       <label>スタッフ登録方法</label><br/>
       <div class="row">
-        <select class="col-md-3" name="addstaff" id="addstaff">
+        <select class="col-sm-3" name="addstaff" id="addstaff">
           <option value="plain">個別入力</option>
           <option value="cybozu" selected>CybouzuLive情報流用</option>
         </select>
@@ -64,19 +64,19 @@
           (パスワードは登録時にスタッフ自身が設定します)
           <br/>
           <div class="row">
-            <label class="col-md-3 text-right">コンシュマートークンキー</label>
-            <input type="text" name="oakey" class="col-md-5" placeholder="consumer_key">
-            <span class="col-md-4 help-inline"> CybouzuLiveが発行したConsumerKey</span>
+            <label class="col-sm-3 text-right">コンシュマートークンキー</label>
+            <input type="text" name="oakey" class="col-sm-5" placeholder="consumer_key">
+            <span class="col-sm-4 help-inline"> CybouzuLiveが発行したConsumerKey</span>
           </div>
           <div class="row">
-            <label class="col-md-3 text-right">コンシュマーシークレット</label>
-            <input type="text" name="oasec" class="col-md-5" placeholder="consumer_secret">
-            <span class="col-md-4 help-inline"> CybouzuLiveが発行したConsumerSecret</span>
+            <label class="col-sm-3 text-right">コンシュマーシークレット</label>
+            <input type="text" name="oasec" class="col-sm-5" placeholder="consumer_secret">
+            <span class="col-sm-4 help-inline"> CybouzuLiveが発行したConsumerSecret</span>
           </div>
           <div class="row">
-            <label class="col-md-3 text-right">グループ名</label>
-            <input type="text" name="cygr" class="col-md-5" placeholder="Group Name">
-            <span class="col-md-4 help-inline"> 参照するCybouzuLiveのグループ名</span>
+            <label class="col-sm-3 text-right">グループ名</label>
+            <input type="text" name="cygr" class="col-sm-5" placeholder="Group Name">
+            <span class="col-sm-4 help-inline"> 参照するCybouzuLiveのグループ名</span>
           </div>
         </div>
       </div>
