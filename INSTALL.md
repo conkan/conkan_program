@@ -45,6 +45,55 @@ https://developer.cybozulive.com にて登録
 これらの値は、初期化処理時に使用するので控えておくこと。
 また、セキュリティ上これらの値は秘匿すべきである。
 
+conkanインストールと起動
+====
+
+1. 稼働サーバ条件
+
+- dockerのイメージ生成と、コンテナ起動ができる環境であること
+
+以下、稼働サーバを<稼働サーバ>と表記する
+
+1. デプロイ
+
+github https://github.com/conkan/conkan_program のmastarブランチを
+稼働サーバに展開する
+(zipをダウンロードして展開してもよいが、update時の手間を考慮するとcloneしたほうが良い)
+以下、展開したディレクトリを<Dockerホーム>と表記する
+
+1. サーバ証明書の生成
+
+<稼働サーバ>で実施
+
+docker > cd <Dockerホーム>
+docker > ./cert.sh
+
+ここで生成したサーバ証明書は、dockerイメージ生成時に組み込むので、
+先に実施しておくこと
+
+1. dockerイメージの作成
+
+<稼働サーバ>で実施
+
+docker > cd <Dockerホーム>
+docker > ./build.sh
+
+(かなり時間がかかるので注意)
+
+1. dockerコンテナの起動
+
+<稼働サーバ>で実施
+
+docker > cd <Dockerホーム>
+docker > ./run.sh product
+
+引数 product を指定しなかった場合、外部(The Internet)からのconkanへのアクセスポートは
+  HTTP  30080
+  HTTPS 30443
+となるので注意
+
+dockerコンテナの起動により、conkan自体も起動する。
+
 conkan初期化処理
 ====
 

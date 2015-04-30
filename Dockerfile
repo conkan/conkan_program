@@ -84,6 +84,8 @@ RUN rm -rf .cpanm/*
 
 #nginx設定
 ADD doccnf/nginx.conf /etc/nginx/nginx.conf
+ADD doccnf/cert.crt   /etc/nginx/cert.crt
+ADD doccnf/cert.key   /etc/nginx/cert.key
 
 #mysqlクライアント設定
 ADD doccnf/my.cnf /etc/my.cnf

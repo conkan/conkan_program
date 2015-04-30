@@ -65,7 +65,7 @@ sub profile :Local {
                     $c->stash->{'rs'}->{$key} = $val;
                 }
             }
-            $c->stash->{'rs'}->passwd = undef;
+            $c->stash->{'rs'}->{'passwd'} = undef;
         }
         else {
             # 更新実施
