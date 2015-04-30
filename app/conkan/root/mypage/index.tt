@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="conkan initialize">
+<meta name="author" content="Studio REM">
+<title>Conkan MyPage</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+</head>
+[% SET self_li_id = 'mypage' %]
+[% PROCESS 'tthead.tt' %]
+<div class="container">
+[%- IF addroot %]
+  <div class="well">
+    最初の管理者を登録してください。<BR/>
+    [%- SWITCH c.config.addstaff.type -%]
+      [%- CASE 'cybozu' -%]
+        最初の管理者の登録のためには、CybozeLiveへのloginが必要です。<BR/>
+        新規スタッフ登録に関連するCybozeLiveへのアクセスは、<BR/>
+        ここで登録する<B>最初の管理者</B>の権限で実行します。(チャット送信など)
+      [%- CASE 'plain' -%]
+        管理情報は完全にConkan内部に閉じます。<BR/>
+        そのため、スタッフ追加時には初期パスワードを別途通知する必要があります。<br/>
+        (スタッフのメールアドレスを登録すれば、Conkanからメールで通知することは可能ですが、メールの中に初期パスワードが含まれるためセキュリティ上望ましくありません)
+      [%- CASE DEFAULT -%]
+        <div style="COLOR:Red;">
+        初期設定で何か問題が起こったようです。<BR/>
+        管理者または開発者に連絡してください。<BR/>
+        (上記「管理者登録」を選んでもエラーになります)
+        </div>
+    [%- END -%]
+  </div>
+[%- ELSE -%]
+  <div class="well">
+    [%- IF acname == 'admin' %]
+      <H2>既に管理者登録済です。</H2>
+      登録済の管理者でloginしなおしてください。
+    [%- ELSE %]
+    [% END %]
+  </div>
+[% END %]
+</div>
+[% PROCESS 'tttail.tt' %]
+</body>
+</html>

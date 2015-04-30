@@ -21,4 +21,9 @@ nytprof.out
 *.swp
 *.json
 .~*.*#
+*~
+*.mwb.bak
 Thumbs.db
+cybozulive.consumer.sec
+conkan.yml
+doccnf/cert*.*

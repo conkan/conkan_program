@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="conkan initialize">
+<meta name="author" content="Studio REM">
+<title>Conkan login</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container">
+  <H1>conkan loginページ</H1>
+
+  [%- IF! c.user_exists %]
+  <!-- パスワードlogin -->
+  <div class="well" id="passwd">
+    <FORM method="POST" action="/login">
+      <div class="row">
+        <label>パスワード認証</label>
+      </div>
+      <input type="hidden" name="realm", value="passwd"/>
+      <div class="row">
+        <label class="col-sm-2 text-right">アカウント</label>
+        <input type="text" name="account" class="col-sm-3" placeholder="account"
+        [%- IF c.session.init_role == 'initial' -%]
+          value="admin" readonly="readonly" class="bg-muted"
+        [%- END -%]
+        >
+      </div>
+      <div class="row">
+        <label class="col-sm-2 text-right">パスワード</label>
+        <input type="password" name="passwd" class="input-small col-sm-3" placeholder="Password"/>
+      </div>
+      <BR/>
+      <div class="row">
+        <span class="col-sm-2"></span>
+        <button type="submit" class="btn btn-primary btn-large col-sm-3">
+          パスワード認証実施
+        </button>
+        [%- IF canaddstaff %]
+          <span class="col-sm-5"></span>
+          <a class="col-sm-2 text-center btn" href="/addstaff">スタッフ登録</a>
+        [% END %]
+      </div>
+    </FORM>
+  </div>
+  <div style="COLOR:Red;">[% errmsg | html %]</div>
+  [%- ELSE %]
+  <div class="well" id="logout">
+    <FORM method="POST" action="/logout">
+      <label>login済です</label><br/>
+      アカウントを切り替えるには一旦logoutしてください<BR/>
+      <button type="submit" class="btn btn-primary btn-large">
+        logoutする
+      </button>
+    </FORM>
+  </div>
+  [%- END %]
+</div>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+</body>
+</html>

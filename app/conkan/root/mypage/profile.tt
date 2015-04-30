@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="conkan initialize">
+<meta name="author" content="Studio REM">
+<title>Conkan Profile</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+</head>
+[%- SET self_li_id = 'mypage_profile' -%]
+[%- PROCESS 'tthead.tt' -%]
+[%- DEFAULT state = 'inputform' -%]
+[%- IF addstaff && state == 'success';
+    SET state = 'initadd';
+END -%]
+<div class="container">
+  <div class="well" id="inputform" style="display:none;">
+    [% PROCESS 'ttprofinput.tt' %]
+  </div>
+  <div class="well" id="success" style="display:none;">
+    <H1>
+      [%- IF addroot || addstaff -%]
+      登録
+      [%- ELSE -%]
+      更新
+      [%- END -%]
+      しました</H1>
+    <a class="btn btn-primary btn-large" href="/mypage">マイページに戻る</a>
+  </div>
+  <div class="well" id="deny" style="display:none;">
+    <H1>更新できませんでした</H1>
+    更新を始めてから登録するまでの間に、システム管理者が更新しました。
+    改めて実施してください
+    <a class="btn btn-primary btn-large" href="/mypage">マイページに戻る</a>
+  </div>
+  <div class="well" id="initadd" style="display:none;">
+    <H1>登録しました</H1>
+    [% IF addroot %]
+      loginしなおしてください
+      <a class="btn btn-primary btn-large" href="/logout">logout</a>
+    [% ELSE %]
+      loginしてください
+      <a class="btn btn-primary btn-large" href="/login">login</a>
+    [% END %]
+  </div>
+</div>
+[% PROCESS 'tttail.tt' %]
+[% PROCESS 'ttprofjs.tt' %]
+</body>
+</html>
+

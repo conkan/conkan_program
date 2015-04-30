@@ -1,2 +1,3 @@
-※作成中
-https://cacoo.com/diagrams/TGmbHQbJBI4EXMq4
+Mysql Workbenchを使って作成
+(DataBase_ER図.PDF)
+ソースファイルは、conkan.mwb

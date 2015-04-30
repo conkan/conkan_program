@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="conkan initialize">
+<meta name="author" content="Studio REM">
+<title>Conkan Initialize</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container">
+  <H1>conkan初期化ページ</H1>
+
+  <!-- 初期化パラメータ入力ページ -->
+  <div class="well" id="init">
+    <FORM method="POST" action="/initialprocess">
+      <div>
+        <label>adminパスワード</label><br/>
+        <input type="password" name="adpw" class="col-sm-3 input-small" placeholder="Password">
+        <span class="col-sm-4 help-inline"> 緊急用アカウントのパスワード</span>
+      </div>
+      <HR/>
+      <label>DB接続情報</label><br/>
+      <div class="row">
+        <label class="col-sm-2 text-right">DBサーバ</label>
+        <input type="text" name="dbsv" class="col-sm-3" placeholder="FQDN or IP Addr">
+        <span class="col-sm-4 help-inline"> DBサーバのFQDNまたはIPアドレス</span>
+      </div>
+      <div class="row">
+        <label class="col-sm-2 text-right">DB名</label>
+        <input type="text" name="dbnm" class="col-sm-3" placeholder="DatabaseName">
+        <span class="col-sm-4 help-inline"> 作成したDB名</span>
+      </div>
+      <div class="row">
+        <label class="col-sm-2 text-right">DBユーザ</label>
+        <input type="text" name="dbus" class="col-sm-3" placeholder="user">
+        <span class="col-sm-4 help-inline"> DB管理ユーザ名</span>
+      </div>
+      <div class="row">
+        <label class="col-sm-2 text-right">DBパスワード</label>
+        <input type="password" name="dbpw" class="col-sm-3" placeholder="Password">
+        <span class="col-sm-4 help-inline"> DB管理ユーザのパスワード</span>
+      </div>
+      <HR/>
+      <label>スタッフ登録方法</label><br/>
+      <div class="row">
+        <select class="col-sm-3" name="addstaff" id="addstaff">
+          <option value="plain">個別入力</option>
+          <option value="cybozu" selected>CybouzuLive情報流用</option>
+        </select>
+      </div>
+      <BR/>
+      <div class="well">
+        <div id="addstaff_plain" style="display:none;">
+          管理者が、個別にスタッフを登録します。<BR/>
+          新たに登録したスタッフへの連絡は、手作業になります。<BR/>
+          (初期パスワードを通知する必要が有るため、セキュリティに留意してください)
+        </div>
+        <div id="addstaff_cybozu">
+          スタッフ自身が、自分で登録します。<BR/>
+          その際、CybouzeLiveの特定のグループに参加している必要があります。<BR/>
+          (パスワードは登録時にスタッフ自身が設定します)
+          <br/>
+          <div class="row">
+            <label class="col-sm-3 text-right">コンシュマートークンキー</label>
+            <input type="text" name="oakey" class="col-sm-5" placeholder="consumer_key">
+            <span class="col-sm-4 help-inline"> CybouzuLiveが発行したConsumerKey</span>
+          </div>
+          <div class="row">
+            <label class="col-sm-3 text-right">コンシュマーシークレット</label>
+            <input type="text" name="oasec" class="col-sm-5" placeholder="consumer_secret">
+            <span class="col-sm-4 help-inline"> CybouzuLiveが発行したConsumerSecret</span>
+          </div>
+          <div class="row">
+            <label class="col-sm-3 text-right">グループ名</label>
+            <input type="text" name="cygr" class="col-sm-5" placeholder="Group Name">
+            <span class="col-sm-4 help-inline"> 参照するCybouzuLiveのグループ名</span>
+          </div>
+        </div>
+      </div>
+      <BR/>
+      <button type="submit" class="btn btn-primary btn-large" id="initbtn">
+        初期化実行
+      </button>
+    </FORM>
+  </div>
+
+  <!-- 初期化実行中ページ -->
+  <div class="well" style="display:none;" id="do_init">
+    <H1>conkan初期化中...</H1>
+  </div>
+</div>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<script>
+  $('#initbtn').click(function() {
+    $('#init').hide();
+    $('#do_init').show();
+  });
+  $('#addstaff').change(function() {
+    if ( $('#addstaff').val() == 'plain' ) {
+      $('#addstaff_plain').show();
+      $('#addstaff_cybozu').hide();
+    } else {
+      $('#addstaff_plain').hide();
+      $('#addstaff_cybozu').show();
+    }
+  });
+</script>
+</body>
+</html>

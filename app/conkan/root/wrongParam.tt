@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="conkan error page">
+<meta name="author" content="Studio REM">
+<title>Conkan Error</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container">
+  [%- IF wrongtype == 'connect' %]
+  <H1>データベース接続失敗</H1>
+
+  DB接続情報が間違っています。<br/>
+  [%- ELSE %]
+  <H1>パラメータ不正</H1>
+
+  必要な項目が設定されていません。<br/>
+  [% END %]
+  再度入力してください<br>
+
+  <div class="well">
+    <FORM method="POST" action="/">
+      <button type="submit" class="btn btn-primary btn-large" id="initbtn">
+        再設定
+      </button>
+    </FORM>
+  </div>
+</div>
+</body>
+</html>

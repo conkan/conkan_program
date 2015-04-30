@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="conkan yet initialized">
+<meta name="author" content="Studio REM">
+<title>404 Conkan Yet Initialized</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container">
+  <H1>404 Conkan Yet Initialized</H1>
+  Conkanが初期化されていないため、アクセスできません
+</div>
+</body>
+</html>
