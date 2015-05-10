@@ -109,7 +109,8 @@ sub cybozu :Local {
         $c->flash->{'name'}    = $grfeed->author->name;
         $c->flash->{'account'} = $grfeed->author->email;
         $c->flash->{'ma'}      = $grfeed->author->email;
-        $c->flash->{'role'}    = $c->session->{'init_role'} eq 'addroot' 
+        my $initrole = $c->session->{'init_role'};
+        $c->flash->{'role'} = ( defined($initrole) && ($initrole eq 'addroot') )
                                  ? 'ROOT'
                                  : 'NORM';
         # flashは同じ名前だと消されてしまうので、別名で引き渡す
