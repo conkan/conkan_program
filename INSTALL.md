@@ -4,9 +4,14 @@
 データベース設定
 ====
 
-以下は、mysqlのrootユーザで実行
-
 1. データベースおよび管理ユーザ作成
+
+Azureなどクラウドサービスが提供するmysqlを使用する場合には、
+それぞれのサービスで割り当てられるDB名、管理ユーザ名、パスワードを控えておく
+
+手動でデータベースを作成する場合には、以下の処理をmysqlのrootユーザで実行
+(DB名、管理ユーザ名、パスワードは、任意の値)
+
 
 ````
 mysql> create database [DB名] default character set utf8;
@@ -15,8 +20,7 @@ mysql> flush privileges;
 mysql> exit;
 ````
 
-DB名、管理ユーザ名、パスワードは、任意の値を使用する。
-これらの値は、初期化処理時に使用するので控えておくこと。
+DB名、管理ユーザ名、パスワードは、conkan初期化処理時に使用するので控えておくこと。
 また、セキュリティ上これらの値は秘匿すべきである。
 
 CybozuLive アプリケーション登録
@@ -56,9 +60,12 @@ conkanインストールと起動
 
 1. デプロイ
 
-github https://github.com/conkan/conkan_program のmastarブランチを
+GitHub https://github.com/conkan/conkan_program のmastarブランチを
 稼働サーバに展開する
 (zipをダウンロードして展開してもよいが、update時の手間を考慮するとcloneしたほうが良い)
+
+$> git clone git://github.com/conkan/conkan_program <Dockerホーム>
+
 以下、展開したディレクトリを<Dockerホーム>と表記する
 
 1. サーバ証明書の生成
@@ -68,17 +75,13 @@ github https://github.com/conkan/conkan_program のmastarブランチを
 docker > cd <Dockerホーム>
 docker > ./cert.sh
 
-ここで生成したサーバ証明書は、dockerイメージ生成時に組み込むので、
-先に実施しておくこと
+ここで生成したサーバ証明書は、dockerコンテナ起動時に読み込む
 
-1. dockerイメージの作成
+1. dockerイメージの取得
 
 <稼働サーバ>で実施
 
-docker > cd <Dockerホーム>
-docker > ./build.sh
-
-(かなり時間がかかるので注意)
+docker > docker pull srem/conkan
 
 1. dockerコンテナの起動
 
@@ -92,7 +95,7 @@ docker > ./run.sh product
   HTTPS 30443
 となるので注意
 
-dockerコンテナの起動により、conkan自体も起動する。
+dockerコンテナの起動により、nginxおよびconkan自体も起動する。
 
 conkan初期化処理
 ====
