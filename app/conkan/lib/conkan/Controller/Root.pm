@@ -195,6 +195,7 @@ logout
 sub logout :Local {
     my ( $self, $c ) = @_;
     $c->logout;
+    $c->delete_session('logout');
     $c->response->redirect( '/login' );
 }
 
@@ -360,7 +361,7 @@ sub _doInitialProc :Private {
         YAML::DumpFile( $conkan_yml_f, $conkan_yml );
         # サーバ再起動
         # これにより、$c->config->{inited} が設定される
-        unless ( 0 == system('/usr/bin/pkill starman') ) {
+        unless ( 0 == system('/usr/bin/pkill -HUP starman') ) {
             $c->error('conkan再起動失敗 at ' . scalar localtime );
         }
     } catch {

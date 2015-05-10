@@ -38,12 +38,11 @@ END -%]
   <div class="well" id="initadd" style="display:none;">
     <H1>登録しました</H1>
     [% IF addroot %]
-      loginしなおしてください
-      <a class="btn btn-primary btn-large" href="/logout">logout</a>
+      登録した管理者でloginしなおしてください
     [% ELSE %]
       loginしてください
-      <a class="btn btn-primary btn-large" href="/login">login</a>
     [% END %]
+    <a class="btn btn-primary btn-large" href="/logout">login</a>
   </div>
 </div>
 [% PROCESS 'tttail.tt' %]
