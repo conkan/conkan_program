@@ -45,8 +45,8 @@ sub profile :Local {
     }
     my $staffM = $c->model('ConkanDB::PgStaff');
     my $staffid = $value->{'staffid'};
-    my $curacnt = $c->user->get('account')
-    unless ( defined($staffid) || $curacnt eq 'admin' ) ) {
+    my $curacnt = $c->user->get('account');
+    unless ( defined($staffid) || $curacnt eq 'admin' ) {
         $staffid = $c->user->get('staffid');
     }
 
