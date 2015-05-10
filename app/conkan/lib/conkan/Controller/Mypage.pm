@@ -46,8 +46,10 @@ sub profile :Local {
     my $staffM = $c->model('ConkanDB::PgStaff');
     my $staffid = $value->{'staffid'};
     my $curacnt = $c->user->get('account');
-    unless ( defined($staffid) || $curacnt eq 'admin' ) {
-        $staffid = $c->user->get('staffid');
+    unless ( defined($staffid) ) {
+        if ( !defined($curacnt) || $curacnt ne 'admin' ) {
+            $staffid = $c->user->get('staffid');
+        }
     }
 
     if ( $staffid ) { # 更新
@@ -113,6 +115,7 @@ sub profile :Local {
                 }
                 $value->{'passwd'} =
                     crypt( $value->{'passwd'}, random_string( 'cccc' ));
+                $value->{'staffid'} = undef;
                 $staffM->create( $value );
                 $c->stash->{'rs'} = undef;
                 $c->stash->{'state'} = 'success';

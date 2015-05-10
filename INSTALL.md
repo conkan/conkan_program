@@ -77,6 +77,13 @@ docker > ./cert.sh
 
 ここで生成したサーバ証明書は、dockerコンテナ起動時に読み込む
 
+1. ダミー設定ファイル作成
+
+<稼働サーバ>で実施
+
+docker > cd <Dockerホーム>/app/conkan
+docker > cp conkan.yml_default conkan.yml
+
 1. dockerイメージの取得
 
 <稼働サーバ>で実施
