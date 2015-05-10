@@ -17,9 +17,7 @@
     最初の管理者を登録してください。<BR/>
     [%- SWITCH c.config.addstaff.type -%]
       [%- CASE 'cybozu' -%]
-        最初の管理者の登録のためには、CybozeLiveへのloginが必要です。<BR/>
-        新規スタッフ登録に関連するCybozeLiveへのアクセスは、<BR/>
-        ここで登録する<B>最初の管理者</B>の権限で実行します。(チャット送信など)
+        スタッフ登録のために、CybozeLiveへのloginが必要です。<BR/>
       [%- CASE 'plain' -%]
         管理情報は完全にConkan内部に閉じます。<BR/>
         そのため、スタッフ追加時には初期パスワードを別途通知する必要があります。<br/>
