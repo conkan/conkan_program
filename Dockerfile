@@ -75,7 +75,7 @@ RUN cpanm -i Catalyst::Plugin::Session::Store::FastMmap
 RUN cpanm -i Catalyst::Authentication::Credential::OAuth
 RUN cpanm -i DBIx::Class::Schema::Loader
 RUN cpanm -i MooseX::NonMoose
-RUN cpanm -i LWP::Protocol::https
+RUN cpanm -in LWP::Protocol::https
 RUN cpanm -i Term::Size::Any
 RUN cpanm -i XML::LibXML XML::RSS XML::Atom XML::Feed
 
@@ -84,8 +84,6 @@ RUN rm -rf .cpanm/*
 
 #nginx設定
 ADD doccnf/nginx.conf /etc/nginx/nginx.conf
-ADD doccnf/cert.crt   /etc/nginx/cert.crt
-ADD doccnf/cert.key   /etc/nginx/cert.key
 
 #mysqlクライアント設定
 ADD doccnf/my.cnf /etc/my.cnf

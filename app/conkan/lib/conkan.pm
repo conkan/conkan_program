@@ -15,6 +15,8 @@ use Catalyst::Runtime 5.80;
 #                 application's home directory
 # Static::Simple: will serve static files from the application's root
 #                 directory
+#
+# starmanでのデバッグ時には    -Debug -Log=debug を追加すること
 
 use Catalyst qw/
     ConfigLoader
