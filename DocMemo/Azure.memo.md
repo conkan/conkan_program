@@ -11,6 +11,33 @@ Azure Portalで、CoreOSを選択してVMを作成すれば良い
 - HTTPSアクセスポイントを作成するのを忘れないように
 - SSHアクセスポイントは自動で作成するが、外部ポート番号が22ではないので、一旦削除して再作成したほうが良い
 - docker-enterはないので、自分で作成する
+    作成方法後述
+
+1. DBサーバ
+
+Microsoft Azureが用意しているmysqlサーバ(clearDB)は、
+無料の火星コースでは、同時接続クライアント数が4に制限されているなど、少々使いづらい。
+(BizSparkサブスクリプションでは、火星コースしか使えないらしい)
+
+問題となるのは初期化時のみと思われるが、同時利用者が増えると問題になるかもしれないので、独自にmysqlサーバを立てる(dockerコンテナとして)
+
+  1. Azure Portalで、CoreOSを選択してVMを作成(docker環境を含んでいる)
+    Docker環境作成にあたっての注意事項は、稼働サーバと同じ
+    (HTTPSアクセスポイントではなく、MYSQLアクセスポイント(3306)を作成)
+
+  1. Docker公式の mysql Dockerイメージを利用
+    ''''
+    docker> docker pull mysql:5.5
+    ''''
+  1. コンテナの起動
+    rootのパスワードは、起動時に環境変数 MYSQL_ROOT_PASSWORD で設定
+    mysqlのポート番号は、ホスト:コンテナ とも3306にする
+    ''''
+    docker> docker run --name mysql -e MYSQL_ROOT_PASSWORD=xxxx -d -p 3306:3306 mysql:5.5
+    ''''
+1. docker-enter作成方法
+
+稼働サーバの/opt/bin下に作成する。
 
 ````
 docker> sudo mkdir -p /opt/bin
@@ -66,23 +93,12 @@ else
     fi
 fi
 ~~~~
-1. DBサーバ
+1. 一般ユーザでdockerを利用可能にする方法(Azureとは直接関係ない)
 
-Microsoft Azureが用意しているmysqlサーバ(clearDB)は、
-無料の火星コースでは、同時接続クライアント数が4に制限されているなど、少々使いづらい。
-(BizSparkサブスクリプションでは、火星コースしか使えないらしい)
+dockerグループに対象ユーザを追加する
 
-問題となるのは初期化時のみと思われるが、同時利用者が増えると問題になるかもしれないので、独自にmysqlサーバを立てる(dockerコンテナとして)
+docker > sudo vigr
+docker > sudo vigr -s
 
-  1. Azure Portalで、CoreOSを選択してVMを作成(docker環境を含んでいる)
-  1. Docker公式の mysql Dockerイメージを利用
-    ''''
-    docker> docker pull mysql:5.5
-    ''''
-  1. コンテナの起動
-    rootのパスワードは、起動時に環境変数 MYSQL_ROOT_PASSWORD で設定
-    mysqlのポート番号は、ホスト:コンテナ とも3306にする
-    ''''
-    docker> docker run --name mysql -e MYSQL_ROOT_PASSWORD=xxxx -d -p 3306:3306 mysql:5.5
-    ''''
+
 EOF
