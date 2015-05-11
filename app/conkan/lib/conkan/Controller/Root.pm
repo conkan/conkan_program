@@ -127,8 +127,22 @@ Standard 404 error page
 
 sub default :Path {
     my ( $self, $c ) = @_;
-    $c->response->body( '<H1>Page not found</H1>(開発中)' );
+
+    my $action = $c->request->path();
+    my $liid =  ($action eq 'program/list/list')      ? 'program_list'
+              : ($action eq 'program/progress/list')  ? 'program_progress' 
+              : ($action eq 'mypage/profile')         ? 'mypage_profile'
+              : ($action eq 'config/staff/list')      ? 'config_staff'
+              : ($action eq 'config/room/list')       ? 'config_room'
+              : ($action eq 'config/equip/list')      ? 'config_equip'
+              : ($action eq 'config/setting')         ? 'config_conf'
+              : ($action eq 'addstaff')               ? 'mypage_profile'
+              : 'mypage';
+$c->log->debug('>>> action : [' . $action . ']');
+$c->log->debug('>>> liid   : [' . $liid   . ']');
     $c->response->status(404);
+    $c->stash->{self_li_id} = $liid;
+    $c->stash->{template} = 'underconstract.tt';
 }
 
 =head2 login
