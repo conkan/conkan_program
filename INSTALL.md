@@ -73,7 +73,7 @@ $> git clone git://github.com/conkan/conkan_program <Dockerホーム>
 <稼働サーバ>で実施
 
 docker > cd <Dockerホーム>
-docker > sudo ./cert.sh
+docker > sudo ./cert.sh <conkanトップURL>
 
 ここで生成したサーバ証明書は、dockerコンテナ起動時(nginx起動時)に読み込む
 
