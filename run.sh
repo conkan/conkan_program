@@ -9,6 +9,8 @@ else
 fi
 docker stop conkan
 docker rm conkan
-# 常にconkan.ymlを初期化(でないと起動失敗する)
-cp `pwd`/app/conkan/conkan.yml_default `pwd`/app/conkan/conkan.yml
+# 存在しない場合、conkan.ymlを初期化(でないと起動失敗する)
+if ! [ -e `pwd`/app/conkan/conkan.yml ]; then
+  cp `pwd`/app/conkan/conkan.yml_default `pwd`/app/conkan/conkan.yml
+fi
 docker run -d --name conkan -p $HP:80 -p $HS:443 -v `pwd`/app:/root/app srem/conkan
