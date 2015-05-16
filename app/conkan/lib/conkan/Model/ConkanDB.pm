@@ -7,9 +7,9 @@ __PACKAGE__->config(
     schema_class => 'conkan::Schema',
     
     connect_info => {
-        dsn => 'dbi:mysql:conkan:192.168.24.22',
-        user => 'conkan',
-        password => 'conkan',
+        dsn => '',
+        user => '',
+        password => '',
         AutoCommit => q{1},
         on_connect_do => ["SET NAMES utf8"],
     }
