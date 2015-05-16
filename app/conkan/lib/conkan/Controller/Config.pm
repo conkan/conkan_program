@@ -62,7 +62,8 @@ sub index :Path :Args(0) {
 sub setting :Local {
     my ( $self, $c ) = @_;
 
-    my @rowconf = $c->model('ConkanDB::PgSystemConf')->all;
+    my $sysconM = $c->model('ConkanDB::PgSystemConf');
+    my @rowconf = $sysconM->all;
     my $pHconf = {};
     foreach my $pHwk ( @rowconf ) {
         $pHconf->{$pHwk->pg_conf_code} = {
@@ -73,31 +74,46 @@ sub setting :Local {
     }
 
     if ( $c->request->method eq 'GET' ) {
+        # 希望的排他処理
+        $c->session->{'updtic'} = time;
+        $sysconM->update_or_create( {
+            pg_conf_code => 'updateflg',
+            pg_conf_name => 'updateflg',
+            pg_conf_value => $c->sessionid . $c->session->{'updtic'},
+        });
         # 更新表示
         $c->stash->{'cnf'} = $pHconf;
     }
     else {
         # 更新実施
-        my $param = $c->request->body_params;
-        try {
-            foreach my $pHwk ( @rowconf ) {
-                $param->{$pHwk->pg_conf_code} =~ s/\s+$//;
-                $pHwk->pg_conf_value( $param->{$pHwk->pg_conf_code} );
-                $pHwk->update();
-            }
-            $c->stash->{'state'} = 'success';
-        } catch {
-            my $e = shift;
-            $c->log->error('>>> ' . localtime() . 'dbexp : [' . $e . ']');
-            if ( scalar @{ $c->error } ) {
-                foreach my $err (@{ $c->error }) {
-                    $c->log->error('>>> ' . localtime() . 'dbexp : [' . $err . ']');
+        my $updaterow = [ $sysconM->find('updateflg') ]->[0];
+        if ( $updaterow->pg_conf_value eq
+                +( $c->sessionid . $c->session->{'updtic'}) ) {
+            my $param = $c->request->body_params;
+            try {
+                foreach my $pHwk ( @rowconf ) {
+                    next if ( $pHwk->pg_conf_code eq 'updateflg' );
+                    $param->{$pHwk->pg_conf_code} =~ s/\s+$//;
+                    $pHwk->pg_conf_value( $param->{$pHwk->pg_conf_code} );
+                    $pHwk->update();
                 }
-                $c->clear_errors();
-            }
+                $c->stash->{'state'} = 'success';
+            } catch {
+                my $e = shift;
+                $c->log->error('>>> ' . localtime() . 'dbexp : [' . $e . ']');
+                if ( scalar @{ $c->error } ) {
+                    foreach my $err (@{ $c->error }) {
+                        $c->log->error('>>> ' . localtime() . 'dbexp : [' . $err . ']');
+                    }
+                    $c->clear_errors();
+                }
+                $c->stash->{'state'} = 'deny';
+            };
+        }
+        else {
             $c->stash->{'state'} = 'deny';
-        };
-        $c->stash->{'rs'} = undef;
+        }
+        $c->stash->{'cnf'} = undef;
     }
 }
 

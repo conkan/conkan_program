@@ -70,7 +70,8 @@
   </div>
   <div class="well" id="deny" style="display:none;">
     <H1>更新できませんでした</H1>
-    何らかの問題が発生しました。開発者に連絡してください。
+    他のシステム管理者が設定更新した可能性があります。<br/>
+    確認して下さい。<br/>
     <a class="btn btn-primary btn-large" href="/mypage">マイページに戻る</a>
   </div>
 </div>
