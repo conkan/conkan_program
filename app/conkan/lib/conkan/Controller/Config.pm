@@ -53,14 +53,53 @@ sub index :Path :Args(0) {
 
 =head2 setting
 
-システム全体設定(未実装)
-    system_conf, regist_conf の更新
+システム全体設定
+    system_confの更新
+    regist_confは別途
 
 =cut
 
-#sub setting :Local {
-#    my ( $self, $c ) = @_;
-#}
+sub setting :Local {
+    my ( $self, $c ) = @_;
+
+    my @rowconf = $c->model('ConkanDB::PgSystemConf')->all;
+    my $pHconf = {};
+    foreach my $pHwk ( @rowconf ) {
+        $pHconf->{$pHwk->pg_conf_code} = {
+                pg_conf_name => $pHwk->pg_conf_name,
+                pg_conf_value => $pHwk->pg_conf_value,
+            };
+        $pHconf->{$pHwk->pg_conf_code}->{pg_conf_value} =~ s/\s+$//;
+    }
+
+    if ( $c->request->method eq 'GET' ) {
+        # 更新表示
+        $c->stash->{'cnf'} = $pHconf;
+    }
+    else {
+        # 更新実施
+        my $param = $c->request->body_params;
+        try {
+            foreach my $pHwk ( @rowconf ) {
+                $param->{$pHwk->pg_conf_code} =~ s/\s+$//;
+                $pHwk->pg_conf_value( $param->{$pHwk->pg_conf_code} );
+                $pHwk->update();
+            }
+            $c->stash->{'state'} = 'success';
+        } catch {
+            my $e = shift;
+            $c->log->error('>>> ' . localtime() . 'dbexp : [' . $e . ']');
+            if ( scalar @{ $c->error } ) {
+                foreach my $err (@{ $c->error }) {
+                    $c->log->error('>>> ' . localtime() . 'dbexp : [' . $err . ']');
+                }
+                $c->clear_errors();
+            }
+            $c->stash->{'state'} = 'deny';
+        };
+        $c->stash->{'rs'} = undef;
+    }
+}
 
 =head2 staff
 
@@ -163,10 +202,10 @@ sub staff_edit : Chained('staff_show') : PathPart('edit') : Args(0) {
                 $c->response->body('<FORM><H1>更新しました</H1></FORM>');
             } catch {
                 my $e = shift;
-                $c->log->error('>>> dbexp : [' . $e . ']');
+                $c->log->error('>>> ' . localtime() . 'dbexp : [' . $e . ']');
                 if ( scalar @{ $c->error } ) {
                     foreach my $err (@{ $c->error }) {
-                        $c->log->error('>>> dbexp : [' . $err . ']');
+                        $c->log->error('>>> ' . localtime() . 'dbexp : [' . $err . ']');
                     }
                     $c->clear_errors();
                 }
@@ -205,10 +244,10 @@ sub staff_del : Chained('staff_show') : PathPart('del') : Args(0) {
                 $c->response->body('<FORM><H1>削除しました</H1></FORM>');
             } catch {
                 my $e = shift;
-                $c->log->error('>>> dbexp : [' . $e . ']');
+                $c->log->error('>>> ' . localtime() . 'dbexp : [' . $e . ']');
                 if ( scalar @{ $c->error } ) {
                     foreach my $err (@{ $c->error }) {
-                        $c->log->error('>>> dbexp : [' . $err . ']');
+                        $c->log->error('>>> ' . localtime() . 'dbexp : [' . $err . ']');
                     }
                     $c->clear_errors();
                 }

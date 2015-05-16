@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="conkan initialize">
+<meta name="author" content="Studio REM">
+<title>Conkan Setting</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+</head>
+[% SET self_li_id = 'config_conf' %]
+[% PROCESS 'tthead.tt' %]
+[%- DEFAULT state = 'inputform' -%]
+<div class="container">
+  <div class="well" id="inputform" style="display:none;">
+    <FORM method="POST" class="form-horizontal" role="form" action="/config/setting" id="profform">
+      <div style="COLOR:Red;" id="valerr"> </div>
+      <div class="form-group">
+        <label class="col-sm-3 text-right">[% cnf.first_date.pg_conf_name %]</label>
+        <input type="text" name="first_date" id="first_date" class="col-sm-2" value="[% cnf.first_date.pg_conf_value | html %]"/>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-3 text-right">[% cnf.first_start_times.pg_conf_name %]</label>
+        <input type="text" name="first_start_times" id="first_start_times" class="col-sm-8" value="[% cnf.first_start_times.pg_conf_value | html %]"/>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-3 text-right">[% cnf.first_end_time.pg_conf_name %]</label>
+        <input type="text" name="first_end_time" id="first_end_time" class="col-sm-2" value="[% cnf.first_end_time.pg_conf_value | html %]"/>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-3 text-right">[% cnf.second_start_times.pg_conf_name %]</label>
+        <input type="text" name="second_start_times" id="second_start_times" class="col-sm-8" value="[% cnf.second_start_times.pg_conf_value | html %]"/>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-3 text-right">[% cnf.second_end_time.pg_conf_name %]</label>
+        <input type="text" name="second_end_time" id="second_end_time" class="col-sm-2" value="[% cnf.second_end_time.pg_conf_value | html %]"/>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-3 text-right">[% cnf.pg_status_vals.pg_conf_name %]</label>
+        <textarea name="pg_status_vals" id="pg_status_vals" class="col-sm-8" rows="3">
+          [%- cnf.pg_status_vals.pg_conf_value | html -%]
+        </textarea>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-3 text-right">[% cnf.cast_status_vals.pg_conf_name %]</label>
+        <textarea name="cast_status_vals" id="cast_status_vals" class="col-sm-8" rows="4">
+          [%- cnf.cast_status_vals.pg_conf_value | html -%]
+        </textarea>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-3 text-right">[% cnf.contact_status_vals.pg_conf_name %]</label>
+        <textarea name="contact_status_vals" id="contact_status_vals" class="col-sm-8" rows="6">
+          [%- cnf.contact_status_vals.pg_conf_value | html -%]
+        </textarea>
+      </div>
+      <div class="form-group">
+        <span class="col-sm-4"></span>
+        <button type="submit" class="col-sm-2 text-center btn btn-primary btn-large" id="dobtn">
+          更新
+        </button>
+        <span class="col-sm-1"></span>
+        <a id="cancel" class="col-sm-2 text-center btn btn-large" href="">リセット</a>
+      </div>
+    </FORM>
+  </div>
+  <div class="well" id="success" style="display:none;">
+    <H1>更新しました</H1>
+      <a class="btn btn-primary btn-large" href="/mypage">マイページに戻る</a>
+  </div>
+  <div class="well" id="deny" style="display:none;">
+    <H1>更新できませんでした</H1>
+    何らかの問題が発生しました。開発者に連絡してください。
+    <a class="btn btn-primary btn-large" href="/mypage">マイページに戻る</a>
+  </div>
+</div>
+[% PROCESS 'tttail.tt' %]
+<script>
+  // 有効なdivを表示
+  $(document).ready(function() {
+    $('#[%- state | html -%]').show();
+  } );
+  // バリデーション
+  function valchk( val, type ) { // val:チェックする値 type: 0:日付 1:時刻 3:json配列 4:json配列時刻
+    var result, tary, tval, ret;
+    ret = false;
+    if (!val) {
+      return 'は省略できません';
+    }
+    switch ( type ) {
+      case 0:
+        result = /^(\d{4})\/((?:0?\d)|(?:1[012]))\/((?:[012]?\d)|(?:3[01]))$/.exec(val);
+        if ( ! result ) {
+            ret = 'は年月日ではありません';
+        }
+        break;
+      case 1:
+        result = /^((?:[01]?\d)|(?:2[0123])):([012345]?\d)$/.exec(val);
+        if ( ! result ) {
+          ret = 'は時刻ではありません';
+        }
+        break;
+      case 3:
+        try {
+          tary = JSON.parse( val );
+        } catch (e) {
+          ret = 'の形式が不正です';
+        };
+        break;
+      case 4:
+        try {
+          tary = JSON.parse( val );
+          for ( var tval in tary ) {
+            if ( ret = valchk( tary[tval], 1 ) ) {
+                break;
+            }
+          }
+        } catch (e) {
+          ret = 'の形式が不正です';
+        };
+        break;
+    }
+    return ret;
+  };
+
+  $('#dobtn').click(function(){
+    var ret;
+    if ( ret = valchk( $('#first_date').val(), 0 ) ) {
+        $('#valerr').text('[% cnf.first_date.pg_conf_name %] ' + ret);
+        return false;
+    }
+    if ( ret = valchk( $('#first_start_times').val(), 4 ) ) {
+        $('#valerr').text('[% cnf.first_start_times.pg_conf_name %] ' + ret);
+        return false;
+    }
+    if ( ret = valchk( $('#first_end_time').val(), 2 ) ) {
+        $('#valerr').text('[% cnf.first_end_time.pg_conf_name %] ' + ret);
+        return false;
+    }
+    if ( ret = valchk( $('#second_start_times').val(), 4 ) ) {
+        $('#valerr').text('[% cnf.second_start_times.pg_conf_name %] ' + ret);
+        return false;
+    }
+    if ( ret = valchk( $('#second_end_time').val(), 2 ) ) {
+        $('#valerr').text('[% cnf.second_end_time.pg_conf_name %] ' + ret);
+        return false;
+    }
+    if ( ret = valchk( $('#pg_status_vals').val(), 3 ) ) {
+        $('#valerr').text('[% cnf.pg_status_vals.pg_conf_name %] ' + ret);
+        return false;
+    }
+    if ( ret = valchk( $('#cast_status_vals').val(), 3 ) ) {
+        $('#valerr').text('[% cnf.cast_status_vals.pg_conf_name %] ' + ret);
+        return false;
+    }
+    if ( ret = valchk( $('#contact_status_vals').val(), 3 ) ) {
+        $('#valerr').text('[% cnf.contact_status_vals.pg_conf_name %] ' + ret);
+        return false;
+    }
+  } );
+</script>
+</body>
+</html>
