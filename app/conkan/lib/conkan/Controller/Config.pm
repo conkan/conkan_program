@@ -52,7 +52,7 @@ sub index :Path :Args(0) {
 }
 
 =head2 setting
-
+-----------------------------------------------------------------------------
 システム全体設定
     system_confの更新
     regist_confは別途
@@ -118,7 +118,7 @@ sub setting :Local {
 }
 
 =head2 staff
-
+-----------------------------------------------------------------------------
 スタッフ管理 staff_base  : Chainの起点
 
 =cut
@@ -230,7 +230,7 @@ sub staff_edit : Chained('staff_show') : PathPart('edit') : Args(0) {
         }
         else {
             $c->stash->{'rs'} = undef;
-            $c->response->body = '<FORM><H1>更新できませんでした</H1></FORM>';
+            $c->response->body = '<FORM><H1>更新できませんでした</H1><BR/>他のシステム管理者が変更した可能性があります</FORM>';
         }
         $c->stash->{'rs'} = undef;
         $c->response->status(200);
@@ -271,7 +271,194 @@ sub staff_del : Chained('staff_show') : PathPart('del') : Args(0) {
             };
         }
         else {
-            $c->response->body = '<FORM><H1>削除できませんでした</H1></FORM>';
+            $c->response->body = '<FORM><H1>削除できませんでした</H1><BR/>他のシステム管理者が変更した可能性があります</FORM>';
+        }
+        $c->stash->{'rs'} = undef;
+        $c->response->status(200);
+    }
+}
+
+=head2 room
+-----------------------------------------------------------------------------
+部屋管理 room_base  : Chainの起点
+
+=cut
+
+sub room_base : Chained('') : PathPart('config/room') : CaptureArgs(0) {
+    my ( $self, $c ) = @_;
+
+    # roomテーブルに対応したrsオブジェクト取得
+    $c->stash->{'RS'}   = $c->model('ConkanDB::PgRoom');
+}
+
+=head2 room/list 
+
+部屋管理 room_list  : 部屋一覧
+
+=cut
+
+sub room_list : Chained('room_base') : PathPart('list') : Args(0) {
+    my ( $self, $c ) = @_;
+    $c->stash->{'list'} = [ $c->stash->{RS}
+                            ->search( { },
+                                      { 'order_by' => { '-asc' => 'roomID' } } )
+                          ];
+}
+
+=head2 room/*
+
+部屋管理 room_show  : 部屋情報更新のための表示起点
+
+=cut
+
+sub room_show : Chained('room_base') :PathPart('') :CaptureArgs(1) {
+    my ( $self, $c, $roomid ) = @_;
+    
+    my $rowroom;
+    if ( defined($roomid) ) {
+        $rowroom = [ $c->stash->{'RS'}->find($roomid) ]->[0];
+        $c->session->{'updtic'} = time;
+        $rowroom->update( { 
+            'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
+        } );
+    } else {
+        $rowroom = {
+            'roomid'        => undef,
+            'name'          => '',
+            'roomno'        => '',
+            'max'           => 0,
+            'type'          => '洋室',
+            'size'          => 0,
+            'tablecnt'      => 0,
+            'chaircnt'      => 0,
+            'equips'        => '',
+            'useabletime'   => undef,
+            'net'           => 'W',
+            'comment'       => undef,
+        };
+    }
+    $c->stash->{'rs'} = $rowroom;
+}
+
+=head2 room/*
+
+部屋管理room_detail  : 部屋情報更新表示
+
+=cut
+
+sub room_detail : Chained('room_show') : PathPart('') : Args(0) {
+    my ( $self, $c ) = @_;
+}
+
+=head2 room/*/edit
+
+部屋管理room_edit  : 部屋情報更新
+
+=cut
+
+sub room_edit : Chained('room_show') : PathPart('edit') : Args(0) {
+    my ( $self, $c ) = @_;
+
+    my $roomid = $c->request->body_params->{'roomid'};
+
+    $c->log->debug('>>> room_edit :[' . $roomid . ']');
+
+    # GETはおそらく直打ちとかなので再度
+    if ( $c->request->method eq 'GET' ) {
+        $c->log->debug('>>> reload');
+        $c->go->( '/config/room/' . $roomid );
+    }
+    else {
+        my $value = {};
+        for my $item qw/name roomno max type size tablecnt
+                        chaircnt equips useabletime net comment / {
+            $value->{$item} = $c->request->body_params->{$item};
+            $value->{$item} =~ s/\s+//;
+        }
+        if ( defined($roomid)) {
+            # 更新
+            my $rowroom = [ $c->stash->{'RS'}->find($roomid) ]->[0];
+            if ( $rowroom->updateflg eq 
+                    +( $c->sessionid . $c->session->{'updtic'}) ) {
+                try {
+                    $c->log->debug('>>> update');
+                    $rowroom->update( $value ); 
+                    $c->response->body('<FORM><H1>更新しました</H1></FORM>');
+                } catch {
+                    my $e = shift;
+                    $c->log->error('>>> ' . localtime() . 'dbexp : [' . $e . ']');
+                    if ( scalar @{ $c->error } ) {
+                        foreach my $err (@{ $c->error }) {
+                            $c->log->error('>>> ' . localtime() . 'dbexp : [' . $err . ']');
+                        }
+                        $c->clear_errors();
+                    }
+                    $c->response->body('<FORM>更新失敗</FORM>');
+                };
+            }
+            else {
+                $c->log->debug('>>> updateflg unmatch');
+                $c->response->body = '<FORM><H1>更新できませんでした</H1><BR/>他のシステム管理者が変更した可能性があります</FORM>';
+            }
+        }
+        else {
+            # 新規登録
+            try {
+                $c->log->debug('>>> create');
+                $c->stash->{'RS'}->create( $value );
+                $c->response->body('<FORM><H1>登録しました</H1></FORM>');
+            } catch {
+                my $e = shift;
+                $c->log->error('>>> ' . localtime() . 'dbexp : [' . $e . ']');
+                if ( scalar @{ $c->error } ) {
+                    foreach my $err (@{ $c->error }) {
+                        $c->log->error('>>> ' . localtime() . 'dbexp : [' . $err . ']');
+                    }
+                    $c->clear_errors();
+                }
+                $c->response->body('<FORM>登録失敗</FORM>');
+            };
+        }
+        $c->stash->{'rs'} = undef;
+        $c->response->status(200);
+    }
+}
+
+=head2 room/*/del
+
+部屋管理 room_del   : 部屋削除
+
+=cut
+
+sub room_del : Chained('room_show') : PathPart('del') : Args(0) {
+    my ( $self, $c ) = @_;
+    my $roomid = $c->request->body_params->{'roomid'};
+    # GETはおそらく直打ちとかなので再度
+    if ( $c->request->method eq 'GET' ) {
+        $c->go->( '/config/room/' . $roomid );
+    }
+    else {
+        # 削除実施
+        my $rowprof = [ $c->stash->{'RS'}->find($roomid) ]->[0];
+        if ( $rowprof->updateflg eq 
+                +( $c->sessionid . $c->session->{'updtic'}) ) {
+            try {
+                $rowprof->update( { 'rmdate'   => DateTime->now() } );
+                $c->response->body('<FORM><H1>削除しました</H1></FORM>');
+            } catch {
+                my $e = shift;
+                $c->log->error('>>> ' . localtime() . 'dbexp : [' . $e . ']');
+                if ( scalar @{ $c->error } ) {
+                    foreach my $err (@{ $c->error }) {
+                        $c->log->error('>>> ' . localtime() . 'dbexp : [' . $err . ']');
+                    }
+                    $c->clear_errors();
+                }
+                $c->response->body('<FORM>削除失敗</FORM>');
+            };
+        }
+        else {
+            $c->response->body = '<FORM><H1>削除できませんでした</H1><BR/>他のシステム管理者が変更した可能性があります</FORM>';
         }
         $c->stash->{'rs'} = undef;
         $c->response->status(200);

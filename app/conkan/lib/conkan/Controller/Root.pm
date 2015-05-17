@@ -40,7 +40,7 @@ login処理と初期設定のみ組み込み。それ以外は別のコントロ
 sub auto :Private {
     my ( $self, $c ) = @_;
 
-    $c->log->info('>>>' . localtime() . ' アクション内部パス:[' . $c->action->reverse . '][' . $c->request->method . ']' );
+    $c->log->info(localtime() . ' アクション内部パス:[' . $c->action->reverse . '][' . $c->request->method . ']' );
     # 初期化済判断
     unless (exists($c->config->{inited})) {
         if ( ( $c->action->reverse eq 'index'  )        ||
@@ -69,11 +69,11 @@ sub auto :Private {
 
         if (!$olddbv) {
             $schema->deploy( { add_drop_table => 1, } );
-            $c->log->info('>>>' . localtime() . ' DB Update : deploy');
+            $c->log->info( localtime() . ' DB Update : deploy');
         } elsif ( $newdbv != $olddbv ) {
             $schema->create_ddl_dir( 'MySQL', $newdbv, './sql', $olddbv );
             $schema->upgrade();
-            $c->log->info('>>>' . localtime() . ' DB Update : upgrade ['
+            $c->log->info( localtime() . ' DB Update : upgrade ['
                              . $schema->get_db_version() . ']');
         }
     }
@@ -87,7 +87,7 @@ sub auto :Private {
     }
     # 強制login処理
     unless ( $c->user_exists ) {
-        $c->log->info('>>>' . localtime() . ' 強制login' );
+        $c->log->info( localtime() . ' 強制login' );
         $c->visit( '/login' );
         return 0;
     }
@@ -138,8 +138,8 @@ sub default :Path {
               : ($action eq 'config/setting')         ? 'config_conf'
               : ($action eq 'addstaff')               ? 'mypage_profile'
               : 'mypage';
-$c->log->debug('>>>' . localtime() . ' action : [' . $action . ']');
-$c->log->debug('>>>' . localtime() . ' liid   : [' . $liid   . ']');
+    $c->log->debug('>>>' . localtime() . ' action : [' . $action . ']');
+    $c->log->debug('>>>' . localtime() . ' liid   : [' . $liid   . ']');
     $c->response->status(404);
     $c->stash->{self_li_id} = $liid;
     $c->stash->{template} = 'underconstract.tt';
@@ -314,7 +314,7 @@ sub _doInitialProc :Private {
             $dbh->do( 'DROP TABLE dbix_class_schema_versions' );
         }
         $schema->deploy( { add_drop_table => 1, } );
-        $c->log->info('>>>' . localtime() . ' Initial : deploy');
+        $c->log->info( localtime() . ' Initial : deploy');
 
         # 規定値一括登録
         $dbh->do( 'SET NAMES utf8' );
