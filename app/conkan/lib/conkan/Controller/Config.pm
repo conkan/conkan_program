@@ -315,7 +315,7 @@ sub room_show : Chained('room_base') :PathPart('') :CaptureArgs(1) {
     my ( $self, $c, $roomid ) = @_;
     
     my $rowroom;
-    if ( defined($roomid) ) {
+    if ( $roomid != 0 ) {
         $rowroom = [ $c->stash->{'RS'}->find($roomid) ]->[0];
         $c->session->{'updtic'} = time;
         $rowroom->update( { 
@@ -323,7 +323,7 @@ sub room_show : Chained('room_base') :PathPart('') :CaptureArgs(1) {
         } );
     } else {
         $rowroom = {
-            'roomid'        => undef,
+            'roomid'        => 0,
             'name'          => '',
             'roomno'        => '',
             'max'           => 0,
@@ -375,7 +375,7 @@ sub room_edit : Chained('room_show') : PathPart('edit') : Args(0) {
             $value->{$item} = $c->request->body_params->{$item};
             $value->{$item} =~ s/\s+//;
         }
-        if ( defined($roomid)) {
+        if ( $roomid != 0 ) {
             # 更新
             my $rowroom = [ $c->stash->{'RS'}->find($roomid) ]->[0];
             if ( $rowroom->updateflg eq 

@@ -59,7 +59,7 @@
     <div>
       <button type="button" class="btn"
               data-toggle="modal" data-target="#editRoom"
-              data-whatever="">
+              data-whatever="0" data-rmcol="">
         追加
       </button>
     </div>
@@ -80,7 +80,7 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
         <button type="button" class="btn " id="dodel">削除</button>
-        <button type="button" class="btn btn-primary" id="dobtn">更新</button>
+        <button type="button" class="btn btn-primary" id="dobtn">登録/更新</button>
       </div>
     </div>
   </div>
