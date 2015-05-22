@@ -135,9 +135,6 @@
     $('#dodel').hide();
     $(content).load(roomid + '/del/ FORM', data );
   } );
-  // キャンセル
-  $('#cancel').click(function(){
-  } );
 </script>
 </body>
 </html>

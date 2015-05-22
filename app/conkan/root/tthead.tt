@@ -30,8 +30,8 @@ SET cuRole = c.user.get('role') -%]
         [%- IF addroot != 1 -%]
           [%- IF acname != 'admin' %]
             [% IF addstaff != 1 %]
-              <li id="program_list"><a href="/program/list/list">企画管理</a></li>
-              <li id="program_progress"><a href="/program/progress/list">進捗報告</a></li>
+              <li id="program_list"><a href="/program/list">企画一覧</a></li>
+              <li id="program_progress"><a href="/program/timetable">タイムテーブル</a></li>
             [% END %]
             <li id="mypage_profile"><a href="/mypage/profile">プロファイル設定</a></li>
             [%- IF cuRole == 'ROOT' %]

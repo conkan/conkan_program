@@ -22,6 +22,7 @@ use Catalyst::Runtime 5.80;
 
 use Catalyst qw/
     ConfigLoader
+   -Debug -Log=debug
     Static::Simple
     Session
     Session::Store::FastMmap

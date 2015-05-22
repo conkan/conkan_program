@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="conkan roomlist">
+<meta name="author" content="Studio REM">
+<title>Conkan ProgramList</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+</head>
+[%- SET self_li_id = 'program_list' -%]
+[%- PROCESS 'tthead.tt' -%]
+<div class="container">
+  <div class="well" id="programlist">
+    <table class="table table-striped table-bordered table-hover">
+      <colgroup>
+        <col class="col-sm-2">
+        <col class="col-sm-3">
+        <col class="col-sm-2">
+        <col class="col-sm-2">
+        <col class="col-sm-2">
+        <col class="col-sm-1">
+      </colgroup>
+      <thead>
+        <tr bgcolor="#FFcc66">
+          <th>企画ID</th>
+          <th>企画名称</th>
+          <th>担当スタッフ</th>
+          <th>実行ステータス</th>
+          <th>最終進捗報告日時</th>
+          <th></th>
+      </thead>
+      <tbody>
+        [% FOREACH item = list %]
+          [%- NEXT IF item.rmdate;
+          IF item.status == '中止';
+            SET rmcol = 'style="background-color:gray;"';
+          ELSE;
+            SET rmcol = '';
+          END %]
+          <tr>
+            <td [% rmcol %]>[% item.pgid        | html %]</td>
+            <td [% rmcol %]>[% item.name        | html %]</td>
+            <td [% rmcol %]>[% item.staff       | html %]</td>
+            <td [% rmcol %]>[% item.status      | html %]</td>
+            <td [% rmcol %]>[% item.repdatetime | html %]</td>
+            <td [% rmcol %]>
+              <button type="button" class="btn"
+                data-toggle="modal" data-target="#detailProgram"
+                data-whatever="[% item.pgid %]" data-rmcol="[% rmcol %]">
+                詳細
+              </button>
+            </td>
+          </tr>
+        [% END %]
+      </tbody>
+    </table>
+    <div>
+      <button type="button" class="btn"
+              data-toggle="modal" data-target="#addProgram">
+        追加
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal detail -->
+<div class="modal fade" id="detailProgram" tabindex="-1" role="dialog" aria-labelledby="detailProgramLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="DetailProgramLabel">Detail Program Info</h4>
+      </div>
+      <div class="modal-body" id="ProgramContent">
+        <FORM>情報取得中</FORM>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
+        <button type="button" class="btn " id="dodel">削除</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal add -->
+<div class="modal fade" id="addProgram" tabindex="-1" role="dialog" aria-labelledby="addProgramLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="addProgramLabel">add new Program</h4>
+      </div>
+      <div class="modal-body" id="addProgram">
+        <FORM id="newProgram" role="form" method="POST" action="add" enctype="multipart/form-data">
+          <div class="form-group">
+            <label for="ymlinputfile">企画登録ファイル(YAML)</label>
+            <input type="file" id="ymlinputfile">
+            <p class="help-block">企画申し込みが生成したYAMLファイル</p>
+          </div>
+          <button type="submit" class="btn btn-primary" id="doadd">追加</button>
+        </FORM>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">キャンセル</button>
+      </div>
+    </div>
+  </div>
+</div>
+[% PROCESS 'tttail.tt' %]
+<script>
+  // モーダルダイアログ detailProgram 表示
+  $('#detailProgram').on('show.bs.modal', function (event) {
+    var pgid = $(event.relatedTarget).data('whatever');
+    var content = $('#ProgramContent');
+    $(content).load(pgid + '/ FORM');
+    if ( $(event.relatedTarget).data('rmcol') ) {
+      $('#dodel').show();
+    }
+    else {
+      $('#dodel').hide();
+    }
+  } );
+  // モーダルダイアログdetailProgram非表示
+  $('#detailProgram').on('hide.bs.modal', function (event) {
+    location.reload(true);
+  } );
+  // プログラム削除
+  $('#dodel').click(function(event) {
+    var content = $('#ProgramContent');
+    var pgid = $('#pgid').val();
+    $('#dodel').hide();
+    $(content).load(pgid + '/del/ FORM');
+  } );
+
+  // モーダルダイアログ addProgram 表示
+  $('#addProgram').on('show.bs.modal', function (event) {
+  } );
+  // モーダルダイアログdetailProgram非表示
+  $('#addProgram').on('hide.bs.modal', function (event) {
+    location.reload(true);
+  } );
+  // プログラム追加
+  $('#doadd').click(function(event) {
+    var content = $('#addProgram');
+    var data = $('#newProgram').serializeArray();
+    $('#doadd').hide();
+    $(content).load('/add/ FORM', data );
+  } );
+</script>
+</body>
+</html>

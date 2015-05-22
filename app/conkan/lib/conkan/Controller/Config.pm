@@ -2,10 +2,7 @@ package conkan::Controller::Config;
 use Moose;
 use utf8;
 use JSON;
-use Net::OAuth;
-use HTTP::Request::Common;
 use String::Random qw/ random_string /;
-use XML::Feed;
 use Try::Tiny;
 use DateTime;
 use namespace::autoclean;
@@ -126,8 +123,8 @@ sub setting :Local {
 sub staff_base : Chained('') : PathPart('config/staff') : CaptureArgs(0) {
     my ( $self, $c ) = @_;
 
-    # staffテーブルに対応したrsオブジェクト取得
-    $c->stash->{'RS'}   = $c->model('ConkanDB::PgStaff');
+    # staffテーブルに対応したmodelオブジェクト取得
+    $c->stash->{'M'}   = $c->model('ConkanDB::PgStaff');
 }
 
 =head2 staff/list 
@@ -138,7 +135,7 @@ sub staff_base : Chained('') : PathPart('config/staff') : CaptureArgs(0) {
 
 sub staff_list : Chained('staff_base') : PathPart('list') : Args(0) {
     my ( $self, $c ) = @_;
-    $c->stash->{'list'} = [ $c->stash->{RS}
+    $c->stash->{'list'} = [ $c->stash->{M}
                             ->search( { 'account'  => { '!=' => 'admin' } },
                                       { 'order_by' => { '-asc' => 'staffID' } } 
                                     )
@@ -154,7 +151,7 @@ sub staff_list : Chained('staff_base') : PathPart('list') : Args(0) {
 sub staff_show : Chained('staff_base') :PathPart('') :CaptureArgs(1) {
     my ( $self, $c, $staffid ) = @_;
     
-    my $rowprof = [ $c->stash->{'RS'}->find($staffid) ]->[0];
+    my $rowprof = [ $c->stash->{'M'}->find($staffid) ]->[0];
     $c->session->{'updtic'} = time;
     $rowprof->update( { 
         'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
@@ -195,7 +192,7 @@ sub staff_edit : Chained('staff_show') : PathPart('edit') : Args(0) {
     }
     else {
         # 更新実施
-        my $rowprof = [ $c->stash->{'RS'}->find($staffid) ]->[0];
+        my $rowprof = [ $c->stash->{'M'}->find($staffid) ]->[0];
         if ( $rowprof->updateflg eq 
                 +( $c->sessionid . $c->session->{'updtic'}) ) {
             my $value = {};
@@ -252,7 +249,7 @@ sub staff_del : Chained('staff_show') : PathPart('del') : Args(0) {
     }
     else {
         # 削除実施
-        my $rowprof = [ $c->stash->{'RS'}->find($staffid) ]->[0];
+        my $rowprof = [ $c->stash->{'M'}->find($staffid) ]->[0];
         if ( $rowprof->updateflg eq 
                 +( $c->sessionid . $c->session->{'updtic'}) ) {
             try {
@@ -287,8 +284,8 @@ sub staff_del : Chained('staff_show') : PathPart('del') : Args(0) {
 sub room_base : Chained('') : PathPart('config/room') : CaptureArgs(0) {
     my ( $self, $c ) = @_;
 
-    # roomテーブルに対応したrsオブジェクト取得
-    $c->stash->{'RS'}   = $c->model('ConkanDB::PgRoom');
+    # roomテーブルに対応したmodelオブジェクト取得
+    $c->stash->{'M'}   = $c->model('ConkanDB::PgRoom');
 }
 
 =head2 room/list 
@@ -299,7 +296,7 @@ sub room_base : Chained('') : PathPart('config/room') : CaptureArgs(0) {
 
 sub room_list : Chained('room_base') : PathPart('list') : Args(0) {
     my ( $self, $c ) = @_;
-    $c->stash->{'list'} = [ $c->stash->{RS}
+    $c->stash->{'list'} = [ $c->stash->{M}
                             ->search( { },
                                       { 'order_by' => { '-asc' => 'roomID' } } )
                           ];
@@ -316,7 +313,7 @@ sub room_show : Chained('room_base') :PathPart('') :CaptureArgs(1) {
     
     my $rowroom;
     if ( $roomid != 0 ) {
-        $rowroom = [ $c->stash->{'RS'}->find($roomid) ]->[0];
+        $rowroom = [ $c->stash->{'M'}->find($roomid) ]->[0];
         $c->session->{'updtic'} = time;
         $rowroom->update( { 
             'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
@@ -377,7 +374,7 @@ sub room_edit : Chained('room_show') : PathPart('edit') : Args(0) {
         }
         if ( $roomid != 0 ) {
             # 更新
-            my $rowroom = [ $c->stash->{'RS'}->find($roomid) ]->[0];
+            my $rowroom = [ $c->stash->{'M'}->find($roomid) ]->[0];
             if ( $rowroom->updateflg eq 
                     +( $c->sessionid . $c->session->{'updtic'}) ) {
                 try {
@@ -405,7 +402,7 @@ sub room_edit : Chained('room_show') : PathPart('edit') : Args(0) {
             # 新規登録
             try {
                 $c->log->debug('>>> create');
-                $c->stash->{'RS'}->create( $value );
+                $c->stash->{'M'}->create( $value );
                 $c->response->body('<FORM><H1>登録しました</H1></FORM>');
             } catch {
                 my $e = shift;
@@ -439,7 +436,7 @@ sub room_del : Chained('room_show') : PathPart('del') : Args(0) {
     }
     else {
         # 削除実施
-        my $rowprof = [ $c->stash->{'RS'}->find($roomid) ]->[0];
+        my $rowprof = [ $c->stash->{'M'}->find($roomid) ]->[0];
         if ( $rowprof->updateflg eq 
                 +( $c->sessionid . $c->session->{'updtic'}) ) {
             try {
