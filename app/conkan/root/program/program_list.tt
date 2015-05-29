@@ -40,7 +40,7 @@
             SET rmcol = '';
           END %]
           <tr>
-            <td [% rmcol %]>[% item.pgid        | html %]</td>
+            <td [% rmcol %]>[% item.pgidv       | html %]</td>
             <td [% rmcol %]>[% item.name        | html %]</td>
             <td [% rmcol %]>[% item.staff       | html %]</td>
             <td [% rmcol %]>[% item.status      | html %]</td>
@@ -48,7 +48,7 @@
             <td [% rmcol %]>
               <button type="button" class="btn"
                 data-toggle="modal" data-target="#detailProgram"
-                data-whatever="[% item.pgid %]" data-rmcol="[% rmcol %]">
+                data-whatever="[% item.pgidv %]" data-rmcol="[% rmcol %]">
                 詳細
               </button>
             </td>
@@ -92,11 +92,11 @@
         <h4 class="modal-title" id="addProgramLabel">add new Program</h4>
       </div>
       <div class="modal-body" id="addProgram">
-        <FORM id="newProgram" role="form" method="POST" action="add" enctype="multipart/form-data">
+        <FORM id="newProgram" role="form" method="POST" action="/program/add" enctype="multipart/form-data">
           <div class="form-group">
-            <label for="ymlinputfile">企画登録ファイル(YAML)</label>
-            <input type="file" id="ymlinputfile">
-            <p class="help-block">企画申し込みが生成したYAMLファイル</p>
+            <label for="jsoninputfile">企画登録ファイル(JSON)</label>
+            <input type="file" name= "jsoninputfile" id="jsoninputfile">
+            <p class="help-block">企画申し込みが生成したJSONファイル</p>
           </div>
           <button type="submit" class="btn btn-primary" id="doadd">追加</button>
         </FORM>
@@ -135,17 +135,11 @@
 
   // モーダルダイアログ addProgram 表示
   $('#addProgram').on('show.bs.modal', function (event) {
+    $('#jsoninputfile').val('');
   } );
-  // モーダルダイアログdetailProgram非表示
+  // モーダルダイアログProgram非表示
   $('#addProgram').on('hide.bs.modal', function (event) {
     location.reload(true);
-  } );
-  // プログラム追加
-  $('#doadd').click(function(event) {
-    var content = $('#addProgram');
-    var data = $('#newProgram').serializeArray();
-    $('#doadd').hide();
-    $(content).load('/add/ FORM', data );
   } );
 </script>
 </body>

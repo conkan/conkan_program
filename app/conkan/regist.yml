@@ -1,0 +1,187 @@
+Regist:
+    RegProgram:
+        schema: PgRegProgram
+        items:
+            -   hashkey: 企画名
+                column:     name
+                addcnf:
+                    -   hashkey: 企画ID
+                        column:     pgid
+                    -   hashkey: 企画名ふりがな
+                        column:     namef
+                    -   hashkey: 申し込み日付
+                        column:     regdate
+                    -   hashkey: 申込者名
+                        column:     regname
+                    -   hashkey: メールアドレス
+                        column:     regma
+                    -   hashkey: 米魂番号
+                        column:     regno
+                    -   hashkey: 電話番号
+                        column:     telno
+                    -   hashkey: FAX番号
+                        column:     faxno
+                    -   hashkey: 携帯番号
+                        column:     celno
+                    -   hashkey: 企画種別
+                        column:     type
+                        repcnf:
+                            repval:  その他
+                            hashkey: 企画種別その他内容
+                    -   hashkey: 希望場所
+                        column:     place
+                        repcnf:
+                            repval:  その他
+                            hashkey: 希望場所その他内容
+                    -   hashkey: 希望レイアウト
+                        column:     layout
+                        repcnf:
+                            repval:  その他
+                            hashkey: 希望レイアウトその他内容
+                    -   hashkey: 希望時刻
+                        column:     date
+                        repcnf:
+                            repval:  その他
+                            hashkey: 希望時刻その他内容
+                    -   hashkey: 希望コマ数
+                        column:     classlen
+                        repcnf:
+                            repval:  その他
+                            hashkey: 希望コマ数その他内容
+                    -   hashkey: 予想人数
+                        column:     expmaxcnt
+                    -   hashkey: 企画内容
+                        column:     content
+                    -   hashkey: 内容事前公開
+                        column:     contentpub
+                    -   hashkey: リアルタイム公開
+                        column:     realpub
+                    -   hashkey: 事後公開
+                        column:     afterpub
+                    -   hashkey: 重なると困る企画
+                        column:     avoiddup
+                    -   hashkey: 企画経験
+                        column:     experience
+                    -   hashkey: 備考
+                        column:     comment
+    RegEquip:
+        schema: PgRegEquip
+        items:
+            -   hashkey: ホワイトボード
+                validval:   使用する
+                column:     name
+                addcnf:
+                    -   hashkey: 企画ID
+                        column:     pgid
+            -   hashkey: 壇上マイク
+                validval:   使用する
+                column:     name
+                addcnf:
+                    -   hashkey: 企画ID
+                        column:     pgid
+                    -   hashkey: 壇上マイク本数
+                        column:     count
+            -   hashkey: 客席マイク
+                validval:   使用する
+                column:     name
+                addcnf:
+                    -   hashkey: 企画ID
+                        column:     pgid
+                    -   hashkey: 客席マイク本数
+                        column:     count
+            -   hashkey: モニタ/スクリーン
+                validval:   使用する
+                column:     name
+                addcnf:
+                    -   hashkey: 企画ID
+                        column:     pgid
+            -   hashkey: BD/DVDプレイヤー
+                validval:   使用する
+                column:     name
+                addcnf:
+                    -   hashkey: 企画ID
+                        column:     pgid
+            -   hashkey: 書画カメラ
+                validval:   使用する
+                column:     name
+                addcnf:
+                    -   hashkey: 企画ID
+                        column:     pgid
+            -   hashkey: その他要望機材
+                column:     name
+                addcnf:
+                    -   hashkey: 企画ID
+                        column:     pgid
+            -   hashkey: 持ち込み映像機器
+                validval:   持ち込む
+                column:     name
+                addcnf:
+                    -   hashkey: 企画ID
+                        column:     pgid
+                    -   hashkey: 映像機器映像接続
+                        column:     vif
+                        repcnf:
+                            repval:  その他
+                            hashkey: 映像機器映像接続その他内容
+                    -   hashkey: 映像機器音声接続
+                        column:     aif
+                        repcnf:
+                            repval:  その他
+                            hashkey: 映像機器音声接続その他内容
+            -   hashkey: 持ち込みPC
+                validval:   持ち込む
+                column:     name
+                addcnf:
+                    -   hashkey: 企画ID
+                        column:     pgid
+                    -   hashkey: PC映像接続
+                        column:     vif
+                        repcnf:
+                            repval:  その他
+                            hashkey: PC映像接続その他内容
+                    -   hashkey: PC音声接続
+                        column:     aif
+                        repcnf:
+                            repval:  その他
+                            hashkey: PC音声接続その他内容
+                    -   hashkey: PC-LAN接続
+                        column:     eif
+                        repcnf:
+                            repval:  その他
+                            hashkey: PC-LAN接続その他内容
+                    -   hashkey: LAN利用目的
+                        column:     intende
+            -   hashkey: その他持ち込み機材
+                column:     name
+                addcnf:
+                    -   hashkey: 企画ID
+                        column:     pgid
+    RegCast:
+        schema: PgRegCast
+        items:
+            -   hashkey: 申込者出演
+                validval:   する
+                addcnf:
+                    -   hashkey: 企画ID
+                        column:     pgid
+                    -   hashkey: 申込者名
+                        column:     name
+                    -   hashkey: 米魂番号
+                        column:     entrantregno
+            -   hashkey: 出演者氏名
+                loopmax: 5
+                column:     name
+                addcnf:
+                    -   hashkey: 企画ID
+                        column:     pgid
+                    -   hashkey: 出演者氏名ふりがな
+                        column:     namef
+                    -   hashkey: 出演交渉
+                        column:     needreq
+                    -   hashkey: ゲスト申請
+                        column:     needguest
+    Program:
+        schema: PgProgram
+        items:
+            -   hashkey: 企画ID
+                column:     pgid

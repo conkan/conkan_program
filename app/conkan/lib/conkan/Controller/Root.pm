@@ -9,6 +9,7 @@ use Try::Tiny;
 use String::Random qw/ random_string /;
 
 use Data::Dumper;
+use Encode;
 use conkan::Schema;
 
 BEGIN { extends 'Catalyst::Controller' }

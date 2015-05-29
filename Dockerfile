@@ -78,6 +78,7 @@ RUN cpanm -i MooseX::NonMoose
 RUN cpanm -in LWP::Protocol::https
 RUN cpanm -i Term::Size::Any
 RUN cpanm -i XML::LibXML XML::RSS XML::Atom XML::Feed
+RUN cpanm -in Catalyst::Plugin::Config::YAML
 
 # cpanm work削除
 RUN rm -rf .cpanm/*

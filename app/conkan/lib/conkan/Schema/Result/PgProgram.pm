@@ -57,12 +57,12 @@ __PACKAGE__->table("pg_program");
   data_type: 'integer'
   extra: {unsigned => 1}
   is_foreign_key: 1
-  is_nullable: 0
+  is_nullable: 1
 
 =head2 status
 
   data_type: 'varchar'
-  is_nullable: 0
+  is_nullable: 1
   size: 64
 
 =head2 date1
@@ -143,10 +143,10 @@ __PACKAGE__->add_columns(
     data_type => "integer",
     extra => { unsigned => 1 },
     is_foreign_key => 1,
-    is_nullable => 0,
+    is_nullable => 1,
   },
   "status",
-  { data_type => "varchar", is_nullable => 0, size => 64 },
+  { data_type => "varchar", is_nullable => 1, size => 64 },
   "date1",
   { data_type => "date", datetime_undef_if_invalid => 1, is_nullable => 1 },
   "stime1",
@@ -235,12 +235,17 @@ __PACKAGE__->belongs_to(
   "staffid",
   "conkan::Schema::Result::PgStaff",
   { staffid => "staffid" },
-  { is_deferrable => 1, on_delete => "NO ACTION", on_update => "NO ACTION" },
+  {
+    is_deferrable => 1,
+    join_type     => "LEFT",
+    on_delete     => "NO ACTION",
+    on_update     => "NO ACTION",
+  },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-18 12:18:22
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:lFIou8ftNNku+OoyO3rrpg
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-05-29 16:34:01
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Q3KnJoLnruVrpVPCAjfLbA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
