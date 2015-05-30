@@ -13,12 +13,13 @@
 [%- PROCESS 'tthead.tt' -%]
 <div class="container">
   <div class="well" id="roomlist">
-    <table class="table table-striped table-bordered table-hover">
+    <table class="table table-striped table-bordered table-condensed">
       <colgroup>
-        <col class="col-sm-3">
+        <col class="col-sm-4">
         <col class="col-sm-2">
         <col class="col-sm-3">
         <col class="col-sm-2">
+        <col class="col-sm-1">
       </colgroup>
       <thead>
         <tr bgcolor="#FFcc66">
@@ -40,8 +41,8 @@
             <td [% rmcol %]>[% item.roomno  | html %]</td>
             <td [% rmcol %]>[% item.type  | html %]</td>
             <td [% rmcol %]>[% item.size  | html %]</td>
-            <td [% rmcol %]>
-              <button type="button" class="btn"
+            <td [% rmcol %] style="text-align:center;">
+              <button type="button" class="btn btn-xs btn-primary"
               [%- IF rmcol -%]
                 >
                 無効

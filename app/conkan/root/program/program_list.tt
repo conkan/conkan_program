@@ -15,8 +15,8 @@
   <div class="well" id="programlist">
     <table class="table table-striped table-bordered table-hover">
       <colgroup>
-        <col class="col-sm-2">
-        <col class="col-sm-3">
+        <col class="col-sm-1">
+        <col class="col-sm-4">
         <col class="col-sm-2">
         <col class="col-sm-2">
         <col class="col-sm-2">
@@ -24,11 +24,11 @@
       </colgroup>
       <thead>
         <tr bgcolor="#FFcc66">
-          <th>企画ID</th>
-          <th>企画名称</th>
-          <th>担当スタッフ</th>
-          <th>実行ステータス</th>
-          <th>最終進捗報告日時</th>
+          <th style="text-align:center;">企画ID</th>
+          <th style="text-align:center;">企画名称</th>
+          <th style="text-align:center;">担当スタッフ</th>
+          <th style="text-align:center;">実行ステータス</th>
+          <th style="text-align:center;">最終進捗報告日時</th>
           <th></th>
       </thead>
       <tbody>
@@ -45,10 +45,8 @@
             <td [% rmcol %]>[% item.staff       | html %]</td>
             <td [% rmcol %]>[% item.status      | html %]</td>
             <td [% rmcol %]>[% item.repdatetime | html %]</td>
-            <td [% rmcol %]>
-              <a class="btn text-center" href="/program/[% item.pgidv %]">
-                詳細
-              </a>
+            <td style="text-align:center;">
+              <a href="/program/[% item.pgidv %]">詳細</a>
             </td>
           </tr>
         [% END %]

@@ -109,6 +109,7 @@ sub cybozu :Local {
         $c->flash->{'name'}    = $grfeed->author->name;
         $c->flash->{'account'} = $grfeed->author->email;
         $c->flash->{'ma'}      = $grfeed->author->email;
+        $c->flash->{'tname'}   = $grfeed->author->name;
         my $initrole = $c->session->{'init_role'};
         $c->flash->{'role'} = ( defined($initrole) && ($initrole eq 'addroot') )
                                  ? 'ROOT'

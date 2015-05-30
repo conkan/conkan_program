@@ -200,6 +200,30 @@ sub AddCast {
     );
 }
 
+=head2 progress
+-----------------------------------------------------------------------------
+企画管理 progress  : 進捗登録 (Chain外)
+
+=cut
+
+sub progress :Local {
+    my ( $self, $c ) = @_;
+
+    my $param = $c->request->body_params;
+    my $pgid   = $param->{'pgid'};
+
+    $c->model('ConkanDB::PgProgress')->create(
+        {
+        'pgid'      => $pgid,
+        'staffid'   => $c->user->get('staffid'),
+        'repdatetime' => \'NOW()',
+        'report'        => $param->{'progress'},
+        },
+    );
+
+    $c->response->redirect('/program/' . $pgid . '#progress');
+}
+
 =head2 program
 -----------------------------------------------------------------------------
 企画管理 program_base  : Chainの起点
@@ -230,21 +254,20 @@ sub program_list : Chained('program_base') : PathPart('list') : Args(0) {
         [ $c->model('ConkanDB::PgProgress')->search( { },
             {
                 'group_by' => [ 'pgid' ],
-                'select'   => [ 'pgid', { MAX => 'repDateTime'} ], 
+                'select'   => [ 'pgid', { MAX => 'repdatetime'} ], 
                 'as'       => [ 'pgid', 'lastprg' ],
-                'order_by' => { '-asc' => 'pgid' },
             } )
         ];
     my $list = {};
     foreach my $prg ( @$prglist ) {
-        $list->{$prg->pgid()} = $prg->get_column('lastprg');
+        $list->{$prg->get_column('pgid')} = $prg->get_column('lastprg');
     }
 
     foreach my $pgm ( @$pgmlist ) {
         $pgm->{'pgidv'}  = $pgm->pgid->pgid();
         $pgm->{'name'}   = $pgm->pgid->name();
         $pgm->{'staff'}  = $pgm->staffid ? $pgm->staffid->name() : '';
-        $pgm->{'reqpdatetime'} = $list->{$pgm->{'pgidv'}};
+        $pgm->{'repdatetime'} = $list->{$pgm->{'pgidv'}};
     }
     $c->stash->{'list'} = $pgmlist;
 }
@@ -255,7 +278,7 @@ sub program_list : Chained('program_base') : PathPart('list') : Args(0) {
 
 =cut
 
-sub program_detail : Chained('program_base') : PathPart('') : CaptureArgs(1) {
+sub program_detail : Chained('program_base') : PathPart('') : Args(1) {
     my ( $self, $c, $pgid ) = @_;
 
     $c->stash->{'RegProgram'} =
@@ -277,11 +300,15 @@ sub program_detail : Chained('program_base') : PathPart('') : CaptureArgs(1) {
     $c->stash->{'Program'}  =
         [ $c->model('ConkanDB::PgProgram')->search(
                         { pgid => $pgid },
+                        {
+                            'prefetch' => [ 'staffid', 'roomid' ],
+                        },
                     ) ]->[0];
     $c->stash->{'Progress'}  =
         [ $c->model('ConkanDB::PgProgress')->search(
                         { pgid => $pgid },
                         {
+                            'prefetch' => [ 'staffid' ],
                             'order_by' => { '-desc' => 'repdatetime' },
                         }
                     ) ];
