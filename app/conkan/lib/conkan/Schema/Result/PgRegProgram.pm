@@ -77,8 +77,9 @@ __PACKAGE__->table("pg_reg_program");
 
 =head2 regno
 
-  data_type: 'integer'
+  data_type: 'varchar'
   is_nullable: 0
+  size: 64
 
 =head2 telno
 
@@ -200,7 +201,7 @@ __PACKAGE__->add_columns(
   "regma",
   { data_type => "varchar", is_nullable => 0, size => 64 },
   "regno",
-  { data_type => "integer", is_nullable => 0 },
+  { data_type => "varchar", is_nullable => 0, size => 64 },
   "telno",
   { data_type => "varchar", is_nullable => 1, size => 64 },
   "faxno",
@@ -243,13 +244,11 @@ __PACKAGE__->add_columns(
 
 =item * L</pgid>
 
-=item * L</layout>
-
 =back
 
 =cut
 
-__PACKAGE__->set_primary_key("pgid", "layout");
+__PACKAGE__->set_primary_key("pgid");
 
 =head1 RELATIONS
 
@@ -344,8 +343,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-18 12:18:22
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:AVkX/wZ7T5DQfA//BKVIuQ
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-05-30 11:20:14
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:2GGrxfNnxvp7gzQlnRLKmA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

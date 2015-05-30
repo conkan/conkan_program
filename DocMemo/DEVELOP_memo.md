@@ -18,6 +18,7 @@ Enter password:[管理パスワード]
 1. スキーマ作成
 
 conkanをdeployしたサーバで、conkan::Schema を含むモデルクラスを作成する
+下記[DBサーバ]は、開発用DBサーバである
 
 ````
 $> cd [conkan_root]
@@ -35,7 +36,7 @@ nginxにupstreamとして開発用サーバ(下記)を利用させるため、
         # proxy_pass http://localhost:8080;
 ~~~~
 
-開発用サーバは、Catalystが作成したものを使用
+開発用サーバは、Catalystが作成したサーバスクリプトを使用
 
 ````
 $> cd [conkan_root]
@@ -66,3 +67,16 @@ $Carp::Verbose =1;
 - Catalystが発行するSQLを観るには
 サーバ起動前に環境変数 DBIC_TRACEを1に設定する
 
+````
+$> cd [conkan_root]
+$> export DBIC_TRACE=1;./script/conkan_server.pl -r -d
+````
+
+- 登録した企画をクリアするには、regprog_reset.sqlを使う
+下記[DBサーバ]は、クリア対象のDBサーバ(ほぼ開発用)である
+
+````
+$> cd [conkan_root]/..
+$> mysql -u [管理ユーザ名] -p --host=[DBサーバ] [DB名] < initializer/regprog_reset.sql
+Enter password:[管理パスワード]
+````

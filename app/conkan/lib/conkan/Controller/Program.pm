@@ -56,38 +56,48 @@ sub add :Local {
     my $hval;
 
     # $c->config->{Regist}->{RegProgram}の内容にもとづいて、pginfoの内容を登録
-    ## PgIDが未設定の場合autoincするため、{RegProgram}のみ先行登録
+    ## PgIDが未設定の場合autoincするため
     ## {RegProgram}のitem数は1つであり、loopmax定義はない
     $regcnf = $c->config->{Regist}->{RegProgram};
     $hval = __PACKAGE__->ParseRegist( $pginfo, $regcnf->{items}->[0], undef, ''  );
     if ( ref($hval) eq 'HASH' ) {
-$c->log->debug(">>> hval :\n" . Dump($hval) );
         my $row = $c->model('ConkanDB::' . $regcnf->{schema})->create( $hval );
         ## $pginfo->{企画ID}の値を再設定 (autoinc対応)
-$c->log->debug(">>>  row->pgid :[" . $row->pgid . ']' );
         $pginfo->{'企画ID'} = $row->pgid;
     }
 
+    # $c->config->{Regist}->{RegCast}の内容にもとづいて、pginfoの内容を登録
+    ## 同時にPgAllCastにも登録するため
+    ## {RegCast}のみloopmax定義がある
+    $regcnf = $c->config->{Regist}->{RegCast};
+    foreach my $item (@{$regcnf->{items}}) {
+        if ( defined($item->{loopmax}) ) {
+            foreach my $cnt (1..$item->{loopmax}) {
+                $hval = __PACKAGE__->ParseRegist( $pginfo, $item, undef, $cnt );
+                if ( ref($hval) eq 'HASH' ) {
+                    __PACKAGE__->AddCast( $c, $hval );
+                }
+            }
+        }
+        else {
+            $hval = __PACKAGE__->ParseRegist( $pginfo, $item, undef, '');
+            if ( ref($hval) eq 'HASH' ) {
+                __PACKAGE__->AddCast( $c, $hval );
+            }
+        }
+    }
+
     # $c->config->{Regist}の内容に基づいて pginfoの内容をDBに登録
-$c->log->debug('>>> pgid:[' . $pginfo->{'企画ID'} . ']');
+    ## {RegCast}以外にはloopmax定義はない
     my @kinds = keys( %{$c->config->{Regist}} );
     foreach my $kind (@kinds) {
         next if ($kind eq 'RegProgram' );
+        next if ($kind eq 'RegCast' );
         $regcnf = $c->config->{Regist}->{$kind};
         foreach my $item (@{$regcnf->{items}}) {
-            if ( defined($item->{loopmax}) ) {
-                foreach my $cnt (1..$item->{loopmax}) {
-                    $hval = __PACKAGE__->ParseRegist( $pginfo, $item, undef, $cnt );
-                    if ( ref($hval) eq 'HASH' ) {
-                        $c->model('ConkanDB::' . $regcnf->{schema})->create( $hval );
-                    }
-                }
-            }
-            else {
-                $hval = __PACKAGE__->ParseRegist( $pginfo, $item, undef, '');
-                if ( ref($hval) eq 'HASH' ) {
-                    $c->model('ConkanDB::' . $regcnf->{schema})->create( $hval )
-                }
+            $hval = __PACKAGE__->ParseRegist( $pginfo, $item, undef, '');
+            if ( ref($hval) eq 'HASH' ) {
+                $c->model('ConkanDB::' . $regcnf->{schema})->create( $hval )
             }
         }
     }
@@ -142,6 +152,54 @@ sub ParseRegist {
     return $hval;
 }
 
+=head2 AddCast
+
+出演者登録
+
+出演者受付に加え、全出演者、出演者管理 にも登録
+
+=cut
+
+sub AddCast {
+    my ( $self,
+         $c,            # コンテキスト
+         $hval,         # 登録する情報
+       ) = @_;
+
+    # 出演者受付登録
+    $c->model('ConkanDB::PgRegCast')->create( $hval );
+    # 全出演者登録
+    my $castid;
+    my $acrow = $c->model('ConkanDB::PgAllCast')->find( $hval->{'name'},
+            { 'key'  => 'name_UNIQUE', },
+        );
+    if ( $acrow ) {
+        $castid = $acrow->castid();
+    }
+    else {
+        my $aval = {
+                'name'   => $hval->{'name'},
+                'namef'  => $hval->{'namef'},
+                'status' => '',
+                };
+        if ( $hval->{'entrantregno'} =~ /^\d+$/ ) {
+            $aval->{'regno'} = $hval->{'entrantregno'};
+        }
+        $acrow = $c->model('ConkanDB::PgAllCast')->create( $aval );
+        $castid = $acrow->castid();
+    }
+    # 出演者管理登録
+    $c->model('ConkanDB::PgCast')->create(
+        {
+        'pgid'   => $hval->{pgid},
+        'castid' => $castid,
+        'name'   => $hval->{'name'},
+        'namef'  => $hval->{'namef'},
+        'status' => ( $hval->{'entrantregno'} ) ? '申込者' : $hval->{'needreq'},
+        },
+    );
+}
+
 =head2 program
 -----------------------------------------------------------------------------
 企画管理 program_base  : Chainの起点
@@ -191,7 +249,59 @@ sub program_list : Chained('program_base') : PathPart('list') : Args(0) {
     $c->stash->{'list'} = $pgmlist;
 }
 
+=head2 program/*
 
+企画管理 program_detail  : 詳細表示
+
+=cut
+
+sub program_detail : Chained('program_base') : PathPart('') : CaptureArgs(1) {
+    my ( $self, $c, $pgid ) = @_;
+
+    $c->stash->{'RegProgram'} =
+        $c->model('ConkanDB::PgRegProgram')->find($pgid);
+    $c->stash->{'RegCasts'} =
+        [ $c->model('ConkanDB::PgRegCast')->search(
+                        { pgid => $pgid },
+                        {
+                            'order_by' => { '-asc' => 'id' },
+                        }
+                    ) ];
+    $c->stash->{'RegEquips'} =
+        [ $c->model('ConkanDB::PgRegEquip')->search(
+                        { pgid => $pgid },
+                        {
+                            'order_by' => { '-asc' => 'id' },
+                        }
+                    ) ];
+    $c->stash->{'Program'}  =
+        [ $c->model('ConkanDB::PgProgram')->search(
+                        { pgid => $pgid },
+                    ) ]->[0];
+    $c->stash->{'Progress'}  =
+        [ $c->model('ConkanDB::PgProgress')->search(
+                        { pgid => $pgid },
+                        {
+                            'order_by' => { '-desc' => 'repdatetime' },
+                        }
+                    ) ];
+    $c->stash->{'Casts'} =
+        [ $c->model('ConkanDB::PgCast')->search(
+                        { pgid => $pgid },
+                        {
+                            'prefetch' => [ 'castid' ],
+                            'order_by' => { '-asc' => 'id' },
+                        }
+                    ) ];
+    $c->stash->{'Equips'} =
+        [ $c->model('ConkanDB::PgEquip')->search(
+                        { pgid => $pgid },
+                        {
+                            'prefetch' => [ 'equipid' ],
+                            'order_by' => { '-asc' => 'id' },
+                        }
+                    ) ];
+};
 =encoding utf8
 
 =head1 AUTHOR

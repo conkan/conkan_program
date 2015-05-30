@@ -118,6 +118,18 @@ __PACKAGE__->set_primary_key("castid");
 
 =head1 UNIQUE CONSTRAINTS
 
+=head2 C<name_UNIQUE>
+
+=over 4
+
+=item * L</name>
+
+=back
+
+=cut
+
+__PACKAGE__->add_unique_constraint("name_UNIQUE", ["name"]);
+
 =head2 C<regno_UNIQUE>
 
 =over 4
@@ -148,8 +160,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-18 12:18:22
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:3wUNuMBojkE8QRMk73699Q
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-05-30 11:33:23
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:aDcYwG8Q/2lMsERcTBNC8g
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

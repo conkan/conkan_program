@@ -72,17 +72,15 @@ __PACKAGE__->table("pg_reg_cast");
 
 =head2 needreq
 
-  data_type: 'enum'
-  default_value: 'accepted'
-  extra: {list => ["req","accepted","innego","yetnego"]}
+  data_type: 'varchar'
   is_nullable: 1
+  size: 64
 
 =head2 needguest
 
-  data_type: 'enum'
-  default_value: 'N'
-  extra: {list => ["Y","N"]}
+  data_type: 'varchar'
   is_nullable: 1
+  size: 10
 
 =cut
 
@@ -108,19 +106,9 @@ __PACKAGE__->add_columns(
   "entrantregno",
   { data_type => "integer", extra => { unsigned => 1 }, is_nullable => 1 },
   "needreq",
-  {
-    data_type => "enum",
-    default_value => "accepted",
-    extra => { list => ["req", "accepted", "innego", "yetnego"] },
-    is_nullable => 1,
-  },
+  { data_type => "varchar", is_nullable => 1, size => 64 },
   "needguest",
-  {
-    data_type => "enum",
-    default_value => "N",
-    extra => { list => ["Y", "N"] },
-    is_nullable => 1,
-  },
+  { data_type => "varchar", is_nullable => 1, size => 10 },
 );
 
 =head1 PRIMARY KEY
@@ -153,8 +141,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-11 15:59:00
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:W9xsbhZ8EiDI82Ki/ZtEMA
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-05-30 11:20:14
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:VZVoRY8ZGdSFJWnQ1qxyag
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

@@ -46,11 +46,9 @@
             <td [% rmcol %]>[% item.status      | html %]</td>
             <td [% rmcol %]>[% item.repdatetime | html %]</td>
             <td [% rmcol %]>
-              <button type="button" class="btn"
-                data-toggle="modal" data-target="#detailProgram"
-                data-whatever="[% item.pgidv %]" data-rmcol="[% rmcol %]">
+              <a class="btn text-center" href="/program/[% item.pgidv %]">
                 詳細
-              </button>
+              </a>
             </td>
           </tr>
         [% END %]
@@ -61,25 +59,6 @@
               data-toggle="modal" data-target="#addProgram">
         追加
       </button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal detail -->
-<div class="modal fade" id="detailProgram" tabindex="-1" role="dialog" aria-labelledby="detailProgramLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="DetailProgramLabel">Detail Program Info</h4>
-      </div>
-      <div class="modal-body" id="ProgramContent">
-        <FORM>情報取得中</FORM>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
-        <button type="button" class="btn " id="dodel">削除</button>
-      </div>
     </div>
   </div>
 </div>
@@ -109,35 +88,11 @@
 </div>
 [% PROCESS 'tttail.tt' %]
 <script>
-  // モーダルダイアログ detailProgram 表示
-  $('#detailProgram').on('show.bs.modal', function (event) {
-    var pgid = $(event.relatedTarget).data('whatever');
-    var content = $('#ProgramContent');
-    $(content).load(pgid + '/ FORM');
-    if ( $(event.relatedTarget).data('rmcol') ) {
-      $('#dodel').show();
-    }
-    else {
-      $('#dodel').hide();
-    }
-  } );
-  // モーダルダイアログdetailProgram非表示
-  $('#detailProgram').on('hide.bs.modal', function (event) {
-    location.reload(true);
-  } );
-  // プログラム削除
-  $('#dodel').click(function(event) {
-    var content = $('#ProgramContent');
-    var pgid = $('#pgid').val();
-    $('#dodel').hide();
-    $(content).load(pgid + '/del/ FORM');
-  } );
-
   // モーダルダイアログ addProgram 表示
   $('#addProgram').on('show.bs.modal', function (event) {
     $('#jsoninputfile').val('');
   } );
-  // モーダルダイアログProgram非表示
+  // モーダルダイアログ addProgram非表示
   $('#addProgram').on('hide.bs.modal', function (event) {
     location.reload(true);
   } );
