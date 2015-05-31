@@ -1,0 +1,9 @@
+<FORM method="POST" class="form-horizontal" role="form" id="progform">
+  <div style="COLOR:Red;" id="valerr"></div>
+  <div class="form-group">
+    target:[% args.target %]<br/>
+    pgid:  [% args.pgid   %]<br/>
+    id:    [% args.id     %]<br/>
+  </div>
+</FORM>
+

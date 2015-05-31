@@ -221,7 +221,7 @@ sub progress :Local {
         },
     );
 
-    $c->response->redirect('/program/' . $pgid . '#progress');
+    $c->response->redirect('/program/' . $pgid );
 }
 
 =head2 program
@@ -270,6 +270,54 @@ sub program_list : Chained('program_base') : PathPart('list') : Args(0) {
         $pgm->{'repdatetime'} = $list->{$pgm->{'pgidv'}};
     }
     $c->stash->{'list'} = $pgmlist;
+}
+
+=head2 program/regprogram
+
+企画管理 pgup_regprog  : 企画更新(受付分)
+
+=cut
+sub pgup_regprog : Chained('program_base') : PathPart('regprogram') : Args(1) {
+    my ( $self, $c, $pgid ) = @_;
+
+    $c->stash->{'args'} = { target => 'regprogram', pgid => $pgid, };
+
+}
+
+=head2 program/program
+
+企画管理 pgup_program  : 企画更新(管理分)
+
+=cut
+sub pgup_program : Chained('program_base') : PathPart('program') : Args(1) {
+    my ( $self, $c, $pgid ) = @_;
+
+    $c->stash->{'args'} = { target => 'program', pgid => $pgid, };
+
+}
+
+=head2 program/equip
+
+企画管理 pgup_equip  : 決定機材更新
+
+=cut
+sub pgup_equip : Chained('program_base') : PathPart('equip') : Args(2) {
+    my ( $self, $c, $pgid, $id ) = @_;
+
+    $c->stash->{'args'} = { target => 'equip', pgid => $pgid, id => $id, };
+
+}
+
+=head2 program/cast
+
+企画管理 pgup_cast  : 決定出演者更新
+
+=cut
+sub pgup_cast : Chained('program_base') : PathPart('cast') : Args(2) {
+    my ( $self, $c, $pgid, $id ) = @_;
+
+    $c->stash->{'args'} = { target => 'cast', pgid => $pgid, id => $id, };
+
 }
 
 =head2 program/*

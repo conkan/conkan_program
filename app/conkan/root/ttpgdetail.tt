@@ -7,7 +7,7 @@ IF c.user.get('staffid') == Program.staffid;
   SET editable = 1;
 END -%]
 [%- MACRO subtag ( bgcolor ) BLOCK -%]
-  <div class="row">
+  <div class="subtag row">
     <div class="col-sm-2 [% bgcolor.reg_program %] text-center">
       <a href="#reg_program"><h5>企画概要</h5></a>
     </div>
@@ -32,7 +32,8 @@ END -%]
 <!-- 企画概要 -->
 <div class="well" id="reg_program">
   [% subtag( { 'reg_program' => 'bg-info' } ) %]
-  <table class="table table-bordered table-condensed" style="background-color:white;">
+  <table class="table table-bordered table-condensed"
+   style="background-color:white;">
     <colgroup>
       <col class="col-sm-1">
       <col class="col-sm-1">
@@ -40,57 +41,73 @@ END -%]
       <col class="col-sm-2">
       <col class="col-sm-2">
       <col class="col-sm-2">
-      <col class="col-sm-2">
+      <col class="col-sm-1">
+      <col class="col-sm-1">
     </colgroup>
     <tbody>
       <tr>
-        <th>企画ID</th>
-        <td>[% RegProgram.pgid | html %]</td>
-        <td colspan="5">[% RegProgram.name | html %] ([% RegProgram.namef | html %])</td>
+        <th>企画ID</th> <td>[% RegProgram.pgid | html %]</td>
+        <td colspan="5">
+          <b>[% RegProgram.name | html %]</b>
+          ([% RegProgram.namef | html %])
+        </td>
       </tr>
       <tr>
+        <th>内容</th>
         <td colspan="7">[% RegProgram.content | html %]</td>
       </tr>
       <tr>
-        <th colspan="2">申込者名</th>     <td>[% RegProgram.regname | html %]</td>
-        <th>申込日付</th>     <td>[% RegProgram.regdate | html %]</td>
-        <th>企画立案経験</th> <td>[% RegProgram.experience | html %]</td>
+        <th colspan="2">申込者名</th> <td>[% RegProgram.regname | html %]</td>
+        <th>申込日付</th> <td>[% RegProgram.regdate | html %]</td>
+        <th>企画立案経験</th>
+        <td colspan="2">[% RegProgram.experience | html %]</td>
       </tr>
       [%- IF editable %]
         <tr>
-          <th colspan="2">大会登録番号</th>   <td>[% RegProgram.regno | html %]</td>
-          <th>メールアドレス</th> <td colspan="3">[% RegProgram.regma | html %]</td>
+          <th colspan="2">大会登録番号</th>
+          <td>[% RegProgram.regno | html %]</td>
+          <th>メールアドレス</th>
+          <td colspan="4">[% RegProgram.regma | html %]</td>
         </tr>
         <tr>
-          <th colspan="2">電話番号</th>     <td>[% RegProgram.telno | html %]</td>
-          <th>FAX番号</th>      <td>[% RegProgram.faxno | html %]</td>
-          <th>携帯番号</th>     <td>[% RegProgram.celno | html %]</td>
+          <th colspan="2">電話番号</th> <td>[% RegProgram.telno | html %]</td>
+          <th>FAX番号</th> <td>[% RegProgram.faxno | html %]</td>
+          <th>携帯番号</th> <td colspan="2">[% RegProgram.celno | html %]</td>
         </tr>
       [% END %]
       <tr>
-        <th colspan="2">企画種別</th>   <td>[% RegProgram.type | html %]</td>
+        <th colspan="2">企画種別</th> <td>[% RegProgram.type | html %]</td>
         <th>予想参加者</th> <td>[% RegProgram.expmaxcnt | html %]</td>
-        <th>希望場所</th>   <td>[% RegProgram.place | html %]</td>
+        <th>希望場所</th> <td colspan="2">[% RegProgram.place | html %]</td>
       </tr>
       <tr>
-        <th colspan="2">希望日時</th>       <td>[% RegProgram.date | html %]</td>
+        <th colspan="2">希望日時</th> <td>[% RegProgram.date | html %]</td>
         <th>希望レイアウト</th> <td>[% RegProgram.layout | html %]</td>
-        <th>希望コマ数</th>     <td>[% RegProgram.classlen | html %]</td>
+        <th>希望コマ数</th>
+        <td colspan="2">[% RegProgram.classlen | html %]</td>
       </tr>
       <tr>
-        <th colspan="2">内容事前公開</th>     <td>[% RegProgram.contentpub | html %]</td>
+        <th colspan="2">内容事前公開</th>
+        <td>[% RegProgram.contentpub | html %]</td>
         <th>リアルタイム公開</th> <td>[% RegProgram.realpub | html %]</td>
-        <th>事後公開</th>         <td>[% RegProgram.afterpub | html %]</td>
+        <th>事後公開</th> <td colspan="2">[% RegProgram.afterpub | html %]</td>
       </tr>
       <tr>
-        <th colspan="2">重なると困る企画</th> <td colspan="5">[% RegProgram.aboiddup | html %]</td>
+        <th colspan="2">重なると困る企画</th>
+        <td colspan="6">[% RegProgram.aboiddup | html %]</td>
       </tr>
       <tr>
-        <th colspan="2">備考</th> <td colspan="4">[% RegProgram.comment | html %]</td>
+        <th colspan="2">備考</th>
+        <td colspan="5">[% RegProgram.comment | html %]</td>
         <td align="center">
           [%- IF editable %]
-            <button type="button" class="btn btn-warning" data-toggle="modal"
-              data-target="#editRegProgram" data-whatever="[% RegProgram.pgid | html %]">
+            <button type="button" class="btn btn-warning btn-xs"
+              data-toggle="modal"
+              data-target="#PgEdit"
+              data-whatpgid="[% RegProgram.pgid | html %]"
+              data-whatitem="-"
+              data-whattarget="regprogram"
+            >
               編集
             </button>
           [% END %]
@@ -98,41 +115,48 @@ END -%]
       </tr>
     </tbody>
   </table>
-  <table class="table table-bordered table-condensed" style="background-color:white;">
+  <table class="table table-bordered table-condensed"
+   style="background-color:white;">
     <colgroup>
       <col class="col-sm-2">
       <col class="col-sm-2">
       <col class="col-sm-2">
       <col class="col-sm-2">
       <col class="col-sm-2">
-      <col class="col-sm-2">
+      <col class="col-sm-1">
+      <col class="col-sm-1">
     </colgroup>
     <tbody>
       <tr>
         <th>担当スタッフ</th> <td>[% Program.staffid.tname | html %]</td>
-        <th>実行ステータス</th> <td colspan="3">[% Program.status | html %]</td>
+        <th>実行ステータス</th> <td colspan="4">[% Program.status | html %]</td>
       </tr>
       <tr>
         <th>実施日時1</th>
         <td>[% Program.date1 | html %]</td><td>[% Program.stime1 | html %]</td>
-        <td colspan="3">- [% Program.etime1 | html %]</td>
+        <td colspan="4">- [% Program.etime1 | html %]</td>
       </tr>
       <tr>
         <th>実施日時2</th>
         <td>[% Program.date2 | html %]</td><td>[% Program.stime2 | html %]</td>
-        <td colspan="3">-[% Program.etime2 | html %]</td>
+        <td colspan="4">-[% Program.etime2 | html %]</td>
       </tr>
       <tr>
         <th>場所</th> <td colspan="2">[% Program.roomid.name | html %]</td>
                       <td>[% Program.roomid.roomNo | html %]</td>
-        <th>表示順序</th> <td>[% Program.layerno | html %]</td>
+        <th>表示順序</th> <td colspan="2">[% Program.layerno | html %]</td>
       </tr>
       <tr>
-        <th>企画紹介文進捗状況</th> <td colspan="4">[% Program.progressprp | html %]</td>
+        <th>企画紹介文進捗状況</th> <td colspan="5">[% Program.progressprp | html %]</td>
         <td align="center">
           [%- IF editable %]
-            <button type="button" class="btn btn-warning" data-toggle="modal"
-              data-target="#editProgram" data-whatever="[% RegProgram.pgid | html %]">
+            <button type="button" class="btn btn-warning btn-xs"
+              data-toggle="modal"
+              data-target="#PgEdit"
+              data-whatpgid="[% RegProgram.pgid | html %]"
+              data-whatitem="-"
+              data-whattarget="program"
+            >
               編集
             </button>
           [% END %]
@@ -144,7 +168,8 @@ END -%]
 <!-- 要望機材 -->
 <div class="well" id="reg_equip">
   [% subtag( { 'reg_equip' => 'bg-info' } ) %]
-  <table class="table table-bordered table-condensed" style="background-color:white;">
+  <table class="table table-bordered table-condensed"
+   style="background-color:white;">
     <colgroup>
       <col class="col-sm-2">
       <col class="col-sm-1">
@@ -180,7 +205,8 @@ END -%]
 <!-- 要望出演者 -->
 <div class="well" id="reg_cast">
   [% subtag( { 'reg_cast' => 'bg-info' } ) %]
-  <table class="table table-bordered table-condensed" style="background-color:white;">
+  <table class="table table-bordered table-condensed"
+   style="background-color:white;">
     <colgroup>
       <col class="col-sm-3">
       <col class="col-sm-3">
@@ -210,7 +236,8 @@ END -%]
 <!-- 決定機材 -->
 <div class="well" id="equip">
   [% subtag( { 'equip' => 'bg-info' } ) %]
-  <table class="table table-bordered table-condensed" style="background-color:white;">
+  <table class="table table-bordered table-condensed"
+   style="background-color:white;">
     <colgroup>
       <col class="col-sm-2">
       <col class="col-sm-2">
@@ -223,7 +250,8 @@ END -%]
         <th style="text-align:center;">機材名</th>
         <th style="text-align:center;">機材番号</th>
         <th style="text-align:center;">数</th>
-        <th colspan="2" style="text-align:center;">仕様</th>
+        <th style="text-align:center;">仕様</th>
+        <th></th>
       </tr>
     </thead>
     <tbody>
@@ -232,18 +260,36 @@ END -%]
           <td>[% item.equipid.name    | html %]</td>
           <td>[% item.equipid.equipno | html %]</td>
           <td>[% item.count           | html %]</td>
-          <td colspan="2">[% item.equipid.spec    | html %]</td>
+          <td>[% item.equipid.spec    | html %]</td>
+          <td align="center">
+            [%- IF editable %]
+              <button type="button" class="btn btn-warning btn-xs"
+                data-toggle="modal"
+                data-target="#PgEdit"
+                data-whatpgid="[% RegProgram.pgid | html %]"
+                data-whatitem="[% item.id | html %]"
+                data-whattarget="equip"
+              >
+                編集
+              </button>
+            [% END %]
+          </td>
         </tr>
       [% END %]
       [%- IF editable %]
         <tr>
-          <td colspan="4"></td>
           <td align="center">
-            <button type="button" class="btn btn-warning" data-toggle="modal"
-              data-target="#editEquip" data-whatever="[% RegProgram.pgid | html %]">
-              編集
+            <button type="button" class="btn btn-primary btn-xs"
+              data-toggle="modal"
+              data-target="#PgEdit"
+              data-whatpgid="[% RegProgram.pgid | html %]"
+              data-whatitem="0"
+              data-whattarget="equip"
+            >
+              追加
             </button>
           </td>
+          <td colspan="4"></td>
         </tr>
       [% END %]
     </tbody>
@@ -252,7 +298,8 @@ END -%]
 <!-- 決定出演者 -->
 <div class="well" id="cast">
   [% subtag( { 'cast' => 'bg-info' } ) %]
-  <table class="table table-bordered table-condensed" style="background-color:white;">
+  <table class="table table-bordered table-condensed"
+   style="background-color:white;">
     <colgroup>
       <col class="col-sm-2">
       <col class="col-sm-2">
@@ -269,7 +316,8 @@ END -%]
         <th style="text-align:center;">企画ネーム</th>
         <th style="text-align:center;">ふりがな</th>
         <th style="text-align:center;">コンタクトステータス</th>
-        <th colspan="2" style="text-align:center;">出演ステータス</th>
+        <th style="text-align:center;">出演ステータス</th>
+        <th></th>
       </tr>
     </thead>
     <tbody>
@@ -280,18 +328,36 @@ END -%]
           <td>[% item.name          | html %]</td>
           <td>[% item.namef         | html %]</td>
           <td>[% item.castid.status | html %]</td>
-          <td colspan="2">[% item.status        | html %]</td>
+          <td>[% item.status        | html %]</td>
+          <td align="center">
+            [%- IF editable %]
+              <button type="button" class="btn btn-warning btn-xs"
+                data-toggle="modal"
+                data-target="#PgEdit"
+                data-whatpgid="[% RegProgram.pgid | html %]"
+                data-whatitem="[% item.id | html %]"
+                data-whattarget="cast"
+              >
+                編集
+              </button>
+            [% END %]
+          </td>
         </tr>
       [% END %]
       [%- IF editable %]
         <tr>
-          <td colspan="6"></td>
           <td align="center">
-            <button type="button" class="btn btn-warning" data-toggle="modal"
-              data-target="#editCast" data-whatever="[% RegProgram.pgid | html %]">
-              編集
+            <button type="button" class="btn btn-primary btn-xs"
+              data-toggle="modal"
+              data-target="#PgEdit"
+              data-whatpgid="[% RegProgram.pgid | html %]"
+              data-whatitem="0"
+              data-whattarget="cast"
+            >
+              追加
             </button>
           </td>
+          <td colspan="6"></td>
         </tr>
       [% END %]
     </tbody>
@@ -303,12 +369,12 @@ END -%]
   <FORM id="addProgress" role="form" method="POST" action="/program/progress">
     <div class="form-group">
       <input type="hidden" name="pgid", id="pgid" value="[% RegProgram.pgid | html %]"/>
-      <label >進捗報告</label>
-      <button type="submit" class="btn btn-primary">登録</button>
+      <button type="submit" class="btn btn-primary btn-xs">進捗登録</button>
       <textarea name="progress" id="progress" class="col-sm-12" rows="3"></textarea>
     </div>
   </FORM>
-  <table class="table table-bordered table-condensed" style="background-color:white;">
+  <table class="table table-bordered table-condensed"
+   style="background-color:white;">
     <colgroup>
       <col class="col-sm-2">
       <col class="col-sm-2">
@@ -331,4 +397,29 @@ END -%]
       [% END %]
     </tbody>
   </table>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="PgEdit" tabindex="-1" role="dialog"
+ aria-labelledby="PgEditLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal"
+         aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title" id="PgEditLabel">Edit ProgramInfo</h4>
+      </div>
+      <div class="modal-body" id="PgEditContent">
+        <FORM>情報取得中</FORM>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">
+          閉じる
+        </button>
+        <button type="button" class="btn btn-primary" id="dobtn">更新</button>
+      </div>
+    </div>
+  </div>
 </div>

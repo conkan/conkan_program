@@ -15,7 +15,6 @@
   [% PROCESS 'ttpgdetail.tt' %]
 </div>
 [% PROCESS 'tttail.tt' %]
-<script>
-</script>
+[% PROCESS 'ttpgdtjs.tt' %]
 </body>
 </html>

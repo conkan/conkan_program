@@ -1,0 +1,44 @@
+<script>
+  // スクロール制御
+  $('.subtag a').click(function(){
+    var pd, tp;
+    pd = parseInt($(document.body).css('padding-top'));
+    tp = $(this.hash).position().top;
+    $(document).scrollTop(tp-pd);
+    return false;
+  });
+  // モーダルダイアログ表示
+  $('#PgEdit').on('show.bs.modal', function (event) {
+    var pgid   = $(event.relatedTarget).data('whatpgid');
+    var id     = $(event.relatedTarget).data('whatitem');
+    var target = $(event.relatedTarget).data('whattarget');
+    var content = $('#PgEditContent');
+    var arg = target + '/' + pgid;
+    if ( id != "-" ) {
+        arg += '/' + id;
+    }
+    arg += '/ FORM';
+    $(content).load(arg);
+    $('#dobtn').show();
+  } );
+  // モーダルダイアログ非表示
+  $('#PgEdit').on('hide.bs.modal', function (event) {
+    location.reload(true);
+  } );
+  // 更新
+  $('#dobtn').click(function(event) {
+    // バリデーション
+    var content = $('#PgEditContent');
+    var data = $('#progform').serializeArray();
+    var pgid   = $('#pgid').val();
+    var id     = $('#id').val();
+    var target = $('#target').val();
+    $('#dobtn').hide();
+    var arg = target + '/' + pgid;
+    if ( id != "-" ) {
+        arg += '/' + id;
+    }
+    arg += '/ FORM';
+    $(content).load(arg, data );
+  } );
+</script>
