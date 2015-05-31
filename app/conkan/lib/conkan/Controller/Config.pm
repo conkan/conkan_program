@@ -30,6 +30,7 @@ sub auto :Private {
     my ( $self, $c ) = @_;
 
     return 1 if ( $c->user->get('role') eq 'ROOT' );
+    return 1 if ( $c->user->get('role') eq 'ADMIN' );
 
     $c->response->status(412);
     $c->stash->{template} = 'accessDeny.tt';
@@ -203,7 +204,7 @@ sub staff_edit : Chained('staff_show') : PathPart('edit') : Args(0) {
             }
             # 末尾の空白を除く
             foreach my $key ( keys( %$value ) ) {
-                $value->{$key} =~ s/\s+$//;
+                $value->{$key} =~ s/\s+$// if defined($value->{$key});
             }
             $value->{'staffid'}  = $rowprof->staffid;
             $value->{'otheruid'} = $rowprof->otheruid;
@@ -372,7 +373,7 @@ sub room_edit : Chained('room_show') : PathPart('edit') : Args(0) {
         for my $item qw/name roomno max type size tablecnt
                         chaircnt equips useabletime net comment / {
             $value->{$item} = $c->request->body_params->{$item};
-            $value->{$item} =~ s/\s+//;
+            $value->{$item} =~ s/\s+$// if defined($value->{$item});
         }
         if ( $roomid != 0 ) {
             # 更新

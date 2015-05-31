@@ -34,8 +34,12 @@ SET cuRole = c.user.get('role') -%]
               <li id="program_progress"><a href="/timetable">タイムテーブル</a></li>
             [% END %]
             <li id="mypage_profile"><a href="/mypage/profile">プロファイル設定</a></li>
+          [% END %]
+          [%- IF cuRole == 'ROOT' || cuRole == 'ADMIN' %]
+            <li id="config_staff"><a href="/config/staff/list">スタッフ管理</a></li>
+          [% END %]
+          [%- IF acname != 'admin' %]
             [%- IF cuRole == 'ROOT' %]
-              <li id="config_staff"><a href="/config/staff/list">スタッフ管理</a></li>
               <li id="config_cast"><a href="/cast/list">出演者管理</a></li>
               <li id="config_room"><a href="/config/room/list">企画部屋管理</a></li>
               <li id="config_equip"><a href="/config/equip/list">機材管理</a></li>

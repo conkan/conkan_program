@@ -52,7 +52,7 @@
   </div>
   <div class="form-group">
     <label class="col-sm-3 text-right">備考</label>
-    <textarea name="comment" id="comment" class="col-sm-8" rows="3">[%- rs.comment | trim | html -%]
-    </textarea>
+    <textarea name="comment" id="comment" class="col-sm-8" rows="3">
+      [%- rs.comment | trim | html -%]</textarea>
   </div>
 </FORM>

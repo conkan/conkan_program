@@ -39,20 +39,17 @@
       <div class="form-group">
         <label class="col-sm-3 text-right">[% cnf.pg_status_vals.pg_conf_name %]</label>
         <textarea name="pg_status_vals" id="pg_status_vals" class="col-sm-8" rows="3">
-          [%- cnf.pg_status_vals.pg_conf_value | html -%]
-        </textarea>
+          [%- cnf.pg_status_vals.pg_conf_value | trim | html -%]/textarea>
       </div>
       <div class="form-group">
         <label class="col-sm-3 text-right">[% cnf.cast_status_vals.pg_conf_name %]</label>
         <textarea name="cast_status_vals" id="cast_status_vals" class="col-sm-8" rows="4">
-          [%- cnf.cast_status_vals.pg_conf_value | html -%]
-        </textarea>
+          [%- cnf.cast_status_vals.pg_conf_value | trim | html -%]</textarea>
       </div>
       <div class="form-group">
         <label class="col-sm-3 text-right">[% cnf.contact_status_vals.pg_conf_name %]</label>
         <textarea name="contact_status_vals" id="contact_status_vals" class="col-sm-8" rows="6">
-          [%- cnf.contact_status_vals.pg_conf_value | html -%]
-        </textarea>
+          [%- cnf.contact_status_vals.pg_conf_value | trim | html -%]</textarea>
       </div>
       <div class="form-group">
         <span class="col-sm-4"></span>

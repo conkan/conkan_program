@@ -1,9 +1,161 @@
 <FORM method="POST" class="form-horizontal" role="form" id="progform">
   <div style="COLOR:Red;" id="valerr"></div>
   <div class="form-group">
-    target:[% args.target %]<br/>
-    pgid:  [% args.pgid   %]<br/>
-    id:    [% args.id     %]<br/>
-  </div>
+    <input type="hidden" name="id", id="id" value="-"/>
+    <input type="hidden" name="target", id="target" value="regprogram"/>
+  <table class="table table-bordered table-condensed">
+    </colgroup>
+      <col class="col-sm-2">
+      <col class="col-sm-2">
+      <col class="col-sm-2">
+    </colgroup>
+    <tbody>
+      <tr>
+        <th style="background-color:#FFcc66">企画ID</th>
+        <td style="background-color:#FFcc66">[% rs.pgid | html %]</td>
+        <td></td>
+      </tr>
+      <tr>
+        <td colspan="3">
+          <input type="text" name="name" class="col-sm-6"
+            value="[% rs.name | html %]"/>
+          <input type="text" name="namef" class="col-sm-6"
+            value="[% rs.namef | html %]"/>
+        </td>
+      </tr>
+      <tr>
+        <th>内容</th>
+        <td colspan="2"></td>
+      </tr>
+      <tr>
+        <td colspan="3">
+          <textarea name="content" class="col-sm-12" rows="2">
+            [%- rs.content | trim | html -%]</textarea>
+        </td>
+      </tr>
+      <tr>
+        <th>申込者名</th>
+        <th>申込日付</th>
+        <th>企画立案経験</th>
+      </tr>
+      <tr>
+        <td>
+          <input type="text" name="regname" class="col-sm-12"
+            value="[% rs.regname | html %]"/>
+        </td>
+        <td>[% rs.regdate | html %]</td>
+        <td>[% rs.experience | html %]</td>
+      </tr>
+        <th>大会登録番号</th>
+        <th colspan="2">メールアドレス</th>
+      </tr>
+      <tr>
+        <td>
+          <input type="text" name="regno" class="col-sm-12"
+            value="[% rs.regno | html %]"/>
+        </td>
+        <td colspan="2">
+          <input type="text" class="col-sm-12" name="regma"
+            value="[% rs.regma | html %]"/>
+        </td>
+      </tr>
+      <tr>
+        <th>電話番号</th>
+        <th>FAX番号</th>
+        <th>携帯番号</th>
+      </tr>
+      <tr>
+        <td>
+          <input type="text" name="telno" class="col-sm-12"
+            value="[% rs.telno | html %]"/>
+        </td>
+        <td>
+          <input type="text" name="faxno" class="col-sm-12"
+            value="[% rs.faxno | html %]"/>
+        </td>
+        <td>
+          <input type="text" name="celno" class="col-sm-12"
+            value="[% rs.celno | html %]"/>
+        </td>
+      </tr>
+      <tr>
+        <th>企画種別</th>
+        <th>予想参加者</th>
+        <th>希望場所</th>
+      </tr>
+      <tr>
+        <td>
+          <input type="text" name="type" class="col-sm-12"
+            value="[% rs.type | html %]"/>
+        </td>
+        <td>
+          <input type="text" name="expmaxcnt" class="col-sm-12"
+            value="[% rs.expmaxcnt | html %]"/>
+        </td>
+        <td>
+          <input type="text" name="place" class="col-sm-12"
+            value="[% rs.place | html %]"/>
+        </td>
+      </tr>
+      <tr>
+        <th>希望日時</th>
+        <th>希望レイアウト</th>
+        <th>希望コマ数</th>
+      </tr>
+      <tr>
+        <td>
+          <input type="text" name="date" class="col-sm-12"
+            value="[% rs.date | html %]"/>
+        </td>
+        <td>
+          <input type="text" name="layout" class="col-sm-12"
+            value="[% rs.layout | html %]"/>
+        </td>
+        <td>
+          <input type="text" name="classlen" class="col-sm-12"
+            value="[% rs.classlen | html %]"/>
+        </td>
+      </tr>
+      <tr>
+        <th>内容事前公開</th>
+        <th>リアルタイム公開</th>
+        <th>事後公開</th>
+      </tr>
+      <tr>
+        <td>
+          <input type="text" name="contentpub" class="col-sm-12"
+            value="[% rs.contentpub | html %]"/>
+        </td>
+        <td>
+          <input type="text" name="realpub" class="col-sm-12"
+            value="[% rs.realpub | html %]"/>
+        </td>
+        <td>
+          <input type="text" name="afterpub" class="col-sm-12"
+            value="[% rs.afterpub | html %]"/>
+        </td>
+      </tr>
+      <tr>
+        <th>重なると困る企画</th>
+        <td colspan="2">
+      </tr>
+      <tr>
+        <td colspan="3">
+          <textarea name="aboiddup" class="col-sm-12" rows="2">
+            [%- rs.aboiddup | trim | html -%]</textarea>
+        </td>
+      </tr>
+      <tr>
+        <th>備考</th>
+        <td colspan="2">
+      </tr>
+      <tr>
+        <td colspan="3">
+          <textarea name="comment" class="col-sm-12" rows="2">
+            [%- rs.comment | trim | html -%]</textarea>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </FORM>
 

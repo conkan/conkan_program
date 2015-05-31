@@ -49,15 +49,15 @@
               [%- IF rmcol -%]
                 >
                 無効
-              [% ELSE %]
+              [%- ELSE -%]
                 data-toggle="modal" data-target="#editStaff"
                 data-whatever="[% item.staffid %]">
                 更新
-              [% END %]
+              [%- END %]
               </button>
             </td>
           </tr>
-        [% END %]
+        [%- END %]
       </tbody>
     </table>
   </div>

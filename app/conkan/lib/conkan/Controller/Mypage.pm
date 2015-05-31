@@ -53,7 +53,7 @@ sub profile :Local {
     }
     # 末尾の空白を除く
     foreach my $key ( keys( %$value ) ) {
-        $value->{$key} =~ s/\s+$//;
+        $value->{$key} =~ s/\s+$// if defined($value->{$key});
     }
 
     if ( $staffid ) { # 更新

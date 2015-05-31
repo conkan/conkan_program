@@ -280,8 +280,47 @@ sub program_list : Chained('program_base') : PathPart('list') : Args(0) {
 sub pgup_regprog : Chained('program_base') : PathPart('regprogram') : Args(1) {
     my ( $self, $c, $pgid ) = @_;
 
-    $c->stash->{'args'} = { target => 'regprogram', pgid => $pgid, };
-
+    my $rowprof = $c->model('ConkanDB::PgRegProgram')->find($pgid);
+    if ( $c->request->method eq 'GET' ) {
+        # 更新表示
+        $c->session->{'updtic'} = time;
+        $rowprof->update( { 
+            'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
+        } );
+        $c->stash->{'rs'} = $rowprof;
+    }
+    else {
+        # 更新実施
+        if ( $rowprof->updateflg eq 
+                +( $c->sessionid . $c->session->{'updtic'}) ) {
+            my $value = {};
+            for my $item qw/ name namef regma regno telno faxno celno
+                             type place layout date classlen expmaxcnt
+                             content contentpub realpub afterpub avoiddup
+                             experience comment / {
+                $value->{$item} = $c->request->body_params->{$item};
+            }
+            # 末尾の空白を除く
+            foreach my $key ( keys( %$value ) ) {
+                $value->{$key} =~ s/\s+$// if defined($value->{$key});
+            }
+            try {
+                $rowprof->update( $value ); 
+                $c->response->body('<FORM><H1>更新しました</H1></FORM>');
+            } catch {
+                my $e = shift;
+                $c->log->error('>>> ' . localtime() . 'dbexp : [' . $e . ']');
+                $c->clear_errors();
+                $c->response->body('<FORM>更新失敗</FORM>');
+            };
+        }
+        else {
+            $c->stash->{'rs'} = undef;
+            $c->response->body = '<FORM><H1>更新できませんでした</H1><BR/>他スタッフが変更した可能性があります</FORM>';
+        }
+        $c->stash->{'rs'} = undef;
+        $c->response->status(200);
+    }
 }
 
 =head2 program/program
