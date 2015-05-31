@@ -51,6 +51,10 @@ sub profile :Local {
             $staffid = $c->user->get('staffid');
         }
     }
+    # 末尾の空白を除く
+    foreach my $key ( keys( %$value ) ) {
+        $value->{$key} =~ s/\s+$//;
+    }
 
     if ( $staffid ) { # 更新
         my $rowprof = [ $staffM->find($staffid) ]->[0];
@@ -82,6 +86,7 @@ sub profile :Local {
                 else {
                     $value->{'passwd'}   = $rowprof->passwd
                 }
+                $value->{'tname'} = $value->{'tname'} || $value->{'name'};
                 $rowprof->update( $value ); 
                 $c->stash->{'rs'} = undef;
                 $c->stash->{'state'} = 'success';
@@ -109,13 +114,10 @@ sub profile :Local {
             # 登録実施
             unless ( $staffM->search({account => $value->{'account'}})->count ) {
                 $value->{'otheruid'} = encode_json( $oainfo );
-                # 末尾の空白を除く
-                foreach my $key ( keys( %$value ) ) {
-                    $value->{$key} =~ s/\s+$//;
-                }
                 $value->{'passwd'} =
                     crypt( $value->{'passwd'}, random_string( 'cccc' ));
                 $value->{'staffid'} = undef;
+                $value->{'tname'} = $value->{'tname'} || $value->{'name'};
                 $staffM->create( $value );
                 $c->stash->{'rs'} = undef;
                 $c->stash->{'state'} = 'success';

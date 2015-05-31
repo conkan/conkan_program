@@ -1,7 +1,7 @@
 開発時メモ
 =========
 
-1. データベース作成
+1. データベーススキーマ作成
 
 事前にmysqlのrootユーザで
 データベース"conkan"を作成し、
@@ -15,8 +15,6 @@ $> cd [conkan_root]/..
 $> mysql -u [管理ユーザ名] -p --host=[DBサーバ] < initializer/conkan_init.sql
 Enter password:[管理パスワード]
 ````
-1. スキーマ作成
-
 conkanをdeployしたサーバで、conkan::Schema を含むモデルクラスを作成する
 下記[DBサーバ]は、開発用DBサーバである
 

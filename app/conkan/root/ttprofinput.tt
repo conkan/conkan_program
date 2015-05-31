@@ -2,98 +2,75 @@
 [% IF rs.staffid == c.user.get('staffid');
   SET selfUpdate = 1;
 END %]
-<FORM method="POST" class="form-horizontal" role="form" action="/mypage/profile" id="profform">
-  <div style="COLOR:Red;" id="valerr">
-  [%- IF accountdupl -%]
-    アカウントが重複しています
-  [%- END -%]
-  </div>
-  <div class="form-group">
-    <input type="hidden" name="staffid", id="staffid" value="[% rs.staffid %]"/>
-    <input type="hidden" name="cyid", value="[% rs.cyid %]"/>
-    <input type="hidden" name="CybozuToken",  value="[% rs.CybozuToken  %]"/>
-    <input type="hidden" name="CybozuSecret", value="[% rs.CybozuSecret %]"/>
-    <input type="hidden" name="rmdate", id="rmdate" value="[% rs.rmdate %]"/>
-  </div>
-  <div class="form-group">
-    <label class="col-sm-3 text-right">名前</label>
-    <input type="text" name="name" id="name" class="col-sm-4" value="[% rs.name | html %]"/>
-  </div>
-  <div class="form-group">
-    <label class="col-sm-3 text-right">アカウント</label>
-    <input type="text" name="account" id="account" class="col-sm-4" value="[% rs.account |html %]"/>
-  </div>
-  <div class="form-group">
-    <label class="col-sm-3 text-right">パスワード</label>
-    <input type="password" name="passwd" id="passwd" class="col-sm-4">
-  </div>
-  <div class="form-group">
-    <label class="col-sm-3 text-right">パスワード(確認) </label>
-    <input type="password" name="passwd2" id="passwd2" class="col-sm-4">
-  </div>
-  <div class="form-group">
-    <label class="col-sm-3 text-right">役割</label>
-    <select class="col-sm-4" name="role" id="role">
-    [% IF cuRole == 'ROOT' %]
-      <option id="NORM" value="NORM">企画スタッフ</option>
-      <option id="PG"   value="PG">企画管理スタッフ</option>
-      <option id="ROOT" value="ROOT">システム管理者</option>
-    [% ELSE %]
-      [%- SWITCH rs.role -%]
-        [%- CASE 'NORM' -%]
-          <option id="NORM" value="NORM">企画スタッフ</option>
-        [%- CASE 'PG'   -%]
-          <option id="PG"   value="PG">企画管理スタッフ</option>
-        [%- CASE 'ROOT' -%]
-          <option id="ROOT" value="ROOT">システム管理者</option>
-      [%- END -%]
-    [% END %]
-    </select>
-  </div>
-  <div class="form-group">
-    <label class="col-sm-3 text-right">メールアドレス</label>
-    <input type="text" name="ma" id="ma" class="col-sm-4" value="[% rs.ma | html %]"/>
-  </div>
-  <div class="form-group">
-    <label class="col-sm-3 text-right">電話番号</label>
-    <input type="text" name="telno" id="telno" class="col-sm-4" value="[% rs.telno | html %]"/>
-  </div>
-  <div class="form-group">
-    <label class="col-sm-3 text-right">米魂番号</label>
-    <input type="text" name="regno" id="regno" class="col-sm-4" value="[% rs.regno | html %]"/>
-  </div>
-  <div class="form-group">
-    <label class="col-sm-3 text-right">担当名</label>
-    <input type="text" name="tname" id="tname" class="col-sm-4" value="[% rs.tname | html %]"/>
-  </div>
-  <div class="form-group">
-    <label class="col-sm-3 text-right">担当名ふりがな</label>
-    <input type="text" name="tnamef" id="tnamef" class="col-sm-4" value="[% rs.tnamef | html %]"/>
-  </div>
-  <div class="form-group">
-    <label class="col-sm-3 text-right">備考</label>
-    <textarea name="comment" id="comment" class="col-sm-8" rows="3">[% rs.comment | html %]
-    </textarea>
-  </div>
-[% IF selfUpdate %]
-  <BR/>
-  <div class="form-group">
-    <span class="col-sm-1"></span>
-    <button type="submit" class="col-sm-2 text-center btn btn-primary btn-large" id="dobtn">
-      [%- IF addstaff %]
-      登録
-      [%- ELSE %]
-      更新
-      [% END %]
-    </button>
-    <span class="col-sm-1"></span>
-    [%- IF! addstaff %]
-      [% IF selfUpdate %]
-        <a class="col-sm-3 text-center btn btn-large" href="/mypage">マイページに戻る</a>
-      [%- ELSE %]
-        <button id="cancel" class="col-sm-3 text-center btn btn-large">キャンセル</a>
-      [% END %]
-    [% END %]
-  </div>
-[% END %]
-</FORM>
+<div style="COLOR:Red;" id="valerr">
+[%- IF accountdupl -%]
+  アカウントが重複しています
+[%- END -%]
+</div>
+<div class="form-group">
+  <input type="hidden" name="staffid", id="staffid" value="[% rs.staffid %]"/>
+  <input type="hidden" name="cyid", value="[% rs.cyid %]"/>
+  <input type="hidden" name="CybozuToken",  value="[% rs.CybozuToken  %]"/>
+  <input type="hidden" name="CybozuSecret", value="[% rs.CybozuSecret %]"/>
+  <input type="hidden" name="rmdate", id="rmdate" value="[% rs.rmdate %]"/>
+</div>
+<div class="form-group">
+  <label class="col-sm-3 text-right">名前</label>
+  <input type="text" name="name" id="name" class="col-sm-4" value="[% rs.name | html %]"/>
+</div>
+<div class="form-group">
+  <label class="col-sm-3 text-right">アカウント</label>
+  <input type="text" name="account" id="account" class="col-sm-4" value="[% rs.account |html %]"/>
+</div>
+<div class="form-group">
+  <label class="col-sm-3 text-right">パスワード</label>
+  <input type="password" name="passwd" id="passwd" class="col-sm-4">
+</div>
+<div class="form-group">
+  <label class="col-sm-3 text-right">パスワード(確認) </label>
+  <input type="password" name="passwd2" id="passwd2" class="col-sm-4">
+</div>
+<div class="form-group">
+  <label class="col-sm-3 text-right">役割</label>
+  <select class="col-sm-4" name="role" id="role">
+  [% IF cuRole == 'ROOT' %]
+    <option id="NORM" value="NORM">企画スタッフ</option>
+    <option id="PG"   value="PG">企画管理スタッフ</option>
+    <option id="ROOT" value="ROOT">システム管理者</option>
+  [% ELSE %]
+    [%- SWITCH rs.role -%]
+      [%- CASE 'NORM' -%]
+        <option id="NORM" value="NORM">企画スタッフ</option>
+      [%- CASE 'PG'   -%]
+        <option id="PG"   value="PG">企画管理スタッフ</option>
+      [%- CASE 'ROOT' -%]
+        <option id="ROOT" value="ROOT">システム管理者</option>
+    [%- END -%]
+  [% END %]
+  </select>
+</div>
+<div class="form-group">
+  <label class="col-sm-3 text-right">メールアドレス</label>
+  <input type="text" name="ma" id="ma" class="col-sm-4" value="[% rs.ma | html %]"/>
+</div>
+<div class="form-group">
+  <label class="col-sm-3 text-right">電話番号</label>
+  <input type="text" name="telno" id="telno" class="col-sm-4" value="[% rs.telno | html %]"/>
+</div>
+<div class="form-group">
+  <label class="col-sm-3 text-right">米魂番号</label>
+  <input type="text" name="regno" id="regno" class="col-sm-4" value="[% rs.regno | html %]"/>
+</div>
+<div class="form-group">
+  <label class="col-sm-3 text-right">担当名</label>
+  <input type="text" name="tname" id="tname" class="col-sm-4" value="[% rs.tname | html %]"/>
+</div>
+<div class="form-group">
+  <label class="col-sm-3 text-right">担当名ふりがな</label>
+  <input type="text" name="tnamef" id="tnamef" class="col-sm-4" value="[% rs.tnamef | html %]"/>
+</div>
+<div class="form-group">
+  <label class="col-sm-3 text-right">備考</label>
+  <textarea name="comment" id="comment" class="col-sm-8" rows="3">[% rs.comment | html %]
+  </textarea>
+</div>

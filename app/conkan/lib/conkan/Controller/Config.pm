@@ -201,6 +201,10 @@ sub staff_edit : Chained('staff_show') : PathPart('edit') : Args(0) {
                             tname tnamef comment / {
                 $value->{$item} = $c->request->body_params->{$item};
             }
+            # 末尾の空白を除く
+            foreach my $key ( keys( %$value ) ) {
+                $value->{$key} =~ s/\s+$//;
+            }
             $value->{'staffid'}  = $rowprof->staffid;
             $value->{'otheruid'} = $rowprof->otheruid;
             if ( $value->{'passwd'} ) {
@@ -210,6 +214,7 @@ sub staff_edit : Chained('staff_show') : PathPart('edit') : Args(0) {
             else {
                 $value->{'passwd'}   = $rowprof->passwd
             }
+            $value->{'tname'} = $value->{'tname'} || $value->{'name'};
             try {
                 $rowprof->update( $value ); 
                 $c->response->body('<FORM><H1>更新しました</H1></FORM>');
@@ -358,11 +363,8 @@ sub room_edit : Chained('room_show') : PathPart('edit') : Args(0) {
 
     my $roomid = $c->request->body_params->{'roomid'};
 
-    $c->log->debug('>>> room_edit :[' . $roomid . ']');
-
     # GETはおそらく直打ちとかなので再度
     if ( $c->request->method eq 'GET' ) {
-        $c->log->debug('>>> reload');
         $c->go->( '/config/room/' . $roomid );
     }
     else {
@@ -378,7 +380,6 @@ sub room_edit : Chained('room_show') : PathPart('edit') : Args(0) {
             if ( $rowroom->updateflg eq 
                     +( $c->sessionid . $c->session->{'updtic'}) ) {
                 try {
-                    $c->log->debug('>>> update');
                     $rowroom->update( $value ); 
                     $c->response->body('<FORM><H1>更新しました</H1></FORM>');
                 } catch {
@@ -394,14 +395,12 @@ sub room_edit : Chained('room_show') : PathPart('edit') : Args(0) {
                 };
             }
             else {
-                $c->log->debug('>>> updateflg unmatch');
                 $c->response->body = '<FORM><H1>更新できませんでした</H1><BR/>他のシステム管理者が変更した可能性があります</FORM>';
             }
         }
         else {
             # 新規登録
             try {
-                $c->log->debug('>>> create');
                 $c->stash->{'M'}->create( $value );
                 $c->response->body('<FORM><H1>登録しました</H1></FORM>');
             } catch {
