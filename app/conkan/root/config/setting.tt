@@ -12,44 +12,42 @@
 [% SET self_li_id = 'config_conf' %]
 [% PROCESS 'tthead.tt' %]
 [%- DEFAULT state = 'inputform' -%]
+[% PROCESS 'ttpgupmc.tt' %]
 <div class="container">
   <div class="well" id="inputform" style="display:none;">
     <FORM method="POST" class="form-horizontal" role="form" action="/config/setting" id="profform">
       <div style="COLOR:Red;" id="valerr"> </div>
       <div class="form-group">
         <label class="col-sm-3 text-right">[% cnf.first_date.pg_conf_name %]</label>
-        <input type="text" name="first_date" id="first_date" class="col-sm-2" value="[% cnf.first_date.pg_conf_value | html %]"/>
+        [% pgupinputtext( 'first_date', cnf.first_date.pg_conf_value, 2 ) %]
       </div>
       <div class="form-group">
         <label class="col-sm-3 text-right">[% cnf.first_start_times.pg_conf_name %]</label>
-        <input type="text" name="first_start_times" id="first_start_times" class="col-sm-8" value="[% cnf.first_start_times.pg_conf_value | html %]"/>
+        [% pgupinputtext( 'first_start_times', cnf.first_start_times.pg_conf_value, 8 ) %]
       </div>
       <div class="form-group">
         <label class="col-sm-3 text-right">[% cnf.first_end_time.pg_conf_name %]</label>
-        <input type="text" name="first_end_time" id="first_end_time" class="col-sm-2" value="[% cnf.first_end_time.pg_conf_value | html %]"/>
+        [% pgupinputtext( 'first_end_time', cnf.first_end_time.pg_conf_value, 2 ) %]
       </div>
       <div class="form-group">
         <label class="col-sm-3 text-right">[% cnf.second_start_times.pg_conf_name %]</label>
-        <input type="text" name="second_start_times" id="second_start_times" class="col-sm-8" value="[% cnf.second_start_times.pg_conf_value | html %]"/>
+        [% pgupinputtext( 'second_start_times', cnf.second_start_times.pg_conf_value, 8 ) %]
       </div>
       <div class="form-group">
         <label class="col-sm-3 text-right">[% cnf.second_end_time.pg_conf_name %]</label>
-        <input type="text" name="second_end_time" id="second_end_time" class="col-sm-2" value="[% cnf.second_end_time.pg_conf_value | html %]"/>
+        [% pgupinputtext( 'second_end_time', cnf.second_end_time.pg_conf_value, 2 ) %]
       </div>
       <div class="form-group">
         <label class="col-sm-3 text-right">[% cnf.pg_status_vals.pg_conf_name %]</label>
-        <textarea name="pg_status_vals" id="pg_status_vals" class="col-sm-8" rows="3">
-          [%- cnf.pg_status_vals.pg_conf_value | trim | html -%]/textarea>
+        [% pguptextarea( 'pg_status_vals', cnf.pg_status_vals.pg_conf_value, 8 ) %]
       </div>
       <div class="form-group">
         <label class="col-sm-3 text-right">[% cnf.cast_status_vals.pg_conf_name %]</label>
-        <textarea name="cast_status_vals" id="cast_status_vals" class="col-sm-8" rows="4">
-          [%- cnf.cast_status_vals.pg_conf_value | trim | html -%]</textarea>
+        [% pguptextarea( 'cast_status_vals', cnf.cast_status_vals.pg_conf_value, 8 ) %]
       </div>
       <div class="form-group">
         <label class="col-sm-3 text-right">[% cnf.contact_status_vals.pg_conf_name %]</label>
-        <textarea name="contact_status_vals" id="contact_status_vals" class="col-sm-8" rows="6">
-          [%- cnf.contact_status_vals.pg_conf_value | trim | html -%]</textarea>
+        [% pguptextarea( 'contact_status_vals', cnf.contact_status_vals.pg_conf_value, 8 ) %]
       </div>
       <div class="form-group">
         <span class="col-sm-4"></span>

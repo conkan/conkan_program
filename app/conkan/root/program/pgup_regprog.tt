@@ -1,8 +1,29 @@
+[% PROCESS 'ttpgupmc.tt' %]
 <FORM method="POST" class="form-horizontal" role="form" id="progform">
+  <p id="vha" data-vha=
+"[
+{&#34;id&#34;:&#34;name&#34;,      &#34;name&#34;:&#34;企画名称&#34;},
+{&#34;id&#34;:&#34;namef&#34;,     &#34;name&#34;:&#34;企画名称ふりがな&#34;},
+{&#34;id&#34;:&#34;content&#34;,   &#34;name&#34;:&#34;企画内容&#34;},
+{&#34;id&#34;:&#34;regname&#34;,   &#34;name&#34;:&#34;申込者名&#34;},
+{&#34;id&#34;:&#34;regno&#34;,     &#34;name&#34;:&#34;大会登録番号&#34;},
+{&#34;id&#34;:&#34;regma&#34;,     &#34;name&#34;:&#34;メールアドレス&#34;},
+{&#34;id&#34;:&#34;type&#34;,      &#34;name&#34;:&#34;企画種別&#34;},
+{&#34;id&#34;:&#34;expmaxcnt&#34;, &#34;name&#34;:&#34;予想参加者数&#34;},
+{&#34;id&#34;:&#34;place&#34;,     &#34;name&#34;:&#34;希望場所&#34;},
+{&#34;id&#34;:&#34;date&#34;,      &#34;name&#34;:&#34;希望日時&#34;},
+{&#34;id&#34;:&#34;layout&#34;,    &#34;name&#34;:&#34;希望レイアウト&#34;},
+{&#34;id&#34;:&#34;classlen&#34;,  &#34;name&#34;:&#34;希望コマ数&#34;},
+{&#34;id&#34;:&#34;contentpub&#34;,&#34;name&#34;:&#34;内容事前公開可不可&#34;},
+{&#34;id&#34;:&#34;realpub&#34;,   &#34;name&#34;:&#34;リアルタイム公開制限&#34;},
+{&#34;id&#34;:&#34;afterpub&#34;,  &#34;name&#34;:&#34;事後公開制限&#34;}
+]">
   <div style="COLOR:Red;" id="valerr"></div>
   <div class="form-group">
-    <input type="hidden" name="id", id="id" value="-"/>
-    <input type="hidden" name="target", id="target" value="regprogram"/>
+    <input type="hidden" name="pgid" id="pgid"   value="[% rs.pgid %]"></div>
+    <input type="hidden" name="id"   id="id"     value="-"></div>
+    <input type="hidden" name="target" id="target" value="regprogram"></div>
+  </div>
   <table class="table table-bordered table-condensed">
     </colgroup>
       <col class="col-sm-2">
@@ -17,10 +38,8 @@
       </tr>
       <tr>
         <td colspan="3">
-          <input type="text" name="name" class="col-sm-6"
-            value="[% rs.name | html %]"/>
-          <input type="text" name="namef" class="col-sm-6"
-            value="[% rs.namef | html %]"/>
+          [% pgupinputtext( 'name', rs.name, 6 ) %]
+          [% pgupinputtext( 'namef', rs.namef, 6 ) %]
         </td>
       </tr>
       <tr>
@@ -28,10 +47,7 @@
         <td colspan="2"></td>
       </tr>
       <tr>
-        <td colspan="3">
-          <textarea name="content" class="col-sm-12" rows="2">
-            [%- rs.content | trim | html -%]</textarea>
-        </td>
+        <td colspan="3">[% pguptextarea( 'content', rs.content, 12 ) %]</td>
       </tr>
       <tr>
         <th>申込者名</th>
@@ -39,10 +55,7 @@
         <th>企画立案経験</th>
       </tr>
       <tr>
-        <td>
-          <input type="text" name="regname" class="col-sm-12"
-            value="[% rs.regname | html %]"/>
-        </td>
+        <td>[% pgupinputtext( 'regname', rs.regname, 12 ) %]</td>
         <td>[% rs.regdate | html %]</td>
         <td>[% rs.experience | html %]</td>
       </tr>
@@ -50,14 +63,8 @@
         <th colspan="2">メールアドレス</th>
       </tr>
       <tr>
-        <td>
-          <input type="text" name="regno" class="col-sm-12"
-            value="[% rs.regno | html %]"/>
-        </td>
-        <td colspan="2">
-          <input type="text" class="col-sm-12" name="regma"
-            value="[% rs.regma | html %]"/>
-        </td>
+        <td>[% pgupinputtext( 'regno', rs.regno, 12 ) %]</td>
+        <td colspan="2">[% pgupinputtext( 'regma', rs.regma, 12 ) %]</td>
       </tr>
       <tr>
         <th>電話番号</th>
@@ -65,18 +72,9 @@
         <th>携帯番号</th>
       </tr>
       <tr>
-        <td>
-          <input type="text" name="telno" class="col-sm-12"
-            value="[% rs.telno | html %]"/>
-        </td>
-        <td>
-          <input type="text" name="faxno" class="col-sm-12"
-            value="[% rs.faxno | html %]"/>
-        </td>
-        <td>
-          <input type="text" name="celno" class="col-sm-12"
-            value="[% rs.celno | html %]"/>
-        </td>
+        <td>[% pgupinputtext( 'telno', rs.telno, 12 ) %]</td>
+        <td>[% pgupinputtext( 'faxno', rs.faxno, 12 ) %]</td>
+        <td>[% pgupinputtext( 'celno', rs.celno, 12 ) %]</td>
       </tr>
       <tr>
         <th>企画種別</th>
@@ -84,18 +82,9 @@
         <th>希望場所</th>
       </tr>
       <tr>
-        <td>
-          <input type="text" name="type" class="col-sm-12"
-            value="[% rs.type | html %]"/>
-        </td>
-        <td>
-          <input type="text" name="expmaxcnt" class="col-sm-12"
-            value="[% rs.expmaxcnt | html %]"/>
-        </td>
-        <td>
-          <input type="text" name="place" class="col-sm-12"
-            value="[% rs.place | html %]"/>
-        </td>
+        <td>[% pgupinputtext( 'type', rs.type, 12 ) %]</td>
+        <td>[% pgupinputtext( 'expmaxcnt', rs.expmaxcnt, 12 ) %]</td>
+        <td>[% pgupinputtext( 'place', rs.place, 12 ) %]</td>
       </tr>
       <tr>
         <th>希望日時</th>
@@ -103,18 +92,9 @@
         <th>希望コマ数</th>
       </tr>
       <tr>
-        <td>
-          <input type="text" name="date" class="col-sm-12"
-            value="[% rs.date | html %]"/>
-        </td>
-        <td>
-          <input type="text" name="layout" class="col-sm-12"
-            value="[% rs.layout | html %]"/>
-        </td>
-        <td>
-          <input type="text" name="classlen" class="col-sm-12"
-            value="[% rs.classlen | html %]"/>
-        </td>
+        <td>[% pgupinputtext( 'date', rs.date, 12 ) %]</td>
+        <td>[% pgupinputtext( 'layout', rs.layout, 12 ) %]</td>
+        <td>[% pgupinputtext( 'classlen', rs.classlen, 12 ) %]</td>
       </tr>
       <tr>
         <th>内容事前公開</th>
@@ -122,38 +102,23 @@
         <th>事後公開</th>
       </tr>
       <tr>
-        <td>
-          <input type="text" name="contentpub" class="col-sm-12"
-            value="[% rs.contentpub | html %]"/>
-        </td>
-        <td>
-          <input type="text" name="realpub" class="col-sm-12"
-            value="[% rs.realpub | html %]"/>
-        </td>
-        <td>
-          <input type="text" name="afterpub" class="col-sm-12"
-            value="[% rs.afterpub | html %]"/>
-        </td>
+        <td>[% pgupinputtext( 'contentpub', rs.contentpub, 12 ) %]</td>
+        <td>[% pgupinputtext( 'realpub', rs.realpub, 12 ) %]</td>
+        <td>[% pgupinputtext( 'afterpub', rs.afterpub, 12 ) %]</td>
       </tr>
       <tr>
         <th>重なると困る企画</th>
         <td colspan="2">
       </tr>
       <tr>
-        <td colspan="3">
-          <textarea name="aboiddup" class="col-sm-12" rows="2">
-            [%- rs.aboiddup | trim | html -%]</textarea>
-        </td>
+        <td colspan="3">[% pguptextarea( 'aboiddup', rs.aboiddup, 12 ) %]</td>
       </tr>
       <tr>
         <th>備考</th>
         <td colspan="2">
       </tr>
       <tr>
-        <td colspan="3">
-          <textarea name="comment" class="col-sm-12" rows="2">
-            [%- rs.comment | trim | html -%]</textarea>
-        </td>
+        <td colspan="3">[% pguptextarea( 'comment', rs.comment, 12 ) %]</td>
       </tr>
     </tbody>
   </table>

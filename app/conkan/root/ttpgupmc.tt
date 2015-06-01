@@ -1,0 +1,9 @@
+[%- MACRO pgupinputtext ( item, val, size ) BLOCK -%]
+  <input type="text" name="[% item %]" id="[% item %]" class="col-sm-[% size %]"
+    value="[% val | trim | html %]"/>
+[%- END -%]
+[%- MACRO pguptextarea ( item, val, size ) BLOCK -%]
+  <textarea name="[% item %]" id="[% item %]"
+    class="col-sm-[% size %]" rows="2">[%- val | trim | html -%]</textarea>
+[%- END -%]
+

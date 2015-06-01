@@ -28,11 +28,23 @@
   // 更新
   $('#dobtn').click(function(event) {
     // バリデーション
+    var vha = $('#progform #vha').data().vha;
+    for ( var i in vha ) {
+      if (!$('#'+ vha[i].id).val()) {
+        $('#valerr').text(vha[i].name + 'は必須です');
+        $('#' + vha[i].id).css('background-color', '#ff8e8e');
+        return false;
+      }
+      else {
+        $('#' + vha[i].id).css('background-color', '');
+      }
+    }
+    // 更新実施
     var content = $('#PgEditContent');
     var data = $('#progform').serializeArray();
-    var pgid   = $('#pgid').val();
-    var id     = $('#id').val();
-    var target = $('#target').val();
+    var pgid   = $('#progform #pgid').val();
+    var id     = $('#progform #id').val();
+    var target = $('#progform #target').val();
     $('#dobtn').hide();
     var arg = target + '/' + pgid;
     if ( id != "-" ) {

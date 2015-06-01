@@ -1,4 +1,5 @@
 <FORM method="POST" class="form-horizontal" role="form" action="/config/room" id="roomform">
+  [% PROCESS 'ttpgupmc.tt' %]
   <div style="COLOR:Red;" id="valerr">
   </div>
   <div class="form-group">
@@ -7,39 +8,39 @@
   </div>
   <div class="form-group">
     <label class="col-sm-3 text-right">部屋名</label>
-    <input type="text" name="name" id="name" class="col-sm-4" value="[% rs.name | trim | html -%]"/>
+    [% pgupinputtext( 'name', rs.name, 4 ) %]
   </div>
   <div class="form-group">
     <label class="col-sm-3 text-right">部屋番号</label>
-    <input type="text" name="roomno" id="roomno" class="col-sm-4" value="[% rs.roomno | trim | html -%]"/>
+    [% pgupinputtext( 'roomno', rs.roomno, 4 ) %]
   </div>
   <div class="form-group">
     <label class="col-sm-3 text-right">定員</label>
-    <input type="text" name="max" id="max" class="col-sm-4" value="[% rs.max | trim | html -%]"/>
+    [% pgupinputtext( 'max', rs.max, 4 ) %]
   </div>
   <div class="form-group">
     <label class="col-sm-3 text-right">形式</label>
-    <input type="text" name="type" id="type" class="col-sm-4" value="[% rs.type | trim | html -%]"/>
+    [% pgupinputtext( 'type', rs.type, 4 ) %]
   </div>
   <div class="form-group">
     <label class="col-sm-3 text-right">面積</label>
-    <input type="text" name="size" id="size" class="col-sm-4" value="[% rs.size | trim | html -%]"/>
+    [% pgupinputtext( 'size', rs.size, 4 ) %]
   </div>
   <div class="form-group">
     <label class="col-sm-3 text-right">机数</label>
-    <input type="text" name="tablecnt" id="tablecnt" class="col-sm-4" value="[% rs.tablecnt | trim | html -%]"/>
+    [% pgupinputtext( 'tablecnt', rs.tablecnt, 4 ) %]
   </div>
   <div class="form-group">
     <label class="col-sm-3 text-right">イス数</label>
-    <input type="text" name="chaircnt" id="chaircnt" class="col-sm-4" value="[% rs.chaircnt | trim | html -%]"/>
+    [% pgupinputtext( 'chaircnt', rs.chaircnt, 4 ) %]
   </div>
   <div class="form-group">
     <label class="col-sm-3 text-right">附属設備</label>
-    <input type="text" name="equips" id="equips" class="col-sm-4" value="[% rs.equips | trim | html -%]"/>
+    [% pgupinputtext( 'equips', rs.equips, 4 ) %]
   </div>
   <div class="form-group">
     <label class="col-sm-3 text-right">利用可能時間</label>
-    <input type="text" name="useabletime" id="useabletime" class="col-sm-4" value="[% rs.useabletime | trim | html -%]"/>
+    [% pgupinputtext( 'useabletime', rs.useabletime, 4 ) %]
   </div>
 
   <div class="form-group">
@@ -52,7 +53,6 @@
   </div>
   <div class="form-group">
     <label class="col-sm-3 text-right">備考</label>
-    <textarea name="comment" id="comment" class="col-sm-8" rows="3">
-      [%- rs.comment | trim | html -%]</textarea>
+    [% pguptextarea( 'comment', rs.comment, 8 ) %]
   </div>
 </FORM>
