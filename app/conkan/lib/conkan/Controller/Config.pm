@@ -7,6 +7,7 @@ use Try::Tiny;
 use DateTime;
 use namespace::autoclean;
 use Data::Dumper;
+use YAML;
 
 BEGIN { extends 'Catalyst::Controller'; }
 
@@ -99,12 +100,7 @@ sub setting :Local {
             } catch {
                 my $e = shift;
                 $c->log->error('>>> ' . localtime() . 'dbexp : [' . $e . ']');
-                if ( scalar @{ $c->error } ) {
-                    foreach my $err (@{ $c->error }) {
-                        $c->log->error('>>> ' . localtime() . 'dbexp : [' . $err . ']');
-                    }
-                    $c->clear_errors();
-                }
+                $c->clear_errors();
                 $c->stash->{'state'} = 'deny';
             };
         }
@@ -222,12 +218,7 @@ sub staff_edit : Chained('staff_show') : PathPart('edit') : Args(0) {
             } catch {
                 my $e = shift;
                 $c->log->error('>>> ' . localtime() . 'dbexp : [' . $e . ']');
-                if ( scalar @{ $c->error } ) {
-                    foreach my $err (@{ $c->error }) {
-                        $c->log->error('>>> ' . localtime() . 'dbexp : [' . $err . ']');
-                    }
-                    $c->clear_errors();
-                }
+                $c->clear_errors();
                 $c->response->body('<FORM>更新失敗</FORM>');
             };
         }
@@ -264,12 +255,7 @@ sub staff_del : Chained('staff_show') : PathPart('del') : Args(0) {
             } catch {
                 my $e = shift;
                 $c->log->error('>>> ' . localtime() . 'dbexp : [' . $e . ']');
-                if ( scalar @{ $c->error } ) {
-                    foreach my $err (@{ $c->error }) {
-                        $c->log->error('>>> ' . localtime() . 'dbexp : [' . $err . ']');
-                    }
-                    $c->clear_errors();
-                }
+                $c->clear_errors();
                 $c->response->body('<FORM>削除失敗</FORM>');
             };
         }
@@ -362,7 +348,7 @@ sub room_detail : Chained('room_show') : PathPart('') : Args(0) {
 sub room_edit : Chained('room_show') : PathPart('edit') : Args(0) {
     my ( $self, $c ) = @_;
 
-    my $roomid = $c->request->body_params->{'roomid'};
+    my $roomid = $c->stash->{'rs'}->{'roomid'};
 
     # GETはおそらく直打ちとかなので再度
     if ( $c->request->method eq 'GET' ) {
@@ -386,12 +372,7 @@ sub room_edit : Chained('room_show') : PathPart('edit') : Args(0) {
                 } catch {
                     my $e = shift;
                     $c->log->error('>>> ' . localtime() . 'dbexp : [' . $e . ']');
-                    if ( scalar @{ $c->error } ) {
-                        foreach my $err (@{ $c->error }) {
-                            $c->log->error('>>> ' . localtime() . 'dbexp : [' . $err . ']');
-                        }
-                        $c->clear_errors();
-                    }
+                    $c->clear_errors();
                     $c->response->body('<FORM>更新失敗</FORM>');
                 };
             }
@@ -407,12 +388,7 @@ sub room_edit : Chained('room_show') : PathPart('edit') : Args(0) {
             } catch {
                 my $e = shift;
                 $c->log->error('>>> ' . localtime() . 'dbexp : [' . $e . ']');
-                if ( scalar @{ $c->error } ) {
-                    foreach my $err (@{ $c->error }) {
-                        $c->log->error('>>> ' . localtime() . 'dbexp : [' . $err . ']');
-                    }
-                    $c->clear_errors();
-                }
+                $c->clear_errors();
                 $c->response->body('<FORM>登録失敗</FORM>');
             };
         }
@@ -429,7 +405,7 @@ sub room_edit : Chained('room_show') : PathPart('edit') : Args(0) {
 
 sub room_del : Chained('room_show') : PathPart('del') : Args(0) {
     my ( $self, $c ) = @_;
-    my $roomid = $c->request->body_params->{'roomid'};
+    my $roomid = $c->stash->{'rs'}->{'roomid'};
     # GETはおそらく直打ちとかなので再度
     if ( $c->request->method eq 'GET' ) {
         $c->go->( '/config/room/' . $roomid );
@@ -445,12 +421,7 @@ sub room_del : Chained('room_show') : PathPart('del') : Args(0) {
             } catch {
                 my $e = shift;
                 $c->log->error('>>> ' . localtime() . 'dbexp : [' . $e . ']');
-                if ( scalar @{ $c->error } ) {
-                    foreach my $err (@{ $c->error }) {
-                        $c->log->error('>>> ' . localtime() . 'dbexp : [' . $err . ']');
-                    }
-                    $c->clear_errors();
-                }
+                $c->clear_errors();
                 $c->response->body('<FORM>削除失敗</FORM>');
             };
         }

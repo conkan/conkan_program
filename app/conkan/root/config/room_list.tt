@@ -33,23 +33,27 @@
         [% FOREACH item = list %]
           [% IF item.rmdate;
             SET rmcol = 'style="background-color:gray;"';
+            SET rmcol2 = 'style="text-align:center;background-color:gray;"';
           ELSE;
             SET rmcol = '';
+            SET rmcol2 = 'style="text-align:center;"';
           END %]
           <tr>
             <td [% rmcol %]>[% item.name  | html %]</td>
             <td [% rmcol %]>[% item.roomno  | html %]</td>
             <td [% rmcol %]>[% item.type  | html %]</td>
             <td [% rmcol %]>[% item.size  | html %]</td>
-            <td [% rmcol %] style="text-align:center;">
+            <td [% rmcol2 %]>
               <button type="button" class="btn btn-xs btn-primary"
-              [%- IF rmcol -%]
-                >
-                無効
-              [% ELSE %]
+              [%- IF! rmcol -%]
                 data-toggle="modal" data-target="#editRoom"
-                data-whatever="[% item.roomid %]" data-rmcol="[% rmcol %]">
+                data-whatever="[% item.roomid %]" data-rmcol="[% rmcol %]"
+              [% END %]
+              >
+              [%- IF! rmcol -%]
                 更新
+              [% ELSE %]
+                無効
               [% END %]
               </button>
             </td>
@@ -58,7 +62,7 @@
       </tbody>
     </table>
     <div>
-      <button type="button" class="btn"
+      <button type="button" class="btn btn-primary"
               data-toggle="modal" data-target="#editRoom"
               data-whatever="0" data-rmcol="">
         追加

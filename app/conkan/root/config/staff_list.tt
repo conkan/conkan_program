@@ -51,7 +51,8 @@
                 無効
               [%- ELSE -%]
                 data-toggle="modal" data-target="#editStaff"
-                data-whatever="[% item.staffid %]">
+                data-whatever="[% item.staffid %]"
+                data-whatrole="[% item.role %]">
                 更新
               [%- END %]
               </button>
@@ -86,15 +87,29 @@
 <script>
   $('#editStaff').on('show.bs.modal', function (event) {
     var staffid = $(event.relatedTarget).data('whatever');
+    var role = $(event.relatedTarget).data('whatrole');
     var content = $('#editStaffContent');
-    $(content).load(staffid + '/ FORM');
+    $(content).load(staffid + '/ FORM', '', function() {
+        $('#' + role).prop('selected', true);
+      }
+    );
     $('#dobtn').show();
-      $('#dodel').show();
+    $('#dodel').show();
   } );
   $('#editStaff').on('hide.bs.modal', function (event) {
     location.reload(true);
   } );
   $('#dobtn').click(function(event) {
+    if (!$('#account').val()) {
+        $('#valerr').text('アカウントは必須です');
+        return;
+    }
+    if ( $('#passwd').val() ) {
+        if ( $('#passwd').val() != $('#passwd2').val() ) {
+            $('#valerr').text('パスワードとパスワード(確認)が一致しません');
+            return;
+        }
+    }
     var content = $('#editStaffContent');
     var data = $('#profform').serializeArray();
     var staffid = $('#staffid').val();
@@ -111,7 +126,5 @@
     $(content).load(staffid + '/del/ FORM', data );
   } );
 </script>
-[% PROCESS 'ttprofjs.tt' %]
 </body>
 </html>
-

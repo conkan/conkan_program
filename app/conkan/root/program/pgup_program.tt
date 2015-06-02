@@ -1,9 +1,39 @@
+[% PROCESS 'ttpgupmc.tt' %]
 <FORM method="POST" class="form-horizontal" role="form" id="progform">
+  <p id="vha" data-vha= "[]"/>
+<pre>
+[%# rs.staffid  => stafflist.n.tname; foreachで回しつつ一致したものをactiveにするマクロがいるか
+    rs.status   => conf.st_vals.n.;
+    rs.date1    => conf.f_date || +1;
+    rs.stime1   => conf.fs_times.n;
+    rs.etime1   => conf.fs_times.n+90min;
+    rs.date2    => conf.f_date || +1;
+    rs.stime2   => conf.ss_times.n;
+    rs.etime2   => conf.ss_times.n+90min;
+    rs.roomid   => roomlist.n.name;
+    rs.layerno;
+    rs.progressprp;
+%]
+</pre>
   <div style="COLOR:Red;" id="valerr"></div>
   <div class="form-group">
-    target:[% args.target %]<br/>
-    pgid:  [% args.pgid   %]<br/>
-    id:    [% args.id     %]<br/>
+    <input type="hidden" name="pgid" id="pgid"   value="[% rs.pgid.pgid %]"></div>
+    <input type="hidden" name="id"   id="id"     value="-"></div>
+    <input type="hidden" name="target" id="target" value="program"></div>
   </div>
+  <table class="table table-bordered table-condensed">
+    </colgroup>
+      <col class="col-sm-2">
+      <col class="col-sm-2">
+      <col class="col-sm-2">
+    </colgroup>
+    <tbody>
+      <tr>
+        <th style="background-color:#FFcc66">企画ID</th>
+        <td style="background-color:#FFcc66">[% rs.pgid.pgid | html %]</td>
+        <td style="background-color:#FFcc66">[% rs.pgid.name | html %]</td>
+      </tr>
+    </tbody>
+  </table>
 </FORM>
 

@@ -272,100 +272,13 @@ sub program_list : Chained('program_base') : PathPart('list') : Args(0) {
     $c->stash->{'list'} = $pgmlist;
 }
 
-=head2 program/regprogram
-
-企画管理 pgup_regprog  : 企画更新(受付分)
-
-=cut
-sub pgup_regprog : Chained('program_base') : PathPart('regprogram') : Args(1) {
-    my ( $self, $c, $pgid ) = @_;
-
-    my $rowprof = $c->model('ConkanDB::PgRegProgram')->find($pgid);
-    if ( $c->request->method eq 'GET' ) {
-        # 更新表示
-        $c->session->{'updtic'} = time;
-        $rowprof->update( { 
-            'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
-        } );
-        $c->stash->{'rs'} = $rowprof;
-    }
-    else {
-        # 更新実施
-        if ( $rowprof->updateflg eq 
-                +( $c->sessionid . $c->session->{'updtic'}) ) {
-            my $value = {};
-            for my $item qw/ name namef regma regno telno faxno celno
-                             type place layout date classlen expmaxcnt
-                             content contentpub realpub afterpub avoiddup
-                             experience comment / {
-                $value->{$item} = $c->request->body_params->{$item};
-            }
-            # 末尾の空白を除く
-            foreach my $key ( keys( %$value ) ) {
-                $value->{$key} =~ s/\s+$// if defined($value->{$key});
-            }
-            try {
-                $rowprof->update( $value ); 
-                $c->response->body('<FORM><H1>更新しました</H1></FORM>');
-            } catch {
-                my $e = shift;
-                $c->log->error('>>> ' . localtime() . 'dbexp : [' . $e . ']');
-                $c->clear_errors();
-                $c->response->body('<FORM>更新失敗</FORM>');
-            };
-        }
-        else {
-            $c->stash->{'rs'} = undef;
-            $c->response->body = '<FORM><H1>更新できませんでした</H1><BR/>他スタッフが変更した可能性があります</FORM>';
-        }
-        $c->stash->{'rs'} = undef;
-        $c->response->status(200);
-    }
-}
-
-=head2 program/program
-
-企画管理 pgup_program  : 企画更新(管理分)
-
-=cut
-sub pgup_program : Chained('program_base') : PathPart('program') : Args(1) {
-    my ( $self, $c, $pgid ) = @_;
-
-    $c->stash->{'args'} = { target => 'program', pgid => $pgid, };
-
-}
-
-=head2 program/equip
-
-企画管理 pgup_equip  : 決定機材更新
-
-=cut
-sub pgup_equip : Chained('program_base') : PathPart('equip') : Args(2) {
-    my ( $self, $c, $pgid, $id ) = @_;
-
-    $c->stash->{'args'} = { target => 'equip', pgid => $pgid, id => $id, };
-
-}
-
-=head2 program/cast
-
-企画管理 pgup_cast  : 決定出演者更新
-
-=cut
-sub pgup_cast : Chained('program_base') : PathPart('cast') : Args(2) {
-    my ( $self, $c, $pgid, $id ) = @_;
-
-    $c->stash->{'args'} = { target => 'cast', pgid => $pgid, id => $id, };
-
-}
-
 =head2 program/*
 
-企画管理 program_detail  : 詳細表示
+企画管理 program_show  : 詳細表示起点
 
 =cut
 
-sub program_detail : Chained('program_base') : PathPart('') : Args(1) {
+sub program_show : Chained('program_base') :PathPart('') :CaptureArgs(1) {
     my ( $self, $c, $pgid ) = @_;
 
     $c->stash->{'RegProgram'} =
@@ -415,7 +328,143 @@ sub program_detail : Chained('program_base') : PathPart('') : Args(1) {
                             'order_by' => { '-asc' => 'id' },
                         }
                     ) ];
+    $c->stash->{'pgid'} = $pgid;
 };
+
+=head2 program/*
+
+スタッフ管理program_detail  : スタッフ情報更新表示
+
+=cut
+
+sub program_detail : Chained('program_show') : PathPart('') : Args(0) {
+    my ( $self, $c ) = @_;
+}
+
+=head2 program/*/regprogram
+
+企画管理 pgup_regprog   : 企画更新(受付分)
+
+=cut
+sub pgup_regprog : Chained('program_show') : PathPart('regprogram') : Args(0) {
+    my ( $self, $c ) = @_;
+    my $up_items = [ qw/
+                    name namef regma regno telno faxno celno
+                    type place layout date classlen expmaxcnt
+                    content contentpub realpub afterpub avoiddup
+                    experience comment
+                    / ];
+    my $pgid = $c->stash->{'pgid'};
+    my $rowprof = $c->model('ConkanDB::PgRegProgram')->find($pgid);
+    $c->detach( '_pgupdate', [ $rowprof, $up_items ] );
+}
+
+=head2 program/*/program
+
+企画管理 pgup_program  : 企画更新(管理分)
+
+=cut
+sub pgup_program : Chained('program_show') : PathPart('program') : Args(0) {
+    my ( $self, $c ) = @_;
+    my $up_items = [ qw/
+                    staffid status date1 stime1 etime1 date2 stime2 etime2
+                    roomid layerno progressprp
+                    / ];
+    my $pgid = $c->stash->{'pgid'};
+    my $rowprof = [ $c->model('ConkanDB::PgProgram')->search(
+                        { pgid => $pgid },
+                        {
+                            'prefetch' => [ 'staffid', 'roomid' ],
+                        },
+                    ) ]->[0];
+    $c->stash->{'stafflist'} = [ $c->model('ConkanDB::PgStaff')->all() ];
+    $c->stash->{'roomlist'}  = [ $c->model('ConkanDB::PgRoom')->all() ];
+    my $conf  = {};
+    my $M = $c->model('ConkanDB::PgSystemConf');
+    $conf->{'f_date'}   = $M->find('first_date')->pg_conf_value();
+    $conf->{'fs_times'} = from_json(
+        $M->find('first_start_times')->pg_conf_value() );
+    $conf->{'ss_times'} = from_json(
+        $M->find('second_start_times')->pg_conf_value() );
+    $conf->{'st_vals'}  = from_json(
+        $M->find('pg_status_vals')->pg_conf_value() );
+    $c->stash->{'conf'}  = $conf;
+    $c->detach( '_pgupdate', [ $rowprof, $up_items ] );
+}
+
+=head2 program/*/equip/*
+
+企画管理 pgup_equip  : 決定機材追加/更新
+
+=cut
+sub pgup_equip : Chained('program_show') : PathPart('equip') : Args(1) {
+    my ( $self, $c, $id ) = @_;
+
+    $c->stash->{'rs'} = { target => 'equip', id => $id, };
+
+}
+
+=head2 program/*/cast/*
+
+企画管理 pgup_cast  : 決定出演者追加/更新
+
+=cut
+sub pgup_cast : Chained('program_base') : PathPart('cast') : Args(1) {
+    my ( $self, $c, $id ) = @_;
+
+    $c->stash->{'rs'} = { target => 'cast', id => $id, };
+
+}
+
+=head2 _pgupdate
+
+企画更新実施
+
+=cut
+
+sub _pgupdate :Private {
+    my ( $self, $c, 
+         $rowprof,      # 対象データベース行
+         $up_items,     # 対象列名配列
+       ) = @_;
+
+    if ( $c->request->method eq 'GET' ) {
+        # 更新表示
+        $c->session->{'updtic'} = time;
+        $rowprof->update( { 
+            'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
+        } );
+        $c->stash->{'rs'} = $rowprof;
+    }
+    else {
+        # 更新実施
+        if ( $rowprof->updateflg eq 
+                +( $c->sessionid . $c->session->{'updtic'}) ) {
+            my $value = {};
+            for my $item (@{$up_items}) {
+                $value->{$item} = $c->request->body_params->{$item};
+                $value->{$item} =~ s/\s+$// if defined($value->{$item});
+            }
+            try {
+                $rowprof->update( $value ); 
+                $c->response->body('<FORM><H1>更新しました</H1></FORM>');
+            } catch {
+                my $e = shift;
+                $c->log->error('>>> ' . localtime() . 'dbexp : [' . $e . ']');
+                $c->clear_errors();
+                $c->response->body('<FORM>更新失敗</FORM>');
+            };
+        }
+        else {
+            $c->stash->{'rs'} = undef;
+            $c->response->body = '<FORM><H1>更新できませんでした</H1><BR/>' .
+                                 '他スタッフが変更した可能性があります</FORM>';
+        }
+        $c->stash->{'rs'} = undef;
+        $c->response->status(200);
+    }
+}
+
 =encoding utf8
 
 =head1 AUTHOR

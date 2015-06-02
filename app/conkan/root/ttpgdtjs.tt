@@ -13,12 +13,22 @@
     var id     = $(event.relatedTarget).data('whatitem');
     var target = $(event.relatedTarget).data('whattarget');
     var content = $('#PgEditContent');
-    var arg = target + '/' + pgid;
+    var arg = pgid + '/' + target;
     if ( id != "-" ) {
         arg += '/' + id;
     }
     arg += '/ FORM';
-    $(content).load(arg);
+    $(content).load(arg, '', function () {
+        var content = $('#PgEditContent');
+        var cnth = $(window).height() -
+            ( content.offset().top +
+              $('#PgEditFooter').outerHeight() +
+              parseInt(content.css('paddingTop')) +
+              parseInt(content.css('paddingBottom'))
+            );
+        content.css('height', cnth);
+      }
+    );
     $('#dobtn').show();
   } );
   // モーダルダイアログ非表示
@@ -46,7 +56,7 @@
     var id     = $('#progform #id').val();
     var target = $('#progform #target').val();
     $('#dobtn').hide();
-    var arg = target + '/' + pgid;
+    var arg = pgid + '/' + target;
     if ( id != "-" ) {
         arg += '/' + id;
     }
