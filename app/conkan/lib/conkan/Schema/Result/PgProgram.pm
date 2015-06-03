@@ -121,6 +121,11 @@ __PACKAGE__->table("pg_program");
   is_nullable: 1
   size: 64
 
+=head2 memo
+
+  data_type: 'text'
+  is_nullable: 1
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -172,6 +177,8 @@ __PACKAGE__->add_columns(
   { data_type => "text", is_nullable => 1 },
   "updateflg",
   { data_type => "varchar", is_nullable => 1, size => 64 },
+  "memo",
+  { data_type => "text", is_nullable => 1 },
 );
 
 =head1 PRIMARY KEY
@@ -244,8 +251,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-05-29 16:34:01
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Q3KnJoLnruVrpVPCAjfLbA
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-06-03 23:08:54
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:ZxSwcZ1zIctUSs8MLq7J4w
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

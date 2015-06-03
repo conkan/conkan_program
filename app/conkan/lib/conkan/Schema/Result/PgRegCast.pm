@@ -66,9 +66,9 @@ __PACKAGE__->table("pg_reg_cast");
 
 =head2 entrantregno
 
-  data_type: 'integer'
-  extra: {unsigned => 1}
+  data_type: 'varchar'
   is_nullable: 1
+  size: 64
 
 =head2 needreq
 
@@ -104,7 +104,7 @@ __PACKAGE__->add_columns(
   "namef",
   { data_type => "varchar", is_nullable => 1, size => 64 },
   "entrantregno",
-  { data_type => "integer", extra => { unsigned => 1 }, is_nullable => 1 },
+  { data_type => "varchar", is_nullable => 1, size => 64 },
   "needreq",
   { data_type => "varchar", is_nullable => 1, size => 64 },
   "needguest",
@@ -141,8 +141,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-05-30 11:20:14
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:VZVoRY8ZGdSFJWnQ1qxyag
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-06-03 23:08:54
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:jZ6YcMCxiJL4eTivqr8Wow
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

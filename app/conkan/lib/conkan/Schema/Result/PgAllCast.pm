@@ -80,6 +80,11 @@ __PACKAGE__->table("pg_all_cast");
   is_nullable: 1
   size: 64
 
+=head2 memo
+
+  data_type: 'text'
+  is_nullable: 1
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -102,6 +107,8 @@ __PACKAGE__->add_columns(
   { data_type => "text", is_nullable => 1 },
   "updateflg",
   { data_type => "varchar", is_nullable => 1, size => 64 },
+  "memo",
+  { data_type => "text", is_nullable => 1 },
 );
 
 =head1 PRIMARY KEY
@@ -160,8 +167,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-05-30 11:33:23
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:aDcYwG8Q/2lMsERcTBNC8g
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-06-03 23:08:54
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:uv+QAQ+Yln3QcJg120TCAg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

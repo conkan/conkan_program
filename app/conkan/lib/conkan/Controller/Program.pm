@@ -367,7 +367,8 @@ sub pgup_regprog : Chained('program_show') : PathPart('regprogram') : Args(0) {
 sub pgup_program : Chained('program_show') : PathPart('program') : Args(0) {
     my ( $self, $c ) = @_;
     my $up_items = [ qw/
-                    staffid status date1 stime1 etime1 date2 stime2 etime2
+                    staffid status memo
+                    date1 stime1 etime1 date2 stime2 etime2
                     roomid layerno progressprp
                     / ];
     my $pgid = $c->stash->{'pgid'};
@@ -393,22 +394,16 @@ sub pgup_program : Chained('program_show') : PathPart('program') : Args(0) {
         [ { 'id' => '', 'val' => '' },
           map +{ 'id' => $_, 'val' => $_ },
             @{from_json( $M->find('dates')->pg_conf_value() )} ];
-    $conf->{'s_times1'} =
+    $conf->{'s_times'} =
         [ { 'id' => '', 'val' => '' },
           map +{ 'id' => $_, 'val' => $_ },
-            @{from_json( $M->find('start_times1')->pg_conf_value() )} ];
-    $conf->{'e_times1'} =
+            ( @{from_json( $M->find('start_times1')->pg_conf_value() )},
+              @{from_json( $M->find('start_times2')->pg_conf_value() )} )];
+    $conf->{'e_times'} =
         [ { 'id' => '', 'val' => '' },
           map +{ 'id' => $_, 'val' => $_ },
-            @{from_json( $M->find('end_times1')->pg_conf_value() )} ];
-    $conf->{'s_times2'} =
-        [ { 'id' => '', 'val' => '' },
-          map +{ 'id' => $_, 'val' => $_ },
-            @{from_json( $M->find('start_times2')->pg_conf_value() )} ];
-    $conf->{'e_times2'} =
-        [ { 'id' => '', 'val' => '' },
-          map +{ 'id' => $_, 'val' => $_ },
-            @{from_json( $M->find('end_times2')->pg_conf_value() )} ];
+            ( @{from_json( $M->find('end_times1')->pg_conf_value() )},
+              @{from_json( $M->find('end_times2')->pg_conf_value() )} )];
     $conf->{'status'}  =
         [ { 'id' => '', 'val' => '' },
           map +{ 'id' => $_, 'val' => $_ },

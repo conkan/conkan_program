@@ -77,7 +77,7 @@
     $('#[%- state | html -%]').show();
   } );
   // バリデーション
-  function valchk( val, type ) { // val:チェックする値 type: 0:日付 1:時刻 3:json配列 4:json配列時刻
+  function valchk( val, type ) { // val:チェックする値 type: 0:日付 1:時刻 3:json配列 4:json配列時刻 5:json配列日付
     var result, tary, tval, ret;
     ret = false;
     if (!val) {
@@ -115,30 +115,42 @@
           ret = 'の形式が不正です';
         };
         break;
+      case 5:
+        try {
+          tary = JSON.parse( val );
+          for ( var tval in tary ) {
+            if ( ret = valchk( tary[tval], 0 ) ) {
+                break;
+            }
+          }
+        } catch (e) {
+          ret = 'の形式が不正です';
+        };
+        break;
     }
     return ret;
   };
 
   $('#dobtn').click(function(){
     var ret;
-    if ( ret = valchk( $('#first_date').val(), 0 ) ) {
-        $('#valerr').text('[% cnf.first_date.pg_conf_name %] ' + ret);
+    if ( ret = valchk( $('#dates').val(), 5 ) ) {
+        $('#valerr').text('[% cnf.dates.pg_conf_name %] ' + ret);
         return false;
     }
-    if ( ret = valchk( $('#first_start_times').val(), 4 ) ) {
-        $('#valerr').text('[% cnf.first_start_times.pg_conf_name %] ' + ret);
+    if ( ret = valchk( $('#start_times1').val(), 4 ) ) {
+        $('#valerr').text('[% cnf.start_times1.pg_conf_name %] ' + ret);
         return false;
     }
-    if ( ret = valchk( $('#first_end_time').val(), 2 ) ) {
-        $('#valerr').text('[% cnf.first_end_time.pg_conf_name %] ' + ret);
+    if ( ret = valchk( $('#end_times1').val(), 4 ) ) {
+        $('#valerr').text('[% cnf.end_time.pg_conf_name %] ' + ret);
         return false;
     }
-    if ( ret = valchk( $('#second_start_times').val(), 4 ) ) {
+    if ( ret = valchk( $('#start_times2').val(), 4 ) ) {
         $('#valerr').text('[% cnf.second_start_times.pg_conf_name %] ' + ret);
         return false;
     }
-    if ( ret = valchk( $('#second_end_time').val(), 2 ) ) {
-        $('#valerr').text('[% cnf.second_end_time.pg_conf_name %] ' + ret);
+    if ( ret = valchk( $('#end_times2').val(), 4 ) ) {
+        $('#valerr').text('[% cnf.end_times2.pg_conf_name %] ' + ret);
         return false;
     }
     if ( ret = valchk( $('#pg_status_vals').val(), 3 ) ) {

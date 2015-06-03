@@ -129,17 +129,36 @@ END -%]
     <tbody>
       <tr>
         <th>担当スタッフ</th> <td>[% Program.staffid.tname | html %]</td>
-        <th>実行ステータス</th> <td colspan="4">[% Program.status | html %]</td>
+        <th>実行ステータス</th>
+        <td>[% Program.status | trim | html %]</td>
+        <td colspan="3">[% Program.memo | trim | html %]</td>
       </tr>
+      [% USE date = date(format = '%Y/%m/%d') %]
       <tr>
         <th>実施日時1</th>
-        <td>[% Program.date1 | html %]</td><td>[% Program.stime1 | html %]</td>
-        <td colspan="4">- [% Program.etime1 | html %]</td>
+        [% IF Program.date1 %]
+          <td>[% date.format(Program.date1) %]</td>
+          <td colspan="5">
+            [%- Program.stime1 | remove(':00$') -%] -
+            [%- Program.etime1 | remove(':00$') -%]
+          </td>
+        [% ELSE %]
+          <td></td>
+          <td colspan="5"></td>
+        [% END %]
       </tr>
       <tr>
         <th>実施日時2</th>
-        <td>[% Program.date2 | html %]</td><td>[% Program.stime2 | html %]</td>
-        <td colspan="4">-[% Program.etime2 | html %]</td>
+        [% IF Program.date2 %]
+          <td>[% date.format(Program.date2) %]</td>
+          <td colspan="5">
+            [%- Program.stime2 | remove(':00$') -%] -
+            [%- Program.etime2 | remove(':00$') -%]
+          </td>
+        [% ELSE %]
+          <td></td>
+          <td colspan="5"></td>
+        [% END %]
       </tr>
       <tr>
         <th>場所</th> <td colspan="2">[% Program.roomid.name | html %]</td>

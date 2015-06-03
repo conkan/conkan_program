@@ -15,10 +15,10 @@
   </div>
   <table class="table table-bordered table-condensed">
     </colgroup>
+      <col class="col-sm-2">
       <col class="col-sm-3">
-      <col class="col-sm-3">
-      <col class="col-sm-3">
-      <col>
+      <col class="col-sm-2">
+      <col class="col-sm-2">
       <col class="col-sm-3">
     </colgroup>
     <tbody>
@@ -35,31 +35,49 @@
             [%- rs.staffid.tname -%]
           [%- END -%]
         </td> 
-        <th colspan="2">実行ステータス</td>
+        <th>実行ステータス</th>
         <td>[% pgupselect( 'status', conf.status, rs.status, 12 ) %]</td>
+        <td>[% pgupinputtext( 'memo', rs.memo, 12 ) %]</td>
       </tr>
       <tr>
         <th>日時1</th>
-        <td>[% pgupselect( 'date1', conf.dates, rs.date1, 12 ) %]</td>
-        <td>[% pgupselect( 'stime1', conf.s_times1, rs.stime1, 12 ) %]</td>
-        <td style="text-align:center;"> - </td>
-        <td>[% pgupselect( 'etime1', conf.e_times1, rs.etime1, 12 ) %]</td>
+        [%- IF rs.date1 -%]
+          <td>
+            [%- pgupselect( 'date1', conf.dates, rs.date1.strftime('%Y/%m/%d'), 12 ) -%]
+          </td>
+          <td colspan="3">
+            [%- pgupselect( 'stime1', conf.s_times, rs.stime1.remove(':00$'), 3 ) -%]
+            <div align="center" class="col-sm-1"> - </div>
+            [%- pgupselect( 'etime1', conf.e_times, rs.etime1.remove(':00$'), 3 ) -%]
+          </td>
+        [% ELSE %]
+          <td></td>
+          <td colspan="3"></td>
+        [% END %]
       </tr>
       <tr>
         <th>日時2</th>
-        <td>[% pgupselect( 'date2', conf.dates, rs.date2, 12 ) %]</td>
-        <td>[% pgupselect( 'stime2', conf.s_times2, rs.stime2, 12 ) %]</td>
-        <td style="text-align:center;"> - </td>
-        <td>[% pgupselect( 'etime2', conf.e_times2, rs.etime2, 12 ) %]</td>
+        [%- IF rs.date2 -%]
+          <td>
+            [%- pgupselect( 'date2', conf.dates, rs.date2.strftime('%Y/%m/%d'), 12 ) -%]
+          <td colspan="3">
+            [%- pgupselect( 'stime2', conf.s_times, rs.stime2.remove(':00$'), 3 ) -%]
+            <div align="center" class="col-sm-1"> - </div>
+            [%- pgupselect( 'etime2', conf.e_times, rs.etime2.remove(':00$'), 3 ) -%]
+          </td>
+        [% ELSE %]
+          <td></td>
+          <td colspan="3"></td>
+        [% END %]
       </tr>
       <tr>
         <th>場所</th>
-        <td>[% pgupselect( 'roomid', roomlist, rs.roomid, 12 ) %]</td>
+        <td colspan="2">[% pgupselect( 'roomid', roomlist, rs.roomid.roomid, 12 ) %]</td>
         <th>表示順序</th>
-        <td colspan="2">[% pgupselect( 'layerno', conf.nos, rs.layerno, 4 ) %]</td>
+        <td>[% pgupselect( 'layerno', conf.nos, rs.layerno, 4 ) %]</td>
       </tr>
       <tr>
-        <th>企画紹介文進捗状況</th>
+        <th>企画紹介文状況</th>
         <td colspan="4">[% pguptextarea( 'progressprp', rs.progressprp, 12 ) %]</td>
       </tr>
     </tbody>
