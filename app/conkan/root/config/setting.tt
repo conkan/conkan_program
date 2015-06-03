@@ -18,24 +18,24 @@
     <FORM method="POST" class="form-horizontal" role="form" action="/config/setting" id="profform">
       <div style="COLOR:Red;" id="valerr"> </div>
       <div class="form-group">
-        <label class="col-sm-3 text-right">[% cnf.first_date.pg_conf_name %]</label>
-        [% pgupinputtext( 'first_date', cnf.first_date.pg_conf_value, 2 ) %]
+        <label class="col-sm-3 text-right">[% cnf.dates.pg_conf_name %]</label>
+        [% pgupinputtext( 'dates', cnf.dates.pg_conf_value, 6 ) %]
       </div>
       <div class="form-group">
-        <label class="col-sm-3 text-right">[% cnf.first_start_times.pg_conf_name %]</label>
-        [% pgupinputtext( 'first_start_times', cnf.first_start_times.pg_conf_value, 8 ) %]
+        <label class="col-sm-3 text-right">[% cnf.start_times1.pg_conf_name %]</label>
+        [% pgupinputtext( 'start_times1', cnf.start_times1.pg_conf_value, 8 ) %]
       </div>
       <div class="form-group">
-        <label class="col-sm-3 text-right">[% cnf.first_end_time.pg_conf_name %]</label>
-        [% pgupinputtext( 'first_end_time', cnf.first_end_time.pg_conf_value, 2 ) %]
+        <label class="col-sm-3 text-right">[% cnf.end_times1.pg_conf_name %]</label>
+        [% pgupinputtext( 'end_times1', cnf.end_times1.pg_conf_value, 8 ) %]
       </div>
       <div class="form-group">
-        <label class="col-sm-3 text-right">[% cnf.second_start_times.pg_conf_name %]</label>
-        [% pgupinputtext( 'second_start_times', cnf.second_start_times.pg_conf_value, 8 ) %]
+        <label class="col-sm-3 text-right">[% cnf.start_times2.pg_conf_name %]</label>
+        [% pgupinputtext( 'start_times2', cnf.start_times2.pg_conf_value, 8 ) %]
       </div>
       <div class="form-group">
-        <label class="col-sm-3 text-right">[% cnf.second_end_time.pg_conf_name %]</label>
-        [% pgupinputtext( 'second_end_time', cnf.second_end_time.pg_conf_value, 2 ) %]
+        <label class="col-sm-3 text-right">[% cnf.end_times2.pg_conf_name %]</label>
+        [% pgupinputtext( 'end_times2', cnf.end_times2.pg_conf_value, 8 ) %]
       </div>
       <div class="form-group">
         <label class="col-sm-3 text-right">[% cnf.pg_status_vals.pg_conf_name %]</label>

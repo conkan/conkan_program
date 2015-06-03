@@ -1,20 +1,12 @@
+[% SET urole = c.user.get('role') %]
 [% PROCESS 'ttpgupmc.tt' %]
+
+  [%- USE dumper(indent=1) -%]
+  <pre>
+  [% dumper.dump(cnf.s_times1) %]
+  </pre>
 <FORM method="POST" class="form-horizontal" role="form" id="progform">
   <p id="vha" data-vha= "[]"/>
-<pre>
-[%# rs.staffid  => stafflist.n.tname; foreachで回しつつ一致したものをactiveにするマクロがいるか
-    rs.status   => conf.st_vals.n.;
-    rs.date1    => conf.f_date || +1;
-    rs.stime1   => conf.fs_times.n;
-    rs.etime1   => conf.fs_times.n+90min;
-    rs.date2    => conf.f_date || +1;
-    rs.stime2   => conf.ss_times.n;
-    rs.etime2   => conf.ss_times.n+90min;
-    rs.roomid   => roomlist.n.name;
-    rs.layerno;
-    rs.progressprp;
-%]
-</pre>
   <div style="COLOR:Red;" id="valerr"></div>
   <div class="form-group">
     <input type="hidden" name="pgid" id="pgid"   value="[% rs.pgid.pgid %]"></div>
@@ -23,17 +15,53 @@
   </div>
   <table class="table table-bordered table-condensed">
     </colgroup>
-      <col class="col-sm-2">
-      <col class="col-sm-2">
-      <col class="col-sm-2">
+      <col class="col-sm-3">
+      <col class="col-sm-3">
+      <col class="col-sm-3">
+      <col>
+      <col class="col-sm-3">
     </colgroup>
     <tbody>
       <tr>
-        <th style="background-color:#FFcc66">企画ID</th>
-        <td style="background-color:#FFcc66">[% rs.pgid.pgid | html %]</td>
-        <td style="background-color:#FFcc66">[% rs.pgid.name | html %]</td>
+        <th style="background-color:#FFcc66">企画ID: [% rs.pgid.pgid | html %]</th>
+        <th style="background-color:#FFcc66" colspan="4">[% rs.pgid.name | html %]</td>
+      </tr>
+      <tr>
+        <th>担当スタッフ</th>
+        <td>
+          [%- IF urole == 'ROOT' || urole == 'PG' -%]
+            [% pgupselect( 'staffid', stafflist, rs.staffid.staffid, 12 ) %]
+          [%- ELSE -%]
+            [%- rs.staffid.tname -%]
+          [%- END -%]
+        </td> 
+        <th colspan="2">実行ステータス</td>
+        <td>[% pgupselect( 'status', conf.status, rs.status, 12 ) %]</td>
+      </tr>
+      <tr>
+        <th>日時1</th>
+        <td>[% pgupselect( 'date1', conf.dates, rs.date1, 12 ) %]</td>
+        <td>[% pgupselect( 'stime1', conf.s_times1, rs.stime1, 12 ) %]</td>
+        <td style="text-align:center;"> - </td>
+        <td>[% pgupselect( 'etime1', conf.e_times1, rs.etime1, 12 ) %]</td>
+      </tr>
+      <tr>
+        <th>日時2</th>
+        <td>[% pgupselect( 'date2', conf.dates, rs.date2, 12 ) %]</td>
+        <td>[% pgupselect( 'stime2', conf.s_times2, rs.stime2, 12 ) %]</td>
+        <td style="text-align:center;"> - </td>
+        <td>[% pgupselect( 'etime2', conf.e_times2, rs.etime2, 12 ) %]</td>
+      </tr>
+      <tr>
+        <th>場所</th>
+        <td>[% pgupselect( 'roomid', roomlist, rs.roomid, 12 ) %]</td>
+        <th>表示順序</th>
+        <td colspan="2">[% pgupselect( 'layerno', conf.nos, rs.layerno, 4 ) %]</td>
+      </tr>
+      <tr>
+        <th>企画紹介文進捗状況</th>
+        <td colspan="4">[% pguptextarea( 'progressprp', rs.progressprp, 12 ) %]</td>
       </tr>
     </tbody>
   </table>
 </FORM>
-

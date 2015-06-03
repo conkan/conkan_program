@@ -6,4 +6,14 @@
   <textarea name="[% item %]" id="[% item %]"
     class="col-sm-[% size %]" rows="2">[%- val | trim | html -%]</textarea>
 [%- END -%]
-
+[%- MACRO pgupselect ( item, list, selid, size ) BLOCK -%]
+  <select class="col-sm-[% size %]" name="[% item %]" id="[% item %]">
+    [%- FOREACH opt = list %]
+      <option value="[% opt.id -%]"
+        [%- IF opt.id == selid -%]
+          selected
+        [%- END -%]
+      >[% opt.val %]</option>
+    [%- END %]
+  </select>
+[%- END -%]

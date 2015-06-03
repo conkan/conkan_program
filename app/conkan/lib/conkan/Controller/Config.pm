@@ -54,7 +54,7 @@ sub index :Path :Args(0) {
 -----------------------------------------------------------------------------
 システム全体設定
     system_confの更新
-    regist_confは別途
+    regist_confは別途 -> DBではなくregist.ymlに移行
 
 =cut
 

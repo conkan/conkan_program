@@ -377,17 +377,43 @@ sub pgup_program : Chained('program_show') : PathPart('program') : Args(0) {
                             'prefetch' => [ 'staffid', 'roomid' ],
                         },
                     ) ]->[0];
-    $c->stash->{'stafflist'} = [ $c->model('ConkanDB::PgStaff')->all() ];
-    $c->stash->{'roomlist'}  = [ $c->model('ConkanDB::PgRoom')->all() ];
+
+    $c->stash->{'stafflist'} =
+        [ { 'id' => '', 'val' => '' },
+          map +{ 'id' => $_->staffid(), 'val' => $_->tname() }, 
+            $c->model('ConkanDB::PgStaff')->search( { staffid => { '!=' =>  1 } } ) ];
+        # staffid == 1 は adminなので排除
+    $c->stash->{'roomlist'}  =
+        [ { 'id' => '', 'val' => '' },
+          map +{ 'id' => $_->roomid(), 'val' => $_->name() . '(' . $_->roomno() . ')' },
+            $c->model('ConkanDB::PgRoom')->all() ];
     my $conf  = {};
     my $M = $c->model('ConkanDB::PgSystemConf');
-    $conf->{'f_date'}   = $M->find('first_date')->pg_conf_value();
-    $conf->{'fs_times'} = from_json(
-        $M->find('first_start_times')->pg_conf_value() );
-    $conf->{'ss_times'} = from_json(
-        $M->find('second_start_times')->pg_conf_value() );
-    $conf->{'st_vals'}  = from_json(
-        $M->find('pg_status_vals')->pg_conf_value() );
+    $conf->{'dates'}   =
+        [ { 'id' => '', 'val' => '' },
+          map +{ 'id' => $_, 'val' => $_ },
+            @{from_json( $M->find('dates')->pg_conf_value() )} ];
+    $conf->{'s_times1'} =
+        [ { 'id' => '', 'val' => '' },
+          map +{ 'id' => $_, 'val' => $_ },
+            @{from_json( $M->find('start_times1')->pg_conf_value() )} ];
+    $conf->{'e_times1'} =
+        [ { 'id' => '', 'val' => '' },
+          map +{ 'id' => $_, 'val' => $_ },
+            @{from_json( $M->find('end_times1')->pg_conf_value() )} ];
+    $conf->{'s_times2'} =
+        [ { 'id' => '', 'val' => '' },
+          map +{ 'id' => $_, 'val' => $_ },
+            @{from_json( $M->find('start_times2')->pg_conf_value() )} ];
+    $conf->{'e_times2'} =
+        [ { 'id' => '', 'val' => '' },
+          map +{ 'id' => $_, 'val' => $_ },
+            @{from_json( $M->find('end_times2')->pg_conf_value() )} ];
+    $conf->{'status'}  =
+        [ { 'id' => '', 'val' => '' },
+          map +{ 'id' => $_, 'val' => $_ },
+            @{from_json( $M->find('pg_status_vals')->pg_conf_value() )} ];
+    $conf->{'nos'} = [ map +{ 'id' => $_, 'val' => $_ }, qw/ 0 1 2 3 4 / ];
     $c->stash->{'conf'}  = $conf;
     $c->detach( '_pgupdate', [ $rowprof, $up_items ] );
 }
