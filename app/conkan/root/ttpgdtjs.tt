@@ -41,7 +41,7 @@
   // 更新/追加
   $('#dobtn').click(function(event) {
     // バリデーション
-    var vha = $('#progform #vha').data().vha;
+    var vha = $('#progform #vha').data('vha');
     for ( var i in vha ) {
       if (!$('#'+ vha[i].id).val()) {
         $('#valerr').text(vha[i].name + 'は必須です');

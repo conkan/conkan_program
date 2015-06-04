@@ -455,8 +455,27 @@ sub pgup_program : Chained('program_show') : PathPart('program') : Args(1) {
 sub pgup_equip : Chained('program_show') : PathPart('equip') : Args(1) {
     my ( $self, $c, $id ) = @_;
 
-    $c->stash->{'rs'} = { target => 'equip', id => $id, };
-
+    my $up_items = [ qw/
+                    pgid equipid count
+                    / ];
+    my $model = $c->model('ConkanDB::PgEquip');
+    my $rowprof = undef;
+    try {
+        $rowprof = $model->find( $id, { 'prefetch' => [ 'pgid', 'equipid' ], } )
+            unless ( $id == 0 );
+        $c->stash->{'equiplist'} = [ 
+            map +{ 'id' => $_->equipid,
+                   'val' => $_->name . '(' . $_->equipno . ')' }, 
+                $c->model('ConkanDB::PgAllEquip')->all()
+            ];
+        $c->stash->{'nos'}     = [
+              map +{ 'id' => $_, 'val' => $_ }, qw/ 0 1 2 3 4 5 6 7 8 9/
+            ];
+    } catch {
+        $c->detach( '_dberror', [ shift ] );
+        return;
+    };
+    $c->detach( '_pgupdate', [ $rowprof, $up_items, $model ] );
 }
 
 =head2 program/*/cast/*

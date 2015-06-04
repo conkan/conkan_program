@@ -1,9 +1,38 @@
+[% SET urole = c.user.get('role') %]
+[% PROCESS 'ttpgupmc.tt' %]
 <FORM method="POST" class="form-horizontal" role="form" id="progform">
+  <p id="vha" data-vha= "[
+{&#34;id&#34;:&#34;equipid&#34;,  &#34;name&#34;:&#34;機材名&#34;}
+]">
   <div style="COLOR:Red;" id="valerr"></div>
   <div class="form-group">
-    target:[% args.target %]<br/>
-    pgid:  [% args.pgid   %]<br/>
-    id:    [% args.id     %]<br/>
+    <input type="hidden" name="pgid" id="pgid"   value="[% pgid %]"></div>
+    <input type="hidden" name="id"   id="id"     value="[% rs.id %]"></div>
+    <input type="hidden" name="target" id="target" value="equip"></div>
   </div>
+  <table class="table table-bordered table-condensed">
+    </colgroup>
+      <col class="col-sm-2">
+      <col class="col-sm-5">
+      <col class="col-sm-2">
+      <col class="col-sm-3">
+    </colgroup>
+    <tbody>
+      <tr>
+        <th style="background-color:#FFcc66">企画ID: [% pgid | html %]</th>
+        <th style="background-color:#FFcc66" colspan="3">[% pgname | html %]</td>
+      </tr>
+      <tr>
+        <th>機材名</th>
+        <td>
+          [% pgupselect( 'equipid', equiplist, rs.equipid.equipid, 12 ) %]
+        </td> 
+        <th>数量</th>
+        <td>
+          [% pgupselect( 'count', nos, rs.count, 12 ) %]
+        </td> 
+      </tr>
+    </tbody>
+  </table>
 </FORM>
 
