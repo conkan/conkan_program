@@ -19,6 +19,9 @@
     }
     arg += '/ FORM';
     $(content).load(arg);
+    if ( !id ) {
+        $('#dobtn').text('追加');
+    }
     $('#dobtn').show();
   } );
   // モーダルダイアログ表示後サイズ調整
@@ -35,7 +38,7 @@
   $('#PgEdit').on('hide.bs.modal', function (event) {
     location.reload(true);
   } );
-  // 更新
+  // 更新/追加
   $('#dobtn').click(function(event) {
     // バリデーション
     var vha = $('#progform #vha').data().vha;
@@ -49,11 +52,10 @@
         $('#' + vha[i].id).css('background-color', '');
       }
     }
-    // 更新実施
     var content = $('#PgEditContent');
     var data = $('#progform').serializeArray();
     var pgid   = $('#progform #pgid').val();
-    var id     = $('#progform #id').val();
+    var id     = $('#progform #id').val() || 0;
     var target = $('#progform #target').val();
     $('#dobtn').hide();
     var arg = pgid + '/' + target;

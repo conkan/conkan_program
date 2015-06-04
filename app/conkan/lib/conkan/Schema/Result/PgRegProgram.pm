@@ -267,16 +267,16 @@ __PACKAGE__->has_many(
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
-=head2 pg_programs
+=head2 pg_program
 
-Type: has_many
+Type: might_have
 
 Related object: L<conkan::Schema::Result::PgProgram>
 
 =cut
 
-__PACKAGE__->has_many(
-  "pg_programs",
+__PACKAGE__->might_have(
+  "pg_program",
   "conkan::Schema::Result::PgProgram",
   { "foreign.pgid" => "self.pgid" },
   { cascade_copy => 0, cascade_delete => 0 },
@@ -343,8 +343,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-05-30 11:20:14
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:2GGrxfNnxvp7gzQlnRLKmA
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-06-04 17:23:49
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:9aTrlY4Wj9VWembOFWkryA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

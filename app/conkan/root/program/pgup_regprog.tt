@@ -20,7 +20,7 @@
 ]">
   <div style="COLOR:Red;" id="valerr"></div>
   <div class="form-group">
-    <input type="hidden" name="pgid" id="pgid"   value="[% rs.pgid %]"></div>
+    <input type="hidden" name="pgid" id="pgid"   value="[% pgid %]"></div>
     <input type="hidden" name="id"   id="id"     value="-"></div>
     <input type="hidden" name="target" id="target" value="regprogram"></div>
   </div>

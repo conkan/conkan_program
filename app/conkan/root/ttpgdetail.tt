@@ -173,7 +173,7 @@ END -%]
               data-toggle="modal"
               data-target="#PgEdit"
               data-whatpgid="[% RegProgram.pgid | html %]"
-              data-whatitem="-"
+              data-whatitem="[% RegProgram.id | html %]"
               data-whattarget="program"
             >
               編集
