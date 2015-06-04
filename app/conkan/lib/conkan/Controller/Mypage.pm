@@ -22,11 +22,40 @@ MyPageを表示する Catalyst Controller.
 
 =head2 index
 
+mypageはそのユーザが担当している企画一覧
+
 =cut
 
 sub index :Path :Args(0) {
     my ( $self, $c ) = @_;
 
+    my $uid = $c->user->get('staffid');
+    my $pgmlist =
+        [ $c->model('ConkanDB::PgProgram')->search( { 'me.staffid' => $uid },
+            {
+                'prefetch' => [ 'pgid', 'staffid' ],
+                'order_by' => { '-asc' => 'me.pgid' },
+            } )
+        ];
+    my $prglist =
+        [ $c->model('ConkanDB::PgProgress')->search( { },
+            {
+                'group_by' => [ 'pgid' ],
+                'select'   => [ 'pgid', { MAX => 'repdatetime'} ], 
+                'as'       => [ 'pgid', 'lastprg' ],
+            } )
+        ];
+    my $list = {};
+    foreach my $prg ( @$prglist ) {
+        $list->{$prg->get_column('pgid')} = $prg->get_column('lastprg');
+    }
+
+    foreach my $pgm ( @$pgmlist ) {
+        $pgm->{'pgidv'}  = $pgm->pgid->pgid();
+        $pgm->{'name'}   = $pgm->pgid->name();
+        $pgm->{'repdatetime'} = $list->{$pgm->{'pgidv'}};
+    }
+    $c->stash->{'list'} = $pgmlist;
 }
 
 =head2 profile

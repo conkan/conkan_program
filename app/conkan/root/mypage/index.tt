@@ -36,6 +36,10 @@
       <H2>既に管理者登録済です。</H2>
       登録済の管理者でloginしなおしてください。
     [%- ELSE %]
+      [%- SET allprg = 0 %]
+      <div class="well" id="programlist">
+        [%- PROCESS 'ttpglist.tt' -%]
+      </div>
     [% END %]
   </div>
 [% END %]
