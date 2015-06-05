@@ -22,11 +22,33 @@ MyPageを表示する Catalyst Controller.
 
 =head2 index
 
-mypageはそのユーザが担当している企画一覧
+login済 -> mypage/list
+未login -> 初期設定
 
 =cut
 
 sub index :Path :Args(0) {
+    my ( $self, $c ) = @_;
+    my $uid = $c->user->get('staffid');
+    $c->response->redirect( '/mypage/list' ) if ( $uid > 1 );
+}
+
+=head2 mypage
+-----------------------------------------------------------------------------
+MYPAGE mypage_base  : Chainの起点
+
+=cut
+
+sub mypage_base : Chained('') : PathPart('mypage') : CaptureArgs(0) {
+    my ( $self, $c ) = @_;
+}
+
+=head2 list
+
+そのユーザが担当している企画一覧
+
+=cut
+sub mypage_list : Chained('mypage_base') : PathPart('list') : Args(0) {
     my ( $self, $c ) = @_;
 
     my $uid = $c->user->get('staffid');
@@ -58,7 +80,22 @@ sub index :Path :Args(0) {
     $c->stash->{'list'} = $pgmlist;
 }
 
+=head2 mypage/*
+
+MYPAGE mypage_show  : 詳細表示起点
+
+=cut
+
+sub mypage_show : Chained('mypage_base') :PathPart('') :Args(1) {
+    my ( $self, $c, $pgid ) = @_;
+
+    $c->stash->{'self_li_id'} = 'mypage';
+    $c->go('/program/program_detail/', [ $pgid ], [] );
+}
+
 =head2 profile
+
+プロファイル設定
 
 =cut
 
@@ -66,12 +103,21 @@ sub profile :Local {
     my ( $self, $c ) = @_;
 
     my $param = $c->request->body_params;
+    # flashかformからパラメータを取り出し、末尾の空白を除く
     my $value = {};
     for my $item qw/name role ma
                     passwd staffid account telno regno
                     tname tnamef comment / {
         $value->{$item} = $c->flash->{$item} || $param->{$item};
+        $value->{$item} =~ s/\s+$// if defined($value->{$item});
     }
+    # flashかformからoainfoパラメータを取り出し、末尾の空白を除く
+    my $oainfo = {};
+    for my $item qw/cyid CybozuToken CybozuSecret / {
+        $oainfo->{$item} = $c->flash->{'oainfo'}->{$item} || $param->{$item};
+        $oainfo->{$item} =~ s/\s+$// if defined($oainfo->{$item});
+    }
+
     my $staffM = $c->model('ConkanDB::PgStaff');
     my $staffid = $value->{'staffid'};
     my $curacnt = $c->user->get('account');
@@ -80,14 +126,15 @@ sub profile :Local {
             $staffid = $c->user->get('staffid');
         }
     }
-    # 末尾の空白を除く
-    foreach my $key ( keys( %$value ) ) {
-        $value->{$key} =~ s/\s+$// if defined($value->{$key});
+    # 既存のスタッフ検索
+    my $row = $staffM->find( $value->{'account'}, { 'key' => 'account_UNIQUE' });
+    if ( $row && $row->passwd eq '' ) {
+        # 仮登録 -> 本登録
+        $c->stash->{'addstaff'} = 1;
+        $staffid = $row->staffid;
     }
-
     if ( $staffid ) { # 更新
-        my $rowprof = [ $staffM->find($staffid) ]->[0];
-
+        my $rowprof = $staffM->find($staffid);
         if ( $c->request->method eq 'GET' ) {
             # 更新表示
             $c->session->{'updtic'} = time;
@@ -95,11 +142,10 @@ sub profile :Local {
                 'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
             } );
             $c->stash->{'rs'} = $rowprof;
-            if ( $rowprof->otheruid ) {
-                my $cybozu = decode_json( $rowprof->otheruid );
-                while ( my( $key, $val ) = each( %$cybozu )) {
-                    $c->stash->{'rs'}->{$key} = $val;
-                }
+            my $cybozu = $rowprof->otheruid ? decode_json( $rowprof->otheruid )
+                                            : $oainfo;
+            while ( my( $key, $val ) = each( %$cybozu )) {
+                $c->stash->{'rs'}->{$key} = $val;
             }
             $c->stash->{'rs'}->{'passwd'} = undef;
         }
@@ -107,7 +153,8 @@ sub profile :Local {
             # 更新実施
             if ( $rowprof->updateflg eq 
                 +( $c->sessionid . $c->session->{'updtic'}) ) {
-                $value->{'otheruid'} = $rowprof->otheruid;
+                $value->{'otheruid'} = $rowprof->otheruid ||
+                                       encode_json( $oainfo );
                 if ( $value->{'passwd'} ) {
                     $value->{'passwd'} =
                         crypt( $value->{'passwd'}, random_string( 'cccc' ));
@@ -128,38 +175,23 @@ sub profile :Local {
     }
     else {  # 新規登録
         $c->stash->{'addstaff'} = 1;
-        my $oainfo;
-        for my $item qw/cyid CybozuToken CybozuSecret / {
-            $oainfo->{$item} = $c->flash->{'oainfo'}->{$item} || $param->{$item};
+        while ( my( $key, $val ) = each( %$oainfo ) ) {
+            $value->{$key} = $val;
         }
         if ( $c->request->method eq 'GET' ) {
             # 登録表示
-            while ( my( $key, $val ) = each( %$oainfo ) ) {
-                $value->{$key} = $val;
-            }
             $c->stash->{'rs'} = $value;
         }
         else {
             # 登録実施
-            unless ( $staffM->search({account => $value->{'account'}})->count ) {
-                $value->{'otheruid'} = encode_json( $oainfo );
-                $value->{'passwd'} =
-                    crypt( $value->{'passwd'}, random_string( 'cccc' ));
-                $value->{'staffid'} = undef;
-                $value->{'tname'} = $value->{'tname'} || $value->{'name'};
-                $staffM->create( $value );
-                $c->stash->{'rs'} = undef;
-                $c->stash->{'state'} = 'success';
-            }
-            else {
-                while ( my( $key, $val ) = each( %$oainfo ) ) {
-                    $value->{$key} = $val;
-                }
-                $c->stash->{'state'} = undef;
-                $c->stash->{'accountdupl'} = 1;
-                $c->stash->{'rs'} = $value;
-                $c->stash->{'rs'}->{'passwd'} = undef;
-            }
+            $value->{'otheruid'} = encode_json( $oainfo );
+            $value->{'passwd'} =
+                crypt( $value->{'passwd'}, random_string( 'cccc' ));
+            $value->{'tname'} = $value->{'tname'} || $value->{'name'};
+            $value->{'staffid'} = undef;
+            $staffM->create( $value );
+            $c->stash->{'rs'} = undef;
+            $c->stash->{'state'} = 'success';
         }
     }
 }

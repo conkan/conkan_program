@@ -1,4 +1,9 @@
 <script>
+  var storage = sessionStorage;
+  $(document).ready(function(){
+    $(document).scrollTop( storage.getItem( 'sctop' ) );
+    storage.clear();
+  });
   // スクロール制御
   $('.subtag a').click(function(){
     var pd, tp;
@@ -13,7 +18,7 @@
     var id     = $(event.relatedTarget).data('whatitem');
     var target = $(event.relatedTarget).data('whattarget');
     var content = $('#PgEditContent');
-    var arg = pgid + '/' + target;
+    var arg = '/program/' + pgid + '/' + target;
     if ( id != "-" ) {
         arg += '/' + id;
     }
@@ -36,6 +41,7 @@
   } );
   // モーダルダイアログ非表示
   $('#PgEdit').on('hide.bs.modal', function (event) {
+    storage.setItem( 'sctop', $(document).scrollTop() );
     location.reload(true);
   } );
   // 更新/追加
@@ -58,7 +64,7 @@
     var id     = $('#progform #id').val() || 0;
     var target = $('#progform #target').val();
     $('#dobtn').hide();
-    var arg = pgid + '/' + target;
+    var arg = '/program/' + pgid + '/' + target;
     if ( id != "-" ) {
         arg += '/' + id;
     }

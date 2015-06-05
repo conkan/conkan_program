@@ -85,6 +85,11 @@
 </div>
 [% PROCESS 'tttail.tt' %]
 <script>
+  var storage = sessionStorage;
+  $(document).ready(function(){
+    $(document).scrollTop( storage.getItem( 'sctop' ) );
+    storage.clear();
+  });
   $('#editStaff').on('show.bs.modal', function (event) {
     var staffid = $(event.relatedTarget).data('whatever');
     var role = $(event.relatedTarget).data('whatrole');
@@ -97,6 +102,7 @@
     $('#dodel').show();
   } );
   $('#editStaff').on('hide.bs.modal', function (event) {
+    storage.setItem( 'sctop', $(document).scrollTop() );
     location.reload(true);
   } );
   $('#dobtn').click(function(event) {

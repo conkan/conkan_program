@@ -31,7 +31,7 @@ END -%]
         </button>
         <span class="col-sm-1"></span>
         [%- IF! addstaff %]
-          <a class="col-sm-3 text-center btn btn-large" href="/mypage">マイページに戻る</a>
+          <a class="col-sm-3 text-center btn btn-large" href="/mypage/list">マイページに戻る</a>
         [% END %]
       </div>
     </FORM>
@@ -44,13 +44,13 @@ END -%]
       更新
       [%- END -%]
       しました</H1>
-    <a class="btn btn-primary btn-large" href="/mypage">マイページに戻る</a>
+    <a class="btn btn-primary btn-large" href="/mypage/list">マイページに戻る</a>
   </div>
   <div class="well" id="deny" style="display:none;">
     <H1>更新できませんでした</H1>
     更新を始めてから登録するまでの間に、システム管理者が更新しました。
     改めて実施してください
-    <a class="btn btn-primary btn-large" href="/mypage">マイページに戻る</a>
+    <a class="btn btn-primary btn-large" href="/mypage/list">マイページに戻る</a>
   </div>
   <div class="well" id="initadd" style="display:none;">
     <H1>登録しました</H1>

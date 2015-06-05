@@ -3,11 +3,7 @@
   SET selfUpdate = 1;
 END %]
 [% PROCESS 'ttpgupmc.tt' %]
-<div style="COLOR:Red;" id="valerr">
-[%- IF accountdupl -%]
-  アカウントが重複しています
-[%- END -%]
-</div>
+<div style="COLOR:Red;" id="valerr"></div>
 <div class="form-group">
   <input type="hidden" name="staffid", id="staffid" value="[% rs.staffid %]"/>
   <input type="hidden" name="cyid", value="[% rs.cyid %]"/>

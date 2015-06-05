@@ -37,7 +37,7 @@
         <td style="[% rmcol %]">[% item.status      | html %]</td>
         <td style="[% rmcol %]">[% item.repdatetime | html %]</td>
         <td style="[% rmcol %]text-align:center;">
-          <a href="/program/[% item.pgidv %]">詳細</a>
+          <a href="[% item.pgidv %]">詳細</a>
         </td>
       </tr>
     [% END %]

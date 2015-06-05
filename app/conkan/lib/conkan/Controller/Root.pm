@@ -106,7 +106,7 @@ sub index :Path :Args(0) {
 
     $c->go( '/initialize' ) unless (exists($c->config->{inited}));
 
-    $c->response->redirect( '/mypage' );
+    $c->response->redirect( '/mypage/list' );
 }
 
 =head2 yetinit
@@ -130,14 +130,9 @@ sub default :Path {
     my ( $self, $c ) = @_;
 
     my $action = $c->request->path();
-    my $liid =  ($action eq 'program/list/list')      ? 'program_list'
-              : ($action eq 'program/progress/list')  ? 'program_progress' 
-              : ($action eq 'mypage/profile')         ? 'mypage_profile'
-              : ($action eq 'config/staff/list')      ? 'config_staff'
-              : ($action eq 'config/room/list')       ? 'config_room'
+    my $liid =  ($action eq 'timetable')      ? 'timetable'
+              : ($action eq 'config/cast/list')       ? 'config_cast'
               : ($action eq 'config/equip/list')      ? 'config_equip'
-              : ($action eq 'config/setting')         ? 'config_conf'
-              : ($action eq 'addstaff')               ? 'mypage_profile'
               : 'mypage';
     $c->log->debug('>>>' . localtime() . ' action : [' . $action . ']');
     $c->log->debug('>>>' . localtime() . ' liid   : [' . $liid   . ']');
@@ -189,6 +184,8 @@ sub login :Local {
                 $c->session->{init_role} = undef;
             }
             unless ( $c->user->get('rmdate') ) {
+                # この時だけ/mypage/listではなく/mypageにジャンプ
+                ## adminでのlogin対応
                 $c->response->redirect( '/mypage' );
                 return;
             }

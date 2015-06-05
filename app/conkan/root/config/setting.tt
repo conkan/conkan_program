@@ -19,23 +19,23 @@
       <div style="COLOR:Red;" id="valerr"> </div>
       <div class="form-group">
         <label class="col-sm-3 text-right">[% cnf.dates.pg_conf_name %]</label>
-        [% pgupinputtext( 'dates', cnf.dates.pg_conf_value, 6 ) %]
+        [% pguptextarea( 'dates', cnf.dates.pg_conf_value, 6, 1 ) %]
       </div>
       <div class="form-group">
         <label class="col-sm-3 text-right">[% cnf.start_times1.pg_conf_name %]</label>
-        [% pgupinputtext( 'start_times1', cnf.start_times1.pg_conf_value, 8 ) %]
+        [% pguptextarea( 'start_times1', cnf.start_times1.pg_conf_value, 8, 1 ) %]
       </div>
       <div class="form-group">
         <label class="col-sm-3 text-right">[% cnf.end_times1.pg_conf_name %]</label>
-        [% pgupinputtext( 'end_times1', cnf.end_times1.pg_conf_value, 8 ) %]
+        [% pguptextarea( 'end_times1', cnf.end_times1.pg_conf_value, 8, 1 ) %]
       </div>
       <div class="form-group">
         <label class="col-sm-3 text-right">[% cnf.start_times2.pg_conf_name %]</label>
-        [% pgupinputtext( 'start_times2', cnf.start_times2.pg_conf_value, 8 ) %]
+        [% pguptextarea( 'start_times2', cnf.start_times2.pg_conf_value, 8, 1 ) %]
       </div>
       <div class="form-group">
         <label class="col-sm-3 text-right">[% cnf.end_times2.pg_conf_name %]</label>
-        [% pgupinputtext( 'end_times2', cnf.end_times2.pg_conf_value, 8 ) %]
+        [% pguptextarea( 'end_times2', cnf.end_times2.pg_conf_value, 8, 1 ) %]
       </div>
       <div class="form-group">
         <label class="col-sm-3 text-right">[% cnf.pg_status_vals.pg_conf_name %]</label>
@@ -47,7 +47,7 @@
       </div>
       <div class="form-group">
         <label class="col-sm-3 text-right">[% cnf.contact_status_vals.pg_conf_name %]</label>
-        [% pguptextarea( 'contact_status_vals', cnf.contact_status_vals.pg_conf_value, 8 ) %]
+        [% pguptextarea( 'contact_status_vals', cnf.contact_status_vals.pg_conf_value, 8, 4 ) %]
       </div>
       <div class="form-group">
         <span class="col-sm-4"></span>
@@ -61,13 +61,13 @@
   </div>
   <div class="well" id="success" style="display:none;">
     <H1>更新しました</H1>
-      <a class="btn btn-primary btn-large" href="/mypage">マイページに戻る</a>
+      <a class="btn btn-primary btn-large" href="/mypage/list">マイページに戻る</a>
   </div>
   <div class="well" id="deny" style="display:none;">
     <H1>更新できませんでした</H1>
     他のシステム管理者が設定更新した可能性があります。<br/>
     確認して下さい。<br/>
-    <a class="btn btn-primary btn-large" href="/mypage">マイページに戻る</a>
+    <a class="btn btn-primary btn-large" href="/mypage/list">マイページに戻る</a>
   </div>
 </div>
 [% PROCESS 'tttail.tt' %]

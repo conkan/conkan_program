@@ -92,6 +92,11 @@
 </div>
 [% PROCESS 'tttail.tt' %]
 <script>
+  var storage = sessionStorage;
+  $(document).ready(function(){
+    $(document).scrollTop( storage.getItem( 'sctop' ) );
+    storage.clear();
+  });
   // モーダルダイアログ表示
   $('#editRoom').on('show.bs.modal', function (event) {
     var roomid = $(event.relatedTarget).data('whatever');
@@ -108,6 +113,7 @@
   } );
   // モーダルダイアログ非表示
   $('#editRoom').on('hide.bs.modal', function (event) {
+    storage.setItem( 'sctop', $(document).scrollTop() );
     location.reload(true);
   } );
   // 更新

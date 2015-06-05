@@ -4,9 +4,9 @@
   <p id="vha" data-vha= "[]"/>
   <div style="COLOR:Red;" id="valerr"></div>
   <div class="form-group">
-    <input type="hidden" name="pgid" id="pgid"   value="[% pgid %]"></div>
-    <input type="hidden" name="id"   id="id"     value="[% rs.id %]"></div>
-    <input type="hidden" name="target" id="target" value="program"></div>
+    <input type="hidden" name="pgid" id="pgid"   value="[% pgid %]">
+    <input type="hidden" name="id"   id="id"     value="[% rs.id %]">
+    <input type="hidden" name="target" id="target" value="program">
   </div>
   <table class="table table-bordered table-condensed">
     </colgroup>
@@ -27,6 +27,8 @@
           [%- IF urole == 'ROOT' || urole == 'PG' -%]
             [% pgupselect( 'staffid', stafflist, rs.staffid.staffid, 12 ) %]
           [%- ELSE -%]
+            <input type="hidden" name="staffid" id="staffid" value="
+            [%- rs.staffid.staffid -%]">
             [%- rs.staffid.tname -%]
           [%- END -%]
         </td> 

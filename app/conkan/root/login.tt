@@ -15,7 +15,8 @@
 
   [%- IF! c.user_exists %]
   <!-- パスワードlogin -->
-  <div class="well" id="passwd">
+  <div class="well" id="passwordauth">
+    <div style="COLOR:Red;" id="valerr"></div>
     <FORM method="POST" action="/login">
       <div class="row">
         <label>パスワード認証</label>
@@ -31,12 +32,12 @@
       </div>
       <div class="row">
         <label class="col-sm-2 text-right">パスワード</label>
-        <input type="password" name="passwd" class="input-small col-sm-3" placeholder="Password"/>
+        <input type="password" name="passwd" id="passwd" class="input-small col-sm-3" placeholder="Password"/>
       </div>
       <BR/>
       <div class="row">
         <span class="col-sm-2"></span>
-        <button type="submit" class="btn btn-primary btn-large col-sm-3">
+        <button type="submit" id="dobtn" class="btn btn-primary btn-large col-sm-3">
           パスワード認証実施
         </button>
         [%- IF canaddstaff %]
@@ -59,8 +60,16 @@
   </div>
   [%- END %]
 </div>
-
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<script>
+  // login
+  $('#dobtn').click(function(event) {
+    if ( !$('#passwd').val() ) {
+        $('#valerr').text('パスワードは必須です');
+        return false;
+    }
+  } );
+</script>
 </body>
 </html>

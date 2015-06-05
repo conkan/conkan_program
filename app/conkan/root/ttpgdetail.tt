@@ -3,32 +3,10 @@ SET urole = c.user.get('role');
 IF urole == 'ROOT' || urole == 'PG';
   SET editable = 1;
 END;
-IF c.user.get('staffid') == Program.staffid;
+IF c.user.get('staffid') == Program.staffid.staffid;
   SET editable = 1;
 END -%]
-[%- MACRO subtag ( bgcolor ) BLOCK -%]
-  <div class="subtag row">
-    <div class="col-sm-2 [% bgcolor.reg_program %] text-center">
-      <a href="#reg_program"><h5>企画概要</h5></a>
-    </div>
-    <div class="col-sm-2 [% bgcolor.reg_equip %] text-center">
-      <a href="#reg_equip"><h5>要望機材</h5></a>
-    </div>
-    <div class="col-sm-2 [% bgcolor.reg_cast %] text-center">
-      <a href="#reg_cast"><h5>要望出演者</h5></a>
-    </div>
-    <div class="col-sm-2 [% bgcolor.equip %] text-center">
-      <a href="#equip"><h5>決定機材</h5></a>
-    </div>
-    <div class="col-sm-2 [% bgcolor.cast %] text-center">
-      <a href="#cast"><h5>決定出演者</h5></a>
-    </div>
-    <div class="col-sm-2 [% bgcolor.progress %] text-center">
-      <a href="#progress"><h5>進捗</h5></a>
-    </div>
-  </div>
-  <p/>
-[%- END -%]
+[% PROCESS 'ttpgupmc.tt' %]
 <!-- 企画概要 -->
 <div class="well" id="reg_program">
   [% subtag( { 'reg_program' => 'bg-info' } ) %]
@@ -41,7 +19,7 @@ END -%]
       <col class="col-sm-2">
       <col class="col-sm-2">
       <col class="col-sm-2">
-      <col class="col-sm-1">
+      <col class="col-sm-2">
       <col class="col-sm-1">
     </colgroup>
     <tbody>
@@ -123,7 +101,7 @@ END -%]
       <col class="col-sm-2">
       <col class="col-sm-2">
       <col class="col-sm-2">
-      <col class="col-sm-1">
+      <col class="col-sm-2">
       <col class="col-sm-1">
     </colgroup>
     <tbody>
@@ -261,7 +239,7 @@ END -%]
       <col class="col-sm-2">
       <col class="col-sm-2">
       <col class="col-sm-2">
-      <col class="col-sm-5">
+      <col class="col-sm-6">
       <col class="col-sm-1">
     </colgroup>
     <thead>
@@ -325,7 +303,7 @@ END -%]
       <col class="col-sm-2">
       <col class="col-sm-2">
       <col class="col-sm-2">
-      <col class="col-sm-1">
+      <col class="col-sm-2">
       <col class="col-sm-1">
     </colgroup>
     <thead>

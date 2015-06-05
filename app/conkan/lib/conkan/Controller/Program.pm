@@ -295,6 +295,7 @@ sub program_list : Chained('program_base') : PathPart('list') : Args(0) {
 sub program_show : Chained('program_base') :PathPart('') :CaptureArgs(1) {
     my ( $self, $c, $pgid ) = @_;
 
+$c->log->debug('>>> pgid :[' . $pgid . ']');
     $c->stash->{'RegProgram'} =
         $c->model('ConkanDB::PgRegProgram')->find($pgid);
     $c->stash->{'RegCasts'} =
