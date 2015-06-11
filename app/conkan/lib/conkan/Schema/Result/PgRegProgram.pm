@@ -38,7 +38,7 @@ __PACKAGE__->table("pg_reg_program");
 
 =head1 ACCESSORS
 
-=head2 pgid
+=head2 regpgid
 
   data_type: 'integer'
   extra: {unsigned => 1}
@@ -183,7 +183,7 @@ __PACKAGE__->table("pg_reg_program");
 =cut
 
 __PACKAGE__->add_columns(
-  "pgid",
+  "regpgid",
   {
     data_type => "integer",
     extra => { unsigned => 1 },
@@ -242,43 +242,28 @@ __PACKAGE__->add_columns(
 
 =over 4
 
-=item * L</pgid>
+=item * L</regpgid>
 
 =back
 
 =cut
 
-__PACKAGE__->set_primary_key("pgid");
+__PACKAGE__->set_primary_key("regpgid");
 
 =head1 RELATIONS
 
-=head2 pg_casts
+=head2 pg_programs
 
 Type: has_many
-
-Related object: L<conkan::Schema::Result::PgCast>
-
-=cut
-
-__PACKAGE__->has_many(
-  "pg_casts",
-  "conkan::Schema::Result::PgCast",
-  { "foreign.pgid" => "self.pgid" },
-  { cascade_copy => 0, cascade_delete => 0 },
-);
-
-=head2 pg_program
-
-Type: might_have
 
 Related object: L<conkan::Schema::Result::PgProgram>
 
 =cut
 
-__PACKAGE__->might_have(
-  "pg_program",
+__PACKAGE__->has_many(
+  "pg_programs",
   "conkan::Schema::Result::PgProgram",
-  { "foreign.pgid" => "self.pgid" },
+  { "foreign.regpgid" => "self.regpgid" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
@@ -293,7 +278,7 @@ Related object: L<conkan::Schema::Result::PgProgress>
 __PACKAGE__->has_many(
   "pg_progresses",
   "conkan::Schema::Result::PgProgress",
-  { "foreign.pgid" => "self.pgid" },
+  { "foreign.regpgid" => "self.regpgid" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
@@ -308,7 +293,7 @@ Related object: L<conkan::Schema::Result::PgRegCast>
 __PACKAGE__->has_many(
   "pg_reg_casts",
   "conkan::Schema::Result::PgRegCast",
-  { "foreign.pgid" => "self.pgid" },
+  { "foreign.regpgid" => "self.regpgid" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
@@ -323,28 +308,13 @@ Related object: L<conkan::Schema::Result::PgRegEquip>
 __PACKAGE__->has_many(
   "pg_regs_equip",
   "conkan::Schema::Result::PgRegEquip",
-  { "foreign.pgid" => "self.pgid" },
-  { cascade_copy => 0, cascade_delete => 0 },
-);
-
-=head2 pgs_equip
-
-Type: has_many
-
-Related object: L<conkan::Schema::Result::PgEquip>
-
-=cut
-
-__PACKAGE__->has_many(
-  "pgs_equip",
-  "conkan::Schema::Result::PgEquip",
-  { "foreign.pgid" => "self.pgid" },
+  { "foreign.regpgid" => "self.regpgid" },
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-06-04 17:23:49
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:9aTrlY4Wj9VWembOFWkryA
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-06-11 16:41:47
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:o5/4IUxwmQU124JlzMTkzw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

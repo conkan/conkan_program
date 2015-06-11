@@ -13,23 +13,17 @@
   <table class="table table-bordered table-condensed">
     </colgroup>
       <col class="col-sm-2">
-      <col class="col-sm-5">
-      <col class="col-sm-2">
-      <col class="col-sm-3">
+      <col class="col-sm-8">
     </colgroup>
     <tbody>
       <tr>
-        <th style="background-color:#FFcc66">企画ID: [% pgid | html %]</th>
-        <th style="background-color:#FFcc66" colspan="3">[% pgname | html %]</td>
+        <th style="background-color:#FFcc66">企画ID: [% regpgid %] ([% subno %])</th>
+        <th style="background-color:#FFcc66">[% pgname | html %]</td>
       </tr>
       <tr>
         <th>機材名</th>
         <td>
           [% pgupselect( 'equipid', equiplist, rs.equipid.equipid, 12 ) %]
-        </td> 
-        <th>数量</th>
-        <td>
-          [% pgupselect( 'count', nos, rs.count, 12 ) %]
         </td> 
       </tr>
     </tbody>

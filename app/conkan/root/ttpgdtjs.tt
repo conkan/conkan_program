@@ -2,7 +2,7 @@
   var storage = sessionStorage;
   $(document).ready(function(){
     $(document).scrollTop( storage.getItem( 'sctop' ) );
-    storage.clear();
+    storage.removeItem( 'sctop' );
   });
   // スクロール制御
   $('.subtag a').click(function(){

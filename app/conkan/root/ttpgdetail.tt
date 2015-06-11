@@ -24,7 +24,7 @@ END -%]
     </colgroup>
     <tbody>
       <tr>
-        <th>企画ID</th> <td>[% RegProgram.pgid | html %]</td>
+        <th>企画ID</th> <td>[% RegProgram.regpgid %] ([% Program.subno %])</td>
         <td colspan="6">
           <b>[% RegProgram.name | html %]</b>
           ([% RegProgram.namef | html %])
@@ -82,7 +82,7 @@ END -%]
             <button type="button" class="btn btn-warning btn-xs"
               data-toggle="modal"
               data-target="#PgEdit"
-              data-whatpgid="[% RegProgram.pgid | html %]"
+              data-whatpgid="[% Program.pgid | html %]"
               data-whatitem="-"
               data-whattarget="regprogram"
             >
@@ -144,14 +144,13 @@ END -%]
         <th>表示順序</th> <td colspan="2">[% Program.layerno | html %]</td>
       </tr>
       <tr>
-        <th>企画紹介文進捗状況</th> <td colspan="5">[% Program.progressprp | html %]</td>
+        <th>企画紹介文</th> <td colspan="5">[% Program.progressprp | html %]</td>
         <td align="center">
           [%- IF editable %]
             <button type="button" class="btn btn-warning btn-xs"
               data-toggle="modal"
               data-target="#PgEdit"
-              data-whatpgid="[% RegProgram.pgid | html %]"
-              data-whatitem="[% RegProgram.id | html %]"
+              data-whatpgid="[% Program.pgid | html %]"
               data-whattarget="program"
             >
               編集
@@ -256,14 +255,14 @@ END -%]
         <tr>
           <td>[% item.equipid.name    | html %]</td>
           <td>[% item.equipid.equipno | html %]</td>
-          <td>[% item.count           | html %]</td>
+          <td>[% item.equipid.count   | html %]</td>
           <td>[% item.equipid.spec    | html %]</td>
           <td align="center">
             [%- IF editable %]
               <button type="button" class="btn btn-warning btn-xs"
                 data-toggle="modal"
                 data-target="#PgEdit"
-                data-whatpgid="[% RegProgram.pgid | html %]"
+                data-whatpgid="[% Program.pgid | html %]"
                 data-whatitem="[% item.id | html %]"
                 data-whattarget="equip"
               >
@@ -279,7 +278,7 @@ END -%]
             <button type="button" class="btn btn-primary btn-xs"
               data-toggle="modal"
               data-target="#PgEdit"
-              data-whatpgid="[% RegProgram.pgid | html %]"
+              data-whatpgid="[% Program.pgid | html %]"
               data-whatitem="0"
               data-whattarget="equip"
             >
@@ -331,7 +330,7 @@ END -%]
               <button type="button" class="btn btn-warning btn-xs"
                 data-toggle="modal"
                 data-target="#PgEdit"
-                data-whatpgid="[% RegProgram.pgid | html %]"
+                data-whatpgid="[% Program.pgid | html %]"
                 data-whatitem="[% item.id | html %]"
                 data-whattarget="cast"
               >
@@ -347,7 +346,7 @@ END -%]
             <button type="button" class="btn btn-primary btn-xs"
               data-toggle="modal"
               data-target="#PgEdit"
-              data-whatpgid="[% RegProgram.pgid | html %]"
+              data-whatpgid="[% Program.pgid | html %]"
               data-whatitem="0"
               data-whattarget="cast"
             >
@@ -365,7 +364,10 @@ END -%]
   [% subtag( { 'progress' => 'bg-info' } ) %]
   <FORM id="addProgress" role="form" method="POST" action="/program/progress">
     <div class="form-group">
-      <input type="hidden" name="pgid", id="pgid" value="[% RegProgram.pgid | html %]"/>
+      <input type="hidden" name="regpgid", id="progress_regpgid"
+            value="[% RegProgram.regpgid %]"/>
+      <input type="hidden" name="pgid", id="progress_pgid"
+            value="[% Program.pgid %]"/>
       <button type="submit" class="btn btn-primary btn-xs">進捗登録</button>
       <textarea name="progress" id="progress" class="col-sm-12" rows="3"></textarea>
     </div>

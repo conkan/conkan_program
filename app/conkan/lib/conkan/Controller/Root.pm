@@ -183,8 +183,8 @@ sub login :Local {
             else {
                 $c->session->{init_role} = undef;
             }
-            unless ( $c->user->get('rmdate') ) {
-                # この時だけ/mypage/listではなく/mypageにジャンプ
+            if ( $c->user->get('passwd') && !$c->user->get('rmdate') ) {
+                # login直後だけ/mypage/listではなく/mypageにジャンプ
                 ## adminでのlogin対応
                 $c->response->redirect( '/mypage' );
                 return;

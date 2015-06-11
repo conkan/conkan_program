@@ -18,7 +18,7 @@
     </colgroup>
     <tbody>
       <tr>
-        <th style="background-color:#FFcc66">企画ID: [% pgid | html %]</th>
+        <th style="background-color:#FFcc66">企画ID: [% regpgid %] ([% subno %])</th>
         <th style="background-color:#FFcc66" colspan="4">[% pgname | html %]</td>
       </tr>
       <tr>

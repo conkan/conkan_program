@@ -55,29 +55,35 @@ sub mypage_list : Chained('mypage_base') : PathPart('list') : Args(0) {
     my $pgmlist =
         [ $c->model('ConkanDB::PgProgram')->search( { 'me.staffid' => $uid },
             {
-                'prefetch' => [ 'pgid', 'staffid' ],
-                'order_by' => { '-asc' => 'me.pgid' },
+                'prefetch' => [ 'regpgid', 'staffid' ],
+                'order_by' => { '-asc' => [ 'me.regpgid', 'me.subno' ] },
             } )
         ];
     my $prglist =
         [ $c->model('ConkanDB::PgProgress')->search( { },
             {
-                'group_by' => [ 'pgid' ],
-                'select'   => [ 'pgid', { MAX => 'repdatetime'} ], 
-                'as'       => [ 'pgid', 'lastprg' ],
+                'group_by' => [ 'regpgid' ],
+                'select'   => [ 'regpgid', { MAX => 'repdatetime'} ], 
+                'as'       => [ 'regpgid', 'lastprg' ],
             } )
         ];
-    my $list = {};
+    my $lastprgs = {};
     foreach my $prg ( @$prglist ) {
-        $list->{$prg->get_column('pgid')} = $prg->get_column('lastprg');
+        $lastprgs->{$prg->get_column('regpgid')} = $prg->get_column('lastprg');
     }
 
+    my @list = ();
     foreach my $pgm ( @$pgmlist ) {
-        $pgm->{'pgidv'}  = $pgm->pgid->pgid();
-        $pgm->{'name'}   = $pgm->pgid->name();
-        $pgm->{'repdatetime'} = $list->{$pgm->{'pgidv'}};
+        my $regpgid = $pgm->regpgid->regpgid();
+        push @list, {
+            'regpgid'       => $regpgid,
+            'pgid'          => $pgm->pgid(),
+            'subno'         => $pgm->subno(),
+            'name'          => $pgm->regpgid->name(),
+            'repdatetime'   => $lastprgs->{$regpgid},
+        };
     }
-    $c->stash->{'list'} = $pgmlist;
+    $c->stash->{'list'} = \@list;
 }
 
 =head2 mypage/*
@@ -175,11 +181,11 @@ sub profile :Local {
     }
     else {  # 新規登録
         $c->stash->{'addstaff'} = 1;
-        while ( my( $key, $val ) = each( %$oainfo ) ) {
-            $value->{$key} = $val;
-        }
         if ( $c->request->method eq 'GET' ) {
             # 登録表示
+            while ( my( $key, $val ) = each( %$oainfo ) ) {
+                $value->{$key} = $val;
+            }
             $c->stash->{'rs'} = $value;
         }
         else {

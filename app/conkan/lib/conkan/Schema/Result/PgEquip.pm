@@ -59,12 +59,6 @@ __PACKAGE__->table("pg_equip");
   is_foreign_key: 1
   is_nullable: 1
 
-=head2 count
-
-  data_type: 'integer'
-  extra: {unsigned => 1}
-  is_nullable: 0
-
 =head2 updateflg
 
   data_type: 'varchar'
@@ -95,8 +89,6 @@ __PACKAGE__->add_columns(
     is_foreign_key => 1,
     is_nullable => 1,
   },
-  "count",
-  { data_type => "integer", extra => { unsigned => 1 }, is_nullable => 0 },
   "updateflg",
   { data_type => "varchar", is_nullable => 1, size => 64 },
 );
@@ -139,20 +131,20 @@ __PACKAGE__->belongs_to(
 
 Type: belongs_to
 
-Related object: L<conkan::Schema::Result::PgRegProgram>
+Related object: L<conkan::Schema::Result::PgProgram>
 
 =cut
 
 __PACKAGE__->belongs_to(
   "pgid",
-  "conkan::Schema::Result::PgRegProgram",
+  "conkan::Schema::Result::PgProgram",
   { pgid => "pgid" },
   { is_deferrable => 1, on_delete => "NO ACTION", on_update => "NO ACTION" },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-18 12:18:22
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:zhjGn65EqGbIHJQgSDN1uA
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-06-11 16:41:47
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:EKMGgEAxrWOgtbYhigxDtA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

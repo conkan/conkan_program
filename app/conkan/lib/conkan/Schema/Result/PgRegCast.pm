@@ -45,7 +45,7 @@ __PACKAGE__->table("pg_reg_cast");
   is_auto_increment: 1
   is_nullable: 0
 
-=head2 pgid
+=head2 regpgid
 
   data_type: 'integer'
   extra: {unsigned => 1}
@@ -92,7 +92,7 @@ __PACKAGE__->add_columns(
     is_auto_increment => 1,
     is_nullable => 0,
   },
-  "pgid",
+  "regpgid",
   {
     data_type => "integer",
     extra => { unsigned => 1 },
@@ -125,7 +125,7 @@ __PACKAGE__->set_primary_key("id");
 
 =head1 RELATIONS
 
-=head2 pgid
+=head2 regpgid
 
 Type: belongs_to
 
@@ -134,15 +134,15 @@ Related object: L<conkan::Schema::Result::PgRegProgram>
 =cut
 
 __PACKAGE__->belongs_to(
-  "pgid",
+  "regpgid",
   "conkan::Schema::Result::PgRegProgram",
-  { pgid => "pgid" },
+  { regpgid => "regpgid" },
   { is_deferrable => 1, on_delete => "NO ACTION", on_update => "NO ACTION" },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-06-03 23:08:54
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:jZ6YcMCxiJL4eTivqr8Wow
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-06-11 16:41:47
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:tdr++BDp2USshmE6g2O9dw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

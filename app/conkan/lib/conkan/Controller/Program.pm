@@ -55,51 +55,77 @@ sub add :Local {
 
         my $regcnf;
         my $hval;
+        my $pgid;
 
-    # $c->config->{Regist}->{RegProgram}の内容にもとづいて、pginfoの内容を登録
-    ## PgIDが未設定の場合autoincするため
-    ## {RegProgram}のitem数は1つであり、loopmax定義はない
+        # $c->config->{Regist}->{RegProgram}の内容を元にpginfoの内容を登録
+        ## regPgIDが未設定の場合autoincにより決定
+        ## {RegProgram}のitem数は1つであり、loopmax定義はない
         $regcnf = $c->config->{Regist}->{RegProgram};
-        $hval = __PACKAGE__->ParseRegist( $pginfo, $regcnf->{items}->[0], undef, ''  );
+        $hval = __PACKAGE__->ParseRegist(
+                        $pginfo, $regcnf->{items}->[0], undef, ''  );
         if ( ref($hval) eq 'HASH' ) {
-            my $row = $c->model('ConkanDB::' . $regcnf->{schema})->create( $hval );
+            my $row =
+                $c->model('ConkanDB::' . $regcnf->{schema})->create( $hval );
             ## $pginfo->{企画ID}の値を再設定 (autoinc対応)
-            $pginfo->{'企画ID'} = $row->pgid;
+            $pginfo->{'企画ID'} = $row->regpgid;
+        }
+        else {
+            die 'input Format Error /or/ regist.yml Format Error';
         }
 
-    # $c->config->{Regist}->{RegCast}の内容にもとづいて、pginfoの内容を登録
-    ## 同時にPgAllCastにも登録するため
-    ## {RegCast}のみloopmax定義がある
+        # $c->config->{Regist}->{Program}の内容を元にpginfoの内容を登録
+        ## {RegProgram}のitem数は1つであり、loopmax定義はない
+        $regcnf = $c->config->{Regist}->{Program};
+        $hval = __PACKAGE__->ParseRegist(
+                        $pginfo, $regcnf->{items}->[0], undef, ''  );
+        if ( ref($hval) eq 'HASH' ) {
+            my $row =
+                $c->model('ConkanDB::' . $regcnf->{schema})->create( $hval );
+            ## 企画内部IDの値を設定 (登録時にautoincで決定)
+            $pgid = $row->pgid;
+        }
+        else {
+            die 'input Format Error /or/ regist.yml Format Error';
+        }
+
+        # $c->config->{Regist}->{RegCast}の内容を元にpginfoの内容を登録
+        ## 同時にPgAllCastにも登録する
+        ## {RegCast}のitem数は複数あり、さらにloopmax定義がある
         $regcnf = $c->config->{Regist}->{RegCast};
         foreach my $item (@{$regcnf->{items}}) {
             if ( defined($item->{loopmax}) ) {
                 foreach my $cnt (1..$item->{loopmax}) {
-                    $hval = __PACKAGE__->ParseRegist( $pginfo, $item, undef, $cnt );
+                    $hval = __PACKAGE__->ParseRegist(
+                                    $pginfo, $item, undef, $cnt );
                     if ( ref($hval) eq 'HASH' ) {
-                        __PACKAGE__->AddCast( $c, $hval );
+                        __PACKAGE__->AddCast( $c, $hval, $pgid );
+                    }
+                    else {
+                        die 'input Format Error /or/ regist.yml Format Error';
                     }
                 }
             }
             else {
                 $hval = __PACKAGE__->ParseRegist( $pginfo, $item, undef, '');
                 if ( ref($hval) eq 'HASH' ) {
-                    __PACKAGE__->AddCast( $c, $hval );
+                    __PACKAGE__->AddCast( $c, $hval, $pgid );
+                }
+                else {
+                    die 'input Format Error /or/ regist.yml Format Error';
                 }
             }
         }
 
-    # $c->config->{Regist}の内容に基づいて pginfoの内容をDBに登録
-    ## {RegCast}以外にはloopmax定義はない
-        my @kinds = keys( %{$c->config->{Regist}} );
-        foreach my $kind (@kinds) {
-            next if ($kind eq 'RegProgram' );
-            next if ($kind eq 'RegCast' );
-            $regcnf = $c->config->{Regist}->{$kind};
-            foreach my $item (@{$regcnf->{items}}) {
-                $hval = __PACKAGE__->ParseRegist( $pginfo, $item, undef, '');
-                if ( ref($hval) eq 'HASH' ) {
-                    $c->model('ConkanDB::' . $regcnf->{schema})->create( $hval )
-                }
+        # $c->config->{Regist}->{RegEquip}の内容を元にpginfoの内容をDBに登録
+        ## {RegEquip}のitem数は複数あるが、loopmax定義はない
+        $regcnf = $c->config->{Regist}->{RegEquip};
+        foreach my $item (@{$regcnf->{items}}) {
+            $hval = __PACKAGE__->ParseRegist( $pginfo, $item, undef, '');
+            if ( ref($hval) eq 'HASH' ) {
+                $c->model('ConkanDB::' . $regcnf->{schema})->create( $hval )
+            }
+            else {
+                die 'input Format Error /or/ regist.yml Format Error';
             }
         }
     } catch {
@@ -169,20 +195,18 @@ sub AddCast {
     my ( $self,
          $c,            # コンテキスト
          $hval,         # 登録する情報
+         $pgid,         # 企画内部ID
        ) = @_;
                     
     try {
         # 出演者受付登録
         $c->model('ConkanDB::PgRegCast')->create( $hval );
+
         # 全出演者登録
-        my $castid;
         my $acrow = $c->model('ConkanDB::PgAllCast')->find( $hval->{'name'},
                 { 'key'  => 'name_UNIQUE', },
             );
-        if ( $acrow ) {
-            $castid = $acrow->castid();
-        }
-        else {
+        unless ( $acrow ) {
             my $aval = {
                     'name'   => $hval->{'name'},
                     'namef'  => $hval->{'namef'},
@@ -192,12 +216,13 @@ sub AddCast {
                 $aval->{'regno'} = $hval->{'entrantregno'};
             }
             $acrow = $c->model('ConkanDB::PgAllCast')->create( $aval );
-            $castid = $acrow->castid();
         }
+        my $castid = $acrow->castid();
+
         # 出演者管理登録
         $c->model('ConkanDB::PgCast')->create(
             {
-            'pgid'   => $hval->{pgid},
+            'pgid'   => $pgid,
             'castid' => $castid,
             'name'   => $hval->{'name'},
             'namef'  => $hval->{'namef'},
@@ -219,15 +244,16 @@ sub AddCast {
 sub progress :Local {
     my ( $self, $c ) = @_;
 
-    my $param = $c->request->body_params;
-    my $pgid   = $param->{'pgid'};
+    my $param   = $c->request->body_params;
+    my $pgid    = $param->{'pgid'};
+    my $regpgid = $param->{'regpgid'};
 
     try {
         $c->model('ConkanDB::PgProgress')->create(
             {
-            'pgid'      => $pgid,
-            'staffid'   => $c->user->get('staffid'),
-            'repdatetime' => \'NOW()',
+            'regpgid'       => $regpgid,
+            'staffid'       => $c->user->get('staffid'),
+            'repdatetime'   => \'NOW()',
             'report'        => $param->{'progress'},
             },
         );
@@ -260,30 +286,36 @@ sub program_list : Chained('program_base') : PathPart('list') : Args(0) {
     my $pgmlist =
         [ $c->model('ConkanDB::PgProgram')->search( { },
             {
-                'prefetch' => [ 'pgid', 'staffid' ],
-                'order_by' => { '-asc' => 'me.pgid' },
+                'prefetch' => [ 'regpgid', 'staffid' ],
+                'order_by' => { '-asc' => [ 'me.regpgid', 'me.subno'] },
             } )
         ];
     my $prglist =
         [ $c->model('ConkanDB::PgProgress')->search( { },
             {
-                'group_by' => [ 'pgid' ],
-                'select'   => [ 'pgid', { MAX => 'repdatetime'} ], 
-                'as'       => [ 'pgid', 'lastprg' ],
+                'group_by' => [ 'regpgid' ],
+                'select'   => [ 'regpgid', { MAX => 'repdatetime'} ], 
+                'as'       => [ 'regpgid', 'lastprg' ],
             } )
         ];
-    my $list = {};
+    my $lastprgs = {};
     foreach my $prg ( @$prglist ) {
-        $list->{$prg->get_column('pgid')} = $prg->get_column('lastprg');
+        $lastprgs->{$prg->get_column('regpgid')} = $prg->get_column('lastprg');
     }
 
+    my @list = ();
     foreach my $pgm ( @$pgmlist ) {
-        $pgm->{'pgidv'}  = $pgm->pgid->pgid();
-        $pgm->{'name'}   = $pgm->pgid->name();
-        $pgm->{'staff'}  = $pgm->staffid ? $pgm->staffid->name() : '';
-        $pgm->{'repdatetime'} = $list->{$pgm->{'pgidv'}};
+        my $regpgid = $pgm->regpgid->regpgid();
+        push @list, {
+            'regpgid'       => $regpgid,
+            'pgid'          => $pgm->pgid(),
+            'subno'         => $pgm->subno(),
+            'name'          => $pgm->regpgid->name(),
+            'staff'         => $pgm->staffid ? $pgm->staffid->name() : '',
+            'repdatetime'   => $lastprgs->{$regpgid},
+        };
     }
-    $c->stash->{'list'} = $pgmlist;
+    $c->stash->{'list'} = \@list;
 }
 
 =head2 program/*
@@ -294,34 +326,32 @@ sub program_list : Chained('program_base') : PathPart('list') : Args(0) {
 
 sub program_show : Chained('program_base') :PathPart('') :CaptureArgs(1) {
     my ( $self, $c, $pgid ) = @_;
-
-$c->log->debug('>>> pgid :[' . $pgid . ']');
+    $c->stash->{'Program'}  =
+        $c->model('ConkanDB::PgProgram')->find($pgid, 
+                        {
+                            'prefetch' => [ 'regpgid', 'staffid', 'roomid' ],
+                        },
+                    );
+    my $regpgid = $c->stash->{'Program'}->regpgid->regpgid();
     $c->stash->{'RegProgram'} =
-        $c->model('ConkanDB::PgRegProgram')->find($pgid);
+        $c->model('ConkanDB::PgRegProgram')->find($regpgid);
     $c->stash->{'RegCasts'} =
         [ $c->model('ConkanDB::PgRegCast')->search(
-                        { pgid => $pgid },
+                        { regpgid => $regpgid },
                         {
                             'order_by' => { '-asc' => 'id' },
                         }
                     ) ];
     $c->stash->{'RegEquips'} =
         [ $c->model('ConkanDB::PgRegEquip')->search(
-                        { pgid => $pgid },
+                        { regpgid => $regpgid },
                         {
                             'order_by' => { '-asc' => 'id' },
                         }
                     ) ];
-    $c->stash->{'Program'}  =
-        $c->model('ConkanDB::PgProgram')->find($pgid, 
-                        {
-                            'key' => 'PgID',
-                            'prefetch' => [ 'staffid', 'roomid' ],
-                        },
-                    );
     $c->stash->{'Progress'}  =
         [ $c->model('ConkanDB::PgProgress')->search(
-                        { pgid => $pgid },
+                        { regpgid => $regpgid },
                         {
                             'prefetch' => [ 'staffid' ],
                             'order_by' => { '-desc' => 'repdatetime' },
@@ -343,8 +373,10 @@ $c->log->debug('>>> pgid :[' . $pgid . ']');
                             'order_by' => { '-asc' => 'id' },
                         }
                     ) ];
-    $c->stash->{'pgid'} = $pgid;
-    $c->stash->{'pgname'} = $c->stash->{'RegProgram'}->name();
+    $c->stash->{'pgid'}     = $pgid;
+    $c->stash->{'regpgid'}  = $regpgid;
+    $c->stash->{'subno'}    = $c->stash->{'Program'}->subno();
+    $c->stash->{'pgname'}   = $c->stash->{'RegProgram'}->name();
 };
 
 =head2 program/*
@@ -370,11 +402,11 @@ sub pgup_regprog : Chained('program_show') : PathPart('regprogram') : Args(0) {
                     content contentpub realpub afterpub avoiddup
                     experience comment
                     / ];
-    my $pgid = $c->stash->{'pgid'};
+    my $regpgid = $c->stash->{'regpgid'};
     my $model = $c->model('ConkanDB::PgRegProgram');
     my $rowprof;
     try {
-        $rowprof = $model->find($pgid);
+        $rowprof = $model->find($regpgid);
     } catch {
         $c->detach( '_dberror', [ shift ] );
         return;
@@ -382,13 +414,13 @@ sub pgup_regprog : Chained('program_show') : PathPart('regprogram') : Args(0) {
     $c->detach( '_pgupdate', [ $rowprof, $up_items, $model ] );
 }
 
-=head2 program/*/program/*
+=head2 program/*/program
 
 企画管理 pgup_program  : 企画更新(管理分)
 
 =cut
-sub pgup_program : Chained('program_show') : PathPart('program') : Args(1) {
-    my ( $self, $c, $id ) = @_;
+sub pgup_program : Chained('program_show') : PathPart('program') : Args(0) {
+    my ( $self, $c ) = @_;
     my $up_items = [ qw/
                     staffid status memo
                     date1 stime1 etime1 date2 stime2 etime2
@@ -399,7 +431,7 @@ sub pgup_program : Chained('program_show') : PathPart('program') : Args(1) {
     my $rowprof;
     try {
         $rowprof = $model->find(
-                    $id, { 'prefetch' => [ 'pgid', 'staffid', 'roomid' ], } );
+                    $pgid, { 'prefetch' => [ 'regpgid', 'staffid', 'roomid' ], } );
         $c->stash->{'stafflist'} = [
             { 'id' => '', 'val' => '' },
               map +{ 'id' => $_->staffid(), 'val' => $_->tname() }, 
@@ -457,7 +489,7 @@ sub pgup_equip : Chained('program_show') : PathPart('equip') : Args(1) {
     my ( $self, $c, $id ) = @_;
 
     my $up_items = [ qw/
-                    pgid equipid count
+                    equipid
                     / ];
     my $model = $c->model('ConkanDB::PgEquip');
     my $rowprof = undef;
@@ -487,7 +519,7 @@ sub pgup_equip : Chained('program_show') : PathPart('equip') : Args(1) {
 sub pgup_cast : Chained('program_show') : PathPart('cast') : Args(1) {
     my ( $self, $c, $id ) = @_;
     my $up_items = [ qw/
-                    pgid castid status memo name namef
+                    castid status memo name namef
                     / ];
     my $model = $c->model('ConkanDB::PgCast');
     my $rowprof = undef;

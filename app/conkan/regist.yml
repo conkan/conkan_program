@@ -6,7 +6,7 @@ Regist:
                 column:     name
                 addcnf:
                     -   hashkey: 企画ID
-                        column:     pgid
+                        column:     regpgid
                     -   hashkey: 企画名ふりがな
                         column:     namef
                     -   hashkey: 申し込み日付
@@ -64,6 +64,35 @@ Regist:
                         column:     experience
                     -   hashkey: 備考
                         column:     comment
+    Program:
+        schema: PgProgram
+        items:
+            -   hashkey: 企画ID
+                column:     regpgid
+    RegCast:
+        schema: PgRegCast
+        items:
+            -   hashkey: 申込者出演
+                validval:   する
+                addcnf:
+                    -   hashkey: 企画ID
+                        column:     regpgid
+                    -   hashkey: 申込者名
+                        column:     name
+                    -   hashkey: 米魂番号
+                        column:     entrantregno
+            -   hashkey: 出演者氏名
+                loopmax: 5
+                column:     name
+                addcnf:
+                    -   hashkey: 企画ID
+                        column:     regpgid
+                    -   hashkey: 出演者氏名ふりがな
+                        column:     namef
+                    -   hashkey: 出演交渉
+                        column:     needreq
+                    -   hashkey: ゲスト申請
+                        column:     needguest
     RegEquip:
         schema: PgRegEquip
         items:
@@ -72,13 +101,13 @@ Regist:
                 column:     name
                 addcnf:
                     -   hashkey: 企画ID
-                        column:     pgid
+                        column:     regpgid
             -   hashkey: 壇上マイク
                 validval:   使用する
                 column:     name
                 addcnf:
                     -   hashkey: 企画ID
-                        column:     pgid
+                        column:     regpgid
                     -   hashkey: 壇上マイク本数
                         column:     count
             -   hashkey: 客席マイク
@@ -86,7 +115,7 @@ Regist:
                 column:     name
                 addcnf:
                     -   hashkey: 企画ID
-                        column:     pgid
+                        column:     regpgid
                     -   hashkey: 客席マイク本数
                         column:     count
             -   hashkey: モニタ/スクリーン
@@ -94,30 +123,30 @@ Regist:
                 column:     name
                 addcnf:
                     -   hashkey: 企画ID
-                        column:     pgid
+                        column:     regpgid
             -   hashkey: BD/DVDプレイヤー
                 validval:   使用する
                 column:     name
                 addcnf:
                     -   hashkey: 企画ID
-                        column:     pgid
+                        column:     regpgid
             -   hashkey: 書画カメラ
                 validval:   使用する
                 column:     name
                 addcnf:
                     -   hashkey: 企画ID
-                        column:     pgid
+                        column:     regpgid
             -   hashkey: その他要望機材
                 column:     name
                 addcnf:
                     -   hashkey: 企画ID
-                        column:     pgid
+                        column:     regpgid
             -   hashkey: 持ち込み映像機器
                 validval:   持ち込む
                 column:     name
                 addcnf:
                     -   hashkey: 企画ID
-                        column:     pgid
+                        column:     regpgid
                     -   hashkey: 映像機器映像接続
                         column:     vif
                         repcnf:
@@ -133,7 +162,7 @@ Regist:
                 column:     name
                 addcnf:
                     -   hashkey: 企画ID
-                        column:     pgid
+                        column:     regpgid
                     -   hashkey: PC映像接続
                         column:     vif
                         repcnf:
@@ -155,33 +184,4 @@ Regist:
                 column:     name
                 addcnf:
                     -   hashkey: 企画ID
-                        column:     pgid
-    RegCast:
-        schema: PgRegCast
-        items:
-            -   hashkey: 申込者出演
-                validval:   する
-                addcnf:
-                    -   hashkey: 企画ID
-                        column:     pgid
-                    -   hashkey: 申込者名
-                        column:     name
-                    -   hashkey: 米魂番号
-                        column:     entrantregno
-            -   hashkey: 出演者氏名
-                loopmax: 5
-                column:     name
-                addcnf:
-                    -   hashkey: 企画ID
-                        column:     pgid
-                    -   hashkey: 出演者氏名ふりがな
-                        column:     namef
-                    -   hashkey: 出演交渉
-                        column:     needreq
-                    -   hashkey: ゲスト申請
-                        column:     needguest
-    Program:
-        schema: PgProgram
-        items:
-            -   hashkey: 企画ID
-                column:     pgid
+                        column:     regpgid
