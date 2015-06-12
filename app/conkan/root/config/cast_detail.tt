@@ -2,10 +2,10 @@
 <FORM method="POST" class="form-horizontal" role="form" id="castform">
   <div style="COLOR:Red;" id="valerr"></div>
   <div class="form-group">
-    <input type="hidden" name="castid", id="castid" value="[% rs.castid -%]"/>
+    <input type="hidden" name="castid", id="castid" value="[% rs.castid -%]">
   </div>
   <table class="table table-bordered table-condensed">
-    </colgroup>
+    <colgroup>
       <col class="col-sm-2">
       <col class="col-sm-4">
       <col class="col-sm-2">

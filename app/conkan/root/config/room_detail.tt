@@ -1,12 +1,12 @@
 [% PROCESS 'ttpgupmc.tt' %]
-<FORM method="POST" class="form-horizontal" role="form" action="/config/room" id="roomform">
+<FORM method="POST" class="form-horizontal" role="form" id="roomform">
   <div style="COLOR:Red;" id="valerr"></div>
   <div class="form-group">
-    <input type="hidden" name="roomid", id="roomid" value="[% rs.roomid -%]"/>
-    <input type="hidden" name="rmdate", id="rmdate" value="[% rs.rmdate -%]"/>
+    <input type="hidden" name="roomid", id="roomid" value="[% rs.roomid -%]">
+    <input type="hidden" name="rmdate", id="rmdate" value="[% rs.rmdate -%]">
   </div>
   <table class="table table-bordered table-condensed">
-    </colgroup>
+    <colgroup>
       <col class="col-sm-2">
       <col class="col-sm-3">
       <col class="col-sm-2">

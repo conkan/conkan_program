@@ -12,7 +12,7 @@
     <input type="hidden" name="target" id="target" value="equip">
   </div>
   <table class="table table-bordered table-condensed">
-    </colgroup>
+    <colgroup>
       <col class="col-sm-2">
       <col class="col-sm-8">
     </colgroup>

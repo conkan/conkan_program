@@ -100,7 +100,7 @@
   // 更新
   $('#dobtn').click(function(event) {
     if (!$('#name').val()) {
-        $('valerr').val('氏名は必須です');
+        $('#valerr').text('氏名は必須です');
         return false;
     }
     var content = $('#editCastContent');
