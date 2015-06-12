@@ -62,7 +62,7 @@ __PACKAGE__->table("pg_cast");
 =head2 status
 
   data_type: 'varchar'
-  is_nullable: 0
+  is_nullable: 1
   size: 64
 
 =head2 memo
@@ -77,6 +77,12 @@ __PACKAGE__->table("pg_cast");
   size: 64
 
 =head2 namef
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 64
+
+=head2 title
 
   data_type: 'varchar'
   is_nullable: 1
@@ -113,12 +119,14 @@ __PACKAGE__->add_columns(
     is_nullable => 0,
   },
   "status",
-  { data_type => "varchar", is_nullable => 0, size => 64 },
+  { data_type => "varchar", is_nullable => 1, size => 64 },
   "memo",
   { data_type => "text", is_nullable => 1 },
   "name",
   { data_type => "varchar", is_nullable => 1, size => 64 },
   "namef",
+  { data_type => "varchar", is_nullable => 1, size => 64 },
+  "title",
   { data_type => "varchar", is_nullable => 1, size => 64 },
   "updateflg",
   { data_type => "varchar", is_nullable => 1, size => 64 },
@@ -169,8 +177,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-06-11 16:41:47
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:XYYlPn+Ba1ZSTvey6WgR3A
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-06-12 13:40:09
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:dbxk8IaCD3XGiGRp081m3g
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

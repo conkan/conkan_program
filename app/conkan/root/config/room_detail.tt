@@ -1,58 +1,54 @@
+[% PROCESS 'ttpgupmc.tt' %]
 <FORM method="POST" class="form-horizontal" role="form" action="/config/room" id="roomform">
-  [% PROCESS 'ttpgupmc.tt' %]
-  <div style="COLOR:Red;" id="valerr">
-  </div>
+  <div style="COLOR:Red;" id="valerr"></div>
   <div class="form-group">
     <input type="hidden" name="roomid", id="roomid" value="[% rs.roomid -%]"/>
     <input type="hidden" name="rmdate", id="rmdate" value="[% rs.rmdate -%]"/>
   </div>
-  <div class="form-group">
-    <label class="col-sm-3 text-right">部屋名</label>
-    [% pgupinputtext( 'name', rs.name, 4 ) %]
-  </div>
-  <div class="form-group">
-    <label class="col-sm-3 text-right">部屋番号</label>
-    [% pgupinputtext( 'roomno', rs.roomno, 4 ) %]
-  </div>
-  <div class="form-group">
-    <label class="col-sm-3 text-right">定員</label>
-    [% pgupinputtext( 'max', rs.max, 4 ) %]
-  </div>
-  <div class="form-group">
-    <label class="col-sm-3 text-right">形式</label>
-    [% pgupinputtext( 'type', rs.type, 4 ) %]
-  </div>
-  <div class="form-group">
-    <label class="col-sm-3 text-right">面積</label>
-    [% pgupinputtext( 'size', rs.size, 4 ) %]
-  </div>
-  <div class="form-group">
-    <label class="col-sm-3 text-right">机数</label>
-    [% pgupinputtext( 'tablecnt', rs.tablecnt, 4 ) %]
-  </div>
-  <div class="form-group">
-    <label class="col-sm-3 text-right">イス数</label>
-    [% pgupinputtext( 'chaircnt', rs.chaircnt, 4 ) %]
-  </div>
-  <div class="form-group">
-    <label class="col-sm-3 text-right">附属設備</label>
-    [% pgupinputtext( 'equips', rs.equips, 4 ) %]
-  </div>
-  <div class="form-group">
-    <label class="col-sm-3 text-right">利用可能時間</label>
-    [% pgupinputtext( 'useabletime', rs.useabletime, 4 ) %]
-  </div>
-
-  <div class="form-group">
-    <label class="col-sm-3 text-right">インタネット回線</label>
-    <select class="col-sm-4" name="net" id="net">
-      <option id="NONE" value="NORM" [% 'selected' IF rs.net == "NORM" %]>無</option>
-      <option id="W"    value="W"    [% 'selected' IF rs.net == "W"    %]>無線</option>
-      <option id="E"    value="E"    [% 'selected' IF rs.net == "E"    %]>有線</option>
-    </select>
-  </div>
-  <div class="form-group">
-    <label class="col-sm-3 text-right">備考</label>
-    [% pguptextarea( 'comment', rs.comment, 8 ) %]
-  </div>
+  <table class="table table-bordered table-condensed">
+    </colgroup>
+      <col class="col-sm-2">
+      <col class="col-sm-3">
+      <col class="col-sm-2">
+      <col class="col-sm-2">
+      <col class="col-sm-2">
+      <col class="col-sm-1">
+    </colgroup>
+    <tbody>
+      <tr>
+        <th style="text-align:right;">部屋名</th>
+        <td>[% pgupinputtext( 'name', rs.name, 12 ) %]</td>
+        <th style="text-align:right;">部屋番号</th>
+        <td>[% pgupinputtext( 'roomno', rs.roomno, 12 ) %]</td>
+        <th style="text-align:right;">定員</th>
+        <td>[% pgupinputtext( 'max', rs.max, 12 ) %]</td>
+      </tr>
+      <tr>
+        <th style="text-align:right;">形式</th>
+        <td>[% pgupinputtext( 'type', rs.type, 12 ) %]</td>
+        <th style="text-align:right;">面積</th>
+        <td>[% pgupinputtext( 'size', rs.size, 12 ) %]</td>
+        <th style="text-align:right;">利用可能時間</th>
+        <td>[% pgupinputtext( 'useabletime', rs.useabletime, 12 ) %]</td>
+      </tr>
+      <tr>
+        <th style="text-align:right;">机数</th>
+        <td>[% pgupinputtext( 'tablecnt', rs.tablecnt, 12 ) %]</td>
+        <th style="text-align:right">イス数</th>
+        <td>[% pgupinputtext( 'chaircnt', rs.chaircnt, 12 ) %]</td>
+        <th style="text-align:right">附属設備</th>
+        <td>[% pgupinputtext( 'equips', rs.equips, 12 ) %]</td>
+      </tr>
+      <tr>
+        <th style="text-align:right">インタネット回線</th>
+        <td><select class="col-sm-12" name="net" id="net">
+          <option id="NONE" value="NORM" [% 'selected' IF rs.net == "NORM" %]>無</option>
+          <option id="W"    value="W"    [% 'selected' IF rs.net == "W"    %]>無線</option>
+          <option id="E"    value="E"    [% 'selected' IF rs.net == "E"    %]>有線</option>
+          </select></td>
+        <th style="text-align:right">備考</th>
+        <td colspan="3">[% pguptextarea( 'comment', rs.comment, 12 ) %]</td>
+      </tr>
+    </tbody>
+  </table>
 </FORM>

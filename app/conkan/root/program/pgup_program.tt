@@ -4,8 +4,9 @@
   <p id="vha" data-vha= "[]"/>
   <div style="COLOR:Red;" id="valerr"></div>
   <div class="form-group">
+    <input type="hidden" name="regpgid" id="regpgid" value="[% regpgid %]">
     <input type="hidden" name="pgid" id="pgid"   value="[% pgid %]">
-    <input type="hidden" name="id"   id="id"     value="[% rs.id %]">
+    <input type="hidden" name="id"   id="id"     value="-">
     <input type="hidden" name="target" id="target" value="program">
   </div>
   <table class="table table-bordered table-condensed">
@@ -38,34 +39,24 @@
       </tr>
       <tr>
         <th>日時1</th>
-        [%- IF rs.date1 -%]
-          <td>
-            [%- pgupselect( 'date1', conf.dates, rs.date1.strftime('%Y/%m/%d'), 12 ) -%]
-          </td>
-          <td colspan="3">
-            [%- pgupselect( 'stime1', conf.s_times, rs.stime1.remove(':00$'), 3 ) -%]
-            <div align="center" class="col-sm-1"> - </div>
-            [%- pgupselect( 'etime1', conf.e_times, rs.etime1.remove(':00$'), 3 ) -%]
-          </td>
-        [% ELSE %]
-          <td></td>
-          <td colspan="3"></td>
-        [% END %]
+        <td>
+          [%- pgupselect( 'date1', conf.dates, rs.date1.strftime('%Y/%m/%d'), 12 ) -%]
+        </td>
+        <td colspan="3">
+          [%- pgupselect( 'stime1', conf.s_times, rs.stime1.remove(':00$'), 3 ) -%]
+          <div align="center" class="col-sm-1"> - </div>
+          [%- pgupselect( 'etime1', conf.e_times, rs.etime1.remove(':00$'), 3 ) -%]
+        </td>
       </tr>
       <tr>
         <th>日時2</th>
-        [%- IF rs.date2 -%]
-          <td>
-            [%- pgupselect( 'date2', conf.dates, rs.date2.strftime('%Y/%m/%d'), 12 ) -%]
-          <td colspan="3">
-            [%- pgupselect( 'stime2', conf.s_times, rs.stime2.remove(':00$'), 3 ) -%]
-            <div align="center" class="col-sm-1"> - </div>
-            [%- pgupselect( 'etime2', conf.e_times, rs.etime2.remove(':00$'), 3 ) -%]
-          </td>
-        [% ELSE %]
-          <td></td>
-          <td colspan="3"></td>
-        [% END %]
+        <td>
+          [%- pgupselect( 'date2', conf.dates, rs.date2.strftime('%Y/%m/%d'), 12 ) -%]
+        <td colspan="3">
+          [%- pgupselect( 'stime2', conf.s_times, rs.stime2.remove(':00$'), 3 ) -%]
+          <div align="center" class="col-sm-1"> - </div>
+          [%- pgupselect( 'etime2', conf.e_times, rs.etime2.remove(':00$'), 3 ) -%]
+        </td>
       </tr>
       <tr>
         <th>場所</th>
@@ -74,8 +65,8 @@
         <td>[% pgupselect( 'layerno', conf.nos, rs.layerno, 4 ) %]</td>
       </tr>
       <tr>
-        <th>企画紹介文状況</th>
-        <td colspan="4">[% pguptextarea( 'progressprp', rs.progressprp, 12 ) %]</td>
+        <th>企画紹介文</th>
+        <td colspan="4">[% pguptextarea( 'progressprp', rs.progressprp, 12, 4 ) %]</td>
       </tr>
     </tbody>
   </table>

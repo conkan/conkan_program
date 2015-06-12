@@ -21,6 +21,14 @@ conkanをdeployしたサーバで、conkan::Schema を含むモデルクラス�
 ````
 $> cd [conkan_root]
 $> ./script/conkan_create.pl model ConkanDB DBIC::Schema conkan::Schema create=static dbi:mysql:conkan:[DBサーバ] [管理ユーザ名] [管理パスワード] AutoCommit=1 on_connect_do='["SET NAMES utf8"]'
+````
+モデルクラス作成(更新)後、[conkan_root]/lib/conkan/Schema.pm の$VERSIONの値を
+増やすのを忘れないこと
+(同じ値だとupgrade対象にならない)
+
+````
+our $VERSION = '0.00xx';
+````
 
 1. デバッグ起動
 

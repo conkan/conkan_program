@@ -80,6 +80,7 @@ sub mypage_list : Chained('mypage_base') : PathPart('list') : Args(0) {
             'pgid'          => $pgm->pgid(),
             'subno'         => $pgm->subno(),
             'name'          => $pgm->regpgid->name(),
+            'status'        => $pgm->status(),
             'repdatetime'   => $lastprgs->{$regpgid},
         };
     }

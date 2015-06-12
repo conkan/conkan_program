@@ -6,9 +6,10 @@
 ]">
   <div style="COLOR:Red;" id="valerr"></div>
   <div class="form-group">
-    <input type="hidden" name="pgid" id="pgid"   value="[% pgid %]"></div>
-    <input type="hidden" name="id"   id="id"     value="[% rs.id %]"></div>
-    <input type="hidden" name="target" id="target" value="equip"></div>
+    <input type="hidden" name="regpgid" id="regpgid"value="[% regpgid %]">
+    <input type="hidden" name="pgid" id="pgid"   value="[% pgid %]">
+    <input type="hidden" name="id"   id="id"     value="[% rs.id %]">
+    <input type="hidden" name="target" id="target" value="equip">
   </div>
   <table class="table table-bordered table-condensed">
     </colgroup>

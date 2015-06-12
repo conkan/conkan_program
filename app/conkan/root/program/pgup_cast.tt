@@ -4,17 +4,19 @@
   <p id="vha" data-vha= "[]"/>
   <div style="COLOR:Red;" id="valerr"></div>
   <div class="form-group">
-    <input type="hidden" name="pgid" id="pgid"   value="[% pgid %]"></div>
-    <input type="hidden" name="id"   id="id"     value="[% rs.id %]"></div>
-    <input type="hidden" name="target" id="target" value="cast"></div>
+    <input type="hidden" name="regpgid" id="regpgid"value="[% regpgid %]">
+    <input type="hidden" name="pgid" id="pgid"   value="[% pgid %]">
+    <input type="hidden" name="id"   id="id"     value="[% rs.id %]">
+    <input type="hidden" name="target" id="target" value="cast">
   </div>
   <table class="table table-bordered table-condensed">
     </colgroup>
       <col class="col-sm-2">
-      <col class="col-sm-3">
       <col class="col-sm-2">
       <col class="col-sm-2">
-      <col class="col-sm-3">
+      <col class="col-sm-2">
+      <col class="col-sm-2">
+      <col class="col-sm-2">
     </colgroup>
     <tbody>
       <tr>
@@ -28,13 +30,15 @@
         </td> 
         <th>出演ステータス</th>
         <td>[% pgupselect( 'status', statlist, rs.status, 12 ) %]</td>
-        <td>[% pgupinputtext( 'memo', rs.memo, 12 ) %]</td>
+        <td colspan="2">[% pgupinputtext( 'memo', rs.memo, 12 ) %]</td>
       </tr>
       <tr>
         <th>企画ネーム</th>
         <td>[% pgupinputtext( 'name', rs.name, 12 ) %]</td>
         <th>ふりがな</th>
-        <td colspan="2">[% pgupinputtext( 'namef', rs.namef, 8 ) %]</td>
+        <td>[% pgupinputtext( 'namef', rs.namef, 12 ) %]</td>
+        <th>肩書</th>
+        <td>[% pgupinputtext( 'title', rs.title, 12 ) %]</td>
       </tr>
     </tbody>
   </table>

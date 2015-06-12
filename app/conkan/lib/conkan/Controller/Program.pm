@@ -69,7 +69,7 @@ sub add :Local {
             ## $pginfo->{企画ID}の値を再設定 (autoinc対応)
             $pginfo->{'企画ID'} = $row->regpgid;
         }
-        else {
+        elsif ( $hval ) {
             die 'input Format Error /or/ regist.yml Format Error';
         }
 
@@ -84,7 +84,7 @@ sub add :Local {
             ## 企画内部IDの値を設定 (登録時にautoincで決定)
             $pgid = $row->pgid;
         }
-        else {
+        elsif ( $hval ) {
             die 'input Format Error /or/ regist.yml Format Error';
         }
 
@@ -100,7 +100,7 @@ sub add :Local {
                     if ( ref($hval) eq 'HASH' ) {
                         __PACKAGE__->AddCast( $c, $hval, $pgid );
                     }
-                    else {
+                    elsif ( $hval ) {
                         die 'input Format Error /or/ regist.yml Format Error';
                     }
                 }
@@ -110,7 +110,7 @@ sub add :Local {
                 if ( ref($hval) eq 'HASH' ) {
                     __PACKAGE__->AddCast( $c, $hval, $pgid );
                 }
-                else {
+                elsif ( $hval ) {
                     die 'input Format Error /or/ regist.yml Format Error';
                 }
             }
@@ -124,7 +124,7 @@ sub add :Local {
             if ( ref($hval) eq 'HASH' ) {
                 $c->model('ConkanDB::' . $regcnf->{schema})->create( $hval )
             }
-            else {
+            elsif ( $hval ) {
                 die 'input Format Error /or/ regist.yml Format Error';
             }
         }
@@ -248,19 +248,21 @@ sub progress :Local {
     my $pgid    = $param->{'pgid'};
     my $regpgid = $param->{'regpgid'};
 
-    try {
-        $c->model('ConkanDB::PgProgress')->create(
-            {
-            'regpgid'       => $regpgid,
-            'staffid'       => $c->user->get('staffid'),
-            'repdatetime'   => \'NOW()',
-            'report'        => $param->{'progress'},
-            },
-        );
-    } catch {
-        $c->detach( '_dberror', [ shift ] );
-        return;
-    };
+    if ( $param->{'progress'} ) {
+        try {
+            $c->model('ConkanDB::PgProgress')->create(
+                {
+                'regpgid'       => $regpgid,
+                'staffid'       => $c->user->get('staffid'),
+                'repdatetime'   => \'NOW()',
+                'report'        => $param->{'progress'},
+                },
+            );
+        } catch {
+            $c->detach( '_dberror', [ shift ] );
+            return;
+        };
+    }
     $c->response->redirect('/program/' . $pgid );
 }
 
@@ -312,6 +314,7 @@ sub program_list : Chained('program_base') : PathPart('list') : Args(0) {
             'subno'         => $pgm->subno(),
             'name'          => $pgm->regpgid->name(),
             'staff'         => $pgm->staffid ? $pgm->staffid->name() : '',
+            'status'        => $pgm->status(),
             'repdatetime'   => $lastprgs->{$regpgid},
         };
     }
@@ -403,15 +406,15 @@ sub pgup_regprog : Chained('program_show') : PathPart('regprogram') : Args(0) {
                     experience comment
                     / ];
     my $regpgid = $c->stash->{'regpgid'};
-    my $model = $c->model('ConkanDB::PgRegProgram');
+    $c->stash->{'M'} = $c->model('ConkanDB::PgRegProgram');
     my $rowprof;
     try {
-        $rowprof = $model->find($regpgid);
+        $rowprof = $c->stash->{'M'}->find($regpgid);
     } catch {
         $c->detach( '_dberror', [ shift ] );
         return;
     };
-    $c->detach( '_pgupdate', [ $rowprof, $up_items, $model ] );
+    $c->detach( '_pgupdate', [ $rowprof, $up_items ] );
 }
 
 =head2 program/*/program
@@ -427,57 +430,59 @@ sub pgup_program : Chained('program_show') : PathPart('program') : Args(0) {
                     roomid layerno progressprp
                     / ];
     my $pgid = $c->stash->{'pgid'};
-    my $model = $c->model('ConkanDB::PgProgram');
+    $c->stash->{'M'} = $c->model('ConkanDB::PgProgram');
     my $rowprof;
     try {
-        $rowprof = $model->find(
-                    $pgid, { 'prefetch' => [ 'regpgid', 'staffid', 'roomid' ], } );
-        $c->stash->{'stafflist'} = [
-            { 'id' => '', 'val' => '' },
-              map +{ 'id' => $_->staffid(), 'val' => $_->tname() }, 
-                $c->model('ConkanDB::PgStaff')->search(
-                    { staffid => { '!=' =>  1 } } )
-            ];
-        # staffid == 1 は adminなので排除
-        $c->stash->{'roomlist'}  = [
-            { 'id' => '', 'val' => '' },
-              map +{ 'id'  => $_->roomid(),
-                     'val' => $_->name() . '(' . $_->roomno() . ')' },
-                $c->model('ConkanDB::PgRoom')->all()
-            ];
-        my $conf  = {};
-        my $M = $c->model('ConkanDB::PgSystemConf');
-        $conf->{'dates'}   = [
-            { 'id' => '', 'val' => '' },
-              map +{ 'id' => $_, 'val' => $_ },
-                @{from_json( $M->find('dates')->pg_conf_value() )}
-            ];
-        $conf->{'s_times'} = [
-            { 'id' => '', 'val' => '' },
-              map +{ 'id' => $_, 'val' => $_ },
-                ( @{from_json( $M->find('start_times1')->pg_conf_value() )},
-                  @{from_json( $M->find('start_times2')->pg_conf_value() )} )
-            ];
-        $conf->{'e_times'} = [
-            { 'id' => '', 'val' => '' },
-              map +{ 'id' => $_, 'val' => $_ },
-                ( @{from_json( $M->find('end_times1')->pg_conf_value() )},
-                  @{from_json( $M->find('end_times2')->pg_conf_value() )} )
-            ];
-        $conf->{'status'}  = [
-            { 'id' => '', 'val' => '' },
-              map +{ 'id' => $_, 'val' => $_ },
-                @{from_json( $M->find('pg_status_vals')->pg_conf_value() )}
-            ];
-        $conf->{'nos'}     = [
-              map +{ 'id' => $_, 'val' => $_ }, qw/ 0 1 2 3 4 /
-            ];
-        $c->stash->{'conf'}  = $conf;
+        $rowprof = $c->stash->{'M'}->find( $pgid,
+                     { 'prefetch' => [ 'regpgid', 'staffid', 'roomid' ], } );
+        if ( $c->request->method eq 'GET' ) {
+            $c->stash->{'stafflist'} = [
+                { 'id' => '', 'val' => '' },
+                map +{ 'id' => $_->staffid(), 'val' => $_->tname() }, 
+                    $c->model('ConkanDB::PgStaff')->search(
+                        { staffid => { '!=' =>  1 } } )
+                ];
+            # staffid == 1 は adminなので排除
+            $c->stash->{'roomlist'}  = [
+                { 'id' => '', 'val' => '' },
+                map +{ 'id'  => $_->roomid(),
+                       'val' => $_->name() . '(' . $_->roomno() . ')' },
+                    $c->model('ConkanDB::PgRoom')->all()
+                ];
+            my $conf  = {};
+            my $M = $c->model('ConkanDB::PgSystemConf');
+            $conf->{'dates'}   = [
+                { 'id' => '', 'val' => '' },
+                map +{ 'id' => $_, 'val' => $_ },
+                    @{from_json( $M->find('dates')->pg_conf_value() )}
+                ];
+            $conf->{'s_times'} = [
+                { 'id' => '', 'val' => '' },
+                map +{ 'id' => $_, 'val' => $_ },
+                   ( @{from_json( $M->find('start_times1')->pg_conf_value() )},
+                     @{from_json( $M->find('start_times2')->pg_conf_value() )} )
+                ];
+            $conf->{'e_times'} = [
+                { 'id' => '', 'val' => '' },
+                map +{ 'id' => $_, 'val' => $_ },
+                    ( @{from_json( $M->find('end_times1')->pg_conf_value() )},
+                      @{from_json( $M->find('end_times2')->pg_conf_value() )} )
+                ];
+            $conf->{'status'}  = [
+                { 'id' => '', 'val' => '' },
+                map +{ 'id' => $_, 'val' => $_ },
+                    @{from_json( $M->find('pg_status_vals')->pg_conf_value() )}
+                ];
+            $conf->{'nos'}     = [
+                  map +{ 'id' => $_, 'val' => $_ }, qw/ 0 1 2 3 4 /
+                ];
+            $c->stash->{'conf'}  = $conf;
+        }
     } catch {
         $c->detach( '_dberror', [ shift ] );
         return;
     };
-    $c->detach( '_pgupdate', [ $rowprof, $up_items, $model ] );
+    $c->detach( '_pgupdate', [ $rowprof, $up_items ] );
 }
 
 =head2 program/*/equip/*
@@ -491,24 +496,32 @@ sub pgup_equip : Chained('program_show') : PathPart('equip') : Args(1) {
     my $up_items = [ qw/
                     equipid
                     / ];
-    my $model = $c->model('ConkanDB::PgEquip');
+    $c->stash->{'M'} = $c->model('ConkanDB::PgEquip');
     my $rowprof = undef;
     try {
-        $rowprof = $model->find( $id, { 'prefetch' => [ 'pgid', 'equipid' ], } )
-            unless ( $id == 0 );
-        $c->stash->{'equiplist'} = [ 
-            map +{ 'id' => $_->equipid,
-                   'val' => $_->name . '(' . $_->equipno . ')' }, 
-                $c->model('ConkanDB::PgAllEquip')->all()
-            ];
-        $c->stash->{'nos'}     = [
-              map +{ 'id' => $_, 'val' => $_ }, qw/ 0 1 2 3 4 5 6 7 8 9/
-            ];
+        if ( $id == 0 ) {   # 追加
+            push @$up_items, qw/pgid/;
+        }
+        else {              # 更新
+            $rowprof = $c->stash->{'M'}->find( $id,
+                { 'prefetch' => [ 'pgid', 'equipid' ], } );
+        }
+        if ( $c->request->method eq 'GET' ) {
+            $c->stash->{'equiplist'} = [ 
+                { 'id' => '', 'val' => '' },
+                map +{ 'id' => $_->equipid,
+                       'val' => $_->name . '(' . $_->equipno . ')' }, 
+                    $c->model('ConkanDB::PgAllEquip')->all()
+                ];
+            $c->stash->{'nos'}     = [
+                map +{ 'id' => $_, 'val' => $_ }, qw/ 0 1 2 3 4 5 6 7 8 9/
+                ];
+        }
     } catch {
         $c->detach( '_dberror', [ shift ] );
         return;
     };
-    $c->detach( '_pgupdate', [ $rowprof, $up_items, $model ] );
+    $c->detach( '_pgupdate', [ $rowprof, $up_items ] );
 }
 
 =head2 program/*/cast/*
@@ -519,27 +532,36 @@ sub pgup_equip : Chained('program_show') : PathPart('equip') : Args(1) {
 sub pgup_cast : Chained('program_show') : PathPart('cast') : Args(1) {
     my ( $self, $c, $id ) = @_;
     my $up_items = [ qw/
-                    castid status memo name namef
+                    castid status memo name namef title
                     / ];
-    my $model = $c->model('ConkanDB::PgCast');
+    $c->stash->{'M'} = $c->model('ConkanDB::PgCast');
     my $rowprof = undef;
     try {
-        $rowprof = $model->find( $id, { 'prefetch' => [ 'pgid', 'castid' ], } )
-            unless ( $id == 0 );
-        $c->stash->{'castlist'} = [ 
-            map +{ 'id' => $_->castid, 'val' => $_->name }, 
-                $c->model('ConkanDB::PgAllCast')->all()
-            ];
-        my $M = $c->model('ConkanDB::PgSystemConf');
-        $c->stash->{'statlist'}  = [
-            map +{ 'id' => $_, 'val' => $_ },
-                @{from_json( $M->find('cast_status_vals')->pg_conf_value() )}
-            ];
+        if ( $id == 0 ) {   # 追加
+            push @$up_items, qw/pgid/;
+        }
+        else {              # 更新
+            $rowprof = $c->stash->{'M'}->find( $id,
+                { 'prefetch' => [ 'pgid', 'castid' ], } )
+        }
+        if ( $c->request->method eq 'GET' ) {
+            $c->stash->{'castlist'} = [ 
+                { 'id' => '', 'val' => '' },
+                map +{ 'id' => $_->castid, 'val' => $_->name }, 
+                    $c->model('ConkanDB::PgAllCast')->all()
+                ];
+            my $M = $c->model('ConkanDB::PgSystemConf');
+            $c->stash->{'statlist'}  = [
+                { 'id' => '', 'val' => '' },
+                map +{ 'id' => $_, 'val' => $_ },
+                   @{from_json( $M->find('cast_status_vals')->pg_conf_value() )}
+                ];
+        }
     } catch {
         $c->detach( '_dberror', [ shift ] );
         return;
     };
-    $c->detach( '_pgupdate', [ $rowprof, $up_items, $model ] );
+    $c->detach( '_pgupdate', [ $rowprof, $up_items ] );
 }
 
 =head2 _pgupdate
@@ -552,48 +574,52 @@ sub _pgupdate :Private {
     my ( $self, $c, 
          $rowprof,      # 対象データベース行
          $up_items,     # 対象列名配列
-         $model,        # 対象モデル
        ) = @_;
 
-    if ( $c->request->method eq 'GET' ) {
-        # 更新表示
-        if ( defined( $rowprof ) ) {
-            $c->session->{'updtic'} = time;
-            $rowprof->update( { 
-                'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
-            } );
-        }
-        $c->stash->{'rs'} = $rowprof;
-    }
-    else {
-        my $value = {};
-        for my $item (@{$up_items}) {
-            $value->{$item} = $c->request->body_params->{$item};
-            $value->{$item} =~ s/\s+$// if defined($value->{$item});
-        }
-        if ( defined( $rowprof ) ) {
-            # 更新実施
-            if ( $rowprof->updateflg eq 
-                    +( $c->sessionid . $c->session->{'updtic'}) ) {
-                    $rowprof->update( $value ); 
-                    $c->response->body(
-                        '<FORM><H1>更新しました</H1></FORM>');
+    try {
+        if ( $c->request->method eq 'GET' ) {
+            # 更新表示
+            if ( defined( $rowprof ) ) {
+                $c->session->{'updtic'} = time;
+                $rowprof->update( { 
+                    'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
+                } );
             }
-            else {
-                $c->stash->{'rs'} = undef;
-                $c->response->body =
-                    '<FORM><H1>更新できませんでした</H1><BR/>' .
-                    '他スタッフが変更した可能性があります</FORM>';
-            }
+            $c->stash->{'rs'} = $rowprof;
         }
         else {
-            # 追加
-            $model->create( $value ); 
-            $c->response->body('<FORM><H1>追加しました</H1></FORM>');
+            my $value = {};
+            for my $item (@{$up_items}) {
+                $value->{$item} = $c->request->body_params->{$item};
+                $value->{$item} =~ s/\s+$// if defined($value->{$item});
+                delete $value->{$item} if ( $value->{$item} eq '' );
+            }
+            if ( defined( $rowprof ) ) {
+                # 更新実施
+                if ( $rowprof->updateflg eq 
+                        +( $c->sessionid . $c->session->{'updtic'}) ) {
+                        $rowprof->update( $value ); 
+                        $c->response->body(
+                            '<FORM><H1>更新しました</H1></FORM>');
+                }
+                else {
+                    $c->stash->{'rs'} = undef;
+                    $c->response->body =
+                        '<FORM><H1>更新できませんでした</H1><BR/>' .
+                        '他スタッフが変更した可能性があります</FORM>';
+                }
+            }
+            else {
+                # 追加
+                $c->stash->{'M'}->create( $value ); 
+                $c->response->body('<FORM><H1>追加しました</H1></FORM>');
+            }
+            $c->stash->{'rs'} = undef;
+            $c->response->status(200);
         }
-        $c->stash->{'rs'} = undef;
-        $c->response->status(200);
-    }
+    } catch {
+        $c->detach( '_dberror', [ shift ] );
+    };
 }
 
 =head2 _dberror
@@ -604,10 +630,10 @@ DBエラー表示
 
 sub _dberror :Private {
     my ( $self, $c, $e) = @_; 
-    $c->log->error('>>> ' . localtime() . ' dbexp : ' . $e );
+    $c->log->error('>>> ' . localtime() . ' dbexp : ' . Dump($e) );
     $c->clear_errors();
     my $body = $c->response->body() || Dump( $e );
-    $c->response->body('<FORM><pre>' . $body . '</pre></FORM>');
+    $c->response->body('<FORM>更新失敗<br/><pre>' . $body . '</pre></FORM>');
     $c->response->status(200);
 }
 

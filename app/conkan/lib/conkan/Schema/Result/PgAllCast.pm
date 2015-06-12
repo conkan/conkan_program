@@ -60,13 +60,13 @@ __PACKAGE__->table("pg_all_cast");
 =head2 namef
 
   data_type: 'varchar'
-  is_nullable: 0
+  is_nullable: 1
   size: 64
 
 =head2 status
 
   data_type: 'varchar'
-  is_nullable: 0
+  is_nullable: 1
   size: 64
 
 =head2 memo
@@ -100,9 +100,9 @@ __PACKAGE__->add_columns(
   "name",
   { data_type => "varchar", is_nullable => 0, size => 64 },
   "namef",
-  { data_type => "varchar", is_nullable => 0, size => 64 },
+  { data_type => "varchar", is_nullable => 1, size => 64 },
   "status",
-  { data_type => "varchar", is_nullable => 0, size => 64 },
+  { data_type => "varchar", is_nullable => 1, size => 64 },
   "memo",
   { data_type => "text", is_nullable => 1 },
   "restdate",
@@ -167,8 +167,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-06-11 15:47:44
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:iJYsGkz6nom6m3NoB1Etug
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-06-12 13:40:09
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:2hdQeJ6+KgKCHC8K1Q9t5Q
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
