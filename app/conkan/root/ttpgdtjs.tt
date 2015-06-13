@@ -28,6 +28,11 @@
         $('#dobtn').text('追加');
     }
     $('#dobtn').show();
+    if ( target == "equip" && id ) {
+        $('#dodel').show();
+    } else {
+        $('#dodel').hide();
+    }
   } );
   // モーダルダイアログ表示後サイズ調整
   $('#PgEdit').on('shown.bs.modal', function (event) {
@@ -64,11 +69,24 @@
     var id     = $('#progform #id').val() || 0;
     var target = $('#progform #target').val();
     $('#dobtn').hide();
+    $('#dodel').hide();
     var arg = '/program/' + pgid + '/' + target;
     if ( id != "-" ) {
         arg += '/' + id;
     }
     arg += '/ FORM';
+    $(content).load(arg, data );
+  } );
+  // 削除
+  $('#dodel').click(function(event) {
+    var content = $('#PgEditContent');
+    var pgid    = $('#progform #pgid').val();
+    var id      = $('#progform #id').val() || 0;
+    var target  = $('#progform #target').val();
+    var data = $('#progform').serializeArray();
+    $('#dobtn').hide();
+    $('#dodel').hide();
+    var arg = '/program/' + pgid + '/' + target + '/' + id + '/del/ FORM';
     $(content).load(arg, data );
   } );
 </script>

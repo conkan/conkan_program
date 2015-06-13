@@ -382,7 +382,7 @@ sub program_show : Chained('program_base') :PathPart('') :CaptureArgs(1) {
     $c->stash->{'pgname'}   = $c->stash->{'RegProgram'}->name();
 };
 
-=head2 program/*
+=head2 program/*/
 
 企画管理program_detail  : 企画情報更新表示
 
@@ -393,7 +393,7 @@ sub program_detail : Chained('program_show') : PathPart('') : Args(0) {
 }
 
 =head2 program/*/regprogram
-
+---------------------------------------------
 企画管理 pgup_regprog   : 企画更新(受付分)
 
 =cut
@@ -418,7 +418,7 @@ sub pgup_regprog : Chained('program_show') : PathPart('regprogram') : Args(0) {
 }
 
 =head2 program/*/program
-
+---------------------------------------------
 企画管理 pgup_program  : 企画更新(管理分)
 
 =cut
@@ -486,17 +486,28 @@ sub pgup_program : Chained('program_show') : PathPart('program') : Args(0) {
 }
 
 =head2 program/*/equip/*
+---------------------------------------------
+企画管理 pgup_equiptop  : 決定機材追加/更新/削除 起点
+
+=cut
+sub pgup_equiptop : Chained('program_show') : PathPart('equip') : CaptureArgs(1) {
+    my ( $self, $c, $id ) = @_;
+    $c->stash->{'id'} = $id;
+    $c->stash->{'M'} = $c->model('ConkanDB::PgEquip');
+}
+
+=head2 program/*/equip/*/
 
 企画管理 pgup_equip  : 決定機材追加/更新
 
 =cut
-sub pgup_equip : Chained('program_show') : PathPart('equip') : Args(1) {
-    my ( $self, $c, $id ) = @_;
+sub pgup_equip : Chained('pgup_equiptop') : PathPart('') : Args(0) {
+    my ( $self, $c ) = @_;
 
+    my $id = $c->stash->{'id'};
     my $up_items = [ qw/
                     equipid
                     / ];
-    $c->stash->{'M'} = $c->model('ConkanDB::PgEquip');
     my $rowprof = undef;
     try {
         if ( $id == 0 ) {   # 追加
@@ -524,8 +535,43 @@ sub pgup_equip : Chained('program_show') : PathPart('equip') : Args(1) {
     $c->detach( '_pgupdate', [ $rowprof, $up_items ] );
 }
 
-=head2 program/*/cast/*
+=head2 program/*/equip/*/del
 
+企画管理 pgup_equipdel  : 決定機材削除
+
+=cut
+sub pgup_equipdel : Chained('pgup_equiptop') : PathPart('del') : Args(0) {
+    my ( $self, $c ) = @_;
+
+    my $pgid = $c->stash->{'pgid'};
+    my $id   = $c->stash->{'id'};
+
+    # あり得ないが念のため
+    $c->detach( '/program/' . $pgid . '/equip/' . $id )
+        if ( ( $c->request->method eq 'GET' ) || ( $id == 0 ) );
+
+    try {
+        my $rowprof = $c->stash->{'M'}->find( $id );
+        if ( $rowprof->updateflg eq 
+                +( $c->sessionid . $c->session->{'updtic'}) ) {
+            # 削除実施
+            $rowprof->delete(); 
+            $c->response->body('<FORM><H1>削除しました</H1></FORM>');
+        }
+        else {
+            $c->stash->{'rs'} = undef;
+            $c->response->body =
+                '<FORM><H1>削除できませんでした</H1><BR/>' .
+                '他スタッフが変更した可能性があります</FORM>';
+        }
+    } catch {
+        $c->detach( '_dberror', [ shift ] );
+        return;
+    };
+}
+
+=head2 program/*/cast/*/
+---------------------------------------------
 企画管理 pgup_cast  : 決定出演者追加/更新
 
 =cut
@@ -565,7 +611,7 @@ sub pgup_cast : Chained('program_show') : PathPart('cast') : Args(1) {
 }
 
 =head2 _pgupdate
-
+---------------------------------------------
 企画更新実施
 
 =cut

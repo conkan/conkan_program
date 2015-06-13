@@ -201,8 +201,7 @@ END -%]
     <colgroup>
       <col class="col-sm-2">
       <col class="col-sm-2">
-      <col class="col-sm-2">
-      <col class="col-sm-2">
+      <col class="col-sm-3">
       [%- IF editable %]
         <col class="col-sm-2">
       [% END %]
@@ -223,15 +222,20 @@ END -%]
     </thead>
     <tbody>
       [% FOREACH item = Casts %]
+        [% IF item.status == '企画不参加' || item.status == '大会不参加' || item.status == 欠席 || item.status == '企画中止';
+          SET rmcol = 'background-color:#aaa;';
+        ELSE;
+          SET rmcol = '';
+        END %]
         <tr>
-          <td>[% item.castid.name   | html %]</td>
-          <td>[% item.name          | html %]</td>
-          <td>[% item.castid.status | html %]</td>
+          <td style="[% rmcol %]">[% item.castid.name   | html %]</td>
+          <td style="[% rmcol %]">[% item.name          | html %]</td>
+          <td style="[% rmcol %]">[% item.castid.status | html %]</td>
           [%- IF editable %]
-            <td>[% item.castid.memo | html %]</td>
+            <td style="[% rmcol %]">[% item.castid.memo | html %]</td>
           [% END %]
-          <td>[% item.status        | html %]</td>
-          <td align="center">
+          <td style="[% rmcol %]">[% item.status        | html %]</td>
+          <td  style="[% rmcol %]" align="center">
             [%- IF editable %]
               <button type="button" class="btn btn-warning btn-xs"
                 data-toggle="modal"
@@ -422,6 +426,7 @@ END -%]
         <button type="button" class="btn btn-default" data-dismiss="modal">
           閉じる
         </button>
+        <button type="button" class="btn " id="dodel">削除</button>
         <button type="button" class="btn btn-primary" id="dobtn">更新</button>
       </div>
     </div>
