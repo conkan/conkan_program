@@ -89,4 +89,13 @@
     var arg = '/program/' + pgid + '/' + target + '/' + id + '/del/ FORM';
     $(content).load(arg, data );
   } );
+  // 進捗登録
+  $('#addProgress button').click(function(event) {
+    storage.setItem( 'sctop', $(document).scrollTop() );
+  } );
+  // 企画複製分割
+  $('#pgcpysepform button').click(function(event) {
+    var act  = $(event.target).data('cpysep');
+    $('#pgcpysepform #cpysep_act').val(act);
+  } );
 </script>

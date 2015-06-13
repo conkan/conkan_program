@@ -60,12 +60,12 @@ sub add :Local {
         # $c->config->{Regist}->{RegProgram}の内容を元にpginfoの内容を登録
         ## regPgIDが未設定の場合autoincにより決定
         ## {RegProgram}のitem数は1つであり、loopmax定義はない
-        $regcnf = $c->config->{Regist}->{RegProgram};
+        $regcnf = $c->config->{'Regist'}->{'RegProgram'};
         $hval = __PACKAGE__->ParseRegist(
-                        $pginfo, $regcnf->{items}->[0], undef, ''  );
+                        $pginfo, $regcnf->{'items'}->[0], undef, ''  );
         if ( ref($hval) eq 'HASH' ) {
             my $row =
-                $c->model('ConkanDB::' . $regcnf->{schema})->create( $hval );
+                $c->model('ConkanDB::' . $regcnf->{'schema'})->create( $hval );
             ## $pginfo->{企画ID}の値を再設定 (autoinc対応)
             $pginfo->{'企画ID'} = $row->regpgid;
         }
@@ -130,7 +130,6 @@ sub add :Local {
         }
     } catch {
         $c->detach( '_dberror', [ shift ] );
-        return;
     };
     $c->response->redirect('/program/list');
 }
@@ -248,8 +247,8 @@ sub progress :Local {
     my $pgid    = $param->{'pgid'};
     my $regpgid = $param->{'regpgid'};
 
-    if ( $param->{'progress'} ) {
-        try {
+    try {
+        if ( $param->{'progress'} ) {
             $c->model('ConkanDB::PgProgress')->create(
                 {
                 'regpgid'       => $regpgid,
@@ -258,12 +257,87 @@ sub progress :Local {
                 'report'        => $param->{'progress'},
                 },
             );
-        } catch {
-            $c->detach( '_dberror', [ shift ] );
-            return;
-        };
-    }
+        }
+    } catch {
+        $c->detach( '_dberror', [ shift ] );
+    };
     $c->response->redirect('/program/' . $pgid );
+}
+
+
+=head2 cpysep
+-----------------------------------------------------------------------------
+企画管理 cpysep  : 企画複製分割 (Chain外)
+
+=cut
+
+sub cpysep :Local {
+    my ( $self, $c ) = @_;
+
+    my $param   = $c->request->body_params;
+    my $regpgid = $param->{'regpgid'};
+    my $pgid    = $param->{'pgid'};
+    my $action  = $param->{'cpysep_act'};
+    my $svregpgid = $regpgid;
+
+    my $row;
+    my $hval;
+
+    try {
+        if ( $action eq 'cpy' ) { # 複製
+            # 企画受付複製
+            $row = $c->model('ConkanDB::PgRegProgram')->find($regpgid);
+            $hval = { $row->get_columns };
+            delete $hval->{'regpgid'};
+            $row = $c->model('ConkanDB::PgRegProgram')->create( $hval );
+            $regpgid = $row->regpgid();
+            # 企画管理複製
+            $row = $c->model('ConkanDB::PgProgram')->find($pgid);
+            $hval = { $row->get_columns };
+            delete $hval->{'pgid'};
+            $hval->{'regpgid'} = $regpgid;
+            $hval->{'subno'} = 0;
+            $row = $c->model('ConkanDB::PgProgram')->create( $hval );
+            $pgid = $row->pgid();
+            # 出演者受付複製
+            $row = [ $c->model('ConkanDB::PgRegCast')->search(
+                                        { 'regpgid' => $svregpgid } ) ];
+            foreach my $r ( @$row ) {
+                $hval = { $r->get_columns };
+                delete $hval->{'id'};
+                $hval->{'regpgid'} = $regpgid;
+                $c->model('ConkanDB::PgRegCast')->create( $hval );
+            }
+            # 機材受付複製
+            $row = [ $c->model('ConkanDB::PgRegEquip')->search(
+                                        { 'regpgid' => $svregpgid } ) ];
+            foreach my $r ( @$row ) {
+                $hval = { $r->get_columns };
+                delete $hval->{'id'};
+                $hval->{'regpgid'} = $regpgid;
+                $c->model('ConkanDB::PgRegEquip')->create( $hval );
+            }
+        }
+        else {  # 分割
+            # 企画管理のみ複製
+            $row = $c->model('ConkanDB::PgProgram')->find($pgid);
+            $hval = { $row->get_columns };
+            delete $hval->{'pgid'};
+            $row = [ $c->model('ConkanDB::PgProgram')->search(
+                    { 'regpgid' => $regpgid },
+                    {
+                        'select'   => [ { MAX => 'subno'} ], 
+                        'as'       => [ 'maxsubno' ],
+                    } ) ]->[0];
+$c->log->debug('>>>> maxsubno:[' . $row->get_column('maxsubno') . ']');
+            $hval->{'subno'} = $row->get_column('maxsubno') + 1;
+            $row = $c->model('ConkanDB::PgProgram')->create( $hval );
+            $pgid = $row->pgid();
+        }
+    } catch {
+        $c->detach( '_dberror', [ shift ] );
+    };
+    $c->response->redirect('/program/' .  $pgid );
 }
 
 =head2 program
@@ -412,7 +486,6 @@ sub pgup_regprog : Chained('program_show') : PathPart('regprogram') : Args(0) {
         $rowprof = $c->stash->{'M'}->find($regpgid);
     } catch {
         $c->detach( '_dberror', [ shift ] );
-        return;
     };
     $c->detach( '_pgupdate', [ $rowprof, $up_items ] );
 }
@@ -480,7 +553,6 @@ sub pgup_program : Chained('program_show') : PathPart('program') : Args(0) {
         }
     } catch {
         $c->detach( '_dberror', [ shift ] );
-        return;
     };
     $c->detach( '_pgupdate', [ $rowprof, $up_items ] );
 }
@@ -530,7 +602,6 @@ sub pgup_equip : Chained('pgup_equiptop') : PathPart('') : Args(0) {
         }
     } catch {
         $c->detach( '_dberror', [ shift ] );
-        return;
     };
     $c->detach( '_pgupdate', [ $rowprof, $up_items ] );
 }
@@ -566,7 +637,6 @@ sub pgup_equipdel : Chained('pgup_equiptop') : PathPart('del') : Args(0) {
         }
     } catch {
         $c->detach( '_dberror', [ shift ] );
-        return;
     };
 }
 
@@ -605,7 +675,6 @@ sub pgup_cast : Chained('program_show') : PathPart('cast') : Args(1) {
         }
     } catch {
         $c->detach( '_dberror', [ shift ] );
-        return;
     };
     $c->detach( '_pgupdate', [ $rowprof, $up_items ] );
 }

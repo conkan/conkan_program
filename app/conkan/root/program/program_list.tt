@@ -15,12 +15,14 @@
   [%- SET allprg = 1 %]
   <div class="well" id="programlist">
     [%- PROCESS 'ttpglist.tt' -%]
-    <div>
-      <button type="button" class="btn btn-primary"
-              data-toggle="modal" data-target="#addProgram">
-        追加
-      </button>
-    </div>
+    [%- IF cuRole == 'ROOT' %]
+      <div>
+        <button type="button" class="btn btn-primary"
+                data-toggle="modal" data-target="#addProgram">
+          追加
+        </button>
+      </div>
+    [%- END -%]
   </div>
 </div>
 <!-- Modal add -->

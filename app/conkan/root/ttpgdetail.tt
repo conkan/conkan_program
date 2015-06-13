@@ -406,6 +406,38 @@ END -%]
     </tbody>
   </table>
 </div>
+<!-- 複製/分割 -->
+[%- IF editable %]
+  <FORM id="pgcpysepform" role="form" method="POST" action="/program/cpysep">
+    <div class="form-group">
+      <input type="hidden" name="pgid" value="[% Program.pgid %]">
+      <input type="hidden" name="regpgid" value="[% RegProgram.regpgid %]">
+      <input type="hidden" name="cpysep_act", id="cpysep_act" value="">
+    </div>
+    <table class="table table-bordered table-condensed">
+      <colgroup>
+        <col class="col-sm-1">
+        <col class="col-sm-1">
+        <col class="col-sm-10">
+      </colgroup>
+      <tbody>
+        <tr>
+          <td align="center">
+            <button type="submit" class="btn btn-warning btn-xs"
+                data-cpysep="cpy">
+              企画複製
+            </button>
+          </td>
+          <td align="center">
+            <button type="submit" class="btn btn-warning btn-xs"
+                data-cpysep="sep">
+              企画分割
+            </button>
+          </td>
+      </tbody>
+    </table>
+  </FORM>
+[% END %]
 
 <!-- Modal -->
 <div class="modal fade" id="PgEdit" tabindex="-1" role="dialog"
