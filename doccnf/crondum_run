@@ -1,0 +1,9 @@
+#!/bin/sh
+exec 2>&1
+cd /root/app/conkan
+while [ true ]; do
+    sleep 14400
+    exec ./script/conkan_dbbackup.pl ./conkan.yml ../backup
+    exec /etc/cron.daily/logrotate
+    sleep 72000
+done
