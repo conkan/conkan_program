@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="conkan roomlist">
+<meta name="author" content="Studio REM">
+<title>Conkan ProgramList</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+</head>
+[%- SET self_li_id = 'program_list' -%]
+[%- PROCESS 'tthead.tt' -%]
+<div class="container">
+  [%- SET allprg = 1 %]
+  <div class="well" id="programlist">
+    [%- PROCESS 'ttpglist.tt' -%]
+    [%- IF cuRole == 'ROOT' %]
+      <div>
+        <button type="button" class="btn btn-primary"
+                data-toggle="modal" data-target="#addProgram">
+          追加
+        </button>
+      </div>
+    [%- END -%]
+  </div>
+</div>
+<!-- Modal add -->
+<div class="modal fade" id="addProgram" tabindex="-1" role="dialog" aria-labelledby="addProgramLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="addProgramLabel">add new Program</h4>
+      </div>
+      <div class="modal-body" id="addProgram">
+        <FORM id="newProgram" role="form" method="POST" action="/program/add" enctype="multipart/form-data">
+          <div class="form-group">
+            <label for="jsoninputfile">企画登録ファイル(JSON)</label>
+            <input type="file" name= "jsoninputfile" id="jsoninputfile">
+            <p class="help-block">企画申し込みが生成したJSONファイル</p>
+          </div>
+          <button type="submit" class="btn btn-primary" id="doadd">追加</button>
+        </FORM>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">キャンセル</button>
+      </div>
+    </div>
+  </div>
+</div>
+[% PROCESS 'tttail.tt' %]
+<script>
+  // モーダルダイアログ addProgram 表示
+  $('#addProgram').on('show.bs.modal', function (event) {
+    $('#jsoninputfile').val('');
+  } );
+  // モーダルダイアログ addProgram非表示
+  $('#addProgram').on('hide.bs.modal', function (event) {
+    location.reload(true);
+  } );
+</script>
+</body>
+</html>

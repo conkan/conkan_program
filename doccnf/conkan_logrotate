@@ -1,0 +1,11 @@
+/var/log/conkan/*log {
+    daily
+    rotate 10
+    missingok
+    notifempty
+    compress
+    sharedscripts
+    postrotate
+        /usr/bin/pkill starman
+    endscript
+}

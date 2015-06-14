@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="conkan initialize">
+<meta name="description" content="conkan mypage">
 <meta name="author" content="Studio REM">
 <title>Conkan MyPage</title>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
@@ -35,7 +35,6 @@
     [%- IF acname == 'admin' %]
       <H2>既に管理者登録済です。</H2>
       登録済の管理者でloginしなおしてください。
-    [%- ELSE %]
     [% END %]
   </div>
 [% END %]

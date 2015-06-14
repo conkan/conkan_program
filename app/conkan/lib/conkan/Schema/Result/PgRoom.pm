@@ -101,6 +101,11 @@ __PACKAGE__->table("pg_room");
   extra: {list => ["NONE","W","E"]}
   is_nullable: 0
 
+=head2 comment
+
+  data_type: 'text'
+  is_nullable: 1
+
 =head2 updateflg
 
   data_type: 'varchar'
@@ -147,6 +152,8 @@ __PACKAGE__->add_columns(
     extra => { list => ["NONE", "W", "E"] },
     is_nullable => 0,
   },
+  "comment",
+  { data_type => "text", is_nullable => 1 },
   "updateflg",
   { data_type => "varchar", is_nullable => 1, size => 64 },
   "rmdate",
@@ -213,8 +220,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-18 12:18:22
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:LwgVr9SU1Nyipvxm/5ajPg
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-05-17 00:24:12
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:59rQOG0UiEPdYuL8vjxUjw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

@@ -1,0 +1,127 @@
+[% PROCESS 'ttpgupmc.tt' %]
+<FORM method="POST" class="form-horizontal" role="form" id="progform">
+  <p id="vha" data-vha=
+"[
+{&#34;id&#34;:&#34;name&#34;,      &#34;name&#34;:&#34;企画名称&#34;},
+{&#34;id&#34;:&#34;namef&#34;,     &#34;name&#34;:&#34;企画名称ふりがな&#34;},
+{&#34;id&#34;:&#34;content&#34;,   &#34;name&#34;:&#34;企画内容&#34;},
+{&#34;id&#34;:&#34;regname&#34;,   &#34;name&#34;:&#34;申込者名&#34;},
+{&#34;id&#34;:&#34;regno&#34;,     &#34;name&#34;:&#34;大会登録番号&#34;},
+{&#34;id&#34;:&#34;regma&#34;,     &#34;name&#34;:&#34;メールアドレス&#34;},
+{&#34;id&#34;:&#34;type&#34;,      &#34;name&#34;:&#34;企画種別&#34;},
+{&#34;id&#34;:&#34;expmaxcnt&#34;, &#34;name&#34;:&#34;予想参加者数&#34;},
+{&#34;id&#34;:&#34;place&#34;,     &#34;name&#34;:&#34;希望場所&#34;},
+{&#34;id&#34;:&#34;date&#34;,      &#34;name&#34;:&#34;希望日時&#34;},
+{&#34;id&#34;:&#34;layout&#34;,    &#34;name&#34;:&#34;希望レイアウト&#34;},
+{&#34;id&#34;:&#34;classlen&#34;,  &#34;name&#34;:&#34;希望コマ数&#34;},
+{&#34;id&#34;:&#34;contentpub&#34;,&#34;name&#34;:&#34;内容事前公開可不可&#34;},
+{&#34;id&#34;:&#34;realpub&#34;,   &#34;name&#34;:&#34;リアルタイム公開制限&#34;},
+{&#34;id&#34;:&#34;afterpub&#34;,  &#34;name&#34;:&#34;事後公開制限&#34;}
+]">
+  <div style="COLOR:Red;" id="valerr"></div>
+  <div class="form-group">
+    <input type="hidden" name="regpgid" id="regpgid" value="[% regpgid %]">
+    <input type="hidden" name="pgid" id="pgid"   value="[% pgid %]">
+    <input type="hidden" name="id"   id="id"     value="-">
+    <input type="hidden" name="target" id="target" value="regprogram">
+  </div>
+  <table class="table table-bordered table-condensed">
+    <colgroup>
+      <col class="col-sm-2">
+      <col class="col-sm-2">
+      <col class="col-sm-2">
+    </colgroup>
+    <tbody>
+      <tr>
+        <th style="background-color:#FFcc66">企画ID</th>
+        <th style="background-color:#FFcc66">[% regpgid %] ([% subno %])</th>
+        <td></td>
+      </tr>
+      <tr>
+        <td colspan="3">
+          [% pgupinputtext( 'name', rs.name, 6 ) %]
+          [% pgupinputtext( 'namef', rs.namef, 6 ) %]
+        </td>
+      </tr>
+      <tr>
+        <th>内容</th>
+        <td colspan="2"></td>
+      </tr>
+      <tr>
+        <td colspan="3">[% pguptextarea( 'content', rs.content, 12 ) %]</td>
+      </tr>
+      <tr>
+        <th>申込者名</th>
+        <th>申込日付</th>
+        <th>企画立案経験</th>
+      </tr>
+      <tr>
+        <td>[% pgupinputtext( 'regname', rs.regname, 12 ) %]</td>
+        <td>[% rs.regdate | html %]</td>
+        <td>[% rs.experience | html %]</td>
+      </tr>
+        <th>大会登録番号</th>
+        <th colspan="2">メールアドレス</th>
+      </tr>
+      <tr>
+        <td>[% pgupinputtext( 'regno', rs.regno, 12 ) %]</td>
+        <td colspan="2">[% pgupinputtext( 'regma', rs.regma, 12 ) %]</td>
+      </tr>
+      <tr>
+        <th>電話番号</th>
+        <th>FAX番号</th>
+        <th>携帯番号</th>
+      </tr>
+      <tr>
+        <td>[% pgupinputtext( 'telno', rs.telno, 12 ) %]</td>
+        <td>[% pgupinputtext( 'faxno', rs.faxno, 12 ) %]</td>
+        <td>[% pgupinputtext( 'celno', rs.celno, 12 ) %]</td>
+      </tr>
+      <tr>
+        <th>企画種別</th>
+        <th>予想参加者</th>
+        <th>希望場所</th>
+      </tr>
+      <tr>
+        <td>[% pgupinputtext( 'type', rs.type, 12 ) %]</td>
+        <td>[% pgupinputtext( 'expmaxcnt', rs.expmaxcnt, 12 ) %]</td>
+        <td>[% pgupinputtext( 'place', rs.place, 12 ) %]</td>
+      </tr>
+      <tr>
+        <th>希望日時</th>
+        <th>希望レイアウト</th>
+        <th>希望コマ数</th>
+      </tr>
+      <tr>
+        <td>[% pgupinputtext( 'date', rs.date, 12 ) %]</td>
+        <td>[% pgupinputtext( 'layout', rs.layout, 12 ) %]</td>
+        <td>[% pgupinputtext( 'classlen', rs.classlen, 12 ) %]</td>
+      </tr>
+      <tr>
+        <th>内容事前公開</th>
+        <th>リアルタイム公開</th>
+        <th>事後公開</th>
+      </tr>
+      <tr>
+        <td>[% pgupinputtext( 'contentpub', rs.contentpub, 12 ) %]</td>
+        <td>[% pgupinputtext( 'realpub', rs.realpub, 12 ) %]</td>
+        <td>[% pgupinputtext( 'afterpub', rs.afterpub, 12 ) %]</td>
+      </tr>
+      <tr>
+        <th>重なると困る企画</th>
+        <td colspan="2">
+      </tr>
+      <tr>
+        <td colspan="3">[% pguptextarea( 'avoiddup', rs.avoiddup, 12 ) %]</td>
+      </tr>
+      <tr>
+        <th>備考</th>
+        <td colspan="2">
+      </tr>
+      <tr>
+        <td colspan="3">[% pguptextarea( 'comment', rs.comment, 12 ) %]</td>
+      </tr>
+    </tbody>
+  </table>
+</FORM>
+

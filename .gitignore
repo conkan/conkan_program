@@ -27,3 +27,4 @@ Thumbs.db
 cybozulive.consumer.sec
 conkan.yml
 app/.ssh/cert*.*
+app/backup/

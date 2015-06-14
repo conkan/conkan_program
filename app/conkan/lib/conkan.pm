@@ -4,6 +4,8 @@ use namespace::autoclean;
 
 use Catalyst::Runtime 5.80;
 
+extends 'Catalyst';
+
 # Set flags and add plugins for the application.
 #
 # Note that ORDERING IS IMPORTANT here as plugins are initialized in order,
@@ -22,14 +24,14 @@ use Catalyst::Runtime 5.80;
 
 use Catalyst qw/
     ConfigLoader
+    Config::YAML
+   -Debug -Log=debug
     Static::Simple
     Session
     Session::Store::FastMmap
     Session::State::Cookie
     Authentication
 /;
-
-extends 'Catalyst';
 
 our $VERSION = '0.01';
 
@@ -41,23 +43,12 @@ our $VERSION = '0.01';
 # details given here can function as a default configuration,
 # with an external configuration file acting as an override for
 # local deployment.
+#
+# conkan.yml は Plugin::ConfigLoaderが自動で読み込むので、それ以外を指定
 
-__PACKAGE__->config(
-    name => 'conkan',
-    # Disable deprecated behavior needed by old applications
-    disable_component_resolution_regex_fallback => 1,
-    enable_catalyst_header => 1, # Send X-Catalyst header
-    default_model => 'conkanDB',
-    default_view  => 'TT',
-
-    'Plugin::Session' => {
-        expires => 3600,
-        verify_address => 1,
-        verify_user_agent => 1,
-        cookie_name => 'conkan_session',
-        cookie_expires => 0,
-    },
-);
+__PACKAGE__->config( {
+    'config_file'   =>  [ 'regist.yml', ],
+} );
 
 # Start the application
 __PACKAGE__->setup();

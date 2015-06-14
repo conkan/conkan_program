@@ -38,32 +38,44 @@ __PACKAGE__->table("pg_program");
 
 =head1 ACCESSORS
 
-=head2 id
+=head2 pgid
 
   data_type: 'integer'
   extra: {unsigned => 1}
   is_auto_increment: 1
   is_nullable: 0
 
-=head2 pgid
+=head2 regpgid
 
   data_type: 'integer'
   extra: {unsigned => 1}
   is_foreign_key: 1
   is_nullable: 0
+
+=head2 subno
+
+  data_type: 'integer'
+  default_value: 0
+  extra: {unsigned => 1}
+  is_nullable: 1
 
 =head2 staffid
 
   data_type: 'integer'
   extra: {unsigned => 1}
   is_foreign_key: 1
-  is_nullable: 0
+  is_nullable: 1
 
 =head2 status
 
   data_type: 'varchar'
-  is_nullable: 0
+  is_nullable: 1
   size: 64
+
+=head2 memo
+
+  data_type: 'text'
+  is_nullable: 1
 
 =head2 date1
 
@@ -124,29 +136,38 @@ __PACKAGE__->table("pg_program");
 =cut
 
 __PACKAGE__->add_columns(
-  "id",
+  "pgid",
   {
     data_type => "integer",
     extra => { unsigned => 1 },
     is_auto_increment => 1,
     is_nullable => 0,
   },
-  "pgid",
+  "regpgid",
   {
     data_type => "integer",
     extra => { unsigned => 1 },
     is_foreign_key => 1,
     is_nullable => 0,
+  },
+  "subno",
+  {
+    data_type => "integer",
+    default_value => 0,
+    extra => { unsigned => 1 },
+    is_nullable => 1,
   },
   "staffid",
   {
     data_type => "integer",
     extra => { unsigned => 1 },
     is_foreign_key => 1,
-    is_nullable => 0,
+    is_nullable => 1,
   },
   "status",
-  { data_type => "varchar", is_nullable => 0, size => 64 },
+  { data_type => "varchar", is_nullable => 1, size => 64 },
+  "memo",
+  { data_type => "text", is_nullable => 1 },
   "date1",
   { data_type => "date", datetime_undef_if_invalid => 1, is_nullable => 1 },
   "stime1",
@@ -178,17 +199,47 @@ __PACKAGE__->add_columns(
 
 =over 4
 
-=item * L</id>
+=item * L</pgid>
 
 =back
 
 =cut
 
-__PACKAGE__->set_primary_key("id");
+__PACKAGE__->set_primary_key("pgid");
 
 =head1 RELATIONS
 
-=head2 pgid
+=head2 pg_casts
+
+Type: has_many
+
+Related object: L<conkan::Schema::Result::PgCast>
+
+=cut
+
+__PACKAGE__->has_many(
+  "pg_casts",
+  "conkan::Schema::Result::PgCast",
+  { "foreign.pgid" => "self.pgid" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+=head2 pgs_equip
+
+Type: has_many
+
+Related object: L<conkan::Schema::Result::PgEquip>
+
+=cut
+
+__PACKAGE__->has_many(
+  "pgs_equip",
+  "conkan::Schema::Result::PgEquip",
+  { "foreign.pgid" => "self.pgid" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+=head2 regpgid
 
 Type: belongs_to
 
@@ -197,9 +248,9 @@ Related object: L<conkan::Schema::Result::PgRegProgram>
 =cut
 
 __PACKAGE__->belongs_to(
-  "pgid",
+  "regpgid",
   "conkan::Schema::Result::PgRegProgram",
-  { pgid => "pgid" },
+  { regpgid => "regpgid" },
   { is_deferrable => 1, on_delete => "NO ACTION", on_update => "NO ACTION" },
 );
 
@@ -235,12 +286,17 @@ __PACKAGE__->belongs_to(
   "staffid",
   "conkan::Schema::Result::PgStaff",
   { staffid => "staffid" },
-  { is_deferrable => 1, on_delete => "NO ACTION", on_update => "NO ACTION" },
+  {
+    is_deferrable => 1,
+    join_type     => "LEFT",
+    on_delete     => "NO ACTION",
+    on_update     => "NO ACTION",
+  },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-18 12:18:22
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:lFIou8ftNNku+OoyO3rrpg
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-06-12 13:40:09
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:/d4fi3sRzG+aRrL8Aq8r/A
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

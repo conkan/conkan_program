@@ -57,6 +57,13 @@ __PACKAGE__->table("pg_all_equip");
   is_nullable: 0
   size: 64
 
+=head2 count
+
+  data_type: 'integer'
+  default_value: 1
+  extra: {unsigned => 1}
+  is_nullable: 1
+
 =head2 spec
 
   data_type: 'varchar'
@@ -95,6 +102,13 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 0, size => 64 },
   "equipno",
   { data_type => "varchar", is_nullable => 0, size => 64 },
+  "count",
+  {
+    data_type => "integer",
+    default_value => 1,
+    extra => { unsigned => 1 },
+    is_nullable => 1,
+  },
   "spec",
   { data_type => "varchar", is_nullable => 1, size => 64 },
   "comment",
@@ -153,8 +167,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-18 12:18:22
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:IwIbRwg6x7LA1QFSffArnw
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-06-11 15:47:44
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:KuS4fXPTMT0B5a+5UQpqQg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

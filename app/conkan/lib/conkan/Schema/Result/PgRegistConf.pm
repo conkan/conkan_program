@@ -69,6 +69,12 @@ __PACKAGE__->table("pg_regist_conf");
   is_nullable: 1
   size: 64
 
+=head2 upperkeyval
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 64
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -82,6 +88,8 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 0, size => 64 },
   "upperkeyid",
   { data_type => "varchar", is_foreign_key => 1, is_nullable => 1, size => 64 },
+  "upperkeyval",
+  { data_type => "varchar", is_nullable => 1, size => 64 },
 );
 
 =head1 PRIMARY KEY
@@ -148,8 +156,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-14 17:05:10
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:lRIlKyJTnq5Ym2GfHAp7qQ
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-05-27 00:55:22
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:8lBkrX4zM+QR5SYN+AOCWA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
