@@ -184,9 +184,9 @@ sub login :Local {
                 $c->session->{init_role} = undef;
             }
             if ( $c->user->get('passwd') && !$c->user->get('rmdate') ) {
-                # login直後だけ/mypage/listではなく/mypageにジャンプ
-                ## adminでのlogin対応
-                $c->response->redirect( '/mypage' );
+                if ( $c->action->reverse eq 'login' ) {
+                    $c->response->redirect( '/mypage' );
+                }
                 return;
             }
         }
