@@ -51,52 +51,69 @@ sub add :Local {
         open( my $fh, '<:encoding(utf8)', $jsonf );
         my $json_text   = <$fh>;
         close( $fh );
-        my $pginfo = from_json( $json_text );
+        my $json_info = from_json( $json_text );
+        my $aPginfo;
+        if ( ref($json_info) eq 'ARRAY') {
+            $aPginfo = $json_info;
+        } else {
+            $aPginfo = [ $json_info ];
+        } 
 
-        my $regcnf;
-        my $hval;
-        my $pgid;
+        foreach my $pginfo (@{$aPginfo}) {
+            my $regcnf;
+            my $hval;
+            my $pgid;
 
-        # $c->config->{Regist}->{RegProgram}の内容を元にpginfoの内容を登録
-        ## regPgIDが未設定の場合autoincにより決定
-        ## {RegProgram}のitem数は1つであり、loopmax定義はない
-        $regcnf = $c->config->{'Regist'}->{'RegProgram'};
-        $hval = __PACKAGE__->ParseRegist(
-                        $pginfo, $regcnf->{'items'}->[0], undef, ''  );
-        if ( ref($hval) eq 'HASH' ) {
-            my $row =
-                $c->model('ConkanDB::' . $regcnf->{'schema'})->create( $hval );
-            ## $pginfo->{企画ID}の値を再設定 (autoinc対応)
-            $pginfo->{'企画ID'} = $row->regpgid;
-        }
-        elsif ( $hval ) {
-            die 'input Format Error /or/ regist.yml Format Error';
-        }
+            # $c->config->{Regist}->{RegProgram}の内容を元にpginfoの内容を登録
+            ## regPgIDが未設定の場合autoincにより決定
+            ## {RegProgram}のitem数は1つであり、loopmax定義はない
+            $regcnf = $c->config->{'Regist'}->{'RegProgram'};
+            $hval = __PACKAGE__->ParseRegist(
+                            $pginfo, $regcnf->{'items'}->[0], undef, ''  );
+            if ( ref($hval) eq 'HASH' ) {
+                my $row =
+                    $c->model('ConkanDB::' . $regcnf->{'schema'})->create( $hval );
+                ## $pginfo->{企画ID}の値を再設定 (autoinc対応)
+                $pginfo->{'企画ID'} = $row->regpgid;
+            }
+            elsif ( $hval ) {
+                die 'input Format Error /or/ regist.yml Format Error';
+            }
+    
+            # $c->config->{Regist}->{Program}の内容を元にpginfoの内容を登録
+            ## {RegProgram}のitem数は1つであり、loopmax定義はない
+            $regcnf = $c->config->{Regist}->{Program};
+            $hval = __PACKAGE__->ParseRegist(
+                            $pginfo, $regcnf->{items}->[0], undef, ''  );
+            if ( ref($hval) eq 'HASH' ) {
+                my $row =
+                    $c->model('ConkanDB::' . $regcnf->{schema})->create( $hval );
+                ## 企画内部IDの値を設定 (登録時にautoincで決定)
+                $pgid = $row->pgid;
+            }
+            elsif ( $hval ) {
+                die 'input Format Error /or/ regist.yml Format Error';
+            }
 
-        # $c->config->{Regist}->{Program}の内容を元にpginfoの内容を登録
-        ## {RegProgram}のitem数は1つであり、loopmax定義はない
-        $regcnf = $c->config->{Regist}->{Program};
-        $hval = __PACKAGE__->ParseRegist(
-                        $pginfo, $regcnf->{items}->[0], undef, ''  );
-        if ( ref($hval) eq 'HASH' ) {
-            my $row =
-                $c->model('ConkanDB::' . $regcnf->{schema})->create( $hval );
-            ## 企画内部IDの値を設定 (登録時にautoincで決定)
-            $pgid = $row->pgid;
-        }
-        elsif ( $hval ) {
-            die 'input Format Error /or/ regist.yml Format Error';
-        }
-
-        # $c->config->{Regist}->{RegCast}の内容を元にpginfoの内容を登録
-        ## 同時にPgAllCastにも登録する
-        ## {RegCast}のitem数は複数あり、さらにloopmax定義がある
-        $regcnf = $c->config->{Regist}->{RegCast};
-        foreach my $item (@{$regcnf->{items}}) {
-            if ( defined($item->{loopmax}) ) {
-                foreach my $cnt (1..$item->{loopmax}) {
-                    $hval = __PACKAGE__->ParseRegist(
-                                    $pginfo, $item, undef, $cnt );
+            # $c->config->{Regist}->{RegCast}の内容を元にpginfoの内容を登録
+            ## 同時にPgAllCastにも登録する
+            ## {RegCast}のitem数は複数あり、さらにloopmax定義がある
+            $regcnf = $c->config->{Regist}->{RegCast};
+            foreach my $item (@{$regcnf->{items}}) {
+                if ( defined($item->{loopmax}) ) {
+                    foreach my $cnt (1..$item->{loopmax}) {
+                        $hval = __PACKAGE__->ParseRegist(
+                                        $pginfo, $item, undef, $cnt );
+                        if ( ref($hval) eq 'HASH' ) {
+                            __PACKAGE__->AddCast( $c, $hval, $pgid );
+                        }
+                        elsif ( $hval ) {
+                            die 'input Format Error /or/ regist.yml Format Error';
+                        }
+                    }
+                }
+                else {
+                    $hval = __PACKAGE__->ParseRegist( $pginfo, $item, undef, '');
                     if ( ref($hval) eq 'HASH' ) {
                         __PACKAGE__->AddCast( $c, $hval, $pgid );
                     }
@@ -105,27 +122,18 @@ sub add :Local {
                     }
                 }
             }
-            else {
+
+            # $c->config->{Regist}->{RegEquip}の内容を元にpginfoの内容をDBに登録
+            ## {RegEquip}のitem数は複数あるが、loopmax定義はない
+            $regcnf = $c->config->{Regist}->{RegEquip};
+            foreach my $item (@{$regcnf->{items}}) {
                 $hval = __PACKAGE__->ParseRegist( $pginfo, $item, undef, '');
                 if ( ref($hval) eq 'HASH' ) {
-                    __PACKAGE__->AddCast( $c, $hval, $pgid );
+                    $c->model('ConkanDB::' . $regcnf->{schema})->create( $hval )
                 }
                 elsif ( $hval ) {
                     die 'input Format Error /or/ regist.yml Format Error';
                 }
-            }
-        }
-
-        # $c->config->{Regist}->{RegEquip}の内容を元にpginfoの内容をDBに登録
-        ## {RegEquip}のitem数は複数あるが、loopmax定義はない
-        $regcnf = $c->config->{Regist}->{RegEquip};
-        foreach my $item (@{$regcnf->{items}}) {
-            $hval = __PACKAGE__->ParseRegist( $pginfo, $item, undef, '');
-            if ( ref($hval) eq 'HASH' ) {
-                $c->model('ConkanDB::' . $regcnf->{schema})->create( $hval )
-            }
-            elsif ( $hval ) {
-                die 'input Format Error /or/ regist.yml Format Error';
             }
         }
     } catch {
