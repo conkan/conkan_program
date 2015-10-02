@@ -71,6 +71,7 @@ sub add :Local {
             $hval = __PACKAGE__->ParseRegist(
                             $pginfo, $regcnf->{'items'}->[0], undef, ''  );
             if ( ref($hval) eq 'HASH' ) {
+$c->log->debug('>>>> add reg_program:[' . $hval->{'regpgid'} . '][' . $hval->{'name'} . ']');
                 my $row =
                     $c->model('ConkanDB::' . $regcnf->{'schema'})->create( $hval );
                 ## $pginfo->{企画ID}の値を再設定 (autoinc対応)
@@ -101,7 +102,8 @@ sub add :Local {
             $regcnf = $c->config->{Regist}->{RegCast};
             foreach my $item (@{$regcnf->{items}}) {
                 if ( defined($item->{loopmax}) ) {
-                    foreach my $cnt (1..$item->{loopmax}) {
+                    foreach my $cnt (1..$item->{loopmax}+1) {
+                        # 申込者本人が出演する場合があるので、+1
                         $hval = __PACKAGE__->ParseRegist(
                                         $pginfo, $item, undef, $cnt );
                         if ( ref($hval) eq 'HASH' ) {
@@ -165,7 +167,7 @@ sub ParseRegist {
            || $pginfo->{$regitem->{hashkey} . $cnt};
 
     if ( $regitem->{validval} ) {
-        if ( $val eq $regitem->{validval} ) {
+        if ( defined( $val ) && ( $val eq $regitem->{validval} ) ) {
             $val = $regitem->{hashkey};
         }
         else {
@@ -219,7 +221,8 @@ sub AddCast {
                     'namef'  => $hval->{'namef'},
                     'status' => '',
                     };
-            if ( $hval->{'entrantregno'} =~ /^\d+$/ ) {
+            if ( exists($hval->{'entrantregno'}) &&
+                 ( $hval->{'entrantregno'} =~ /^\d+$/ ) ) {
                 $aval->{'regno'} = $hval->{'entrantregno'};
             }
             $acrow = $c->model('ConkanDB::PgAllCast')->create( $aval );
