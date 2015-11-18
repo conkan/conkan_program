@@ -1,9 +1,14 @@
 [%- # TT制御パラメータの設定;
-SET addstaff = 0;
+DEFAULT addstaff = 0;
+DEFAULT updstaff = 0;
 SET acname = c.user.get('name');
 IF! acname;
-  SET acname = '新規登録';
   SET addstaff = 1;
+  IF updstaff == 1;
+    SET acname = '更新登録';
+  ELSE;
+    SET acname = '新規登録';
+  END;
 END;
 SET addroot = 0;
 IF c.session.init_role == 'addroot';

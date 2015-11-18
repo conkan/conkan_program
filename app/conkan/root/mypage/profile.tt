@@ -17,6 +17,16 @@
 END -%]
 <div class="container">
   <div class="well" id="inputform" style="display:none;">
+    [% IF updstaff %]
+      <div class="row">
+        <div class="col-sm-5" style="COLOR:Red;">
+          既に登録済みのアカウントです。パスワードを設定しなおして下さい
+        </div>
+        <div class="col-sm-2">
+          <a href="/logout" class="btn btn-sm btn-info">キャンセル</a>
+        </div>
+      </div>
+    [% END %]
     <FORM method="POST" class="form-horizontal" role="form" action="/mypage/profile" id="profform">
       [% PROCESS 'ttprofinput.tt' %]
       <BR/>

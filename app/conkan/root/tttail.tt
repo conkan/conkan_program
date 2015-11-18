@@ -4,6 +4,8 @@
   <pre>
   cuRole  [% cuRole %]
   acname  [% acname %]
+  updstaff [% updstaff %]
+  addstaff [% addstaff %]
   [% dumper.dump(c.user) %]
   </pre>
 [% END %]
