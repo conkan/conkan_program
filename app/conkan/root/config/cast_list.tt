@@ -43,7 +43,7 @@
               <button type="button" class="btn btn-xs btn-primary"
                       data-toggle="modal" data-target="#editCast"
                       data-whatever="[% item.castid %]">
-                更新
+                編集
               </button>
             </td>
           </tr>

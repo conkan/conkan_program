@@ -145,8 +145,10 @@ sub profile :Local {
             $c->stash->{'addstaff'} = 1;
         }
         else {
-            # 更新
-            $c->stash->{'updstaff'} = 1;
+            # 既存スタッフの再登録
+            if ( defined( $c->flash->{'oainfo'}->{'cyid'} ) ) {
+                $c->stash->{'updstaff'} = 1;
+            }
         }
         if ( $c->request->method eq 'GET' ) {
             # 更新表示
