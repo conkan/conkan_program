@@ -535,22 +535,31 @@ sub pgup_program : Chained('program_show') : PathPart('program') : Args(0) {
                 ];
             my $conf  = {};
             my $M = $c->model('ConkanDB::PgSystemConf');
+            my $time_origin = 0;
             $conf->{'dates'}   = [
                 { 'id' => '', 'val' => '' },
                 map +{ 'id' => $_, 'val' => $_ },
                     @{from_json( $M->find('dates')->pg_conf_value() )}
                 ];
-            $conf->{'s_times'} = [
+            $conf->{'s_hours'} = [
                 { 'id' => '', 'val' => '' },
-                map +{ 'id' => $_, 'val' => $_ },
-                   ( @{from_json( $M->find('start_times1')->pg_conf_value() )},
-                     @{from_json( $M->find('start_times2')->pg_conf_value() )} )
+                  map +{ 'id' => sprintf('%02d', $_), 'val' => sprintf('%02d', $_) },
+                        ( $time_origin .. $time_origin+23 )
                 ];
-            $conf->{'e_times'} = [
+            $conf->{'s_mins'} = [
                 { 'id' => '', 'val' => '' },
-                map +{ 'id' => $_, 'val' => $_ },
-                    ( @{from_json( $M->find('end_times1')->pg_conf_value() )},
-                      @{from_json( $M->find('end_times2')->pg_conf_value() )} )
+                  map +{ 'id' => sprintf('%02d', $_*5), 'val' => sprintf('%02d', $_*5) },
+                        ( 0 .. 11 )
+                ];
+            $conf->{'e_hours'} = [
+                { 'id' => '', 'val' => '' },
+                  map +{ 'id' => sprintf('%02d', $_), 'val' => sprintf('%02d', $_) },
+                        ( $time_origin .. $time_origin+23 )
+                ];
+            $conf->{'e_mins'} = [
+                { 'id' => '', 'val' => '' },
+                  map +{ 'id' => sprintf('%02d', $_*5), 'val' => sprintf('%02d', $_*5) },
+                        ( 0 .. 11 )
                 ];
             $conf->{'status'}  = [
                 { 'id' => '', 'val' => '' },
@@ -712,13 +721,56 @@ sub _pgupdate :Private {
                 } );
             }
             $c->stash->{'rs'} = $rowprof;
+            # 開始終了時刻を分解して時と分にわける
+            my @wk = split( /:/, $rowprof->stime1 );
+            if ( scalar( @wk ) >= 2 ) {
+                $c->stash->{'rs'}->{'shour1'} = $wk[0];
+                $c->stash->{'rs'}->{'smin1'} = $wk[1];
+            }
+            @wk = split( /:/, $rowprof->etime1 );
+            if ( scalar( @wk ) >= 2 ) {
+                $c->stash->{'rs'}->{'ehour1'} = $wk[0];
+                $c->stash->{'rs'}->{'emin1'} = $wk[1];
+            }
+            @wk = split( /:/, $rowprof->stime2 );
+            if ( scalar( @wk ) >= 2 ) {
+                $c->stash->{'rs'}->{'shour2'} = $wk[0];
+                $c->stash->{'rs'}->{'smin2'} = $wk[1];
+            }
+            @wk = split( /:/, $rowprof->etime2 );
+            if ( scalar( @wk ) >= 2 ) {
+                $c->stash->{'rs'}->{'ehour2'} = $wk[0];
+                $c->stash->{'rs'}->{'emin2'} = $wk[1];
+            }
         }
         else {
             my $value = {};
+            my %timeorigin = (
+                'stime1' => [ 'shour1', 'smin1' ],
+                'etime1' => [ 'ehour1', 'emin1' ],
+                'stime2' => [ 'shour2', 'smin2' ],
+                'etime2' => [ 'ehour2', 'emin2' ],
+            );
             for my $item (@{$up_items}) {
-                $value->{$item} = $c->request->body_params->{$item};
+                if ( exists( $timeorigin{$item} ) ) {
+                    my $hour =
+                        $c->request->body_params->{$timeorigin{$item}->[0]};
+                    my $min  =
+                        $c->request->body_params->{$timeorigin{$item}->[1]};
+                    $hour =~ s/\s+$//;
+                    $min  =~ s/\s+$//;
+                    if ( ( $hour ne '' ) || ( $min ne '' ) ) {
+                        $value->{$item} = sprintf( '%02d:%02d', $hour, $min );
+                    }
+                    else {
+                        $value->{$item} = undef;
+                    }
+                }
+                else {
+                   $value->{$item} = $c->request->body_params->{$item};
+                }
                 $value->{$item} =~ s/\s+$// if defined($value->{$item});
-                delete $value->{$item} if ( $value->{$item} eq '' );
+                $value->{$item} = undef if ( $value->{$item} eq '' );
             }
             if ( defined( $rowprof ) ) {
                 # 更新実施
