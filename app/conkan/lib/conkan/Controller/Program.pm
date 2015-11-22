@@ -24,6 +24,13 @@ conkan::Controller::Program - Catalyst Controller
 
 =cut
 
+# 開始終了時刻変換テーブル
+my %timeArgTrn = (
+    'stime1' => [ 'shour1', 'smin1' ],
+    'etime1' => [ 'ehour1', 'emin1' ],
+    'stime2' => [ 'shour2', 'smin2' ],
+    'etime2' => [ 'ehour2', 'emin2' ],
+);
 
 =head2 index
 
@@ -421,6 +428,8 @@ sub program_show : Chained('program_base') :PathPart('') :CaptureArgs(1) {
                         },
                     );
     my $regpgid = $c->stash->{'Program'}->regpgid->regpgid();
+    # 企画開始終了時刻変換
+    $c->forward('/program/_trnSEtime', [ $c->stash->{'Program'}, ], );
     $c->stash->{'RegProgram'} =
         $c->model('ConkanDB::PgRegProgram')->find($regpgid);
     $c->stash->{'RegCasts'} =
@@ -535,7 +544,7 @@ sub pgup_program : Chained('program_show') : PathPart('program') : Args(0) {
                 ];
             my $conf  = {};
             my $M = $c->model('ConkanDB::PgSystemConf');
-            my $time_origin = 0;
+            my $time_origin = $c->config->{time_origin};
             $conf->{'dates'}   = [
                 { 'id' => '', 'val' => '' },
                 map +{ 'id' => $_, 'val' => $_ },
@@ -711,12 +720,6 @@ sub _pgupdate :Private {
          $up_items,     # 対象列名配列
        ) = @_;
 
-    my %timeorigin = (
-        'stime1' => [ 'shour1', 'smin1' ],
-        'etime1' => [ 'ehour1', 'emin1' ],
-        'stime2' => [ 'shour2', 'smin2' ],
-        'etime2' => [ 'ehour2', 'emin2' ],
-    );
     try {
         if ( $c->request->method eq 'GET' ) {
             # 更新表示
@@ -727,28 +730,21 @@ sub _pgupdate :Private {
                 } );
             }
             $c->stash->{'rs'} = $rowprof;
-            foreach my $item (keys(%timeorigin)) {
-                my $wkval = eval( '$rowprof->' . $item );
-                next unless defined($wkval);
-                # 開始終了時刻を分解して時と分にわける
-                my @wk = split( /:/, $wkval );
-                if ( scalar( @wk ) >= 2 ) {
-                    $c->stash->{'rs'}->{$timeorigin{$item}->[0]} = $wk[0];
-                    $c->stash->{'rs'}->{$timeorigin{$item}->[1]} = $wk[1];
-                }
-            }
+            # 企画開始終了時刻変換
+            $c->forward('/program/_trnSEtime', [ $c->stash->{'rs'}, ], );
         }
         else {
             my $value = {};
             for my $item (@{$up_items}) {
-                if ( exists( $timeorigin{$item} ) ) {
+                if ( exists( $timeArgTrn{$item} ) ) {
                     my $hour =
-                        $c->request->body_params->{$timeorigin{$item}->[0]};
+                        $c->request->body_params->{$timeArgTrn{$item}->[0]};
                     my $min  =
-                        $c->request->body_params->{$timeorigin{$item}->[1]};
+                        $c->request->body_params->{$timeArgTrn{$item}->[1]};
                     $hour =~ s/\s+$//;
                     $min  =~ s/\s+$//;
                     if ( ( $hour ne '' ) || ( $min ne '' ) ) {
+                        $hour -= $c->config->{time_origin};
                         $value->{$item} = sprintf( '%02d:%02d', $hour, $min );
                     }
                     else {
@@ -804,6 +800,28 @@ sub _dberror :Private {
     $c->response->status(200);
 }
 
+=head2 _trnSEtime
+
+企画開始/終了時刻変換
+
+=cut
+
+sub _trnSEtime :Private {
+    my ( $self, $c, 
+         $trgHash,      # 変換対象ハッシュ
+       ) = @_;
+
+    foreach my $item (keys(%timeArgTrn)) {
+        my $wkval = eval( '$trgHash->' . $item );
+        next unless defined($wkval);
+        # 開始終了時刻を分解して時と分にわける
+        my @wk = split( /:/, $wkval );
+        if ( scalar( @wk ) >= 2 ) {
+            $trgHash->{$timeArgTrn{$item}->[0]} = $wk[0] + $c->config->{time_origin};
+            $trgHash->{$timeArgTrn{$item}->[1]} = $wk[1];
+        }
+    }
+}
 =encoding utf8
 
 =head1 AUTHOR
