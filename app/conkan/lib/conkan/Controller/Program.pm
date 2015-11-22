@@ -711,6 +711,12 @@ sub _pgupdate :Private {
          $up_items,     # 対象列名配列
        ) = @_;
 
+    my %timeorigin = (
+        'stime1' => [ 'shour1', 'smin1' ],
+        'etime1' => [ 'ehour1', 'emin1' ],
+        'stime2' => [ 'shour2', 'smin2' ],
+        'etime2' => [ 'ehour2', 'emin2' ],
+    );
     try {
         if ( $c->request->method eq 'GET' ) {
             # 更新表示
@@ -721,36 +727,19 @@ sub _pgupdate :Private {
                 } );
             }
             $c->stash->{'rs'} = $rowprof;
-            # 開始終了時刻を分解して時と分にわける
-            my @wk = split( /:/, $rowprof->stime1 );
-            if ( scalar( @wk ) >= 2 ) {
-                $c->stash->{'rs'}->{'shour1'} = $wk[0];
-                $c->stash->{'rs'}->{'smin1'} = $wk[1];
-            }
-            @wk = split( /:/, $rowprof->etime1 );
-            if ( scalar( @wk ) >= 2 ) {
-                $c->stash->{'rs'}->{'ehour1'} = $wk[0];
-                $c->stash->{'rs'}->{'emin1'} = $wk[1];
-            }
-            @wk = split( /:/, $rowprof->stime2 );
-            if ( scalar( @wk ) >= 2 ) {
-                $c->stash->{'rs'}->{'shour2'} = $wk[0];
-                $c->stash->{'rs'}->{'smin2'} = $wk[1];
-            }
-            @wk = split( /:/, $rowprof->etime2 );
-            if ( scalar( @wk ) >= 2 ) {
-                $c->stash->{'rs'}->{'ehour2'} = $wk[0];
-                $c->stash->{'rs'}->{'emin2'} = $wk[1];
+            foreach my $item (keys(%timeorigin)) {
+                my $wkval = eval( '$rowprof->' . $item );
+                next unless defined($wkval);
+                # 開始終了時刻を分解して時と分にわける
+                my @wk = split( /:/, $wkval );
+                if ( scalar( @wk ) >= 2 ) {
+                    $c->stash->{'rs'}->{$timeorigin{$item}->[0]} = $wk[0];
+                    $c->stash->{'rs'}->{$timeorigin{$item}->[1]} = $wk[1];
+                }
             }
         }
         else {
             my $value = {};
-            my %timeorigin = (
-                'stime1' => [ 'shour1', 'smin1' ],
-                'etime1' => [ 'ehour1', 'emin1' ],
-                'stime2' => [ 'shour2', 'smin2' ],
-                'etime2' => [ 'ehour2', 'emin2' ],
-            );
             for my $item (@{$up_items}) {
                 if ( exists( $timeorigin{$item} ) ) {
                     my $hour =
