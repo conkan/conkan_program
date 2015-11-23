@@ -78,6 +78,7 @@ sub auto :Private {
                              . $schema->get_db_version() . ']');
         }
     }
+    $c->config->{time_origin} = 0 unless (exists($c->config->{time_origin}));
     # login->login ループ回避
     if ( $c->action->reverse eq 'login' ) {
         return 1;
@@ -184,9 +185,9 @@ sub login :Local {
                 $c->session->{init_role} = undef;
             }
             if ( $c->user->get('passwd') && !$c->user->get('rmdate') ) {
-                # login直後だけ/mypage/listではなく/mypageにジャンプ
-                ## adminでのlogin対応
-                $c->response->redirect( '/mypage' );
+                if ( $c->action->reverse eq 'login' ) {
+                    $c->response->redirect( '/mypage' );
+                }
                 return;
             }
         }
@@ -252,6 +253,7 @@ sub initialprocess :Local {
     my $dbus = $c->request->body_params->{dbus};
     my $dbpw = $c->request->body_params->{dbpw};
     my $adrt = $c->request->body_params->{addstaff};
+    my $torg = $c->request->body_params->{torg} || 0;
     my $oakey= $c->request->body_params->{oakey};
     my $oasec= $c->request->body_params->{oasec};
     my $cygr = $c->request->body_params->{cygr};
@@ -265,7 +267,7 @@ sub initialprocess :Local {
 
     $c->detach( '/_doInitialProc',
                 [ $adpw, $dbnm, $dbsv, $dbus, $dbpw,
-                  $adrt, $oakey, $oasec, $cygr ],
+                  $adrt, $torg, $oakey, $oasec, $cygr ],
               );
 }
 
@@ -283,6 +285,7 @@ sub _doInitialProc :Private {
          $dbus,     # DBユーザ
          $dbpw,     # DBユーザパスワード
          $adrt,     # スタッフ登録方法 plain | cybozu
+         $torg,     # 時刻切り替え基準時
          $oakey,    # CybozuLive oAuthキー
          $oasec,    # CybozuLive oAuthシークレット
          $cygr,     # CybozuLive 参照グループ名
@@ -353,6 +356,11 @@ sub _doInitialProc :Private {
         my $conkan_yml = {
             'name' => 'conkan',
             'inited' => 1,
+            'disable_component_resolution_regex_fallback' => 1,
+            'enable_catalyst_header' => 1,
+            'default_model' => 'conkanDB',
+            'default_view ' => 'TT',
+            'time_origin' => $torg,
             'addstaff' => {
                 'type' => $adrt,
             },

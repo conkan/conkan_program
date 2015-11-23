@@ -25,7 +25,6 @@ extends 'Catalyst';
 use Catalyst qw/
     ConfigLoader
     Config::YAML
-   -Debug -Log=debug
     Static::Simple
     Session
     Session::Store::FastMmap

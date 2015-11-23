@@ -135,13 +135,21 @@ sub profile :Local {
     }
     # 既存のスタッフ検索
     my $row = $staffM->find( $value->{'account'}, { 'key' => 'account_UNIQUE' });
-    if ( $row && $row->passwd eq '' ) {
-        # 仮登録 -> 本登録
-        $c->stash->{'addstaff'} = 1;
+    if ( $row ) {
         $staffid = $row->staffid;
     }
     if ( $staffid ) { # 更新
         my $rowprof = $staffM->find($staffid);
+        if ( $rowprof->passwd eq '' ) {
+            # 仮登録 -> 本登録
+            $c->stash->{'addstaff'} = 1;
+        }
+        else {
+            # 既存スタッフの再登録
+            if ( defined( $c->flash->{'oainfo'}->{'cyid'} ) ) {
+                $c->stash->{'updstaff'} = 1;
+            }
+        }
         if ( $c->request->method eq 'GET' ) {
             # 更新表示
             $c->session->{'updtic'} = time;

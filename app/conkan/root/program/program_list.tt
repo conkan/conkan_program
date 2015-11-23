@@ -44,13 +44,19 @@
         </FORM>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">キャンセル</button>
+        <button type="button" class="btn btn-default" id="cancel" data-dismiss="modal">キャンセル</button>
       </div>
     </div>
   </div>
 </div>
 [% PROCESS 'tttail.tt' %]
 <script>
+  // 追加実施時、ボタンを無効にする
+  $('#doadd').click(function(event) {
+    $('#doadd').addClass('disabled');
+    $('#cancel').addClass('disabled');
+    return true;
+  } );
   // モーダルダイアログ addProgram 表示
   $('#addProgram').on('show.bs.modal', function (event) {
     $('#jsoninputfile').val('');

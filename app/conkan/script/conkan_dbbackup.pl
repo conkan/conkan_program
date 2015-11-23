@@ -4,6 +4,7 @@ use strict;
 use warnings;
 
 use Try::Tiny;
+use File::Path;
 use YAML;
 
 sub main {
@@ -15,9 +16,11 @@ sub main {
     my $bkffmt   = '%s/%s.conkan_backup.sql';
     my $datefmt  = '%4d%02d%02d%02d%02d';
 
-    usage() unless ( $cnf && $dir && ( -s $cnf ) && ( -d $dir ) );
+    usage() unless ( $cnf && $dir && ( -s $cnf ) );
+    usage() if ( ( -e $dir ) && !( -d $dir ) );
 
     try {
+        mkpath $dir unless ( -e $dir );
         my $config = YAML::LoadFile( $cnf );
         my $dbinfo = $config->{'Model::ConkanDB'}->{'connect_info'};
         my $user = $dbinfo->{'user'};

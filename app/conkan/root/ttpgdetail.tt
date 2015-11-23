@@ -117,8 +117,8 @@ END -%]
         [% IF Program.date1 %]
           <td>[% date.format(Program.date1) %]</td>
           <td colspan="5">
-            [%- Program.stime1 | remove(':00$') -%] -
-            [%- Program.etime1 | remove(':00$') -%]
+            [%- Program.shour1 -%]:[%- Program.smin1 -%]-
+            [%- Program.ehour1 -%]:[%- Program.emin1 -%]
           </td>
         [% ELSE %]
           <td></td>
@@ -130,8 +130,8 @@ END -%]
         [% IF Program.date2 %]
           <td>[% date.format(Program.date2) %]</td>
           <td colspan="5">
-            [%- Program.stime2 | remove(':00$') -%] -
-            [%- Program.etime2 | remove(':00$') -%]
+            [%- Program.shour2 -%]:[%- Program.smin2 -%]-
+            [%- Program.ehour2 -%]:[%- Program.emin2 -%]
           </td>
         [% ELSE %]
           <td></td>
@@ -377,7 +377,7 @@ END -%]
             value="[% RegProgram.regpgid %]"/>
       <input type="hidden" name="pgid", id="progress_pgid"
             value="[% Program.pgid %]"/>
-      <button type="submit" class="btn btn-primary btn-xs">進捗登録</button>
+      <button type="submit" class="btn btn-primary btn-xs">下記内容を進捗として追加</button>
       [% pguptextarea( 'progress', '', 12, 3 ) %]
     </div>
   </FORM>
