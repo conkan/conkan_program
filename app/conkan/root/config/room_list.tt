@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="conkan roomlist">
+<meta name="author" content="Studio REM">
+<title>Conkan RoomList</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+</head>
+[%- SET self_li_id = 'config_room' -%]
+[%- PROCESS 'tthead.tt' -%]
+<div class="container">
+  <div class="well" id="roomlist">
+    <table class="table table-striped table-bordered table-condensed">
+      <colgroup>
+        <col class="col-sm-4">
+        <col class="col-sm-2">
+        <col class="col-sm-3">
+        <col class="col-sm-2">
+        <col class="col-sm-1">
+      </colgroup>
+      <thead>
+        <tr bgcolor="#FFcc66">
+          <th>部屋名</th>
+          <th>部屋番号</th>
+          <th>形式</th>
+          <th>面積(㎡)</th>
+          <th></th>
+      </thead>
+      <tbody>
+        [% FOREACH item = list %]
+          [% IF item.rmdate;
+            SET rmcol = 'style="background-color:gray;"';
+            SET rmcol2 = 'style="text-align:center;background-color:gray;"';
+          ELSE;
+            SET rmcol = '';
+            SET rmcol2 = 'style="text-align:center;"';
+          END %]
+          <tr>
+            <td [% rmcol %]>[% item.name  | html %]</td>
+            <td [% rmcol %]>[% item.roomno  | html %]</td>
+            <td [% rmcol %]>[% item.type  | html %]</td>
+            <td [% rmcol %]>[% item.size  | html %]</td>
+            <td [% rmcol2 %]>
+              <button type="button" class="btn btn-xs btn-primary"
+              [%- IF! rmcol -%]
+                data-toggle="modal" data-target="#editRoom"
+                data-whatever="[% item.roomid %]" data-rmcol="[% rmcol %]"
+              [% END %]
+              >
+              [%- IF! rmcol -%]
+                編集
+              [% ELSE %]
+                無効
+              [% END %]
+              </button>
+            </td>
+          </tr>
+        [% END %]
+      </tbody>
+    </table>
+    <div>
+      <button type="button" class="btn btn-primary"
+              data-toggle="modal" data-target="#editRoom"
+              data-whatever="0" data-rmcol="">
+        追加
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="editRoom" tabindex="-1" role="dialog" aria-labelledby="editRoomLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="editRoomLabel">Edit RoomInfo</h4>
+      </div>
+      <div class="modal-body" id="editRoomContent">
+        <FORM>情報取得中</FORM>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
+        <button type="button" class="btn " id="dodel">削除</button>
+        <button type="button" class="btn btn-primary" id="dobtn">登録/更新</button>
+      </div>
+    </div>
+  </div>
+</div>
+[% PROCESS 'tttail.tt' %]
+<script>
+  var storage = sessionStorage;
+  $(document).ready(function(){
+    $(document).scrollTop( storage.getItem( 'sctop' ) );
+    storage.clear();
+  });
+  // モーダルダイアログ表示
+  $('#editRoom').on('show.bs.modal', function (event) {
+    var roomid = $(event.relatedTarget).data('whatever');
+    var content = $('#editRoomContent');
+    $(content).load(roomid + '/ FORM');
+    if ( $(event.relatedTarget).data('rmcol') ) {
+      $('#dobtn').hide();
+      $('#dodel').hide();
+    }
+    else {
+      $('#dobtn').show();
+      $('#dodel').show();
+    }
+  } );
+  // モーダルダイアログ非表示
+  $('#editRoom').on('hide.bs.modal', function (event) {
+    storage.setItem( 'sctop', $(document).scrollTop() );
+    location.reload(true);
+  } );
+  // 更新
+  $('#dobtn').click(function(event) {
+    if (!$('#name').val()) {
+        $('#valerr').text('部屋名は必須です');
+        return false;
+    }
+    if (!$('#roomno').val()) {
+        $('#valerr').text('部屋番号は必須です');
+        return false;
+    }
+    if (!$('#type').val()) {
+        $('#valerr').text('形式は必須です');
+        return false;
+    }
+    var content = $('#editRoomContent');
+    var data = $('#roomform').serializeArray();
+    var roomid = $('#roomid').val();
+    $('#dobtn').hide();
+    $('#dodel').hide();
+    $(content).load(roomid + '/edit/ FORM', data );
+  } );
+  // 削除
+  $('#dodel').click(function(event) {
+    var content = $('#editRoomContent');
+    var data = $('#roomform').serializeArray();
+    var roomid = $('#roomid').val();
+    $('#dobtn').hide();
+    $('#dodel').hide();
+    $(content).load(roomid + '/del/ FORM', data );
+  } );
+</script>
+</body>
+</html>

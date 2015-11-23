@@ -9,6 +9,7 @@ use Try::Tiny;
 use String::Random qw/ random_string /;
 
 use Data::Dumper;
+use Encode;
 use conkan::Schema;
 
 BEGIN { extends 'Catalyst::Controller' }
@@ -40,7 +41,7 @@ login処理と初期設定のみ組み込み。それ以外は別のコントロ
 sub auto :Private {
     my ( $self, $c ) = @_;
 
-    $c->log->debug('>>>>アクション内部パス:[' . $c->action->reverse . ']' );
+    $c->log->info(localtime() . ' アクション内部パス:[' . $c->action->reverse . '][' . $c->request->method . ']' );
     # 初期化済判断
     unless (exists($c->config->{inited})) {
         if ( ( $c->action->reverse eq 'index'  )        ||
@@ -69,14 +70,15 @@ sub auto :Private {
 
         if (!$olddbv) {
             $schema->deploy( { add_drop_table => 1, } );
-            $c->log->debug('>>> DB Update : deploy');
+            $c->log->info( localtime() . ' DB Update : deploy');
         } elsif ( $newdbv != $olddbv ) {
             $schema->create_ddl_dir( 'MySQL', $newdbv, './sql', $olddbv );
             $schema->upgrade();
-            $c->log->debug('>>> DB Update : upgrade ['
+            $c->log->info( localtime() . ' DB Update : upgrade ['
                              . $schema->get_db_version() . ']');
         }
     }
+    $c->config->{time_origin} = 0 unless (exists($c->config->{time_origin}));
     # login->login ループ回避
     if ( $c->action->reverse eq 'login' ) {
         return 1;
@@ -87,7 +89,7 @@ sub auto :Private {
     }
     # 強制login処理
     unless ( $c->user_exists ) {
-        $c->log->debug('>>>> 強制login' );
+        $c->log->info( localtime() . ' 強制login' );
         $c->visit( '/login' );
         return 0;
     }
@@ -105,7 +107,7 @@ sub index :Path :Args(0) {
 
     $c->go( '/initialize' ) unless (exists($c->config->{inited}));
 
-    $c->response->redirect( '/mypage' );
+    $c->response->redirect( '/mypage/list' );
 }
 
 =head2 yetinit
@@ -129,17 +131,12 @@ sub default :Path {
     my ( $self, $c ) = @_;
 
     my $action = $c->request->path();
-    my $liid =  ($action eq 'program/list/list')      ? 'program_list'
-              : ($action eq 'program/progress/list')  ? 'program_progress' 
-              : ($action eq 'mypage/profile')         ? 'mypage_profile'
-              : ($action eq 'config/staff/list')      ? 'config_staff'
-              : ($action eq 'config/room/list')       ? 'config_room'
+    my $liid =  ($action eq 'timetable')      ? 'timetable'
+              : ($action eq 'config/cast/list')       ? 'config_cast'
               : ($action eq 'config/equip/list')      ? 'config_equip'
-              : ($action eq 'config/setting')         ? 'config_conf'
-              : ($action eq 'addstaff')               ? 'mypage_profile'
               : 'mypage';
-$c->log->debug('>>> action : [' . $action . ']');
-$c->log->debug('>>> liid   : [' . $liid   . ']');
+    $c->log->debug('>>>' . localtime() . ' action : [' . $action . ']');
+    $c->log->debug('>>>' . localtime() . ' liid   : [' . $liid   . ']');
     $c->response->status(404);
     $c->stash->{self_li_id} = $liid;
     $c->stash->{template} = 'underconstract.tt';
@@ -187,8 +184,10 @@ sub login :Local {
             else {
                 $c->session->{init_role} = undef;
             }
-            unless ( $c->user->get('rmdate') ) {
-                $c->response->redirect( '/mypage' );
+            if ( $c->user->get('passwd') && !$c->user->get('rmdate') ) {
+                if ( $c->action->reverse eq 'login' ) {
+                    $c->response->redirect( '/mypage' );
+                }
                 return;
             }
         }
@@ -254,6 +253,7 @@ sub initialprocess :Local {
     my $dbus = $c->request->body_params->{dbus};
     my $dbpw = $c->request->body_params->{dbpw};
     my $adrt = $c->request->body_params->{addstaff};
+    my $torg = $c->request->body_params->{torg} || 0;
     my $oakey= $c->request->body_params->{oakey};
     my $oasec= $c->request->body_params->{oasec};
     my $cygr = $c->request->body_params->{cygr};
@@ -267,7 +267,7 @@ sub initialprocess :Local {
 
     $c->detach( '/_doInitialProc',
                 [ $adpw, $dbnm, $dbsv, $dbus, $dbpw,
-                  $adrt, $oakey, $oasec, $cygr ],
+                  $adrt, $torg, $oakey, $oasec, $cygr ],
               );
 }
 
@@ -285,6 +285,7 @@ sub _doInitialProc :Private {
          $dbus,     # DBユーザ
          $dbpw,     # DBユーザパスワード
          $adrt,     # スタッフ登録方法 plain | cybozu
+         $torg,     # 時刻切り替え基準時
          $oakey,    # CybozuLive oAuthキー
          $oasec,    # CybozuLive oAuthシークレット
          $cygr,     # CybozuLive 参照グループ名
@@ -314,7 +315,7 @@ sub _doInitialProc :Private {
             $dbh->do( 'DROP TABLE dbix_class_schema_versions' );
         }
         $schema->deploy( { add_drop_table => 1, } );
-        $c->log->debug('>>> Initial : deploy');
+        $c->log->info( localtime() . ' Initial : deploy');
 
         # 規定値一括登録
         $dbh->do( 'SET NAMES utf8' );
@@ -355,6 +356,11 @@ sub _doInitialProc :Private {
         my $conkan_yml = {
             'name' => 'conkan',
             'inited' => 1,
+            'disable_component_resolution_regex_fallback' => 1,
+            'enable_catalyst_header' => 1,
+            'default_model' => 'conkanDB',
+            'default_view ' => 'TT',
+            'time_origin' => $torg,
             'addstaff' => {
                 'type' => $adrt,
             },

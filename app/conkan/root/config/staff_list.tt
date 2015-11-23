@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="conkan initialize">
+<meta name="description" content="conkan stafflist">
 <meta name="author" content="Studio REM">
 <title>Conkan StaffList</title>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
@@ -13,12 +13,12 @@
 [%- PROCESS 'tthead.tt' -%]
 <div class="container">
   <div class="well" id="stafflist">
-    <table class="table table-striped table-bordered table-hover">
+    <table class="table table-striped table-bordered table-condensed">
       <colgroup>
         <col class="col-sm-3">
         <col class="col-sm-2">
         <col class="col-sm-3">
-        <col class="col-sm-2">
+        <col class="col-sm-1">
       </colgroup>
       <thead>
         <tr bgcolor="#FFcc66">
@@ -44,20 +44,21 @@
             [%- END -%]
             </td>
             <td [% rmcol %]>[% item.tname | html %]</td>
-            <td [% rmcol %]>
-              <button type="button" class="btn"
+            <td [% rmcol %] style="text-align:center;">
+              <button type="button" class="btn btn-primary btn-xs"
               [%- IF rmcol -%]
                 >
                 無効
-              [% ELSE %]
+              [%- ELSE -%]
                 data-toggle="modal" data-target="#editStaff"
-                data-whatever="[% item.staffid %]">
-                更新
-              [% END %]
+                data-whatever="[% item.staffid %]"
+                data-whatrole="[% item.role %]">
+                編集
+              [%- END %]
               </button>
             </td>
           </tr>
-        [% END %]
+        [%- END %]
       </tbody>
     </table>
   </div>
@@ -84,17 +85,37 @@
 </div>
 [% PROCESS 'tttail.tt' %]
 <script>
+  var storage = sessionStorage;
+  $(document).ready(function(){
+    $(document).scrollTop( storage.getItem( 'sctop' ) );
+    storage.clear();
+  });
   $('#editStaff').on('show.bs.modal', function (event) {
     var staffid = $(event.relatedTarget).data('whatever');
+    var role = $(event.relatedTarget).data('whatrole');
     var content = $('#editStaffContent');
-    $(content).load(staffid + '/ FORM');
+    $(content).load(staffid + '/ FORM', '', function() {
+        $('#' + role).prop('selected', true);
+      }
+    );
     $('#dobtn').show();
-      $('#dodel').show();
+    $('#dodel').show();
   } );
   $('#editStaff').on('hide.bs.modal', function (event) {
+    storage.setItem( 'sctop', $(document).scrollTop() );
     location.reload(true);
   } );
   $('#dobtn').click(function(event) {
+    if (!$('#account').val()) {
+        $('#valerr').text('アカウントは必須です');
+        return;
+    }
+    if ( $('#passwd').val() ) {
+        if ( $('#passwd').val() != $('#passwd2').val() ) {
+            $('#valerr').text('パスワードとパスワード(確認)が一致しません');
+            return;
+        }
+    }
     var content = $('#editStaffContent');
     var data = $('#profform').serializeArray();
     var staffid = $('#staffid').val();
@@ -111,7 +132,5 @@
     $(content).load(staffid + '/del/ FORM', data );
   } );
 </script>
-[% PROCESS 'ttprofjs.tt' %]
 </body>
 </html>
-

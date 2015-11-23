@@ -5,9 +5,9 @@
     $('#[%- state | html -%]').show();
     if ( '[% cuRole -%]' != 'ROOT' && ![% addroot %]) {
       $('#account').prop('readonly', 'readonly');
-      $('#account').addClass('bg-mute');
+      $('#account').css('background-color', '#eee' );
       $('#role').prop('readonly', 'readonly');
-      $('#role').addClass('bg-mute');
+      $('#role').css('background-color', '#eee' );
     }
   } );
   // バリデーション
@@ -22,7 +22,7 @@
             return false;
         }
     }
-    [%- IF addroot || addstaff %]
+    [%- IF addroot || addstaff || updstaff %]
     else {
         $('#valerr').text('パスワードは必須です');
         return false;

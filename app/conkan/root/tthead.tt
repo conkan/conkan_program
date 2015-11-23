@@ -1,9 +1,14 @@
 [%- # TT制御パラメータの設定;
-SET addstaff = 0;
+DEFAULT addstaff = 0;
+DEFAULT updstaff = 0;
 SET acname = c.user.get('name');
 IF! acname;
-  SET acname = '新規登録';
   SET addstaff = 1;
+  IF updstaff == 1;
+    SET acname = '更新登録';
+  ELSE;
+    SET acname = '新規登録';
+  END;
 END;
 SET addroot = 0;
 IF c.session.init_role == 'addroot';
@@ -30,16 +35,19 @@ SET cuRole = c.user.get('role') -%]
         [%- IF addroot != 1 -%]
           [%- IF acname != 'admin' %]
             [% IF addstaff != 1 %]
-              <li id="program_list"><a href="/program/list/list">企画管理</a></li>
-              <li id="program_progress"><a href="/program/progress/list">進捗報告</a></li>
+              <li id="program_list"><a href="/program/list">企画一覧</a></li>
+              <li id="timetable"><a href="/timetable">タイムテーブル</a></li>
             [% END %]
             <li id="mypage_profile"><a href="/mypage/profile">プロファイル設定</a></li>
-            [%- IF cuRole == 'ROOT' %]
-              <li id="config_staff"><a href="/config/staff/list">スタッフ管理</a></li>
-              <li id="config_room"><a href="/config/room/list">企画部屋管理</a></li>
-              <li id="config_equip"><a href="/config/equip/list">機材管理</a></li>
-              <li id="config_conf"><a href="/config/setting">設定</a></li>
-            [%- END -%]
+          [% END %]
+          [%- IF cuRole == 'ROOT' || cuRole == 'ADMIN' %]
+            <li id="config_staff"><a href="/config/staff/list">スタッフ管理</a></li>
+          [% END %]
+          [%- IF cuRole == 'ROOT' %]
+            <li id="config_cast"><a href="/config/cast/list">出演者管理</a></li>
+            <li id="config_room"><a href="/config/room/list">部屋管理</a></li>
+            <li id="config_equip"><a href="/config/equip/list">機材管理</a></li>
+            <li id="config_conf"><a href="/config/setting">設定</a></li>
           [%- END -%]
           <li class="pull-right"><a href="/logout" class="btn btn-info">
             [%- IF addstaff != 1 -%]

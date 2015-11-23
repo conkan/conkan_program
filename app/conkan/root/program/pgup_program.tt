@@ -1,0 +1,77 @@
+[% SET urole = c.user.get('role') %]
+[% PROCESS 'ttpgupmc.tt' %]
+<FORM method="POST" class="form-horizontal" role="form" id="progform">
+  <p id="vha" data-vha= "[]"/>
+  <div style="COLOR:Red;" id="valerr"></div>
+  <div class="form-group">
+    <input type="hidden" name="regpgid" id="regpgid" value="[% regpgid %]">
+    <input type="hidden" name="pgid" id="pgid"   value="[% pgid %]">
+    <input type="hidden" name="id"   id="id"     value="-">
+    <input type="hidden" name="target" id="target" value="program">
+  </div>
+  <table class="table table-bordered table-condensed">
+    <colgroup>
+      <col class="col-sm-2">
+      <col class="col-sm-3">
+      <col class="col-sm-2">
+      <col class="col-sm-2">
+      <col class="col-sm-3">
+    </colgroup>
+    <tbody>
+      <tr>
+        <th style="background-color:#FFcc66">企画ID: [% regpgid %] ([% subno %])</th>
+        <th style="background-color:#FFcc66" colspan="4">[% pgname | html %]</td>
+      </tr>
+      <tr>
+        <th>担当スタッフ</th>
+        <td>
+          [%- IF urole == 'ROOT' || urole == 'PG' -%]
+            [% pgupselect( 'staffid', stafflist, rs.staffid.staffid, 12 ) %]
+          [%- ELSE -%]
+            <input type="hidden" name="staffid" id="staffid" value="
+            [%- rs.staffid.staffid -%]">
+            [%- rs.staffid.tname -%]
+          [%- END -%]
+        </td> 
+        <th>実行ステータス</th>
+        <td>[% pgupselect( 'status', conf.status, rs.status, 12 ) %]</td>
+        <td>[% pgupinputtext( 'memo', rs.memo, 12 ) %]</td>
+      </tr>
+      <tr>
+        <th>日時1</th>
+        <td>
+          [%- pgupselect( 'date1', conf.dates, rs.date1.strftime('%Y/%m/%d'), 12 ) -%]
+        </td>
+        <td colspan="3">
+          [%- pgupselect( 'shour1', conf.s_hours, rs.shour1, 2 ) -%]
+          [%- pgupselect( 'smin1', conf.s_mins, rs.smin1, 2 ) -%]
+          <div align="center" class="col-sm-1"> - </div>
+          [%- pgupselect( 'ehour1', conf.e_hours, rs.ehour1, 2 ) -%]
+          [%- pgupselect( 'emin1', conf.s_mins, rs.emin1, 2 ) -%]
+        </td>
+      </tr>
+      <tr>
+        <th>日時2</th>
+        <td>
+          [%- pgupselect( 'date2', conf.dates, rs.date2.strftime('%Y/%m/%d'), 12 ) -%]
+        <td colspan="3">
+          [%- pgupselect( 'shour2', conf.s_hours, rs.shour2, 2 ) -%]
+          [%- pgupselect( 'smin2', conf.s_mins, rs.smin2, 2 ) -%]
+          <div align="center" class="col-sm-1"> - </div>
+          [%- pgupselect( 'ehour2', conf.e_hours, rs.ehour2, 2 ) -%]
+          [%- pgupselect( 'emin2', conf.s_mins, rs.emin2, 2 ) -%]
+        </td>
+      </tr>
+      <tr>
+        <th>場所</th>
+        <td colspan="2">[% pgupselect( 'roomid', roomlist, rs.roomid.roomid, 12 ) %]</td>
+        <th>表示順序</th>
+        <td>[% pgupselect( 'layerno', conf.nos, rs.layerno, 4 ) %]</td>
+      </tr>
+      <tr>
+        <th>企画紹介文</th>
+        <td colspan="4">[% pguptextarea( 'progressprp', rs.progressprp, 12, 4 ) %]</td>
+      </tr>
+    </tbody>
+  </table>
+</FORM>

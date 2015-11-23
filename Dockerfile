@@ -19,6 +19,7 @@ ADD doccnf/bashrc /root/.bashrc
 ADD doccnf/vimrc /root/.vimrc
 ADD doccnf/clock /etc/sysconfig/clock
 ADD doccnf/i18n /etc/sysconfig/i18n
+ADD doccnf/conkan_logrotate /etc/logrotate.d/conkan
 RUN rm -f /etc/localtime; ln -fs /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
 ENV HOME /root
 ENV TERM xterm
@@ -35,6 +36,9 @@ RUN yum -y install mysql mysql-devel
 
 # gcc
 RUN yum -y install gcc patch
+
+# logrotate
+RUN yum -y install logrotate
 
 # XML:Feedインストールのためのライブラリ
 RUN yum -y install expat-devel libxml2-devel
@@ -78,6 +82,7 @@ RUN cpanm -i MooseX::NonMoose
 RUN cpanm -in LWP::Protocol::https
 RUN cpanm -i Term::Size::Any
 RUN cpanm -i XML::LibXML XML::RSS XML::Atom XML::Feed
+RUN cpanm -in Catalyst::Plugin::Config::YAML
 
 # cpanm work削除
 RUN rm -rf .cpanm/*
@@ -89,10 +94,11 @@ ADD doccnf/nginx.conf /etc/nginx/nginx.conf
 ADD doccnf/my.cnf /etc/my.cnf
 
 # daemontools設定
-RUN mkdir -p /service/conkan; mkdir -p /var/log/conkan; mkdir -p /service/nginx
+RUN mkdir -p /service/conkan; mkdir -p /var/log/conkan; mkdir -p /service/nginx;mkdir -p /service/crondum
 ADD doccnf/conkan_run /service/conkan/run
 ADD doccnf/nginx_run /service/nginx/run
-RUN chmod 755 /service/nginx/run; chmod 755 /service/conkan/run
+ADD doccnf/crondum_run /service/crondum/run
+RUN chmod 755 /service/nginx/run; chmod 755 /service/conkan/run; chmod 755 /service/crondum/run
 
 #----------------------------------------------------------
 # 起動

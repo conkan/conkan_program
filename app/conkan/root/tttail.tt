@@ -2,9 +2,11 @@
   <HR/>
   [%- USE dumper(indent=1) -%]
   <pre>
+  cuRole  [% cuRole %]
+  acname  [% acname %]
+  updstaff [% updstaff %]
+  addstaff [% addstaff %]
   [% dumper.dump(c.user) %]
-  staffid [% c.user.get('staffid') %]
-  rs.staffid  [% rs.staffid %]
   </pre>
 [% END %]
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
@@ -13,6 +15,7 @@
   // ナビのタブ アクティベイト
   $(document).ready(function() {
     $('#[%- self_li_id | html -%]').addClass('active');
+    $(document.body).css('padding-top', $('#navbar').height()+30 );
   });
   // ナビのリサイズでBody開始位置を変える
   $(window).resize(function() {

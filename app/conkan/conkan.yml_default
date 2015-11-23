@@ -18,9 +18,9 @@ Plugin::Authentication:
           access_token_endpoint: https://api.cybozulive.com/oauth/token
           consumer_key: 
           consumer_secret: 
+          group_info_endpoint: https://api.cybozulive.com/api/group/V2
           request_token_endpoint: https://api.cybozulive.com/oauth/initiate
           user_auth_endpoint: https://api.cybozulive.com/oauth/authorize
-          group_info_endpoint: https://api.cybozulive.com/api/group/V2
     store:
       class: +Catalyst::Authentication::Store::Null
     use_session: 1
@@ -39,7 +39,18 @@ Plugin::Authentication:
       user_model: conkanDB::PgStaff
     use_session: 1
   use_session: 1
+Plugin::Session:
+  expires: 3600
+  verify_address: 1
+  verify_user_agent: 1
+  cookie_name: conkan_session
+  cookie_expires: 0
 addstaff:
   group: 
   type: 
 name: conkan
+disable_component_resolution_regex_fallback: 1
+enable_catalyst_header: 1
+default_model: conkanDB
+default_view : TT
+time_origin: 6

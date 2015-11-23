@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="conkan equiplist">
+<meta name="author" content="Studio REM">
+<title>Conkan EquipList</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+</head>
+[%- SET self_li_id = 'config_equip' -%]
+[%- PROCESS 'tthead.tt' -%]
+<div class="container">
+  <div class="well" id="equiplist">
+    <table class="table table-striped table-bordered table-condensed">
+      <colgroup>
+        <col class="col-sm-3">
+        <col class="col-sm-2">
+        <col class="col-sm-2">
+        <col class="col-sm-4">
+        <col class="col-sm-1">
+      </colgroup>
+      <thead>
+        <tr bgcolor="#FFcc66">
+          <th>名称</th>
+          <th>機材番号</th>
+          <th>数</th>
+          <th>仕様</th>
+          <th></th>
+      </thead>
+      <tbody>
+        [% FOREACH item = list %]
+          [% IF item.rmdate;
+            SET rmcol = 'style="background-color:gray;"';
+            SET rmcol2 = 'style="text-align:center;background-color:gray;"';
+          ELSE;
+            SET rmcol = '';
+            SET rmcol2 = 'style="text-align:center;"';
+          END %]
+          <tr>
+            <td [% rmcol %]>[% item.name    | html %]</td>
+            <td [% rmcol %]>[% item.equipno | html %]</td>
+            <td [% rmcol %]>[% item.count   | html %]</td>
+            <td [% rmcol %]>[% item.spec    | html %]</td>
+            <td [% rmcol2 %]>
+              <button type="button" class="btn btn-xs btn-primary"
+              [%- IF! rmcol -%]
+                data-toggle="modal" data-target="#editEquip"
+                data-whatever="[% item.equipid %]" data-rmcol="[% rmcol %]"
+              [% END %]
+              >
+              [%- IF! rmcol -%]
+                編集
+              [% ELSE %]
+                無効
+              [% END %]
+              </button>
+            </td>
+          </tr>
+        [% END %]
+      </tbody>
+    </table>
+    <div>
+      <button type="button" class="btn btn-primary"
+              data-toggle="modal" data-target="#editEquip"
+              data-whatever="0" data-rmcol="">
+        追加
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="editEquip" tabindex="-1" role="dialog" aria-labelledby="editEquipLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="editEquipLabel">Edit EquipInfo</h4>
+      </div>
+      <div class="modal-body" id="editEquipContent">
+        <FORM>情報取得中</FORM>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
+        <button type="button" class="btn " id="dodel">削除</button>
+        <button type="button" class="btn btn-primary" id="dobtn">登録/更新</button>
+      </div>
+    </div>
+  </div>
+</div>
+[% PROCESS 'tttail.tt' %]
+<script>
+  var storage = sessionStorage;
+  $(document).ready(function(){
+    $(document).scrollTop( storage.getItem( 'sctop' ) );
+    storage.clear();
+  });
+  // モーダルダイアログ表示
+  $('#editEquip').on('show.bs.modal', function (event) {
+    var equipid = $(event.relatedTarget).data('whatever');
+    var content = $('#editEquipContent');
+    $(content).load(equipid + '/ FORM');
+    if ( $(event.relatedTarget).data('rmcol') ) {
+      $('#dobtn').hide();
+      $('#dodel').hide();
+    }
+    else {
+      $('#dobtn').show();
+      $('#dodel').show();
+    }
+  } );
+  // モーダルダイアログ非表示
+  $('#editEquip').on('hide.bs.modal', function (event) {
+    storage.setItem( 'sctop', $(document).scrollTop() );
+    location.reload(true);
+  } );
+  // 更新
+  $('#dobtn').click(function(event) {
+    if (!$('#name').val()) {
+        $('#valerr').text('名称は必須です');
+        return false;
+    }
+    if (!$('#equipno').val()) {
+        $('#valerr').text('機材番号は必須です');
+        return false;
+    }
+    var content = $('#editEquipContent');
+    var data = $('#equipform').serializeArray();
+    var equipid = $('#equipid').val();
+    $('#dobtn').hide();
+    $('#dodel').hide();
+    $(content).load(equipid + '/edit/ FORM', data );
+  } );
+  // 削除
+  $('#dodel').click(function(event) {
+    var content = $('#editEquipContent');
+    var data = $('#equipform').serializeArray();
+    var equipid = $('#equipid').val();
+    $('#dobtn').hide();
+    $('#dodel').hide();
+    $(content).load(equipid + '/del/ FORM', data );
+  } );
+</script>
+</body>
+</html>

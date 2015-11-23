@@ -60,14 +60,19 @@ __PACKAGE__->table("pg_all_cast");
 =head2 namef
 
   data_type: 'varchar'
-  is_nullable: 0
+  is_nullable: 1
   size: 64
 
 =head2 status
 
   data_type: 'varchar'
-  is_nullable: 0
+  is_nullable: 1
   size: 64
+
+=head2 memo
+
+  data_type: 'text'
+  is_nullable: 1
 
 =head2 restdate
 
@@ -95,9 +100,11 @@ __PACKAGE__->add_columns(
   "name",
   { data_type => "varchar", is_nullable => 0, size => 64 },
   "namef",
-  { data_type => "varchar", is_nullable => 0, size => 64 },
+  { data_type => "varchar", is_nullable => 1, size => 64 },
   "status",
-  { data_type => "varchar", is_nullable => 0, size => 64 },
+  { data_type => "varchar", is_nullable => 1, size => 64 },
+  "memo",
+  { data_type => "text", is_nullable => 1 },
   "restdate",
   { data_type => "text", is_nullable => 1 },
   "updateflg",
@@ -117,6 +124,18 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key("castid");
 
 =head1 UNIQUE CONSTRAINTS
+
+=head2 C<name_UNIQUE>
+
+=over 4
+
+=item * L</name>
+
+=back
+
+=cut
+
+__PACKAGE__->add_unique_constraint("name_UNIQUE", ["name"]);
 
 =head2 C<regno_UNIQUE>
 
@@ -148,8 +167,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-18 12:18:22
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:3wUNuMBojkE8QRMk73699Q
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-06-12 13:40:09
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:2hdQeJ6+KgKCHC8K1Q9t5Q
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
