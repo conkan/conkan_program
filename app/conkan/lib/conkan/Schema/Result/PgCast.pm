@@ -62,8 +62,13 @@ __PACKAGE__->table("pg_cast");
 =head2 status
 
   data_type: 'varchar'
-  is_nullable: 0
+  is_nullable: 1
   size: 64
+
+=head2 memo
+
+  data_type: 'text'
+  is_nullable: 1
 
 =head2 name
 
@@ -72,6 +77,12 @@ __PACKAGE__->table("pg_cast");
   size: 64
 
 =head2 namef
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 64
+
+=head2 title
 
   data_type: 'varchar'
   is_nullable: 1
@@ -108,10 +119,14 @@ __PACKAGE__->add_columns(
     is_nullable => 0,
   },
   "status",
-  { data_type => "varchar", is_nullable => 0, size => 64 },
+  { data_type => "varchar", is_nullable => 1, size => 64 },
+  "memo",
+  { data_type => "text", is_nullable => 1 },
   "name",
   { data_type => "varchar", is_nullable => 1, size => 64 },
   "namef",
+  { data_type => "varchar", is_nullable => 1, size => 64 },
+  "title",
   { data_type => "varchar", is_nullable => 1, size => 64 },
   "updateflg",
   { data_type => "varchar", is_nullable => 1, size => 64 },
@@ -150,20 +165,20 @@ __PACKAGE__->belongs_to(
 
 Type: belongs_to
 
-Related object: L<conkan::Schema::Result::PgRegProgram>
+Related object: L<conkan::Schema::Result::PgProgram>
 
 =cut
 
 __PACKAGE__->belongs_to(
   "pgid",
-  "conkan::Schema::Result::PgRegProgram",
+  "conkan::Schema::Result::PgProgram",
   { pgid => "pgid" },
   { is_deferrable => 1, on_delete => "NO ACTION", on_update => "NO ACTION" },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-18 12:18:22
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:EDj6t/VBiE2uz/iNpUoWHg
+# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-06-12 13:40:09
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:dbxk8IaCD3XGiGRp081m3g
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

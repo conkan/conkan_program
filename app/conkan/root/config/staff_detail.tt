@@ -1,2 +1,3 @@
-[% PROCESS 'ttprofinput.tt' %]
-
+<FORM method="POST" class="form-horizontal" role="form" action="/mypage/profile" id="profform">
+  [% PROCESS 'ttprofinput.tt' %]
+</FORM>

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="conkan setting">
+<meta name="author" content="Studio REM">
+<title>Conkan Program Detail</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+</head>
+[%- DEFAULT self_li_id = 'program_list' -%]
+[% PROCESS 'tthead.tt' %]
+<div class="container">
+  [% PROCESS 'ttpgdetail.tt' %]
+</div>
+[% PROCESS 'tttail.tt' %]
+[% PROCESS 'ttpgdtjs.tt' %]
+</body>
+</html>

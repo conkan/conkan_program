@@ -16,12 +16,14 @@ Azureなどクラウドサービスが提供するmysqlを使用する場合に�
 ````
 mysql> create database [DB名] default character set utf8;
 mysql> grant all on [DB名].* to [管理ユーザ名] identified by '[パスワード]';
+mysql> grant reload on *.* to [管理ユーザ名]
 mysql> flush privileges;
 mysql> exit;
 ````
 
 DB名、管理ユーザ名、パスワードは、conkan初期化処理時に使用するので控えておくこと。
 また、セキュリティ上これらの値は秘匿すべきである。
+＊ reload権限は、バックアップのために必要
 
 CybozuLive アプリケーション登録
 ====
@@ -146,3 +148,24 @@ admin としてlogin後、タブ「管理者登録」をクリックする。
 必要に応じて、CybozuLive認証画面を経由し、
 【管理者登録ページ】が表示されるので、必要な項目を入力し、登録する。
 
+conkan起動後の定期処理
+====
+
+Dockerコンテナ内でcronを動かすのは非効率的なので、
+定期的な処理は<稼働サーバ>のcronから起動するよう設定する。
+
+1. DBバックアップの設定
+
+<稼働サーバ>のcronとして、
+
+    <Dockerホーム>/dbbackup.sh
+
+を定期的に実行するように設定する。
+
+1. ログローテート
+
+<稼働サーバ>のcronとして、
+
+    <Dockerホーム>/logrotate.sh
+
+を定期的に実行するように設定する。
