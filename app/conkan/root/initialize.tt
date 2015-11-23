@@ -44,6 +44,13 @@
         <span class="col-sm-4 help-inline"> DB管理ユーザのパスワード</span>
       </div>
       <HR/>
+      <label>固定情報</label><br/>
+      <div class="row">
+        <label class="col-sm-2 text-right">表示切り替え時刻</label>
+        <input type="text" name="torg" class="col-sm-3" placeholder="TimeOrigin">
+        <span class="col-sm-4 help-inline"> 日付を切り替える時刻<br>例:6 なら、06:00-29:59が一日になる</span>
+      </div>
+      <HR/>
       <label>スタッフ登録方法</label><br/>
       <div class="row">
         <select class="col-sm-3" name="addstaff" id="addstaff">
