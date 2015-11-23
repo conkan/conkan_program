@@ -24,6 +24,13 @@ conkan::Controller::Program - Catalyst Controller
 
 =cut
 
+# 開始終了時刻変換テーブル
+my %timeArgTrn = (
+    'stime1' => [ 'shour1', 'smin1' ],
+    'etime1' => [ 'ehour1', 'emin1' ],
+    'stime2' => [ 'shour2', 'smin2' ],
+    'etime2' => [ 'ehour2', 'emin2' ],
+);
 
 =head2 index
 
@@ -51,52 +58,71 @@ sub add :Local {
         open( my $fh, '<:encoding(utf8)', $jsonf );
         my $json_text   = <$fh>;
         close( $fh );
-        my $pginfo = from_json( $json_text );
+        my $json_info = from_json( $json_text );
+        my $aPginfo;
+        if ( ref($json_info) eq 'ARRAY') {
+            $aPginfo = $json_info;
+        } else {
+            $aPginfo = [ $json_info ];
+        } 
 
-        my $regcnf;
-        my $hval;
-        my $pgid;
+        foreach my $pginfo (@{$aPginfo}) {
+            my $regcnf;
+            my $hval;
+            my $pgid;
 
-        # $c->config->{Regist}->{RegProgram}の内容を元にpginfoの内容を登録
-        ## regPgIDが未設定の場合autoincにより決定
-        ## {RegProgram}のitem数は1つであり、loopmax定義はない
-        $regcnf = $c->config->{'Regist'}->{'RegProgram'};
-        $hval = __PACKAGE__->ParseRegist(
-                        $pginfo, $regcnf->{'items'}->[0], undef, ''  );
-        if ( ref($hval) eq 'HASH' ) {
-            my $row =
-                $c->model('ConkanDB::' . $regcnf->{'schema'})->create( $hval );
-            ## $pginfo->{企画ID}の値を再設定 (autoinc対応)
-            $pginfo->{'企画ID'} = $row->regpgid;
-        }
-        elsif ( $hval ) {
-            die 'input Format Error /or/ regist.yml Format Error';
-        }
+            # $c->config->{Regist}->{RegProgram}の内容を元にpginfoの内容を登録
+            ## regPgIDが未設定の場合autoincにより決定
+            ## {RegProgram}のitem数は1つであり、loopmax定義はない
+            $regcnf = $c->config->{'Regist'}->{'RegProgram'};
+            $hval = __PACKAGE__->ParseRegist(
+                            $pginfo, $regcnf->{'items'}->[0], undef, ''  );
+            if ( ref($hval) eq 'HASH' ) {
+$c->log->debug('>>>> add reg_program:[' . $hval->{'regpgid'} . '][' . $hval->{'name'} . ']');
+                my $row =
+                    $c->model('ConkanDB::' . $regcnf->{'schema'})->create( $hval );
+                ## $pginfo->{企画ID}の値を再設定 (autoinc対応)
+                $pginfo->{'企画ID'} = $row->regpgid;
+            }
+            elsif ( $hval ) {
+                die 'input Format Error /or/ regist.yml Format Error';
+            }
+    
+            # $c->config->{Regist}->{Program}の内容を元にpginfoの内容を登録
+            ## {RegProgram}のitem数は1つであり、loopmax定義はない
+            $regcnf = $c->config->{Regist}->{Program};
+            $hval = __PACKAGE__->ParseRegist(
+                            $pginfo, $regcnf->{items}->[0], undef, ''  );
+            if ( ref($hval) eq 'HASH' ) {
+                my $row =
+                    $c->model('ConkanDB::' . $regcnf->{schema})->create( $hval );
+                ## 企画内部IDの値を設定 (登録時にautoincで決定)
+                $pgid = $row->pgid;
+            }
+            elsif ( $hval ) {
+                die 'input Format Error /or/ regist.yml Format Error';
+            }
 
-        # $c->config->{Regist}->{Program}の内容を元にpginfoの内容を登録
-        ## {RegProgram}のitem数は1つであり、loopmax定義はない
-        $regcnf = $c->config->{Regist}->{Program};
-        $hval = __PACKAGE__->ParseRegist(
-                        $pginfo, $regcnf->{items}->[0], undef, ''  );
-        if ( ref($hval) eq 'HASH' ) {
-            my $row =
-                $c->model('ConkanDB::' . $regcnf->{schema})->create( $hval );
-            ## 企画内部IDの値を設定 (登録時にautoincで決定)
-            $pgid = $row->pgid;
-        }
-        elsif ( $hval ) {
-            die 'input Format Error /or/ regist.yml Format Error';
-        }
-
-        # $c->config->{Regist}->{RegCast}の内容を元にpginfoの内容を登録
-        ## 同時にPgAllCastにも登録する
-        ## {RegCast}のitem数は複数あり、さらにloopmax定義がある
-        $regcnf = $c->config->{Regist}->{RegCast};
-        foreach my $item (@{$regcnf->{items}}) {
-            if ( defined($item->{loopmax}) ) {
-                foreach my $cnt (1..$item->{loopmax}) {
-                    $hval = __PACKAGE__->ParseRegist(
-                                    $pginfo, $item, undef, $cnt );
+            # $c->config->{Regist}->{RegCast}の内容を元にpginfoの内容を登録
+            ## 同時にPgAllCastにも登録する
+            ## {RegCast}のitem数は複数あり、さらにloopmax定義がある
+            $regcnf = $c->config->{Regist}->{RegCast};
+            foreach my $item (@{$regcnf->{items}}) {
+                if ( defined($item->{loopmax}) ) {
+                    foreach my $cnt (1..$item->{loopmax}+1) {
+                        # 申込者本人が出演する場合があるので、+1
+                        $hval = __PACKAGE__->ParseRegist(
+                                        $pginfo, $item, undef, $cnt );
+                        if ( ref($hval) eq 'HASH' ) {
+                            __PACKAGE__->AddCast( $c, $hval, $pgid );
+                        }
+                        elsif ( $hval ) {
+                            die 'input Format Error /or/ regist.yml Format Error';
+                        }
+                    }
+                }
+                else {
+                    $hval = __PACKAGE__->ParseRegist( $pginfo, $item, undef, '');
                     if ( ref($hval) eq 'HASH' ) {
                         __PACKAGE__->AddCast( $c, $hval, $pgid );
                     }
@@ -105,27 +131,18 @@ sub add :Local {
                     }
                 }
             }
-            else {
+
+            # $c->config->{Regist}->{RegEquip}の内容を元にpginfoの内容をDBに登録
+            ## {RegEquip}のitem数は複数あるが、loopmax定義はない
+            $regcnf = $c->config->{Regist}->{RegEquip};
+            foreach my $item (@{$regcnf->{items}}) {
                 $hval = __PACKAGE__->ParseRegist( $pginfo, $item, undef, '');
                 if ( ref($hval) eq 'HASH' ) {
-                    __PACKAGE__->AddCast( $c, $hval, $pgid );
+                    $c->model('ConkanDB::' . $regcnf->{schema})->create( $hval )
                 }
                 elsif ( $hval ) {
                     die 'input Format Error /or/ regist.yml Format Error';
                 }
-            }
-        }
-
-        # $c->config->{Regist}->{RegEquip}の内容を元にpginfoの内容をDBに登録
-        ## {RegEquip}のitem数は複数あるが、loopmax定義はない
-        $regcnf = $c->config->{Regist}->{RegEquip};
-        foreach my $item (@{$regcnf->{items}}) {
-            $hval = __PACKAGE__->ParseRegist( $pginfo, $item, undef, '');
-            if ( ref($hval) eq 'HASH' ) {
-                $c->model('ConkanDB::' . $regcnf->{schema})->create( $hval )
-            }
-            elsif ( $hval ) {
-                die 'input Format Error /or/ regist.yml Format Error';
             }
         }
     } catch {
@@ -157,7 +174,7 @@ sub ParseRegist {
            || $pginfo->{$regitem->{hashkey} . $cnt};
 
     if ( $regitem->{validval} ) {
-        if ( $val eq $regitem->{validval} ) {
+        if ( defined( $val ) && ( $val eq $regitem->{validval} ) ) {
             $val = $regitem->{hashkey};
         }
         else {
@@ -211,7 +228,8 @@ sub AddCast {
                     'namef'  => $hval->{'namef'},
                     'status' => '',
                     };
-            if ( $hval->{'entrantregno'} =~ /^\d+$/ ) {
+            if ( exists($hval->{'entrantregno'}) &&
+                 ( $hval->{'entrantregno'} =~ /^\d+$/ ) ) {
                 $aval->{'regno'} = $hval->{'entrantregno'};
             }
             $acrow = $c->model('ConkanDB::PgAllCast')->create( $aval );
@@ -410,6 +428,8 @@ sub program_show : Chained('program_base') :PathPart('') :CaptureArgs(1) {
                         },
                     );
     my $regpgid = $c->stash->{'Program'}->regpgid->regpgid();
+    # 企画開始終了時刻変換
+    $c->forward('/program/_trnSEtime', [ $c->stash->{'Program'}, ], );
     $c->stash->{'RegProgram'} =
         $c->model('ConkanDB::PgRegProgram')->find($regpgid);
     $c->stash->{'RegCasts'} =
@@ -524,22 +544,31 @@ sub pgup_program : Chained('program_show') : PathPart('program') : Args(0) {
                 ];
             my $conf  = {};
             my $M = $c->model('ConkanDB::PgSystemConf');
+            my $time_origin = $c->config->{time_origin};
             $conf->{'dates'}   = [
                 { 'id' => '', 'val' => '' },
                 map +{ 'id' => $_, 'val' => $_ },
                     @{from_json( $M->find('dates')->pg_conf_value() )}
                 ];
-            $conf->{'s_times'} = [
+            $conf->{'s_hours'} = [
                 { 'id' => '', 'val' => '' },
-                map +{ 'id' => $_, 'val' => $_ },
-                   ( @{from_json( $M->find('start_times1')->pg_conf_value() )},
-                     @{from_json( $M->find('start_times2')->pg_conf_value() )} )
+                  map +{ 'id' => sprintf('%02d', $_), 'val' => sprintf('%02d', $_) },
+                        ( $time_origin .. $time_origin+23 )
                 ];
-            $conf->{'e_times'} = [
+            $conf->{'s_mins'} = [
                 { 'id' => '', 'val' => '' },
-                map +{ 'id' => $_, 'val' => $_ },
-                    ( @{from_json( $M->find('end_times1')->pg_conf_value() )},
-                      @{from_json( $M->find('end_times2')->pg_conf_value() )} )
+                  map +{ 'id' => sprintf('%02d', $_*5), 'val' => sprintf('%02d', $_*5) },
+                        ( 0 .. 11 )
+                ];
+            $conf->{'e_hours'} = [
+                { 'id' => '', 'val' => '' },
+                  map +{ 'id' => sprintf('%02d', $_), 'val' => sprintf('%02d', $_) },
+                        ( $time_origin .. $time_origin+23 )
+                ];
+            $conf->{'e_mins'} = [
+                { 'id' => '', 'val' => '' },
+                  map +{ 'id' => sprintf('%02d', $_*5), 'val' => sprintf('%02d', $_*5) },
+                        ( 0 .. 11 )
                 ];
             $conf->{'status'}  = [
                 { 'id' => '', 'val' => '' },
@@ -701,13 +730,32 @@ sub _pgupdate :Private {
                 } );
             }
             $c->stash->{'rs'} = $rowprof;
+            # 企画開始終了時刻変換
+            $c->forward('/program/_trnSEtime', [ $c->stash->{'rs'}, ], );
         }
         else {
             my $value = {};
             for my $item (@{$up_items}) {
-                $value->{$item} = $c->request->body_params->{$item};
+                if ( exists( $timeArgTrn{$item} ) ) {
+                    my $hour =
+                        $c->request->body_params->{$timeArgTrn{$item}->[0]};
+                    my $min  =
+                        $c->request->body_params->{$timeArgTrn{$item}->[1]};
+                    $hour =~ s/\s+$//;
+                    $min  =~ s/\s+$//;
+                    if ( ( $hour ne '' ) || ( $min ne '' ) ) {
+                        $hour -= $c->config->{time_origin};
+                        $value->{$item} = sprintf( '%02d:%02d', $hour, $min );
+                    }
+                    else {
+                        $value->{$item} = undef;
+                    }
+                }
+                else {
+                   $value->{$item} = $c->request->body_params->{$item};
+                }
                 $value->{$item} =~ s/\s+$// if defined($value->{$item});
-                delete $value->{$item} if ( $value->{$item} eq '' );
+                $value->{$item} = undef if ( $value->{$item} eq '' );
             }
             if ( defined( $rowprof ) ) {
                 # 更新実施
@@ -752,6 +800,28 @@ sub _dberror :Private {
     $c->response->status(200);
 }
 
+=head2 _trnSEtime
+
+企画開始/終了時刻変換
+
+=cut
+
+sub _trnSEtime :Private {
+    my ( $self, $c, 
+         $trgHash,      # 変換対象ハッシュ
+       ) = @_;
+
+    foreach my $item (keys(%timeArgTrn)) {
+        my $wkval = eval( '$trgHash->' . $item );
+        next unless defined($wkval);
+        # 開始終了時刻を分解して時と分にわける
+        my @wk = split( /:/, $wkval );
+        if ( scalar( @wk ) >= 2 ) {
+            $trgHash->{$timeArgTrn{$item}->[0]} = $wk[0] + $c->config->{time_origin};
+            $trgHash->{$timeArgTrn{$item}->[1]} = $wk[1];
+        }
+    }
+}
 =encoding utf8
 
 =head1 AUTHOR
