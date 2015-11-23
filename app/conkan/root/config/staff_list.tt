@@ -53,7 +53,7 @@
                 data-toggle="modal" data-target="#editStaff"
                 data-whatever="[% item.staffid %]"
                 data-whatrole="[% item.role %]">
-                更新
+                編集
               [%- END %]
               </button>
             </td>

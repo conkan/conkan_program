@@ -22,20 +22,12 @@
         [% pguptextarea( 'dates', cnf.dates.pg_conf_value, 6, 1 ) %]
       </div>
       <div class="form-group">
-        <label class="col-sm-3 text-right">[% cnf.start_times1.pg_conf_name %]</label>
-        [% pguptextarea( 'start_times1', cnf.start_times1.pg_conf_value, 8, 1 ) %]
+        <label class="col-sm-3 text-right">[% cnf.start_hours.pg_conf_name %]</label>
+        [% pguptextarea( 'start_hours', cnf.start_hours.pg_conf_value, 8, 1 ) %]
       </div>
       <div class="form-group">
-        <label class="col-sm-3 text-right">[% cnf.end_times1.pg_conf_name %]</label>
-        [% pguptextarea( 'end_times1', cnf.end_times1.pg_conf_value, 8, 1 ) %]
-      </div>
-      <div class="form-group">
-        <label class="col-sm-3 text-right">[% cnf.start_times2.pg_conf_name %]</label>
-        [% pguptextarea( 'start_times2', cnf.start_times2.pg_conf_value, 8, 1 ) %]
-      </div>
-      <div class="form-group">
-        <label class="col-sm-3 text-right">[% cnf.end_times2.pg_conf_name %]</label>
-        [% pguptextarea( 'end_times2', cnf.end_times2.pg_conf_value, 8, 1 ) %]
+        <label class="col-sm-3 text-right">[% cnf.end_hours.pg_conf_name %]</label>
+        [% pguptextarea( 'end_hours', cnf.end_hours.pg_conf_value, 8, 1 ) %]
       </div>
       <div class="form-group">
         <label class="col-sm-3 text-right">[% cnf.pg_status_vals.pg_conf_name %]</label>
@@ -77,7 +69,7 @@
     $('#[%- state | html -%]').show();
   } );
   // バリデーション
-  function valchk( val, type ) { // val:チェックする値 type: 0:日付 1:時刻 3:json配列 4:json配列時刻 5:json配列日付
+  function valchk( val, type ) { // val:チェックする値 type: 0:日付 1:時刻 3:json配列 4:json配列時刻(時) 5:json配列日付
     var result, tary, tval, ret;
     ret = false;
     if (!val) {
@@ -107,7 +99,8 @@
         try {
           tary = JSON.parse( val );
           for ( var tval in tary ) {
-            if ( ret = valchk( tary[tval], 1 ) ) {
+            result = /^\d{1,2}$/.exec(tary[tval]);
+            if ( ! result ) {
                 break;
             }
           }
@@ -137,20 +130,12 @@
         $('#valerr').text('[% cnf.dates.pg_conf_name %] ' + ret);
         return false;
     }
-    if ( ret = valchk( $('#start_times1').val(), 4 ) ) {
-        $('#valerr').text('[% cnf.start_times1.pg_conf_name %] ' + ret);
+    if ( ret = valchk( $('#start_hours').val(), 4 ) ) {
+        $('#valerr').text('[% cnf.start_hours.pg_conf_name %] ' + ret);
         return false;
     }
-    if ( ret = valchk( $('#end_times1').val(), 4 ) ) {
+    if ( ret = valchk( $('#end_hours').val(), 4 ) ) {
         $('#valerr').text('[% cnf.end_time.pg_conf_name %] ' + ret);
-        return false;
-    }
-    if ( ret = valchk( $('#start_times2').val(), 4 ) ) {
-        $('#valerr').text('[% cnf.second_start_times.pg_conf_name %] ' + ret);
-        return false;
-    }
-    if ( ret = valchk( $('#end_times2').val(), 4 ) ) {
-        $('#valerr').text('[% cnf.end_times2.pg_conf_name %] ' + ret);
         return false;
     }
     if ( ret = valchk( $('#pg_status_vals').val(), 3 ) ) {

@@ -43,9 +43,11 @@
           [%- pgupselect( 'date1', conf.dates, rs.date1.strftime('%Y/%m/%d'), 12 ) -%]
         </td>
         <td colspan="3">
-          [%- pgupselect( 'stime1', conf.s_times, rs.stime1.remove(':00$'), 3 ) -%]
+          [%- pgupselect( 'shour1', conf.s_hours, rs.shour1, 2 ) -%]
+          [%- pgupselect( 'smin1', conf.s_mins, rs.smin1, 2 ) -%]
           <div align="center" class="col-sm-1"> - </div>
-          [%- pgupselect( 'etime1', conf.e_times, rs.etime1.remove(':00$'), 3 ) -%]
+          [%- pgupselect( 'ehour1', conf.e_hours, rs.ehour1, 2 ) -%]
+          [%- pgupselect( 'emin1', conf.s_mins, rs.emin1, 2 ) -%]
         </td>
       </tr>
       <tr>
@@ -53,9 +55,11 @@
         <td>
           [%- pgupselect( 'date2', conf.dates, rs.date2.strftime('%Y/%m/%d'), 12 ) -%]
         <td colspan="3">
-          [%- pgupselect( 'stime2', conf.s_times, rs.stime2.remove(':00$'), 3 ) -%]
+          [%- pgupselect( 'shour2', conf.s_hours, rs.shour2, 2 ) -%]
+          [%- pgupselect( 'smin2', conf.s_mins, rs.smin2, 2 ) -%]
           <div align="center" class="col-sm-1"> - </div>
-          [%- pgupselect( 'etime2', conf.e_times, rs.etime2.remove(':00$'), 3 ) -%]
+          [%- pgupselect( 'ehour2', conf.e_hours, rs.ehour2, 2 ) -%]
+          [%- pgupselect( 'emin2', conf.s_mins, rs.emin2, 2 ) -%]
         </td>
       </tr>
       <tr>
