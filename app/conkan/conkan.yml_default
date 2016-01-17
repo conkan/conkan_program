@@ -48,9 +48,9 @@ Plugin::Session:
 addstaff:
   group: 
   type: 
-name: conkan
+default_model: conkanDB
+default_view: TT
 disable_component_resolution_regex_fallback: 1
 enable_catalyst_header: 1
-default_model: conkanDB
-default_view : TT
+name: conkan
 time_origin: 6

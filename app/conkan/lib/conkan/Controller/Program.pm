@@ -51,6 +51,7 @@ sub index :Path :Args(0) {
 sub add :Local {
     my ( $self, $c ) = @_;
    
+    my $nextURLtail = 'list';   # 複数登録時、企画一覧にリダイレクト
     try {
         my $upload = $c->request->upload('jsoninputfile');
         my $jsonf = $upload->tempname;
@@ -66,10 +67,10 @@ sub add :Local {
             $aPginfo = [ $json_info ];
         } 
 
+        my $pgid;
         foreach my $pginfo (@{$aPginfo}) {
             my $regcnf;
             my $hval;
-            my $pgid;
 
             # $c->config->{Regist}->{RegProgram}の内容を元にpginfoの内容を登録
             ## regPgIDが未設定の場合autoincにより決定
@@ -145,10 +146,18 @@ $c->log->debug('>>>> add reg_program:[' . $hval->{'regpgid'} . '][' . $hval->{'n
                 }
             }
         }
+        # 1件のみ登録の場合、登録した企画詳細表示にリダイレクト
+        unless ( ref($json_info) eq 'ARRAY' ) {
+            $nextURLtail = $pgid;
+            # 登録者がadminの場合(WebAPI) 企画IDを追加
+            if ( $c->user->get('name') eq 'admin' ) {
+                $nextURLtail .= '&prog_id=' . $json_info->{'企画ID'};
+            }
+        }
     } catch {
         $c->detach( '_dberror', [ shift ] );
     };
-    $c->response->redirect('/program/list');
+    $c->response->redirect( '/program/' . $nextURLtail );
 }
 
 =head2 ParseRegist

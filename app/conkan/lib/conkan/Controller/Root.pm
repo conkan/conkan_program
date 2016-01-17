@@ -320,17 +320,20 @@ sub _doInitialProc :Private {
         # 規定値一括登録
         $dbh->do( 'SET NAMES utf8' );
 
-        # pg_system_conf と pg_regist_conf を登録
+        # pg_system_conf を登録
         my $system_conf_f = $c->config->{home} . '/../initializer/system_conf.csv';
-        my $regist_conf_f = $c->config->{home} . '/../initializer/regist_conf.csv';
         $dbh->do( "LOAD DATA LOCAL INFILE '$system_conf_f' " .
                     'INTO TABLE pg_system_conf ' .
                     "FIELDS TERMINATED BY ',' ENCLOSED BY '\"';" );
-        $dbh->do( 'SET FOREIGN_KEY_CHECKS=0;' );
-        $dbh->do( "LOAD DATA LOCAL INFILE '$regist_conf_f' " .
-                    'INTO TABLE pg_regist_conf ' .
-                    "FIELDS TERMINATED BY ',' ENCLOSED BY '\"';" );
-        $dbh->do( 'SET FOREIGN_KEY_CHECKS=1;' );
+        # 時刻シフト
+        if ( $torg != 0 ) {
+            $dbh->do( 'UPDATE pg_system_conf SET pg_conf_value="[' .
+                        sprintf( '%02d,%02d', $torg, $torg ) .
+                        ']" WHERE pg_conf_code="start_hours";' );
+            $dbh->do( 'UPDATE pg_system_conf SET pg_conf_value="[' .
+                        sprintf( '%02d,%02d', $torg+24, $torg+24 ) .
+                        ']" WHERE pg_conf_code="end_hours";' );
+        }
         # adminレコード登録
         $schema->resultset('PgStaff')->create({
             'name'      => 'admin',
@@ -359,7 +362,7 @@ sub _doInitialProc :Private {
             'disable_component_resolution_regex_fallback' => 1,
             'enable_catalyst_header' => 1,
             'default_model' => 'conkanDB',
-            'default_view ' => 'TT',
+            'default_view'  => 'TT',
             'time_origin' => $torg,
             'addstaff' => {
                 'type' => $adrt,
