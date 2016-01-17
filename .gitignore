@@ -23,9 +23,11 @@ nytprof.out
 .~*.*#
 *~
 *.mwb.bak
+*_old
 Thumbs.db
 cybozulive.consumer.sec
 conkan.yml
 app/.ssh/cert*.*
 app/backup/
+app/conkan/sql
 supervise/

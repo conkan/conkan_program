@@ -17,6 +17,8 @@
 {&#34;id&#34;:&#34;contentpub&#34;,&#34;name&#34;:&#34;内容事前公開可不可&#34;},
 {&#34;id&#34;:&#34;realpub&#34;,   &#34;name&#34;:&#34;リアルタイム公開制限&#34;},
 {&#34;id&#34;:&#34;afterpub&#34;,  &#34;name&#34;:&#34;事後公開制限&#34;}
+{&#34;id&#34;:&#34;openpg&#34;,  &#34;name&#34;:&#34;一般公開可否&#34;}
+{&#34;id&#34;:&#34;restpg&#34;,  &#34;name&#34;:&#34;未成年参加可否&#34;}
 ]">
   <div style="COLOR:Red;" id="valerr"></div>
   <div class="form-group">
@@ -35,7 +37,7 @@
       <tr>
         <th style="background-color:#FFcc66">企画ID</th>
         <th style="background-color:#FFcc66">[% regpgid %] ([% subno %])</th>
-        <td></td>
+        <td style="background-color:#FFcc66"></td>
       </tr>
       <tr>
         <td colspan="3">
@@ -106,6 +108,14 @@
         <td>[% pgupinputtext( 'contentpub', rs.contentpub, 12 ) %]</td>
         <td>[% pgupinputtext( 'realpub', rs.realpub, 12 ) %]</td>
         <td>[% pgupinputtext( 'afterpub', rs.afterpub, 12 ) %]</td>
+      </tr>
+      <tr>
+        <th>一般公開可否</th>
+        <th>未成年参加可否</th>
+      </tr>
+      <tr>
+        <td>[% pgupinputtext( 'openpg', rs.openpg, 12 ) %]</td>
+        <td>[% pgupinputtext( 'restpg', rs.restpg, 12 ) %]</td>
       </tr>
       <tr>
         <th>重なると困る企画</th>

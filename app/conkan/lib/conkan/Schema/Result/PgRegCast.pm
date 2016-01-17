@@ -64,6 +64,12 @@ __PACKAGE__->table("pg_reg_cast");
   is_nullable: 1
   size: 64
 
+=head2 title
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 64
+
 =head2 entrantregno
 
   data_type: 'varchar'
@@ -103,6 +109,8 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 0, size => 64 },
   "namef",
   { data_type => "varchar", is_nullable => 1, size => 64 },
+  "title",
+  { data_type => "varchar", is_nullable => 1, size => 64 },
   "entrantregno",
   { data_type => "varchar", is_nullable => 1, size => 64 },
   "needreq",
@@ -141,8 +149,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-06-11 16:41:47
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:tdr++BDp2USshmE6g2O9dw
+# Created by DBIx::Class::Schema::Loader v0.07043 @ 2016-01-17 19:12:31
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:eyyyujHnCAFjO1pnOyVDeg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

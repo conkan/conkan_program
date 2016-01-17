@@ -12,8 +12,7 @@
   <table class="table table-bordered table-condensed">
     <colgroup>
       <col class="col-sm-2">
-      <col class="col-sm-2">
-      <col class="col-sm-2">
+      <col class="col-sm-4">
       <col class="col-sm-2">
       <col class="col-sm-2">
       <col class="col-sm-2">
@@ -30,15 +29,17 @@
         </td> 
         <th>出演ステータス</th>
         <td>[% pgupselect( 'status', statlist, rs.status, 12 ) %]</td>
-        <td colspan="2">[% pgupinputtext( 'memo', rs.memo, 12 ) %]</td>
+        <td>[% pgupinputtext( 'memo', rs.memo, 12 ) %]</td>
       </tr>
       <tr>
         <th>企画ネーム</th>
         <td>[% pgupinputtext( 'name', rs.name, 12 ) %]</td>
         <th>ふりがな</th>
-        <td>[% pgupinputtext( 'namef', rs.namef, 12 ) %]</td>
+        <td colspan="2">[% pgupinputtext( 'namef', rs.namef, 12 ) %]</td>
+      </tr>
+      <tr>
         <th>肩書</th>
-        <td>[% pgupinputtext( 'title', rs.title, 12 ) %]</td>
+        <td colspan="4">[% pgupinputtext( 'title', rs.title, 12 ) %]</td>
       </tr>
     </tbody>
   </table>

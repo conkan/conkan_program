@@ -495,7 +495,6 @@ sub equip_show : Chained('equip_base') :PathPart('') :CaptureArgs(1) {
     } else {
         $rowequip = {
             'equipid'       => 0,
-            'count'         => 1,
         };
     }
     $c->stash->{'rs'} = $rowequip;
@@ -529,7 +528,7 @@ sub equip_edit : Chained('equip_show') : PathPart('edit') : Args(0) {
     }
     else {
         my $items = [ qw/
-                        name equipno count spec comment
+                        name equipno spec comment
                         / ];
         $c->detach( '_updatecreate', [ $equipid, $items ] );
     }

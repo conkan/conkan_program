@@ -42,8 +42,10 @@ sub auto :Private {
     my ( $self, $c ) = @_;
 
     $c->log->info(localtime() . ' アクション内部パス:[' . $c->action->reverse . '][' . $c->request->method . ']' );
+    $c->log->info(localtime() . ' 最新か?');
     # 初期化済判断
     unless (exists($c->config->{inited})) {
+        $c->log->info(localtime() . ' 未初期化');
         if ( ( $c->action->reverse eq 'index'  )        ||
              ( $c->action->reverse eq 'initialize' )    ||
              ( $c->action->reverse eq 'initialprocess' )
@@ -56,6 +58,7 @@ sub auto :Private {
     }
     else {
         # DBスキーマアップデート
+        $c->log->info( localtime() . ' Check DB Update');
         my $coninfo = $c->config->{'Model::ConkanDB'}->{connect_info};
         my $schema = conkan::Schema->connect(
             $coninfo->{'dsn'}, $coninfo->{'user'}, $coninfo->{'password'},

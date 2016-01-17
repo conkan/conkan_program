@@ -71,6 +71,10 @@ END -%]
         <th>事後公開</th> <td colspan="2">[% RegProgram.afterpub | html %]</td>
       </tr>
       <tr>
+        <th colspan="2">一般公開可否</th> <td>[% RegProgram.openpg | html %]</td>
+        <th>未成年参加可否</th> <td>[% RegProgram.restpg | html %]</td>
+      </tr>
+      <tr>
         <th colspan="2">重なると困る企画</th>
         <td colspan="6">[% RegProgram.avoiddup | html %]</td>
       </tr>
@@ -105,6 +109,9 @@ END -%]
       <col class="col-sm-1">
     </colgroup>
     <tbody>
+      <tr>
+        <th>企画短縮名</th> <td colspan="6">[% Program.sname | html %]</td>
+      </tr>
       <tr>
         <th>担当スタッフ</th> <td>[% Program.staffid.tname | html %]</td>
         <th>実行ステータス</th>
@@ -168,15 +175,17 @@ END -%]
   <table class="table table-bordered table-condensed"
    style="background-color:white;">
     <colgroup>
+      <col class="col-sm-2">
       <col class="col-sm-3">
       <col class="col-sm-3">
-      <col class="col-sm-3">
-      <col class="col-sm-3">
+      <col class="col-sm-2">
+      <col class="col-sm-2">
     </colgroup>
     <thead>
       <tr>
         <th style="text-align:center;">氏名</th>
         <th style="text-align:center;">ふりがな</th>
+        <th style="text-align:center;">肩書</th>
         <th style="text-align:center;">出演交渉</th>
         <th style="text-align:center;">ゲスト申請</th>
       </tr>
@@ -186,6 +195,7 @@ END -%]
         <tr>
           <td>[% item.name         | html %]</td>
           <td>[% item.namef        | html %]</td>
+          <td>[% item.title        | html %]</td>
           <td>[% item.needreq      | html %]</td>
           <td>[% item.needguest    | html %]</td>
         </tr>
@@ -201,17 +211,19 @@ END -%]
     <colgroup>
       <col class="col-sm-2">
       <col class="col-sm-2">
-      <col class="col-sm-3">
+      <col class="col-sm-2">
+      <col class="col-sm-2">
       [%- IF editable %]
         <col class="col-sm-2">
       [% END %]
-      <col class="col-sm-2">
+      <col class="col-sm-1">
       <col class="col-sm-1">
     </colgroup>
     <thead>
       <tr>
         <th style="text-align:center;">氏名</th>
         <th style="text-align:center;">企画ネーム</th>
+        <th style="text-align:center;">肩書</th>
         <th style="text-align:center;">コンタクトステータス</th>
         [%- IF editable %]
           <th style="text-align:center;">補足(連絡先)</th>
@@ -230,6 +242,7 @@ END -%]
         <tr>
           <td style="[% rmcol %]">[% item.castid.name   | html %]</td>
           <td style="[% rmcol %]">[% item.name          | html %]</td>
+          <td style="[% rmcol %]">[% item.title         | html %]</td>
           <td style="[% rmcol %]">[% item.castid.status | html %]</td>
           [%- IF editable %]
             <td style="[% rmcol %]">[% item.castid.memo | html %]</td>
@@ -312,8 +325,7 @@ END -%]
   <table class="table table-bordered table-condensed"
    style="background-color:white;">
     <colgroup>
-      <col class="col-sm-2">
-      <col class="col-sm-2">
+      <col class="col-sm-3">
       <col class="col-sm-2">
       <col class="col-sm-6">
       <col class="col-sm-1">
@@ -322,7 +334,6 @@ END -%]
       <tr>
         <th style="text-align:center;">機材名</th>
         <th style="text-align:center;">機材番号</th>
-        <th style="text-align:center;">数</th>
         <th style="text-align:center;">仕様</th>
         <th></th>
       </tr>
@@ -332,7 +343,6 @@ END -%]
         <tr>
           <td>[% item.equipid.name    | html %]</td>
           <td>[% item.equipid.equipno | html %]</td>
-          <td>[% item.equipid.count   | html %]</td>
           <td>[% item.equipid.spec    | html %]</td>
           <td align="center">
             [%- IF editable %]

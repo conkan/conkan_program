@@ -158,6 +158,18 @@ __PACKAGE__->table("pg_reg_program");
   is_nullable: 0
   size: 64
 
+=head2 openpg
+
+  data_type: 'varchar'
+  is_nullable: 0
+  size: 64
+
+=head2 restpg
+
+  data_type: 'varchar'
+  is_nullable: 0
+  size: 64
+
 =head2 avoiddup
 
   data_type: 'text'
@@ -227,6 +239,10 @@ __PACKAGE__->add_columns(
   "realpub",
   { data_type => "varchar", is_nullable => 0, size => 64 },
   "afterpub",
+  { data_type => "varchar", is_nullable => 0, size => 64 },
+  "openpg",
+  { data_type => "varchar", is_nullable => 0, size => 64 },
+  "restpg",
   { data_type => "varchar", is_nullable => 0, size => 64 },
   "avoiddup",
   { data_type => "text", is_nullable => 1 },
@@ -313,8 +329,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-06-11 16:41:47
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:o5/4IUxwmQU124JlzMTkzw
+# Created by DBIx::Class::Schema::Loader v0.07043 @ 2016-01-17 19:12:31
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:iPjyBq+GxJ6bf76mHZ3ZLg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

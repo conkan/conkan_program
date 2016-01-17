@@ -90,7 +90,7 @@ $c->log->debug('>>>> add reg_program:[' . $hval->{'regpgid'} . '][' . $hval->{'n
             }
     
             # $c->config->{Regist}->{Program}の内容を元にpginfoの内容を登録
-            ## {RegProgram}のitem数は1つであり、loopmax定義はない
+            ## {Program}のitem数は1つであり、loopmax定義はない
             $regcnf = $c->config->{Regist}->{Program};
             $hval = __PACKAGE__->ParseRegist(
                             $pginfo, $regcnf->{items}->[0], undef, ''  );
@@ -252,6 +252,7 @@ sub AddCast {
             'castid' => $castid,
             'name'   => $hval->{'name'},
             'namef'  => $hval->{'namef'},
+            'title'  => $hval->{'title'},
             'status' => ( $hval->{'entrantregno'} ) ? '申込者'
                                                     : $hval->{'needreq'},
             },
@@ -412,6 +413,7 @@ sub program_list : Chained('program_base') : PathPart('list') : Args(0) {
         push @list, {
             'regpgid'       => $regpgid,
             'pgid'          => $pgm->pgid(),
+            'sname'         => $pgm->sname(),
             'subno'         => $pgm->subno(),
             'name'          => $pgm->regpgid->name(),
             'staff'         => $pgm->staffid ? $pgm->staffid->name() : '',
@@ -505,8 +507,8 @@ sub pgup_regprog : Chained('program_show') : PathPart('regprogram') : Args(0) {
     my $up_items = [ qw/
                     name namef regma regno telno faxno celno
                     type place layout date classlen expmaxcnt
-                    content contentpub realpub afterpub avoiddup
-                    experience comment
+                    content contentpub realpub afterpub openpg restpg
+                    avoiddup experience comment
                     / ];
     my $regpgid = $c->stash->{'regpgid'};
     $c->stash->{'M'} = $c->model('ConkanDB::PgRegProgram');
@@ -527,7 +529,7 @@ sub pgup_regprog : Chained('program_show') : PathPart('regprogram') : Args(0) {
 sub pgup_program : Chained('program_show') : PathPart('program') : Args(0) {
     my ( $self, $c ) = @_;
     my $up_items = [ qw/
-                    staffid status memo
+                    staffid status sname memo
                     date1 stime1 etime1 date2 stime2 etime2
                     roomid layerno progressprp
                     / ];

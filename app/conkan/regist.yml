@@ -58,6 +58,10 @@ Regist:
                         column:     realpub
                     -   hashkey: 事後公開
                         column:     afterpub
+                    -   hashkey: 一般公開可否
+                        column:     openpg
+                    -   hashkey: 未成年参加可否
+                        column:     restpg
                     -   hashkey: 重なると困る企画
                         column:     avoiddup
                     -   hashkey: 企画経験
@@ -69,6 +73,8 @@ Regist:
         items:
             -   hashkey: 企画ID
                 column:     regpgid
+            -   hashkey: 企画名
+                column:     sname
     RegCast:
         schema: PgRegCast
         items:
@@ -82,13 +88,15 @@ Regist:
                     -   hashkey: 米魂番号
                         column:     entrantregno
             -   hashkey: 出演者氏名
-                loopmax: 5
+                loopmax: 8
                 column:     name
                 addcnf:
                     -   hashkey: 企画ID
                         column:     regpgid
                     -   hashkey: 出演者氏名ふりがな
                         column:     namef
+                    -   hashkey: 出演者肩書
+                        column:     title
                     -   hashkey: 出演交渉
                         column:     needreq
                     -   hashkey: ゲスト申請

@@ -23,6 +23,9 @@
         <th style="background-color:#FFcc66" colspan="4">[% pgname | html %]</td>
       </tr>
       <tr>
+        <th>企画短縮名</th>
+        <td colspan="4">[% pgupinputtext( 'sname', rs.sname, 12 ) %]</td>
+      <tr>
         <th>担当スタッフ</th>
         <td>
           [%- IF urole == 'ROOT' || urole == 'PG' -%]

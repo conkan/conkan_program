@@ -52,6 +52,12 @@ __PACKAGE__->table("pg_program");
   is_foreign_key: 1
   is_nullable: 0
 
+=head2 sname
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 64
+
 =head2 subno
 
   data_type: 'integer'
@@ -150,6 +156,8 @@ __PACKAGE__->add_columns(
     is_foreign_key => 1,
     is_nullable => 0,
   },
+  "sname",
+  { data_type => "varchar", is_nullable => 1, size => 64 },
   "subno",
   {
     data_type => "integer",
@@ -295,8 +303,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-06-12 13:40:09
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:/d4fi3sRzG+aRrL8Aq8r/A
+# Created by DBIx::Class::Schema::Loader v0.07043 @ 2016-01-17 19:41:07
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:GV4/PevvzEe1J1GWHwtOaA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

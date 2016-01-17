@@ -1,9 +1,10 @@
 <table class="table table-striped table-bordered table-hover">
   <colgroup>
     <col class="col-sm-1">
-    <col class="col-sm-4">
+    <col class="col-sm-3">
+    <col class="col-sm-1">
     [% IF allprg == 1 %]
-      <col class="col-sm-2">
+      <col class="col-sm-1">
     [% END %]
     <col class="col-sm-2">
     <col class="col-sm-2">
@@ -13,6 +14,7 @@
     <tr bgcolor="#FFcc66">
       <th style="text-align:center;">企画ID</th>
       <th style="text-align:center;">企画名称</th>
+      <th style="text-align:center;">短縮名</th>
       [% IF allprg == 1 %]
         <th style="text-align:center;">担当スタッフ</th>
       [% END %]
@@ -31,6 +33,7 @@
       <tr>
         <td style="[% rmcol %]">[% item.regpgid %] ([% item.subno %])</td>
         <td style="[% rmcol %]">[% item.name        | html %]</td>
+        <td style="[% rmcol %]">[% item.sname       | html %]</td>
         [% IF allprg == 1 %]
           <td style="[% rmcol %]">[% item.staff       | html %]</td>
         [% END %]
