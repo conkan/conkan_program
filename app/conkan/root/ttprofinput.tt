@@ -55,7 +55,7 @@ END %]
   [% pgupinputtext( 'telno', rs.telno, 4 ) %]
 </div>
 <div class="form-group">
-  <label class="col-sm-3 text-right">米魂番号</label>
+  <label class="col-sm-3 text-right">大会登録番号</label>
   [% pgupinputtext( 'regno', rs.regno, 4 ) %]
 </div>
 <div class="form-group">
