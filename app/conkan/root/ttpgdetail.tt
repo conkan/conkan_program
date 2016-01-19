@@ -209,14 +209,14 @@ END -%]
   <table class="table table-bordered table-condensed"
    style="background-color:white;">
     <colgroup>
-      <col class="col-sm-2">
+      <col class="col-sm-1">
       <col class="col-sm-2">
       <col class="col-sm-2">
       <col class="col-sm-2">
       [%- IF editable %]
         <col class="col-sm-2">
       [% END %]
-      <col class="col-sm-1">
+      <col class="col-sm-2">
       <col class="col-sm-1">
     </colgroup>
     <thead>
