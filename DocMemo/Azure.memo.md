@@ -35,6 +35,18 @@ Microsoft Azureが用意しているmysqlサーバ(clearDB)は、
     ''''
     docker> docker run --name mysql -e MYSQL_ROOT_PASSWORD=xxxx -d -p 3306:3306 mysql:5.5
     ''''
+
+1. dockerコンテナハートビート
+
+なぜかAzure coreOSのdockerコンテナは、一定時間アクセスがないと停止してしまうので、
+どこかのマシン(稼働サーバ、DBサーバにssh接続できるマシン)のcronで、下記コマンドを定期的(毎時0分とか)に実行するよう登録する
+    ''''
+    /usr/bin/ssh <DBサーバアクセスFQDN> docker ps
+    /usr/bin/ssh <稼働サーバアクセスFQDN> docker ps
+    ''''
+先にDBサーバで実行する方が良い 
+もちろん、cronに直接登録するのではなく、shellスクリプトにするのがよい
+
 1. docker-enter作成方法
 
 稼働サーバの/opt/bin下に作成する。
