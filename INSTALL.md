@@ -104,7 +104,11 @@ docker > ./run.sh product
   HTTPS 30443
 となるので注意
 
-dockerコンテナの起動により、nginxおよびconkan自体も起動する。
+dockerコンテナの起動により、nginx,conkan自体,cron処理も自動的に起動する。
+    cron処理に含まれているのは、
+        - DBバックアップ (conkanのDB専用処理)
+        - ログローテート (nginxとconkanのログ)
+    の2つの処理である。
 
 conkan初期化処理
 ====
@@ -148,24 +152,4 @@ admin としてlogin後、タブ「管理者登録」をクリックする。
 必要に応じて、CybozuLive認証画面を経由し、
 【管理者登録ページ】が表示されるので、必要な項目を入力し、登録する。
 
-conkan起動後の定期処理
-====
-
-Dockerコンテナ内でcronを動かすのは非効率的なので、
-定期的な処理は<稼働サーバ>のcronから起動するよう設定する。
-
-1. DBバックアップの設定
-
-<稼働サーバ>のcronとして、
-
-    <Dockerホーム>/dbbackup.sh
-
-を定期的に実行するように設定する。
-
-1. ログローテート
-
-<稼働サーバ>のcronとして、
-
-    <Dockerホーム>/logrotate.sh
-
-を定期的に実行するように設定する。
+<<EOF>>
