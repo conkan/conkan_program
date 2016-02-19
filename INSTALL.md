@@ -16,7 +16,7 @@ Azureなどクラウドサービスが提供するmysqlを使用する場合に�
 ````
 mysql> create database [DB名] default character set utf8;
 mysql> grant all on [DB名].* to [管理ユーザ名] identified by '[パスワード]';
-mysql> grant reload on *.* to [管理ユーザ名]
+mysql> grant reload on *.* to [管理ユーザ名];
 mysql> flush privileges;
 mysql> exit;
 ````

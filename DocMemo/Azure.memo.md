@@ -32,8 +32,21 @@ Microsoft Azureが用意しているmysqlサーバ(clearDB)は、
   1. コンテナの起動
     rootのパスワードは、起動時に環境変数 MYSQL_ROOT_PASSWORD で設定
     mysqlのポート番号は、ホスト:コンテナ とも3306にする
+    DBディレクトリは、稼働サーバの実ディレクトリにマップする
+    
+    稼働サーバのユーザホームディレクトリに、下記内容のShellスクリプトを置き、
+    起動するのが望ましい
     ''''
-    docker> docker run --name mysql -e MYSQL_ROOT_PASSWORD=xxxx -d -p 3306:3306 mysql:5.5
+    #!/bin/bash
+    if [ "$1" ]; then
+        MRPW=$1
+    else
+        echo 'Usage: run.sh <MYSQL_ROOT_PASSWD>'
+        exit
+    fi
+    docker stop mysql
+    docker rm mysql
+    docker run  -d --restart='always' --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=xxxx -v `pwd`/mysql:/var/lib/mysql mysql:5.5
     ''''
 
 1. dockerコンテナハートビート
