@@ -7,7 +7,7 @@
 <meta name="description" content="conkan Program Detail">
 <meta name="author" content="Studio REM">
 <title>Conkan Program Detail</title>
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+[% PROCESS 'ttwijgethead.tt' -%]
 </head>
 [%- DEFAULT self_li_id = 'program_list' -%]
 [% PROCESS 'tthead.tt' %]
@@ -15,6 +15,6 @@
   [% PROCESS 'ttpgdetail.tt' %]
 </div>
 [% PROCESS 'tttail.tt' %]
-[% PROCESS 'ttpgdtjs.tt' %]
+<script type="text/javascript" src="/static/js/conkan_prog_detail.js"></script>
 </body>
 </html>

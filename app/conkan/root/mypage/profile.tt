@@ -7,7 +7,7 @@
 <meta name="description" content="conkan profile">
 <meta name="author" content="Studio REM">
 <title>Conkan Profile</title>
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+[% PROCESS 'ttwijgethead.tt' -%]
 </head>
 [%- SET self_li_id = 'mypage_profile' -%]
 [%- PROCESS 'tthead.tt' -%]
@@ -73,7 +73,41 @@ END -%]
   </div>
 </div>
 [% PROCESS 'tttail.tt' %]
-[% PROCESS 'ttprofjs.tt' %]
+<script type="text/javascript"> <!-- TTマクロを含むので、srcではなく埋め込み -->
+  // 役割 選択リスト アクティベイト, 有効なdivを表示
+  $(document).ready(function() {
+    $('#[%- rs.role | html -%]').prop('selected', true);
+    $('#[%- state | html -%]').show();
+    if ( '[% cuRole -%]' != 'ROOT' && ![% addroot %]) {
+      $('#account').prop('readonly', 'readonly');
+      $('#account').css('background-color', '#eee' );
+      $('#role').prop('readonly', 'readonly');
+      $('#role').css('background-color', '#eee' );
+    }
+  } );
+  // バリデーション
+  $('#dobtn').click(function(){
+    if (!$('#account').val()) {
+        $('#valerr').text('アカウントは必須です');
+        return false;
+    }
+    if ( $('#passwd').val() ) {
+        if ( $('#passwd').val() != $('#passwd2').val() ) {
+            $('#valerr').text('パスワードとパスワード(確認)が一致しません');
+            return false;
+        }
+    }
+    [%- IF addroot || addstaff || updstaff %]
+    else {
+        $('#valerr').text('パスワードは必須です');
+        return false;
+    }
+    [% END -%]
+  } );
+  // キャンセル(管理者による更新の場合のみ)
+  $('#cancel').click(function(){
+  } );
+</script>
 </body>
 </html>
 

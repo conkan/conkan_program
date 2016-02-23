@@ -1,3 +1,4 @@
+<!-- #Region "tttail.tt" -->
 [% IF 0 %]
   <HR/>
   [%- USE dumper(indent=1) -%]
@@ -9,7 +10,6 @@
   [% dumper.dump(c.user) %]
   </pre>
 [% END %]
-<!-- #Region "tttail.tt" -->
 <script type="text/javascript">
   // ナビのタブ アクティベイト
   $(document).ready(function() {

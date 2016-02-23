@@ -7,7 +7,7 @@
 <meta name="description" content="conkan setting">
 <meta name="author" content="Studio REM">
 <title>Conkan Setting</title>
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+[% PROCESS 'ttwijgethead.tt' -%]
 </head>
 [% SET self_li_id = 'config_conf' %]
 [% PROCESS 'tthead.tt' %]
@@ -63,7 +63,7 @@
   </div>
 </div>
 [% PROCESS 'tttail.tt' %]
-<script>
+<script type="text/javascript"> <!-- TTマクロを使うのでsrcではなく埋め込み -->
   // 有効なdivを表示
   $(document).ready(function() {
     $('#[%- state | html -%]').show();

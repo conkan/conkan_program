@@ -7,7 +7,7 @@
 <meta name="description" content="conkan castlist">
 <meta name="author" content="Studio REM">
 <title>Conkan CastList</title>
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+[% PROCESS 'ttwijgethead.tt' -%]
 </head>
 [%- SET self_li_id = 'config_cast' -%]
 [%- PROCESS 'tthead.tt' -%]
@@ -79,36 +79,6 @@
   </div>
 </div>
 [% PROCESS 'tttail.tt' %]
-<script>
-  var storage = sessionStorage;
-  $(document).ready(function(){
-    $(document).scrollTop( storage.getItem( 'sctop' ) );
-    storage.clear();
-  });
-  // モーダルダイアログ表示
-  $('#editCast').on('show.bs.modal', function (event) {
-    var castid = $(event.relatedTarget).data('whatever');
-    var content = $('#editCastContent');
-    $(content).load(castid + '/ FORM');
-    $('#dobtn').show();
-  } );
-  // モーダルダイアログ非表示
-  $('#editCast').on('hide.bs.modal', function (event) {
-    storage.setItem( 'sctop', $(document).scrollTop() );
-    location.reload(true);
-  } );
-  // 更新
-  $('#dobtn').click(function(event) {
-    if (!$('#name').val()) {
-        $('#valerr').text('氏名は必須です');
-        return false;
-    }
-    var content = $('#editCastContent');
-    var data = $('#castform').serializeArray();
-    var castid = $('#castid').val();
-    $('#dobtn').hide();
-    $(content).load(castid + '/edit/ FORM', data );
-  } );
-</script>
+<script type="text/javascript" src="/static/js/conkan_cast_list.js"></script>
 </body>
 </html>
