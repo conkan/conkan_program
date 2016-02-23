@@ -42,7 +42,6 @@ sub auto :Private {
     my ( $self, $c ) = @_;
 
     $c->log->info(localtime() . ' アクション内部パス:[' . $c->action->reverse . '][' . $c->request->method . ']' );
-    $c->log->info(localtime() . ' 最新か?');
     # 初期化済判断
     unless (exists($c->config->{inited})) {
         $c->log->info(localtime() . ' 未初期化');
@@ -94,7 +93,6 @@ sub auto :Private {
     unless ( $c->user_exists ) {
         $c->log->info( localtime() . ' 強制login' );
         $c->visit( '/login' );
-        return 0;
     }
     return 1;
 }

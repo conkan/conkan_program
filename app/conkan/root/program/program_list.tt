@@ -4,27 +4,27 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="conkan roomlist">
+<meta name="description" content="conkan Program List">
 <meta name="author" content="Studio REM">
 <title>Conkan ProgramList</title>
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+[% PROCESS 'ttwijgethead.tt' -%]
 </head>
-[%- SET self_li_id = 'program_list' -%]
-[%- PROCESS 'tthead.tt' -%]
-<div class="container">
+[%- SET self_li_id = 'program_list' %]
+[% PROCESS 'tthead.tt' %]
+<div class="container" ng-app="wijmo">
   [%- SET allprg = 1 %]
-  <div class="well" id="programlist">
-    [%- PROCESS 'ttpglist.tt' -%]
+  <div class="well" id="programlist" ng-controller="MyController">
+    [% PROCESS 'ttpglist.tt' -%]
+    <div id="pgAddDiv" style="padding:10px;">
     [%- IF cuRole == 'ROOT' %]
-      <div>
-        <button type="button" class="btn btn-primary"
-                data-toggle="modal" data-target="#addProgram">
-          追加
-        </button>
-      </div>
-    [%- END -%]
-  </div>
-</div>
+      <button type="button" class="btn btn-primary"
+              data-toggle="modal" data-target="#addProgram">
+        追加
+      </button>
+    [% END -%]
+    </div>
+  </div> <!-- End of well programlist -->
+</div> <!-- End of container wijmo -->
 <!-- Modal add -->
 <div class="modal fade" id="addProgram" tabindex="-1" role="dialog" aria-labelledby="addProgramLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -49,8 +49,9 @@
     </div>
   </div>
 </div>
+[%- SET useWijGrid = 1 %]
 [% PROCESS 'tttail.tt' %]
-<script>
+<script type="text/javascript">
   // 追加実施時、ボタンを無効にする
   $('#doadd').click(function(event) {
     $('#doadd').addClass('disabled');

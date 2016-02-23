@@ -9,16 +9,23 @@
   [% dumper.dump(c.user) %]
   </pre>
 [% END %]
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-<script>
+<!-- #Region "tttail.tt" -->
+<script type="text/javascript">
   // ナビのタブ アクティベイト
   $(document).ready(function() {
     $('#[%- self_li_id | html -%]').addClass('active');
     $(document.body).css('padding-top', $('#navbar').height()+30 );
+    [%- IF useWijGrid %]
+    wijGridResize();
+    [%- END %]
+    $(window).resize();
   });
   // ナビのリサイズでBody開始位置を変える
   $(window).resize(function() {
     $(document.body).css('padding-top', $('#navbar').height()+30 );
+    [%- IF useWijGrid %]
+    wijGridResize();
+    [%- END %]
   });
 </script>
+<!-- #End Region "tttail.tt" -->

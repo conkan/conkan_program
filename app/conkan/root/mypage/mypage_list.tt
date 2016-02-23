@@ -7,18 +7,17 @@
 <meta name="description" content="conkan mypage">
 <meta name="author" content="Studio REM">
 <title>Conkan MyPage</title>
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+[%- PROCESS 'ttwijgethead.tt' -%]
 </head>
 [% SET self_li_id = 'mypage' %]
 [% PROCESS 'tthead.tt' %]
-<div class="container">
-  <div class="well">
-    [%- SET allprg = 0 %]
-    <div class="well" id="programlist">
-      [%- PROCESS 'ttpglist.tt' -%]
-    </div>
+<div class="container" ng-app="wijmo">
+  [%- SET allprg = 0 %]
+  <div class="well" id="programlist" ng-controller="MyController">
+    [%- PROCESS 'ttpglist.tt' -%]
   </div>
 </div>
+[%- SET useWijGrid = 1 %]
 [% PROCESS 'tttail.tt' %]
 </body>
 </html>

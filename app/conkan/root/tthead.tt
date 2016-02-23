@@ -16,7 +16,7 @@ IF c.session.init_role == 'addroot';
 END;
 DEFAULT self_li_id = 'mypage';
 SET cuRole = c.user.get('role') -%]
-
+<!-- #Region "tthead.tt" -->
 <body style="padding-top:200px;">
 <div class="navbar navbar-default navbar-fixed-top" id="navbar">
   <div class="container-fluid">
@@ -63,3 +63,4 @@ SET cuRole = c.user.get('role') -%]
     </div>
   </div>
 </div>
+<!-- #End Region "tthead.tt" -->

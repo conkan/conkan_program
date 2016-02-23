@@ -1,4 +1,4 @@
-<script>
+<script type="text/javascript">
   // 役割 選択リスト アクティベイト, 有効なdivを表示
   $(document).ready(function() {
     $('#[%- rs.role | html -%]').prop('selected', true);
