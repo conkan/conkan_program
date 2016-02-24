@@ -14,7 +14,7 @@
 [% PROCESS 'tthead.tt' %]
 <div class="container" ng-app="wijmo">
   [%- SET allprg = 1 %]
-  <div class="well" id="programlist" ng-controller="MyController">
+  <div class="well" id="gridlist" ng-controller="MyController">
     [% PROCESS 'ttpglist.tt' -%]
     <div id="pgAddDiv">
     [%- IF cuRole == 'ROOT' %]
@@ -24,7 +24,7 @@
       </button>
     [% END -%]
     </div>
-  </div> <!-- End of well programlist -->
+  </div> <!-- End of well gridlist -->
 </div> <!-- End of container wijmo -->
 <!-- Modal add -->
 <div class="modal fade" id="addProgram" tabindex="-1" role="dialog" aria-labelledby="addProgramLabel" aria-hidden="true">

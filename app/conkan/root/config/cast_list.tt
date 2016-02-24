@@ -7,58 +7,53 @@
 <meta name="description" content="conkan castlist">
 <meta name="author" content="Studio REM">
 <title>Conkan CastList</title>
+[%- SET useWijGrid = 1 %]
 [% PROCESS 'ttwijgethead.tt' -%]
 </head>
 [%- SET self_li_id = 'config_cast' -%]
 [%- PROCESS 'tthead.tt' -%]
-<div class="container">
-  <div class="well" id="castlist">
-    <table class="table table-striped table-bordered table-condensed">
-      <colgroup>
-        <col class="col-sm-2">
-        <col class="col-sm-2">
-        <col class="col-sm-3">
-        <col class="col-sm-2">
-        <col class="col-sm-2">
-        <col class="col-sm-1">
-      </colgroup>
-      <thead>
-        <tr bgcolor="#FFcc66">
-          <th style="text-align:center;">氏名</th>
-          <th style="text-align:center;">ふりがな</th>
-          <th style="text-align:center;">コンタクトステータス</th>
-          <th style="text-align:center;">補足(連絡先)</th>
-          <th style="text-align:center;">補足(制限事項)</th>
-          <th></th>
-      </thead>
-      <tbody>
-        [% FOREACH item = list %]
-          <tr>
-            <td>[% item.name     | html %]</td>
-            <td>[% item.namef    | html %]</td>
-            <td>[% item.status   | html %]</td>
-            <td>[% item.memo     | html %]</td>
-            <td>[% item.restdate | html %]</td>
-            <td style="text-align:center;">
-              <button type="button" class="btn btn-xs btn-primary"
-                      data-toggle="modal" data-target="#editCast"
-                      data-whatever="[% item.castid %]">
-                編集
-              </button>
-            </td>
-          </tr>
-        [% END %]
-      </tbody>
-    </table>
-    <div>
+<div class="container" ng-app="wijmo">
+  <div class="well" id="gridlist" ng-controller="MyController">
+    <wij-grid id="dataGrid" data="list"
+        class="table table-bordered"
+        allow-col-sizing="true"
+        allow-sorting="true"
+        allow-keyboard-navigation="true"
+        ensureColumnsPxWidth="true"
+        highlight-on-hover="false"
+>
+      <scrolling-settings
+        mode="vertical"
+        static-row-index="-1"
+      ></scrolling-settings>
+      <columns>
+        <column width="16%" header-text="氏名"></column>
+        <column width="16%" header-text="ふりがな"></column>
+        <column width="24%" header-text="コンタクトステータス"></column>
+        <column width="16%" header-text="補足(連絡先)"></column>
+        <column width="16%" header-text="補足(制限事項)"></column>
+        <column             header-text=""></column>
+      </columns>
+    </wij-grid>
+    <script type="text/javascript"> <!-- 貼り付けるdataはsrcではなく埋め込み -->
+      function MyController( $scope, $locale ) {
+        $scope.list = [
+          [% FOREACH item = list -%]
+            [ "[% item.name | html %]", "[% item.namef | html %]", "[% item.status   | html %]", "[% item.memo | html %]", "[% item.restdate | html %]", "<button type='button' class='btn btn-xs btn-primary' data-toggle='modal' data-target='#editCast' data-whatever='[% item.castid %]'>編集</button>" ],
+          [% END %]
+            [ "", "", "", "", "", "" ]
+        ];
+      }
+    </script>
+    <div id="pgAddDiv">
       <button type="button" class="btn btn-primary"
               data-toggle="modal" data-target="#editCast"
               data-whatever="0">
         追加
       </button>
     </div>
-  </div>
-</div>
+  </div> <!-- End of well gridlist -->
+</div> <!-- End of container wijmo -->
 
 <!-- Modal -->
 <div class="modal fade" id="editCast" tabindex="-1" role="dialog" aria-labelledby="editCastLabel" aria-hidden="true">

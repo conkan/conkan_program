@@ -15,7 +15,7 @@
 [% PROCESS 'tthead.tt' %]
 <div class="container" ng-app="wijmo">
   [%- SET allprg = 0 %]
-  <div class="well" id="programlist" ng-controller="MyController">
+  <div class="well" id="gridlist" ng-controller="MyController">
     [%- PROCESS 'ttpglist.tt' -%]
   </div>
 </div>

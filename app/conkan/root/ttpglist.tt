@@ -19,7 +19,7 @@
     <column width="10%" header-text="担当スタッフ"></column>
     [% END -%]
     <column width="20%" header-text="実行ステータス"></column>
-    <column             header-text="最終進捗報告日時"></column>
+    <column             header-text="最終更新日時"></column>
   </columns>
 </wij-grid>
 <script type="text/javascript"> <!-- 貼り付けるデータはsrcではなく埋め込み -->
