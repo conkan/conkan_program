@@ -7,7 +7,7 @@ use namespace::autoclean;
 use DBI;
 use Try::Tiny;
 use String::Random qw/ random_string /;
-
+use namespace::autoclean;
 use Data::Dumper;
 use Encode;
 use conkan::Schema;
@@ -186,6 +186,7 @@ sub login :Local {
                 $c->session->{init_role} = undef;
             }
             if ( $c->user->get('passwd') && !$c->user->get('rmdate') ) {
+                __PACKAGE__->LoginLogging( $c );
                 if ( $c->action->reverse eq 'login' ) {
                     $c->response->redirect( '/mypage' );
                 }
@@ -198,6 +199,57 @@ sub login :Local {
     else {
         $c->error('Fatal access at '. scalar localtime );
     }
+}
+
+=head2 LoginLogging
+                
+ログイン履歴保存
+
+スタッフテーブルの最終ログイン日時更新 & ログイン履歴レコード追加
+
+=cut
+
+sub LoginLogging {
+    my ( $self,
+         $c,            # コンテキスト
+       ) = @_;
+
+    try {
+        my $staffid = $c->user->get('staffid');
+        my $rowstaff = $c->model('ConkanDB::PgStaff')->find($staffid);
+        $rowstaff->update(
+            { 
+                'lastlogin' =>  \'NOW()',
+            },
+        );
+        $rowstaff = $c->model('ConkanDB::PgStaff')->find($staffid);
+        my $logintime = $rowstaff->lastlogin();
+        $c->log->debug('>>>' . localtime() .
+                'StaffTbl last_login : [' . $logintime . ']' );
+        $c->model('ConkanDB::LoginLog')->create(
+            {
+                'staffid'       => $staffid,
+                'login_date'    => $logintime,
+            },
+        );
+    } catch {
+        $c->detach( '_dberror', [ shift ] );
+    };
+}
+
+=head2 _dberror
+
+DBエラー表示
+
+=cut
+
+sub _dberror :Private {
+    my ( $self, $c, $e) = @_; 
+    $c->log->error('>>> ' . localtime() . ' dbexp : ' . Dumper($e) );
+    $c->clear_errors();
+    my $body = $c->response->body() || Dumper( $e );
+    $c->response->body('<FORM>更新失敗<br/><pre>' . $body . '</pre></FORM>');
+    $c->response->status(200);
 }
 
 =head2 logout

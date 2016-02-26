@@ -16,15 +16,15 @@
   [%- SET allprg = 1 %]
   <div class="well" id="gridlist" ng-controller="MyController">
     [% PROCESS 'ttpglist.tt' -%]
-    <div id="pgAddDiv">
-    [%- IF cuRole == 'ROOT' %]
-      <button type="button" class="btn btn-primary"
-              data-toggle="modal" data-target="#addProgram">
-        追加
-      </button>
-    [% END -%]
-    </div>
   </div> <!-- End of well gridlist -->
+  <div id="pgAddDiv">
+  [%- IF cuRole == 'ROOT' %]
+    <button type="button" class="btn btn-primary"
+            data-toggle="modal" data-target="#addProgram">
+      追加
+    </button>
+  [% END -%]
+  </div>
 </div> <!-- End of container wijmo -->
 <!-- Modal add -->
 <div class="modal fade" id="addProgram" tabindex="-1" role="dialog" aria-labelledby="addProgramLabel" aria-hidden="true">

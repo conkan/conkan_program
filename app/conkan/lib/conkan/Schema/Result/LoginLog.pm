@@ -83,6 +83,18 @@ __PACKAGE__->add_columns(
   },
 );
 
+=head1 PRIMARY KEY
+
+=over 4
+
+=item * L</logid>
+
+=back
+
+=cut
+
+__PACKAGE__->set_primary_key("logid");
+
 =head1 RELATIONS
 
 =head2 staffid
@@ -101,8 +113,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07043 @ 2016-02-26 20:09:58
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:+UBnKNXp2pGas/0cIBbnBQ
+# Created by DBIx::Class::Schema::Loader v0.07043 @ 2016-02-26 21:32:26
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:t0lE9V9ubowiP93KhtUgUA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

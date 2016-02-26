@@ -27,9 +27,10 @@
         static-row-index="-1"
       ></scrolling-settings>
       <columns>
-        <column width="32%" header-text="名前"></column>
-        <column width="26%" header-text="役割"></column>
-        <column width="32%" header-text="担当名"></column>
+        <column width="23%" header-text="名前"></column>
+        <column width="23%" header-text="役割"></column>
+        <column width="23%" header-text="担当名"></column>
+        <column width="23%" header-text="最終ログイン日時"></column>
         <column             header-text=""></column>
       </columns>
     </wij-grid>
@@ -48,7 +49,7 @@
                 [%- CASE 'PG'   -%] 企画管理スタッフ
                 [%- CASE 'ROOT' -%] システム管理者
               [%- END -%]
-              </span>", "<span [% rmcol %]>[% item.tname | html %]</span>", "<span [% rmcol %]><button type='button' class='btn btn-primary btn-xs'
+              </span>", "<span [% rmcol %]>[% item.tname | html %]</span>", "<span [% rmcol %]>[% item.lastlogin | html %]</span>", "<span [% rmcol %]><button type='button' class='btn btn-primary btn-xs'
               [%- IF rmcol -%]
                 >無効
               [%- ELSE -%]

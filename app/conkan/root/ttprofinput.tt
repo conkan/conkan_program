@@ -20,6 +20,10 @@ END %]
   [% pgupinputtext( 'account', rs.account, 4 ) %]
 </div>
 <div class="form-group">
+  <label class="col-sm-3 text-right">最終ログイン日時</label>
+  <span class="col-sm-4">[% rs.lastlogin | html %]</span>
+</div>
+<div class="form-group">
   <label class="col-sm-3 text-right">パスワード</label>
   <input type="password" name="passwd" id="passwd" class="col-sm-4">
 </div>

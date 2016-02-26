@@ -15,9 +15,6 @@
   $(document).ready(function() {
     $('#[%- self_li_id | html -%]').addClass('active');
     $(document.body).css('padding-top', $('#navbar').height()+30 );
-    [%- IF useWijGrid %]
-    wijGridResize();
-    [%- END %]
     $(window).resize();
   });
   // ナビのリサイズでBody開始位置を変える

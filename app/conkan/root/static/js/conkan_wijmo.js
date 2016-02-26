@@ -13,8 +13,8 @@ var wijGridResize = function () {
               parseFloat(pgldiv.css('borderBottomWidth')) +
               parseFloat(pgldiv.css('marginTop')) +
               parseFloat(pgldiv.css('marginBottom')) +
-              parseFloat(wijdiv.css("borderTopWidth")) +
-              parseFloat(wijdiv.css("borderBottomWidth")) +
+              parseFloat(wijdiv.css('borderTopWidth')) +
+              parseFloat(wijdiv.css('borderBottomWidth')) +
               adddiv.outerHeight() );
   wijdiv.height(h + 'px');
 };

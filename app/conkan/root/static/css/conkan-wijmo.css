@@ -10,6 +10,9 @@
 .wijmo-wijgrid-headerrow .ui-state-default {
     background-color: rgb(255, 204, 102);
 }
+.wijmo-wijgrid tr.wijmo-wijgrid-row td.ui-state-highlight {
+    background-color: #B3BFC3;
+}
 #pgAddDiv {
-    padding: 10px;
+    padding-left: 10px;
 }
