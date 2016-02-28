@@ -4,7 +4,6 @@ use utf8;
 use JSON;
 use String::Random qw/ random_string /;
 use Try::Tiny;
-use DateTime;
 use namespace::autoclean;
 use Data::Dumper;
 use YAML;
@@ -610,7 +609,7 @@ sub _delete :Private {
     if ( $row->updateflg eq 
             +( $c->sessionid . $c->session->{'updtic'}) ) {
         try {
-            $row->update( { 'rmdate'   => DateTime->now() } );
+            $row->update( { 'rmdate'   => \'NOW()', } );
             $c->response->body('<FORM><H1>削除しました</H1></FORM>');
         } catch {
             $c->detach( '_dberror', [ shift ] );

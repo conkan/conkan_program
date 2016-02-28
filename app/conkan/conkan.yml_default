@@ -5,6 +5,7 @@ Model::ConkanDB:
     mysql_enable_utf8: 1
     on_connect_do:
       - SET NAMES utf8
+      - SET time_zone +09:00
     password: 
     user: 
   schema_class: conkan::Schema

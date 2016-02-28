@@ -5,7 +5,6 @@ use Encode;
 use JSON;
 use String::Random qw/ random_string /;
 use Try::Tiny;
-use DateTime;
 use namespace::autoclean;
 use Data::Dumper;
 use YAML;
