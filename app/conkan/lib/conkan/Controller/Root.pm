@@ -403,8 +403,9 @@ sub _doInitialProc :Private {
                 dsn      => $dsn,
                 user     => $dbus,
                 password => $dbpw,
+                AutoCommit => q{1},
                 mysql_enable_utf8 => 1,
-                on_connect_do => ["SET NAMES utf8"],
+                on_connect_do => ["SET NAMES utf8", "SET time_zone='+09:00'", ],
             };
 
         # conkan.ymlを書き出す(必要な物だけ)

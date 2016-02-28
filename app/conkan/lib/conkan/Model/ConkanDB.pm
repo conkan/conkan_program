@@ -11,7 +11,8 @@ __PACKAGE__->config(
         user => '',
         password => '',
         AutoCommit => q{1},
-        on_connect_do => ["SET NAMES utf8"],
+        mysql_enable_utf8 => q{1},
+        on_connect_do => ["SET NAMES utf8", "SET time_zone='+09:00'"],
     }
 );
 
