@@ -6,15 +6,17 @@ var wijGridResize = function () {
   wijdiv = $("#gridlist .wijgridouterdiv"),
   scldiv = $("#gridlist .wijmo-wijgrid-scroller"),
   adddiv = $("#pgAddDiv");
-  h    = wh - ( pgldiv.offset().top +
-                parseFloat(pgldiv.css('paddingTop')) +
-                parseFloat(pgldiv.css('paddingBottom')) +
-                parseFloat(pgldiv.css('borderTopWidth')) +
-                parseFloat(pgldiv.css('borderBottomWidth')) +
-                parseFloat(pgldiv.css('marginTop')) +
-                parseFloat(pgldiv.css('marginBottom')) +
-                parseFloat(wijdiv.css('borderTopWidth')) +
-                parseFloat(wijdiv.css('borderBottomWidth')) +
-                adddiv.outerHeight() );
-  scldiv.css('max-height', h + 'px');
+  if ( pgldiv.size() !== 0 ) {
+    h    = wh - ( pgldiv.offset().top +
+                  parseFloat(pgldiv.css('paddingTop')) +
+                  parseFloat(pgldiv.css('paddingBottom')) +
+                  parseFloat(pgldiv.css('borderTopWidth')) +
+                  parseFloat(pgldiv.css('borderBottomWidth')) +
+                  parseFloat(pgldiv.css('marginTop')) +
+                  parseFloat(pgldiv.css('marginBottom')) +
+                  parseFloat(wijdiv.css('borderTopWidth')) +
+                  parseFloat(wijdiv.css('borderBottomWidth')) +
+                  adddiv.outerHeight() );
+    scldiv.css('max-height', h + 'px');
+  }
 };

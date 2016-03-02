@@ -30,3 +30,4 @@ conkan.yml
 app/.ssh/cert*.*
 app/backup/
 supervise/
+ttctmp/

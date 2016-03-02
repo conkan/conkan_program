@@ -1,0 +1,19 @@
+#timetable_down {
+    margin-top: -15px;
+}
+
+#unset_pglist_wrap {
+    background: red;
+}
+
+#timetable_wrap {
+    background: blue;
+}
+
+#unset_pglist_wrap, #timetable_wrap {
+    height: 500px;
+}
+
+#timetable_edit_form {
+    background: yellow;
+}
