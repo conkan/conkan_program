@@ -15,7 +15,7 @@ Regist:
                         column:     regname
                     -   hashkey: メールアドレス
                         column:     regma
-                    -   hashkey: 米魂番号
+                    -   hashkey: 参加番号
                         column:     regno
                     -   hashkey: 電話番号
                         column:     telno
@@ -85,7 +85,7 @@ Regist:
                         column:     regpgid
                     -   hashkey: 申込者名
                         column:     name
-                    -   hashkey: 米魂番号
+                    -   hashkey: 参加番号
                         column:     entrantregno
             -   hashkey: 出演者氏名
                 loopmax: 8

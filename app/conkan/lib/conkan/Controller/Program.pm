@@ -78,9 +78,10 @@ sub add :Local {
             $hval = __PACKAGE__->ParseRegist(
                             $pginfo, $regcnf->{'items'}->[0], undef, ''  );
             if ( ref($hval) eq 'HASH' ) {
-$c->log->debug('>>>> add reg_program:[' . $hval->{'regpgid'} . '][' . $hval->{'name'} . ']');
+$c->log->debug('>>>> add reg_program:name [' . $hval->{'name'} . ']');
                 my $row =
                     $c->model('ConkanDB::' . $regcnf->{'schema'})->create( $hval );
+$c->log->debug('>>>> add reg_program:regpgid [' . $row->regpgid . ']');
                 ## $pginfo->{企画ID}の値を再設定 (autoinc対応)
                 $pginfo->{'企画ID'} = $row->regpgid;
             }
