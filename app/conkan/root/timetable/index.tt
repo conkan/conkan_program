@@ -48,11 +48,12 @@
         <tbody>
           <tr>
             <td style="background-color:#FFcc66">
-              {{current.regpgid}}({{current.subno}})
+              {{current.regpgid}}{{current.subno}}
             </td>
-            <th colspan="4">{{current.name}}</th>
+            <th style="text-align: right">企画名</th>
+            <th colspan="3">{{current.name}}</th>
             <td colspan="2" style="background-color:#FFcc66">
-              ({{current.sname}})
+              {{current.sname}}
             </td>
           </tr>
           <tr>
@@ -97,15 +98,19 @@
                   ng-options="i.id as i.val for i in roomlist"></select>
             </td>
             <th style="text-align: right" colspan="2">実行ステータス</th>
-            <td colspan="2">
+            <td>
               <select class="col-sm-12" ng-model="current.stat"
                   ng-options="i.id as i.val for i in statuslist"></select>
+            </td>
+            <td style="text-align: center">
+                <button type="submit" class="btn" id="applybtn">反映</button>
             </td>
           </tr>
           <tr>
         </tbody>
       </table>
       <script type="text/javascript"> <!-- Formの初期化はsrcではなく埋め込み -->
+        // subnoとsnameの値には()で囲む
         var TimeformController = function( $scope ) {
           $scope.current = {
             regpgid : '', subno : '', pgid :   '', id :      '', target : '',
@@ -115,52 +120,40 @@
             roomid :  ''
           };
           $scope.statuslist   = [
-            {
-              [%- FOREACH opt = conf.status %]
-                [% opt.id %] : '[% opt.val %]',
-              [%- END %]
-                none : ''
-            }
+            [%- FOREACH opt = conf.status %]
+              { id : '[% opt.id %]', val : '[% opt.val %]' },
+            [%- END %]
+              { id : '', val : '' }
           ];
           $scope.dateslist    = [
-            {
-              [%- FOREACH opt = conf.dates %]
-                [% opt.id %] : '[% opt.val %]',
-              [%- END %]
-                none : ''
-            }
+            [%- FOREACH opt = conf.dates %]
+              { id : '[% opt.id %]', val : '[% opt.val %]' },
+            [%- END %]
+              { id : '', val : '' }
           ];
           $scope.shourslist   = [
-            {
-              [%- FOREACH opt = conf.s_hours %]
-                [% opt.id %] : '[% opt.val %]',
-              [%- END %]
-              none : ''
-            }
+            [%- FOREACH opt = conf.s_hours %]
+              { id : '[% opt.id %]', val : '[% opt.val %]' },
+            [%- END %]
+              { id : '', val : '' }
           ];
           $scope.minslist     = [
-            {
-              [%- FOREACH opt = conf.s_mins %]
-                [% opt.id %] : '[% opt.val %]',
-              [%- END %]
-                none : ''
-            }
+            [%- FOREACH opt = conf.s_mins %]
+              { id : '[% opt.id %]', val : '[% opt.val %]' },
+            [%- END %]
+              { id : '', val : '' }
           ];
           $scope.ehourslist   = [
-            {
-              [%- FOREACH opt = conf.e_hours %]
-                [% opt.id %] : '[% opt.val %]',
-              [%- END %]
-                none : ''
-            }
+            [%- FOREACH opt = conf.e_hours %]
+              { id : '[% opt.id %]', val : '[% opt.val %]' },
+            [%- END %]
+              { id : '', val : '' }
           ];
           $scope.roomlist     = [
-            {
-              [%- FOREACH opt = roomlist %]
-                [% opt.id %] : '[% opt.val %]',
-              [%- END %]
-                none : ''
-            }
+            [%- FOREACH opt = conf.roomlist %]
+              { id : '[% opt.id %]', val : '[% opt.val %]' },
+            [%- END %]
+              { id : '', val : '' }
           ];
         };
 

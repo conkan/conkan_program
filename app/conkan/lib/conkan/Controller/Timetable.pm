@@ -31,31 +31,38 @@ sub index :Path :Args(0) {
     my $M = $c->model('ConkanDB::PgSystemConf');
     my $time_origin = $c->config->{time_origin};
     $conf->{'dates'}   = [
-        map +{ 'id' => "'" . $_ . "'", 'val' => $_ },
+          map +{ 'id' => $_ , 'val' => $_ },
             @{from_json( $M->find('dates')->pg_conf_value() )}
         ];
     $conf->{'s_hours'} = [
           map +{ 'id' => sprintf('%02d', $_), 'val' => sprintf('%02d', $_) },
-                ( $time_origin .. $time_origin+23 )
+            ( $time_origin .. $time_origin+23 )
         ];
     $conf->{'s_mins'} = [
-          map +{ 'id' => sprintf('%02d', $_*5), 'val' => sprintf('%02d', $_*5) },
-                ( 0 .. 11 )
+          map +{ 'id' => sprintf('%02d', $_*5),
+                 'val' => sprintf('%02d', $_*5) },
+            ( 0 .. 11 )
         ];
     $conf->{'e_hours'} = [
           map +{ 'id' => sprintf('%02d', $_), 'val' => sprintf('%02d', $_) },
-                ( $time_origin .. $time_origin+23 )
+            ( $time_origin .. $time_origin+23 )
         ];
     $conf->{'e_mins'} = [
-          map +{ 'id' => sprintf('%02d', $_*5), 'val' => sprintf('%02d', $_*5) },
-                ( 0 .. 11 )
+          map +{ 'id' => sprintf('%02d', $_*5),
+                 'val' => sprintf('%02d', $_*5) },
+            ( 0 .. 11 )
         ];
     $conf->{'status'}  = [
-        map +{ 'id' => $_, 'val' => $_ },
+          map +{ 'id' => $_, 'val' => $_ },
             @{from_json( $M->find('pg_status_vals')->pg_conf_value() )}
         ];
     $conf->{'nos'}     = [
           map +{ 'id' => $_, 'val' => $_ }, qw/ 0 1 2 3 4 /
+        ];
+    $conf->{'roomlist'}  = [
+          map +{ 'id'  => $_->roomid(),
+                 'val' => $_->name() . '(' . $_->roomno() . ')' },
+            $c->model('ConkanDB::PgRoom')->all()
         ];
     $c->stash->{'conf'}  = $conf;
 }

@@ -7,6 +7,7 @@ Azure Portalで、CoreOSを選択してVMを作成すれば良い
 (docker環境を含んでいる)
 
 注意点:
+- CoreOSのstableを使うこと(AlphaやBetaでは、git,dockerが入っていないことがある)
 - デフォルトだとアクセスURLにランダムな文字が付け加わるので、ちゃんと指定すること
 - HTTPSアクセスポイントを作成するのを忘れないように
 - SSHアクセスポイントは自動で作成するが、外部ポート番号が22ではないので、一旦削除して再作成したほうが良い
@@ -26,9 +27,11 @@ Microsoft Azureが用意しているmysqlサーバ(clearDB)は、
     (HTTPSアクセスポイントではなく、MYSQLアクセスポイント(3306)を作成)
 
   1. Docker公式の mysql Dockerイメージを利用
-    ''''
-    docker> docker pull mysql:5.5
-    ''''
+
+''''
+docker> docker pull mysql:5.5
+''''
+
   1. コンテナの起動
     rootのパスワードは、起動時に環境変数 MYSQL_ROOT_PASSWORD で設定
     mysqlのポート番号は、ホスト:コンテナ とも3306にする
@@ -36,29 +39,121 @@ Microsoft Azureが用意しているmysqlサーバ(clearDB)は、
     
     稼働サーバのユーザホームディレクトリに、下記内容のShellスクリプトを置き、
     起動するのが望ましい
-    ''''
-    #!/bin/bash
-    if [ "$1" ]; then
-        MRPW=$1
-    else
-        echo 'Usage: run.sh <MYSQL_ROOT_PASSWD>'
-        exit
-    fi
-    docker stop mysql
-    docker rm mysql
-    docker run  -d --restart='always' --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=xxxx -v `pwd`/mysql:/var/lib/mysql mysql:5.5
-    ''''
+
+''''
+#!/bin/bash
+if [ "$1" ]; then
+    MRPW=$1
+else
+    echo 'Usage: run.sh <MYSQL_ROOT_PASSWD>'
+    exit
+fi
+docker stop mysql
+docker rm mysql
+docker run  -d --restart='always' --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=xxxx -v `pwd`/mysql:/var/lib/mysql mysql:5.5
+''''
 
 1. dockerコンテナハートビート
 
 なぜかAzure coreOSのdockerコンテナは、一定時間アクセスがないと停止してしまうので、
 どこかのマシン(稼働サーバ、DBサーバにssh接続できるマシン)のcronで、下記コマンドを定期的(毎時0分とか)に実行するよう登録する
-    ''''
-    /usr/bin/ssh <DBサーバアクセスFQDN> docker ps
-    /usr/bin/ssh <稼働サーバアクセスFQDN> docker ps
-    ''''
+
+''''
+/usr/bin/ssh <DBサーバアクセスFQDN> docker ps
+/usr/bin/ssh <稼働サーバアクセスFQDN> docker ps
+''''
 先にDBサーバで実行する方が良い 
 もちろん、cronに直接登録するのではなく、shellスクリプトにするのがよい
+
+★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
+これはAzure VM再起動時にコンテナがされていないせいかもしれない
+(--restart='always' を付け忘れてたのかも)
+正しくは、systemdで起動する
+
+【稼働サーバ】
+ - /etc/systemd/system/conkan.service として、下記ファイルを作成
+
+''''
+[Unit]
+Description=conkan
+After=docker.service
+Requires=docker.service
+
+[Service]
+ExecStart=/usr/bin/docker start conkan
+
+[Install]
+WantedBy=multi-user.target
+''''
+ - ファイルの登録と実行
+
+下記コマンドを実行
+````
+VM> sudo systemctl enable /etc/systemd/system/conkan.service
+````
+
+※ DBバックアップやログローテーションもこちらでやったほうがいいのかも
+※ (conkanにアタッチしてスクリプトを定期的に実施する)
+
+conkancron.service
+
+''''
+[Unit]
+Description=conkan db backup
+Requires=docker.service
+
+[Service]
+ExecStart=[conkanにアタッチしてその中でコマンド実行する記述]
+''''
+
+conkancron.timer
+
+''''
+[Unit]
+Description=daily conkan db backup
+
+[Timer]
+OnCalendar=*-*-* 05:00:00 ※毎日朝05:00に実施
+
+[Install]
+WantedBy=default.target
+''''
+
+ - ファイルの登録と実行
+
+下記コマンドを実行
+````
+VM> sudo systemctl start conkancron.timer
+````
+
+【DBサーバ】
+ - /etc/systemd/system/mysqld.service として、下記ファイルを作成
+
+''''
+[Unit]
+Description=mysqld
+After=docker.service
+Requires=docker.service
+#After/Requiresはそのサービスが起動後に実行される
+
+[Service]
+ExecStart=/usr/bin/docker start mysql
+
+[Install]
+WantedBy=multi-user.target
+''''
+ - ファイルの登録と実行
+
+下記コマンドを実行
+````
+VM> sudo systemctl enable /etc/systemd/system/mysqld.service
+````
+
+1. dockerの動作ログ参照方法
+
+````
+VM> sudo journalctl -u docker
+````
 
 1. docker-enter作成方法
 
