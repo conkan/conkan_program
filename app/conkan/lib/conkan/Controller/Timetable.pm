@@ -27,6 +27,29 @@ Timetableを表示する Catalyst Controller.
 sub index :Path :Args(0) {
     my ( $self, $c ) = @_;
     my $uid = $c->user->get('staffid');
+    # 未設定企画一覧
+    my $pgmlist =
+        [ $c->model('ConkanDB::PgProgram')->search(
+            [
+                { 'roomid' }, { 'date1' }, { 'stime1' }, { 'etime1' }
+            ],
+            {
+                'prefetch' => [ 'regpgid' ],
+                'order_by' => { '-asc' => [ 'me.regpgid', 'me.subno'] },
+            } )
+        ];
+    my @list = ();
+    foreach my $pgm ( @$pgmlist ) {
+        my $regpgid = 
+        push @list, {
+            'pgid'          => $pgm->pgid(),
+            'regpgid'       => $pgm->regpgid->regpgid(),
+            'subno'         => $pgm->subno(),
+            'sname'         => $pgm->sname(),
+        };
+    }
+    $c->stash->{'Program'} = \@list;
+    # 設定フォーム選択肢
     my $conf  = {};
     my $M = $c->model('ConkanDB::PgSystemConf');
     my $time_origin = $c->config->{time_origin};

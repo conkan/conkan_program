@@ -12,6 +12,7 @@
 
 #unset_pglist_wrap, #timetable_wrap {
     height: 500px;
+    overflow-y: auto;
 }
 
 #timetable_edit_form {
