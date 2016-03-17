@@ -1,0 +1,63 @@
+<script type="text/javascript"> <!-- 値の初期化はsrcではなく埋め込み -->
+// 本当はこれらはサーバに問い合わせて得たほうがいいのかもしれない
+// そうすれば、モジュールの生成もjsに持っていける
+
+// conkanTimeTableモジュールの生成(グローバル変数)
+var ConkanAppModule = angular.module('conkanTimeTable', [] );
+
+// 未設定企画リスト設定
+ConkanAppModule.value( 'pglistValue', {
+    unsetprglist : [
+        [%- FOREACH prg = Program %]
+            {
+                pgid    : '[% prg.pgid %]',
+                regpgid : '[% prg.regpgid %]',
+                subno   : '[% prg.subno %]',
+                sname   : '[% prg.sname | xml %]',
+            },
+        [%- END %]
+        {}
+     ]
+})
+
+// 設定フォームselect選択肢設定
+ConkanAppModule.value( 'selectValue', {
+    'statuslist' : [
+        [%- FOREACH opt = conf.status %]
+            { id : '[% opt.id %]', val : '[% opt.val %]' },
+        [%- END %]
+        { id : '', val : '' }
+    ],
+    'dateslist' : [
+        [%- FOREACH opt = conf.dates %]
+            { id : '[% opt.id %]', val : '[% opt.val %]' },
+        [%- END %]
+        { id : '', val : '' }
+    ],
+    'shourslist' : [
+        [%- FOREACH opt = conf.s_hours %]
+            { id : '[% opt.id %]', val : '[% opt.val %]' },
+        [%- END %]
+        { id : '', val : '' }
+    ],
+    'minslist' : [
+        [%- FOREACH opt = conf.s_mins %]
+            { id : '[% opt.id %]', val : '[% opt.val %]' },
+        [%- END %]
+        { id : '', val : '' }
+    ],
+    'ehourslist' : [
+        [%- FOREACH opt = conf.e_hours %]
+            { id : '[% opt.id %]', val : '[% opt.val %]' },
+        [%- END %]
+        { id : '', val : '' }
+    ],
+    'roomlist' : [
+        [%- FOREACH opt = conf.roomlist %]
+            { id : '[% opt.id %]', val : '[% opt.val %]' },
+        [%- END %]
+        { id : '', val : '' }
+     ]
+})
+</script>
+<!-- EOF -->

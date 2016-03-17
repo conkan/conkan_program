@@ -45,7 +45,7 @@ sub index :Path :Args(0) {
             'pgid'          => $pgm->pgid(),
             'regpgid'       => $pgm->regpgid->regpgid(),
             'subno'         => $pgm->subno(),
-            'sname'         => $pgm->sname(),
+            'sname'         => $pgm->sname() || $pgm->regpgid->name(),
         };
     }
     $c->stash->{'Program'} = \@list;

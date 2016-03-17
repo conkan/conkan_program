@@ -3,7 +3,12 @@
 }
 
 #unset_pglist_wrap {
-    background: red;
+    background-color: #ddd;
+    overflow-x: hidden;
+}
+
+#unset_pglist_wrap a {
+    white-space:    nowrap;
 }
 
 #timetable_wrap {

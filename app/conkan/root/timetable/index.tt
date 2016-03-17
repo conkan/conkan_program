@@ -15,38 +15,17 @@
 [%- PROCESS 'tthead.tt' -%]
 <div class="container" ng-app="conkanTimeTable">
   <script type="text/javascript">
-    // conkanTimeTableモジュールの生成(グローバル変数)
-    var ConkanAppModule = angular.module('conkanTimeTable', [] );
   </script>
   <div class="row" id="timetable_up">
     <div id="unset_pglist_wrap" class="col-sm-2">
       <!-- Left: 場所/時刻 未設定企画一覧 -->
-      <ul ng-controller="unsetlistController">
-        <li ng-repeat="prg in unsetprglist">
-          <a data-conkan-pgid={{prg.pgid}} ng-click="unsetclick()">
-            {{prg.regpgid}}{{prg.subno}}:{{prg.sname}}
+      <dl ng-controller="unsetlistController">
+        <dt ng-repeat="prg in unsetprglist">
+          <a ng-click="unsetclick(prg.pgid)">
+            {{prg.regpgid}}({{prg.subno}}):{{prg.sname}}
           </a>
-        </li>
-      </ul>
-      <script type="text/javascript"> <!-- 値の初期化はsrcではなく埋め込み -->
-        // 未設定企画リストコントローラ
-        ConkanAppModule.controller( 'unsetlistController',
-        [ '$scope', 'currentprgService',
-          function( $scope, currentprgService ) {
-            $scope.unsetprglist = [
-              [%- FOREACH prg = Program %]
-                {
-                  pgid    : '[% prg.pgid %]',
-                  regpgid : '[% prg.regpgid %]', subno   : '[% prg.subno %]',
-                  sname   : '[% prg.sname %]',
-                },
-              [%- END %]
-                {}
-            ];
-            $scope.unsetclick= function( pgid ) {};
-          }
-        ]);
-      </script>
+        </dt>
+      </dl>
     </div>
     <div id="timetable_wrap" class="col-sm-10">
       <div id="timetable_room">
@@ -142,51 +121,8 @@
           <tr>
         </tbody>
       </table>
-      <script type="text/javascript"> <!-- 値の初期化はsrcではなく埋め込み -->
-        // subnoとsnameの値は()で囲む
-        // 設定フォームコントローラ
-        ConkanAppModule.controller( 'timeformController',
-        [ '$scope', 'currentprgService',
-          function( $scope, currentprgService ) {
-            $scope.statuslist   = [
-              [%- FOREACH opt = conf.status %]
-                { id : '[% opt.id %]', val : '[% opt.val %]' }, [%- END %]
-                { id : '', val : '' }
-            ];
-            $scope.dateslist    = [
-              [%- FOREACH opt = conf.dates %]
-                { id : '[% opt.id %]', val : '[% opt.val %]' },
-              [%- END %]
-                { id : '', val : '' }
-            ];
-            $scope.shourslist   = [
-              [%- FOREACH opt = conf.s_hours %]
-                { id : '[% opt.id %]', val : '[% opt.val %]' },
-              [%- END %]
-                { id : '', val : '' }
-            ];
-            $scope.minslist     = [
-              [%- FOREACH opt = conf.s_mins %]
-                { id : '[% opt.id %]', val : '[% opt.val %]' },
-              [%- END %]
-                { id : '', val : '' }
-            ];
-            $scope.ehourslist   = [
-              [%- FOREACH opt = conf.e_hours %]
-                { id : '[% opt.id %]', val : '[% opt.val %]' },
-              [%- END %]
-                { id : '', val : '' }
-            ];
-            $scope.roomlist     = [
-              [%- FOREACH opt = conf.roomlist %]
-                { id : '[% opt.id %]', val : '[% opt.val %]' },
-              [%- END %]
-                { id : '', val : '' }
-            ];
-            $scope.DoApply= function() {};
-          }
-        ]);
-      </script>
+      <!-- 各コントローラが使う値設定サービス(ttで初期化) -->
+      [%- PROCESS 'tttimeselval.tt' -%]
     </div> <!-- End of timetable_edit_form -->
   </div> <!-- End of timetable_down -->
 </div>
