@@ -1,7 +1,7 @@
 $(window).resize(function() {
   // リサイズによるタイムテーブル領域の調整
   var
-  h,
+  h,w,
   wh = window.innerHeight || $(window).innerHeight(),
   updiv   = $("#timetable_up"),
   downdiv = $("#timetable_down");
@@ -13,6 +13,9 @@ $(window).resize(function() {
   updiv.css('max-height', h + 'px');
   $("#unset_pglist_wrap").css('min-height', h + 'px');
   $("#timetable_wrap").css('min-height', h + 'px');
+  w = $("#timetable_wrap").width();
+  $("#timetable_room").width(w);
+  $("#timetable_cast").width(w);
 });
 
 // conkanTimeTableモジュールの取得(生成済のもの)
@@ -32,9 +35,52 @@ ConkanAppModule.factory( 'currentprgService',
             current: currentval,
             query:   function(pgid) {
                 // pgidの企画情報を取得し、currentvalに設定
+                // subnoは前後に()付ける
             }
         };
     }
+);
+
+// タイムテーブルコントローラ
+ConkanAppModule.controller( 'timetableController',
+    [ '$scope', '$log', 'pglistValue',
+        function( $scope, $log, pglistValue ) {
+            $scope.ttgridbyroom = {
+                enableFiltering: true,
+                treeRowHeaderAlwaysVisible: false,
+            };
+            $scope.ttgridbyroom.columnDefs = [
+                { name : 'room', grouping: { groupPriority: 1 },
+                                 sort: { priority: 1, direction: 'asc' },  },
+                { name : 'prgname' },
+                { name : 'doperiod' },
+            ];
+            $scope.ttgridbyroom.data = pglistValue.roomprglist;
+
+            $scope.ttgridbycast= {
+                enableFiltering: true,
+                treeRowHeaderAlwaysVisible: false,
+            };
+            $scope.ttgridbycast.columnDefs = [
+                { name : 'cast', grouping: { groupPriority: 1 },
+                                 sort: { priority: 1, direction: 'asc' },  },
+                { name : 'prgname',
+                                 sort: { priority: 2, direction: 'asc' },  },
+                { name : 'room' },
+                { name : 'doperiod' },
+            ];
+            $scope.ttgridbycast.data = pglistValue.castprglist;
+
+            $scope.showbyroom = function( ) {
+                $("#timetable_room").css( 'visibility', 'visible');
+                $("#timetable_cast").css( 'visibility', 'hidden');
+            };
+            $scope.showbycast = function( ) {
+                $("#timetable_room").css( 'visibility', 'hidden');
+                $("#timetable_cast").css( 'visibility', 'visible');
+            };
+        }
+    ]
 );
 
 // 未設定企画リストコントローラ
@@ -59,6 +105,14 @@ ConkanAppModule.controller( 'timeformController',
             $scope.minslist     = selectValue.minslist;
             $scope.ehourslist   = selectValue.ehourslist;
             $scope.roomlist     = selectValue.roomlist;
+            $scope.doApply = function() {
+                $log.log( selectValue.statuslist ); 
+                $log.log( selectValue.dateslist );
+                $log.log( selectValue.shourslist );
+                $log.log( selectValue.minslist );
+                $log.log( selectValue.ehourslist );
+                $log.log( selectValue.roomlist );
+            };
           }
     ]
 );

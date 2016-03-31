@@ -27,69 +27,111 @@ Timetableを表示する Catalyst Controller.
 sub index :Path :Args(0) {
     my ( $self, $c ) = @_;
     my $uid = $c->user->get('staffid');
-    # 未設定企画一覧
-    my $pgmlist =
+    # 未設定企画リスト
+    my $unsetPgmlist =
         [ $c->model('ConkanDB::PgProgram')->search(
             [
-                { 'roomid' }, { 'date1' }, { 'stime1' }, { 'etime1' }
+                { 'roomid' => \'IS NULL' },
+                { 'date1'  => \'IS NULL' },
+                { 'stime1' => \'IS NULL' },
+                { 'etime1' => \'IS NULL' }
             ],
             {
                 'prefetch' => [ 'regpgid' ],
                 'order_by' => { '-asc' => [ 'me.regpgid', 'me.subno'] },
             } )
         ];
-    my @list = ();
-    foreach my $pgm ( @$pgmlist ) {
-        my $regpgid = 
-        push @list, {
-            'pgid'          => $pgm->pgid(),
+    my @unsetlist = ();
+    foreach my $pgm ( @$unsetPgmlist ) {
+        push @unsetlist, {
             'regpgid'       => $pgm->regpgid->regpgid(),
             'subno'         => $pgm->subno(),
             'sname'         => $pgm->sname() || $pgm->regpgid->name(),
         };
     }
-    $c->stash->{'Program'} = \@list;
+    $c->stash->{'unsetProgram'} = \@unsetlist;
+    # 部屋別企画リスト
+    my $roomPgmlist =
+        [ $c->model('ConkanDB::PgProgram')->search(
+            { 'me.roomid' => \'IS NOT NULL',
+              'date1'  => \'IS NOT NULL', 
+              'stime1' => \'IS NOT NULL', 
+              'etime1' => \'IS NOT NULL' 
+            },
+            {
+                'prefetch' => [ 'roomid', 'regpgid' ],
+                'order_by' => { '-asc' => [ 'me.roomid' ] },
+            } )
+        ];
+    my @roomlist = ();
+    foreach my $pgm ( @$roomPgmlist ) {
+        my $doperiod = __PACKAGE__->createPeriod( $pgm );
+        push @roomlist, {
+            'roomid'        => $pgm->roomid->roomid(),
+            'roomname'      => $pgm->roomid->name(),
+            'roomno'        => $pgm->roomid->roomno(),
+            'regpgid'       => $pgm->regpgid->regpgid(),
+            'subno'         => $pgm->subno(),
+            'sname'         => $pgm->sname() || $pgm->regpgid->name(),
+            'doperiod'      => $doperiod,
+        };
+    }
+    $c->stash->{'roomProgram'} = \@roomlist;
+    # 出演者別企画リスト
+    my $castPgmlist =
+        [ $c->model('ConkanDB::PgProgram')->search(
+            { 'me.roomid' => \'IS NOT NULL',
+              'date1'  => \'IS NOT NULL', 
+              'stime1' => \'IS NOT NULL', 
+              'etime1' => \'IS NOT NULL' 
+            },
+            {
+                'prefetch' => [ 'pg_casts', 'regpgid', 'roomid' ],
+                'order_by' => { '-asc' => [ 'pg_casts.castid' ] },
+            } )
+        ];
+    my @castlist = ();
+    foreach my $pgm ( @$castPgmlist ) {
+        my $doperiod = __PACKAGE__->createPeriod( $pgm );
+
+        foreach my $cast ( $pgm->pg_casts->all() ) {
+            push @castlist, {
+                'castid'        => $cast->castid->castid(),
+                'castname'      => $cast->name(),
+                'regpgid'       => $pgm->regpgid->regpgid(),
+                'subno'         => $pgm->subno(),
+                'sname'         => $pgm->sname() || $pgm->regpgid->name(),
+                'roomid'        => $pgm->roomid->roomid(),
+                'roomname'      => $pgm->roomid->name(),
+                'doperiod'      => $doperiod,
+            };
+        }
+    }
+    $c->stash->{'castProgram'} = \@castlist;
     # 設定フォーム選択肢
-    my $conf  = {};
-    my $M = $c->model('ConkanDB::PgSystemConf');
-    my $time_origin = $c->config->{time_origin};
-    $conf->{'dates'}   = [
-          map +{ 'id' => $_ , 'val' => $_ },
-            @{from_json( $M->find('dates')->pg_conf_value() )}
-        ];
-    $conf->{'s_hours'} = [
-          map +{ 'id' => sprintf('%02d', $_), 'val' => sprintf('%02d', $_) },
-            ( $time_origin .. $time_origin+23 )
-        ];
-    $conf->{'s_mins'} = [
-          map +{ 'id' => sprintf('%02d', $_*5),
-                 'val' => sprintf('%02d', $_*5) },
-            ( 0 .. 11 )
-        ];
-    $conf->{'e_hours'} = [
-          map +{ 'id' => sprintf('%02d', $_), 'val' => sprintf('%02d', $_) },
-            ( $time_origin .. $time_origin+23 )
-        ];
-    $conf->{'e_mins'} = [
-          map +{ 'id' => sprintf('%02d', $_*5),
-                 'val' => sprintf('%02d', $_*5) },
-            ( 0 .. 11 )
-        ];
-    $conf->{'status'}  = [
-          map +{ 'id' => $_, 'val' => $_ },
-            @{from_json( $M->find('pg_status_vals')->pg_conf_value() )}
-        ];
-    $conf->{'nos'}     = [
-          map +{ 'id' => $_, 'val' => $_ }, qw/ 0 1 2 3 4 /
-        ];
-    $conf->{'roomlist'}  = [
-          map +{ 'id'  => $_->roomid(),
-                 'val' => $_->name() . '(' . $_->roomno() . ')' },
-            $c->model('ConkanDB::PgRoom')->all()
-        ];
-    $c->stash->{'conf'}  = $conf;
+    $c->stash->{'conf'}  = $c->forward('/program/_setSysConf' );
 }
 
+=head2 createPeriod
+
+企画実施日時を変換する
+
+戻り値 変換した文字列
+
+=cut
+        
+sub createPeriod {
+    my ( $self,
+         $pgm,  # DBレコードオブジェクト
+       ) = @_;
+    my $ret;
+
+    $ret = sprintf('%s %s-%s', $pgm->date1(), $pgm->stime1(), $pgm->etime1() );
+    if ( $pgm->date2() ) {
+        $ret .= sprintf('%s %s-%s', $pgm->date2(), $pgm->stime2(), $pgm->etime2() );
+    }
+    return $ret;
+}
 =encoding utf8
 
 =head1 AUTHOR

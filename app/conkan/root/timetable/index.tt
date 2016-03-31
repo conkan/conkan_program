@@ -7,15 +7,14 @@
 <meta name="description" content="conkan profile">
 <meta name="author" content="Studio REM">
 <title>Conkan Timetable</title>
-[%- SET useWijGrid = 1 %]
+[%- SET useWijGrid = 0 %]
+[%- SET useUiGrid = 1 %]
 [% PROCESS 'ttwijgethead.tt' -%]
 <link rel="stylesheet" href="/static/css/conkan-timetable.css" />
 </head>
 [%- SET self_li_id = 'timetable' -%]
 [%- PROCESS 'tthead.tt' -%]
 <div class="container" ng-app="conkanTimeTable">
-  <script type="text/javascript">
-  </script>
   <div class="row" id="timetable_up">
     <div id="unset_pglist_wrap" class="col-sm-2">
       <!-- Left: 場所/時刻 未設定企画一覧 -->
@@ -27,12 +26,17 @@
         </dt>
       </dl>
     </div>
-    <div id="timetable_wrap" class="col-sm-10">
-      <div id="timetable_room">
+    <div id="timetable_wrap" class="col-sm-10" ng-controller="timetableController">
+      <div class="row">
+          <div class="col-sm-6"></div>
+          <div class="showbtn col-sm-3" ng-click="showbyroom()">部屋別</div>
+          <div class="showbtn col-sm-3" ng-click="showbycast()">出演者別</div>
+      </div>
+      <div id="timetable_room" ui-grid="ttgridbyroom" class="grid">
         <!-- Main: タイムテーブル表示: 部屋別 -->
       </div>
-      <div id="timetable_cast">
-        <!-- Main: タイムテーブル表示: 部屋別 -->
+      <div id="timetable_cast" ui-grid="ttgridbycast" class="grid">
+        <!-- Main: タイムテーブル表示: 出演者別 -->
       </div>
     </div>
   </div> <!-- End of timetable_up -->
@@ -56,12 +60,12 @@
         </colgroup>
         <tbody>
           <tr>
-            <td style="background-color:#FFcc66">
+            <td>
               {{current.regpgid}}{{current.subno}}
             </td>
             <th style="text-align: right">企画名</th>
             <th colspan="3">{{current.name}}</th>
-            <td colspan="2" style="background-color:#FFcc66">
+            <td colspan="2">
               {{current.sname}}
             </td>
           </tr>
@@ -113,7 +117,7 @@
             </td>
             <td style="text-align: center">
                 <button type="submit" class="btn" id="applybtn"
-                    ng-click="doAppry()">
+                    ng-click="doApply()">
                   反映
                 </button>
             </td>
@@ -122,7 +126,7 @@
         </tbody>
       </table>
       <!-- 各コントローラが使う値設定サービス(ttで初期化) -->
-      [%- PROCESS 'tttimeselval.tt' -%]
+      [% PROCESS 'tttimeselval.tt' %]
     </div> <!-- End of timetable_edit_form -->
   </div> <!-- End of timetable_down -->
 </div>

@@ -553,42 +553,16 @@ sub pgup_program : Chained('program_show') : PathPart('program') : Args(0) {
                        'val' => $_->name() . '(' . $_->roomno() . ')' },
                     $c->model('ConkanDB::PgRoom')->all()
                 ];
-            my $conf  = {};
-            my $M = $c->model('ConkanDB::PgSystemConf');
-            my $time_origin = $c->config->{time_origin};
-            $conf->{'dates'}   = [
-                { 'id' => '', 'val' => '' },
-                map +{ 'id' => $_, 'val' => $_ },
-                    @{from_json( $M->find('dates')->pg_conf_value() )}
-                ];
-            $conf->{'s_hours'} = [
-                { 'id' => '', 'val' => '' },
-                  map +{ 'id' => sprintf('%02d', $_), 'val' => sprintf('%02d', $_) },
-                        ( $time_origin .. $time_origin+23 )
-                ];
-            $conf->{'s_mins'} = [
-                { 'id' => '', 'val' => '' },
-                  map +{ 'id' => sprintf('%02d', $_*5), 'val' => sprintf('%02d', $_*5) },
-                        ( 0 .. 11 )
-                ];
-            $conf->{'e_hours'} = [
-                { 'id' => '', 'val' => '' },
-                  map +{ 'id' => sprintf('%02d', $_), 'val' => sprintf('%02d', $_) },
-                        ( $time_origin .. $time_origin+23 )
-                ];
-            $conf->{'e_mins'} = [
-                { 'id' => '', 'val' => '' },
-                  map +{ 'id' => sprintf('%02d', $_*5), 'val' => sprintf('%02d', $_*5) },
-                        ( 0 .. 11 )
-                ];
-            $conf->{'status'}  = [
-                { 'id' => '', 'val' => '' },
-                map +{ 'id' => $_, 'val' => $_ },
-                    @{from_json( $M->find('pg_status_vals')->pg_conf_value() )}
-                ];
-            $conf->{'nos'}     = [
-                  map +{ 'id' => $_, 'val' => $_ }, qw/ 0 1 2 3 4 /
-                ];
+            # 設定フォーム選択肢
+            my $conf = $c->forward('/program/_setSysConf' );
+            # select直記述時の特殊処理 (angular化したら不要)
+            unshift( @{$conf->{'dates'}}, { 'id' => '', 'val' => '' } );
+            unshift( @{$conf->{'s_hours'}}, { 'id' => '', 'val' => '' } );
+            unshift( @{$conf->{'s_mins'}}, { 'id' => '', 'val' => '' } );
+            unshift( @{$conf->{'e_hours'}}, { 'id' => '', 'val' => '' } );
+            unshift( @{$conf->{'e_mins'}}, { 'id' => '', 'val' => '' } );
+            unshift( @{$conf->{'status'}}, { 'id' => '', 'val' => '' } );
+            unshift( @{$conf->{'nos'}}, { 'id' => '', 'val' => '' } );
             $c->stash->{'conf'}  = $conf;
         }
     } catch {
@@ -833,6 +807,55 @@ sub _trnSEtime :Private {
         }
     }
 }
+
+=head2 _setSysConf
+
+企画情報選択肢設定
+
+=cut
+
+sub _setSysConf :Private {
+    my ( $self, $c, 
+       ) = @_;
+
+    my $conf  = {};
+    my $M = $c->model('ConkanDB::PgSystemConf');
+    my $time_origin = $c->config->{time_origin};
+    $conf->{'dates'}   = [
+        map +{ 'id' => $_, 'val' => $_ },
+            @{from_json( $M->find('dates')->pg_conf_value() )}
+        ];
+    $conf->{'s_hours'} = [
+          map +{ 'id' => sprintf('%02d', $_), 'val' => sprintf('%02d', $_) },
+                ( $time_origin .. $time_origin+23 )
+        ];
+    $conf->{'s_mins'} = [
+          map +{ 'id' => sprintf('%02d', $_*5), 'val' => sprintf('%02d', $_*5) },
+                ( 0 .. 11 )
+        ];
+    $conf->{'e_hours'} = [
+          map +{ 'id' => sprintf('%02d', $_), 'val' => sprintf('%02d', $_) },
+                ( $time_origin .. $time_origin+23 )
+        ];
+    $conf->{'e_mins'} = [
+          map +{ 'id' => sprintf('%02d', $_*5), 'val' => sprintf('%02d', $_*5) },
+                ( 0 .. 11 )
+        ];
+    $conf->{'status'}  = [
+        map +{ 'id' => $_, 'val' => $_ },
+            @{from_json( $M->find('pg_status_vals')->pg_conf_value() )}
+        ];
+    $conf->{'nos'}     = [
+          map +{ 'id' => $_, 'val' => $_ }, qw/ 0 1 2 3 4 /
+        ];
+    $conf->{'roomlist'}  = [
+          map +{ 'id'  => $_->roomid(),
+                 'val' => $_->name() . '(' . $_->roomno() . ')' },
+                $c->model('ConkanDB::PgRoom')->all()
+        ];
+    return $conf;
+}
+
 =encoding utf8
 
 =head1 AUTHOR

@@ -3,8 +3,8 @@
   <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
   <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.0/jquery-ui.min.js"></script>
 <!-- bootstrap -->
-  <script type="text/javascript" src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-  <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+  <script type="text/javascript" src="//maxcdn.bootstrapcdn.com/bootstrap/latest/js/bootstrap.min.js"></script>
+  <link href="//maxcdn.bootstrapcdn.com/bootstrap/latest/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
 [%- IF useWijGrid %]
   <!-- wijmo -->
     <script type="text/javascript" src="/static/js/jquery.wijmo-open.all.3.20151.71.min.js"></script>
@@ -15,6 +15,16 @@
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.0/angular.min.js"></script>
   <!-- angular-wijmo -->
     <script type="text/javascript" src="/static/js/angular.wijmo.3.20151.71.js"></script>
+  <!-- conkan-wijmo -->
+    <script type="text/javascript" src="/static/js/conkan_wijmo.js"></script>
+    <link rel="stylesheet" href="/static/css/conkan-wijmo.css" />
+[%- END %]
+[%- IF useUiGrid %]
+  <!-- angular -->
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.0/angular.min.js"></script>
+  <!-- angular ui grid-->
+  <link href="//cdnjs.cloudflare.com/ajax/libs/angular-ui-grid/3.1.1/ui-grid.min.css" rel="stylesheet" type="text/css" />
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-grid/3.1.1/ui-grid.min.js"></script>
   <!-- conkan-wijmo -->
     <script type="text/javascript" src="/static/js/conkan_wijmo.js"></script>
     <link rel="stylesheet" href="/static/css/conkan-wijmo.css" />

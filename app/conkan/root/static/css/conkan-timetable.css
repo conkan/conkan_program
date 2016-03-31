@@ -11,8 +11,22 @@
     white-space:    nowrap;
 }
 
-#timetable_wrap {
-    background: blue;
+#timetable_wrap .showbtn {
+    border-style: ridge;
+    border-color:   black
+    background-color: #F0F0F0;
+}
+
+#timetable_room {
+    background: #88F;
+    position: absolute;
+    visibility: visible;
+}
+
+#timetable_cast {
+    background: #44F;
+    position: absolute;
+    visibility: hidden;
 }
 
 #unset_pglist_wrap, #timetable_wrap {
