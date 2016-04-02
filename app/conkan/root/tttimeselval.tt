@@ -3,7 +3,8 @@
 // そうすれば、モジュールの生成もjsに持っていける
 
 // conkanTimeTableモジュールの生成(グローバル変数)
-var ConkanAppModule = angular.module('conkanTimeTable', ['ui.grid'] );
+var ConkanAppModule = angular.module('conkanTimeTable',
+        ['ui.grid', 'ui.grid.resizeColumns', 'ui.grid.pinning'] );
 
 // 企画データ
 ConkanAppModule.value( 'pglistValue', {
@@ -11,9 +12,10 @@ ConkanAppModule.value( 'pglistValue', {
     unsetprglist : [
         [%- FOREACH prg = unsetProgram %]
             {
-                regpgid : '[% prg.regpgid %]',
-                subno   : '[% prg.subno %]',
+                regpgid : '[% prg.regpgid | format('%04d') %]',
+                subno   : '[% prg.subno | format('%01d') %]',
                 sname   : '[% prg.sname | xml %]',
+                pgid    : '[% prg.pgid %]',
             },
         [%- END %]
     ],
@@ -23,8 +25,10 @@ ConkanAppModule.value( 'pglistValue', {
             {
                 room     :
                     '[%- prg.roomno %] [% prg.roomname | xml %]',
-                prgname  :
-                    '[%- prg.regpgid %]([% prg.subno %]) [% prg.sname | xml %]',
+                prgname  : {
+                    name: '[%- prg.regpgid | format('%04d') %]([% prg.subno | format('%01d') %]) [% prg.sname | xml %]',
+                    pgid    : '[% prg.pgid %]',
+                },
                 doperiod :
                     '[%- prg.doperiod %]',
             },
@@ -35,11 +39,13 @@ ConkanAppModule.value( 'pglistValue', {
         [%- FOREACH prg = castProgram %]
             {
                 cast :
-                    '[%- prg.castid %] [% prg.castname | xml %]',
-                prgname  :
-                    '[%- prg.regpgid %]([% prg.subno %]) [% prg.sname | xml %]',
+                    '[%- prg.castid | format('%04d') %] [% prg.castname | xml %]',
+                prgname  : {
+                    name: '[%- prg.regpgid | format('%04d') %]([% prg.subno | format('%01d') %]) [% prg.sname | xml %]',
+                    pgid    : '[% prg.pgid %]',
+                },
                 room     :
-                    '[%- prg.roomid %] [% prg.roomname | xml %]',
+                    '[%- prg.roomno %] [% prg.roomname | xml %]',
                 doperiod :
                     '[%- prg.doperiod %]',
             },

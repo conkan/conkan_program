@@ -5,16 +5,42 @@
 #unset_pglist_wrap {
     background-color: #ddd;
     overflow-x: hidden;
+    padding:    0px;
 }
 
 #unset_pglist_wrap a {
     white-space:    nowrap;
+    padding:    0px;
 }
 
 #timetable_wrap .showbtn {
+    -moz-user-select: none;
     border-style: ridge;
     border-color:   black
     background-color: #F0F0F0;
+    text-align: center;
+    cursor: pointer;
+}
+
+#timetable_wrap .showbtnon {
+    background-color: #C0C0FF;
+}
+
+#timetable_wrap .gridheader {
+    text-align: center;
+}
+
+.prgcell {
+    text-align: left;
+    border: thin ridge #686868;
+}
+
+#timetable_wrap .prgcell {
+    width: 100%;
+}
+
+#timetable_wrap .doperiod {
+    min-width: 480px;
 }
 
 #timetable_room {
@@ -36,4 +62,8 @@
 
 #timetable_edit_form {
     background: yellow;
+}
+
+#timetable_edit_form select {
+    padding: 0px;
 }

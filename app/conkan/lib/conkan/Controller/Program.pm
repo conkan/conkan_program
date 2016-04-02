@@ -850,7 +850,7 @@ sub _setSysConf :Private {
         ];
     $conf->{'roomlist'}  = [
           map +{ 'id'  => $_->roomid(),
-                 'val' => $_->name() . '(' . $_->roomno() . ')' },
+                 'val' => $_->roomno() . ' ' . $_->name() },
                 $c->model('ConkanDB::PgRoom')->all()
         ];
     return $conf;

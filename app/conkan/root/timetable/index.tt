@@ -20,22 +20,22 @@
       <!-- Left: 場所/時刻 未設定企画一覧 -->
       <dl ng-controller="unsetlistController">
         <dt ng-repeat="prg in unsetprglist">
-          <a ng-click="unsetclick(prg.pgid)">
+          <button class="btn primary prgcell" ng-click="unsetclick(prg.pgid)">
             {{prg.regpgid}}({{prg.subno}}):{{prg.sname}}
-          </a>
+          </button>
         </dt>
       </dl>
     </div>
     <div id="timetable_wrap" class="col-sm-10" ng-controller="timetableController">
       <div class="row">
           <div class="col-sm-6"></div>
-          <div class="showbtn col-sm-3" ng-click="showbyroom()">部屋別</div>
-          <div class="showbtn col-sm-3" ng-click="showbycast()">出演者別</div>
+          <div class="showbtnon showbtn col-sm-3" id="roombtn" ng-click="showbyroom()">部屋別</div>
+          <div class="showbtn col-sm-3" id="castbtn" ng-click="showbycast()">出演者別</div>
       </div>
-      <div id="timetable_room" ui-grid="ttgridbyroom" class="grid">
+      <div id="timetable_room" ui-grid="ttgridbyroom" class="grid" ui-grid-resize-columns ui-grid-pinning>
         <!-- Main: タイムテーブル表示: 部屋別 -->
       </div>
-      <div id="timetable_cast" ui-grid="ttgridbycast" class="grid">
+      <div id="timetable_cast" ui-grid="ttgridbycast" class="grid" ui-grid-resize-columns ui-grid-pinning>
         <!-- Main: タイムテーブル表示: 出演者別 -->
       </div>
     </div>

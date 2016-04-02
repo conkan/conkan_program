@@ -45,6 +45,7 @@ sub index :Path :Args(0) {
     foreach my $pgm ( @$unsetPgmlist ) {
         push @unsetlist, {
             'regpgid'       => $pgm->regpgid->regpgid(),
+            'pgid'          => $pgm->pgid(),
             'subno'         => $pgm->subno(),
             'sname'         => $pgm->sname() || $pgm->regpgid->name(),
         };
@@ -71,6 +72,7 @@ sub index :Path :Args(0) {
             'roomname'      => $pgm->roomid->name(),
             'roomno'        => $pgm->roomid->roomno(),
             'regpgid'       => $pgm->regpgid->regpgid(),
+            'pgid'          => $pgm->pgid(),
             'subno'         => $pgm->subno(),
             'sname'         => $pgm->sname() || $pgm->regpgid->name(),
             'doperiod'      => $doperiod,
@@ -97,11 +99,12 @@ sub index :Path :Args(0) {
         foreach my $cast ( $pgm->pg_casts->all() ) {
             push @castlist, {
                 'castid'        => $cast->castid->castid(),
-                'castname'      => $cast->name(),
+                'castname'      => $cast->name() || $cast->castid->name(),
                 'regpgid'       => $pgm->regpgid->regpgid(),
+                'pgid'          => $pgm->pgid(),
                 'subno'         => $pgm->subno(),
                 'sname'         => $pgm->sname() || $pgm->regpgid->name(),
-                'roomid'        => $pgm->roomid->roomid(),
+                'roomno'        => $pgm->roomid->roomno(),
                 'roomname'      => $pgm->roomid->name(),
                 'doperiod'      => $doperiod,
             };
