@@ -44,13 +44,13 @@
 }
 
 #timetable_room {
-    background: #88F;
+    background: lightgray;
     position: absolute;
     visibility: visible;
 }
 
 #timetable_cast {
-    background: #44F;
+    background: lightgray;
     position: absolute;
     visibility: hidden;
 }
@@ -65,5 +65,49 @@
 }
 
 #timetable_edit_form select {
+    padding: 0px;
+}
+
+.ganttHead th {
+    text-align: center;
+    border: 1px solid gray;
+}
+
+.ganttCell {
+    border: 1px dashed gray;
+    width: 24px;
+        /* tttimeselval.tt:pglistValue.ganttConst.cell_widthと同値にすること */
+}
+
+.ganttRow {
+    height: 100%;
+    position: relative;
+    padding: 0px;
+}
+
+.ganttRowBack {
+    top: 0px;
+    left: 0px;
+    height: 100%;
+}
+
+.ganttBar {
+    background: #008080;
+    height: 15px;
+    opacity: 0.7;
+    position: absolute;
+    top: 10px;
+}
+
+.ui-grid-column-menu-button {
+    display: none;
+}
+
+.ui-grid-header {
+    padding: 0px;
+    border: 0px;
+}
+
+.ui-grid-canvas {
     padding: 0px;
 }

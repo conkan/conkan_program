@@ -27,6 +27,18 @@ Timetableを表示する Catalyst Controller.
 sub index :Path :Args(0) {
     my ( $self, $c ) = @_;
     my $uid = $c->user->get('staffid');
+    # タイムテーブルガントチャート表示用固定値
+    my $M = $c->model('ConkanDB::PgSystemConf');
+    my $syscon = {
+        'dates'       => [ @{from_json( $M->find('dates')->pg_conf_value() )}],
+        'start_hours' => [ @{from_json( $M->find('start_hours')->pg_conf_value() )}],
+        'end_hours'   => [ @{from_json( $M->find('end_hours')->pg_conf_value() )}],
+        'gantt_header'      => $M->find('gantt_header')->pg_conf_value(),
+        'gantt_back_grid'   => $M->find('gantt_back_grid')->pg_conf_value(),
+        'gantt_colmnum'     => $M->find('gantt_colmnum')->pg_conf_value(),
+        'shift_hour'  => $c->config->{time_origin},
+    };
+    $c->stash->{'syscon'} = $syscon;
     # 未設定企画リスト
     my $unsetPgmlist =
         [ $c->model('ConkanDB::PgProgram')->search(
@@ -129,9 +141,17 @@ sub createPeriod {
        ) = @_;
     my $ret;
 
-    $ret = sprintf('%s %s-%s', $pgm->date1(), $pgm->stime1(), $pgm->etime1() );
+    my @date  = split('T', $pgm->date1());
+    my @stime = split(':', $pgm->stime1());
+    my @etime = split(':', $pgm->etime1());
+    $ret = sprintf('%s %02d:%02d-%02d:%02d',
+                    $date[0], $stime[0], $stime[1], $etime[0], $etime[1] );
     if ( $pgm->date2() ) {
-        $ret .= sprintf('%s %s-%s', $pgm->date2(), $pgm->stime2(), $pgm->etime2() );
+        @date  = split('T', $pgm->date2());
+        @stime = split(':', $pgm->stime2());
+        @etime = split(':', $pgm->etime2());
+        $ret .= sprintf(' %s %02d:%02d-%02d:%02d',
+                        $date[0], $stime[0], $stime[1], $etime[0], $etime[1] );
     }
     return $ret;
 }

@@ -8,6 +8,30 @@ var ConkanAppModule = angular.module('conkanTimeTable',
 
 // 企画データ
 ConkanAppModule.value( 'pglistValue', {
+    // タイムテーブルガントチャート表示用固定値
+    ganttConst : {
+        dates : [
+            [%- FOREACH date = syscon.dates -%]
+                "[%- date -%]",
+            [%- END -%]
+        ],
+        start_hours : [
+            [%- FOREACH hour = syscon.start_hours -%]
+                "[%- hour -%]",
+            [%- END -%]
+        ],
+        end_hours : [
+            [%- FOREACH hour = syscon.end_hours -%]
+                "[%- hour -%]",
+            [%- END -%]
+        ],
+        ganttHeader : "[% syscon.gantt_header %]",
+        ganttBackGrid : "[% syscon.gantt_back_grid %]",
+        shift_hour  : [% syscon.shift_hour %],
+        colmnum : [% syscon.gantt_colmnum %],
+        cell_width : 24,
+            // conkan-timetable.css:.ganttCell.widthと同値にすること
+    },
     // 未設定企画リスト
     unsetprglist : [
         [%- FOREACH prg = unsetProgram %]
@@ -23,14 +47,12 @@ ConkanAppModule.value( 'pglistValue', {
     roomprglist : [
         [%- FOREACH prg = roomProgram %]
             {
-                room     :
-                    '[%- prg.roomno %] [% prg.roomname | xml %]',
+                room     : '[% prg.roomno %] [% prg.roomname | xml %]',
                 prgname  : {
-                    name: '[%- prg.regpgid | format('%04d') %]([% prg.subno | format('%01d') %]) [% prg.sname | xml %]',
+                    name: '[% prg.regpgid | format('%04d') %]([% prg.subno | format('%01d') %]) [% prg.sname | xml %]',
                     pgid    : '[% prg.pgid %]',
                 },
-                doperiod :
-                    '[%- prg.doperiod %]',
+                doperiod : '[% prg.doperiod %]'
             },
         [%- END %]
     ], 
@@ -38,16 +60,13 @@ ConkanAppModule.value( 'pglistValue', {
     castprglist : [
         [%- FOREACH prg = castProgram %]
             {
-                cast :
-                    '[%- prg.castid | format('%04d') %] [% prg.castname | xml %]',
+                cast : '[% prg.castid | format('%04d') %] [% prg.castname | xml %]',
                 prgname  : {
-                    name: '[%- prg.regpgid | format('%04d') %]([% prg.subno | format('%01d') %]) [% prg.sname | xml %]',
+                    name: '[% prg.regpgid | format('%04d') %]([% prg.subno | format('%01d') %]) [% prg.sname | xml %]',
                     pgid    : '[% prg.pgid %]',
                 },
-                room     :
-                    '[%- prg.roomno %] [% prg.roomname | xml %]',
-                doperiod :
-                    '[%- prg.doperiod %]',
+                room     : '[% prg.roomno %] [% prg.roomname | xml %]',
+                doperiod : '[% prg.doperiod %]'
             },
         [%- END %]
     ], 

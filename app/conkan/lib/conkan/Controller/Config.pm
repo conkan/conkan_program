@@ -91,11 +91,35 @@ sub setting :Local {
             my $param = $c->request->body_params;
             try {
                 foreach my $pHwk ( @rowconf ) {
-                    next if ( $pHwk->pg_conf_code eq 'updateflg' );
-                    $param->{$pHwk->pg_conf_code} =~ s/\s+$//;
+                    my $code = $pHwk->pg_conf_code;
+                    next if   ( $code eq 'updateflg' )
+                           || ( $code eq 'gantt_header' )
+                           || ( $code eq 'gantt_back_grid' )
+                           || ( $code eq 'gantt_colmnum' );
+                    $param->{$code} =~ s/\s+$//;
                     $pHwk->pg_conf_value( $param->{$pHwk->pg_conf_code} );
                     $pHwk->update();
                 }
+                # タイムテーブルガントチャート表示用固定値算出設定
+                # 日付、開始時刻列、終了時刻列を修正した場合のみでよいが、
+                # めったにないので毎回設定
+                my $ganttStrs = $c->forward('/config/_crGntStr', [ $param, ], );
+                $sysconM->update_or_create( {
+                    pg_conf_code => 'gantt_header',
+                    pg_conf_name => 'gantt_header(cache)',
+                    pg_conf_value => $ganttStrs->[0],
+                });
+                $sysconM->update_or_create( {
+                    pg_conf_code => 'gantt_back_grid',
+                    pg_conf_name => 'gantt_back_grid(cache)',
+                    pg_conf_value => $ganttStrs->[1],
+                });
+                $sysconM->update_or_create( {
+                    pg_conf_code => 'gantt_colmnum',
+                    pg_conf_name => 'gantt_colmnum(cache)',
+                    pg_conf_value => $ganttStrs->[2],
+                });
+
                 $c->stash->{'state'} = 'success';
             } catch {
                 $c->detach( '_dberror', [ shift ] );
@@ -108,6 +132,61 @@ sub setting :Local {
     }
 }
 
+=head2 _crGntStr
+
+タイムテーブルガントチャート表示用固定値算出
+
+戻り値 固定値配列参照 [0]ヘッダ [1]背景グリッド [2]カラム数
+
+=cut
+
+sub _crGntStr :Private {
+    my ( $self, $c, 
+         $param,      # 日付列、開始時刻列、終了時刻列が入ったハッシュ
+       ) = @_;
+
+    my @dates  = @{from_json($param->{'dates'})};
+    my @starts = @{from_json($param->{'start_hours'})};
+    my @ends   = @{from_json($param->{'end_hours'})};
+
+    my $daycnt = scalar(@dates);
+    my @colnum = ();
+    my $maxcolnum = 0;
+
+    my @shours;
+    for ( my $cnt=0; $cnt<$daycnt; $cnt++ ) {
+        my @swk = split( /:/, $starts[$cnt] );
+        my @ewk = split( /:/, $ends[$cnt] );
+        $ewk[0] += 1 if $ewk[1] > 0;
+        $colnum[$cnt] = $ewk[0] - $swk[0];
+        $shours[$cnt] = $swk[0];
+        $maxcolnum += $colnum[$cnt];
+    }
+
+    my @ganttStrs = ();
+    $ganttStrs[0] = "<table class=ganttHead><tr>";
+    for ( my $cnt=0; $cnt<$daycnt; $cnt++ ) {
+        $ganttStrs[0] .= "<th colspan=$colnum[$cnt]>$dates[$cnt]</th>";
+    }
+    $ganttStrs[0] .= "</tr><tr>";
+    for ( my $cnt=0; $cnt<$daycnt; $cnt++ ) {
+        for ( my $hcnt=0; $hcnt<$colnum[$cnt]; $hcnt++ ) {
+            my $wkhstr = sprintf( '%02d', $shours[$cnt] + $hcnt );
+            $ganttStrs[0] .= "<td class=ganttCell>$wkhstr</td>";
+        }
+    }
+    $ganttStrs[0] .= "</tr></table>";
+
+    $ganttStrs[1] = "<table class=ganttRowBack><tr class=ui-grid-row>";
+    for ( my $cnt=0; $cnt<$maxcolnum; $cnt++ ) {
+        $ganttStrs[1] .= "<td class=ganttCell></td>";
+    }
+    $ganttStrs[1] .= "</tr></table>";
+
+    $ganttStrs[2] = $maxcolnum;
+
+    return \@ganttStrs;
+}
 =head2 staff
 -----------------------------------------------------------------------------
 スタッフ管理 staff_base  : Chainの起点

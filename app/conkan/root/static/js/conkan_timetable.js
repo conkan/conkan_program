@@ -41,60 +41,89 @@ ConkanAppModule.factory( 'currentprgService',
     }
 );
 
-// タイムテーブルコントローラ
-ConkanAppModule.controller( 'timetableController',
+// 未設定企画リストコントローラ
+ConkanAppModule.controller( 'unsetlistController',
     [ '$scope', 'currentprgService', 'pglistValue',
         function( $scope, currentprgService, pglistValue ) {
+            $scope.unsetprglist = pglistValue.unsetprglist;
+            $scope.unsetclick = function( pgid ) {
+                currentprgService.query( pgid );
+            };
+        }
+    ]
+);
+
+// タイムテーブルコントローラ
+ConkanAppModule.controller( 'timetableController',
+    [ '$scope', 'currentprgService', 'pglistValue', '$sce',
+        function( $scope, currentprgService, pglistValue, $sce ) {
+            $scope.__getGanttWidth = function() {
+                return pglistValue.ganttConst.cell_width * ( pglistValue.ganttConst.colmnum + 1 );
+            };
+            $scope.__crGanttCell = function( doperiod ) {
+                var retval = pglistValue.ganttConst.ganttBackGrid;
+                retval += '<div class="ganttBar" style="left:10px;width:48px"></div>';
+                var wkstr = $sce.trustAsHtml( retval );
+                return wkstr;
+            };
+
             $scope.ttgridbyroom = {
                 enableFiltering: false,
+                enableSorting: false,
                 treeRowHeaderAlwaysVisible: false,
                 enableColumnResizing: true,
+                enableGridMenu: false
             };
             $scope.ttgridbyroom.columnDefs = [
                 { name : '部屋', field: 'room',
                     headerCellClass: 'gridheader',
                     grouping: { groupPriority: 1 },
-                    sort: { priority: 0, direction: 'asc' },
-                    width: 250,
+                    sort: { priority: 0, direction: 'asc' }
                 },
                 { name : '企画名', field: 'prgname',
                     headerCellClass: 'gridheader',
                     sort: { priority: 1, direction: 'asc' }, 
-                    width: 250,
                     cellTemplate: '<button class="btn primary prgcell" ng-click=grid.appScope.pgmclick(row.entity.prgname.pgid)>{{row.entity.prgname.name}}</button>'
                 },
-                { name : '', field: 'doperiod',
-                    width: 480,
+                { name : '期間',
+                    headerCellTemplate: pglistValue.ganttConst.ganttHeader,
+                    field: 'doperiod',
                     pinnedRight:true,
+                    width: $scope.__getGanttWidth(),
+                    cellTooltip: true,
+                    cellTemplate: '<div class="ganttRow ui-grid-cell-contents" title="TOOLTIP" ng-bind-html="grid.appScope.__crGanttCell(row.entity.doperiod)"></div>'
                 }
             ];
             $scope.ttgridbyroom.data = pglistValue.roomprglist;
 
             $scope.ttgridbycast= {
                 enableFiltering: false,
+                enableSorting: false,
                 treeRowHeaderAlwaysVisible: false,
                 enableColumnResizing: true,
+                enableGridMenu: false
             };
             $scope.ttgridbycast.columnDefs = [
                 { name : '出演者', field: 'cast',
                     headerCellClass: 'gridheader',
                     grouping: { groupPriority: 1 },
-                    sort: { priority: 0, direction: 'asc' },
-                    width: 170,
+                    sort: { priority: 0, direction: 'asc' }
                 },
                 { name : '企画名', field: 'prgname',
                     headerCellClass: 'gridheader',
                     sort: { priority: 1, direction: 'asc' },
-                    width: 170,
                     cellTemplate: '<button class="btn primary prgcell" ng-click=grid.appScope.pgmclick(row.entity.prgname.pgid)>{{row.entity.prgname.name}}</button>'
                 },
                 { name : '部屋', field: 'room',
-                    headerCellClass: 'gridheader',
-                    width: 160,
+                    headerCellClass: 'gridheader'
                 },
-                { name : '', field: 'doperiod',
-                    width: 480,
+                { name : '期間',
+                    headerCellTemplate: pglistValue.ganttConst.ganttHeader,
+                    width: $scope.__getGanttWidth(),
+                    field: 'doperiod',
                     pinnedRight:true,
+                    cellTooltip: true,
+                    cellTemplate: '<div class="ganttRow ui-grid-cell-contents" title="TOOLTIP" ng-bind-html="grid.appScope.__crGanttCell(row.entity.doperiod)"></div>'
                 }
             ];
             $scope.ttgridbycast.data = pglistValue.castprglist;
@@ -112,18 +141,6 @@ ConkanAppModule.controller( 'timetableController',
                 $("#castbtn").addClass( 'showbtnon' );
             };
             $scope.pgmclick = function( pgid ) {
-                currentprgService.query( pgid );
-            };
-        }
-    ]
-);
-
-// 未設定企画リストコントローラ
-ConkanAppModule.controller( 'unsetlistController',
-    [ '$scope', 'currentprgService', 'pglistValue',
-        function( $scope, currentprgService, pglistValue ) {
-            $scope.unsetprglist = pglistValue.unsetprglist;
-            $scope.unsetclick = function( pgid ) {
                 currentprgService.query( pgid );
             };
         }

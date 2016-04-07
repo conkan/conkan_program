@@ -21,7 +21,7 @@
 [%- END %]
 [%- IF useUiGrid %]
   <!-- angular -->
-    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.0/angular.min.js"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.min.js"></script>
   <!-- angular ui grid-->
   <link href="//cdnjs.cloudflare.com/ajax/libs/angular-ui-grid/3.1.1/ui-grid.min.css" rel="stylesheet" type="text/css" />
   <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-grid/3.1.1/ui-grid.min.js"></script>
