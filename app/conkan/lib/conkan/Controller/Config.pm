@@ -95,7 +95,8 @@ sub setting :Local {
                     next if   ( $code eq 'updateflg' )
                            || ( $code eq 'gantt_header' )
                            || ( $code eq 'gantt_back_grid' )
-                           || ( $code eq 'gantt_colmnum' );
+                           || ( $code eq 'gantt_colmnums' )
+                           || ( $code eq 'gantt_scale_str' );
                     $param->{$code} =~ s/\s+$//;
                     $pHwk->pg_conf_value( $param->{$pHwk->pg_conf_code} );
                     $pHwk->update();
@@ -119,6 +120,11 @@ sub setting :Local {
                     pg_conf_name => 'gantt_colmnum(cache)',
                     pg_conf_value => $ganttStrs->[2],
                 });
+                $sysconM->update_or_create( {
+                    pg_conf_code => 'gantt_scale_str',
+                    pg_conf_name => 'gantt_scale_str(cache)',
+                    pg_conf_value => $ganttStrs->[3],
+                });
 
                 $c->stash->{'state'} = 'success';
             } catch {
@@ -136,7 +142,10 @@ sub setting :Local {
 
 タイムテーブルガントチャート表示用固定値算出
 
-戻り値 固定値配列参照 [0]ヘッダ [1]背景グリッド [2]カラム数
+戻り値 固定値配列参照 [0]ヘッダ [1]背景グリッド [2]カラム総数
+                      [3]タイムスケール表示用ハッシュ(JSON)
+                            キー: 日付
+                              値: [ 開始時刻(分表示), 先頭カラム数 ]
 
 =cut
 
@@ -154,12 +163,15 @@ sub _crGntStr :Private {
     my $maxcolnum = 0;
 
     my @shours;
+    my $gantt_scale = {};
     for ( my $cnt=0; $cnt<$daycnt; $cnt++ ) {
         my @swk = split( /:/, $starts[$cnt] );
         my @ewk = split( /:/, $ends[$cnt] );
         $ewk[0] += 1 if $ewk[1] > 0;
         $colnum[$cnt] = $ewk[0] - $swk[0];
         $shours[$cnt] = $swk[0];
+        $gantt_scale->{$dates[$cnt]} = [ ( ($swk[0] * 60) + $swk[1] ),
+                                         $maxcolnum ];
         $maxcolnum += $colnum[$cnt];
     }
 
@@ -178,12 +190,16 @@ sub _crGntStr :Private {
     $ganttStrs[0] .= "</tr></table>";
 
     $ganttStrs[1] = "<table class=ganttRowBack><tr class=ui-grid-row>";
-    for ( my $cnt=0; $cnt<$maxcolnum; $cnt++ ) {
-        $ganttStrs[1] .= "<td class=ganttCell></td>";
+    for ( my $cnt=0; $cnt<$daycnt; $cnt++ ) {
+        for ( my $hcnt=0; $hcnt<$colnum[$cnt]; $hcnt++ ) {
+            $ganttStrs[1] .= "<td class=ganttCell></td>";
+        }
     }
     $ganttStrs[1] .= "</tr></table>";
 
     $ganttStrs[2] = $maxcolnum;
+
+    $ganttStrs[3] = to_json($gantt_scale);
 
     return \@ganttStrs;
 }

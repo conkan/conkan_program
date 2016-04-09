@@ -10,26 +10,12 @@ var ConkanAppModule = angular.module('conkanTimeTable',
 ConkanAppModule.value( 'pglistValue', {
     // タイムテーブルガントチャート表示用固定値
     ganttConst : {
-        dates : [
-            [%- FOREACH date = syscon.dates -%]
-                "[%- date -%]",
-            [%- END -%]
-        ],
-        start_hours : [
-            [%- FOREACH hour = syscon.start_hours -%]
-                "[%- hour -%]",
-            [%- END -%]
-        ],
-        end_hours : [
-            [%- FOREACH hour = syscon.end_hours -%]
-                "[%- hour -%]",
-            [%- END -%]
-        ],
-        ganttHeader : "[% syscon.gantt_header %]",
-        ganttBackGrid : "[% syscon.gantt_back_grid %]",
-        shift_hour  : [% syscon.shift_hour %],
-        colmnum : [% syscon.gantt_colmnum %],
-        cell_width : 24,
+        scale_hash      : [% syscon.gantt_scale_str %],
+        ganttHeader     : "[% syscon.gantt_header %]",
+        ganttBackGrid   : "[% syscon.gantt_back_grid %]",
+        shift_hour      : [% syscon.shift_hour %],
+        maxcolmnum      : [% syscon.gantt_colmnum %],
+        cell_width      : 24,
             // conkan-timetable.css:.ganttCell.widthと同値にすること
     },
     // 未設定企画リスト

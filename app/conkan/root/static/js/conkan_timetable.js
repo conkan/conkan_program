@@ -58,12 +58,31 @@ ConkanAppModule.controller( 'timetableController',
     [ '$scope', 'currentprgService', 'pglistValue', '$sce',
         function( $scope, currentprgService, pglistValue, $sce ) {
             $scope.__getGanttWidth = function() {
-                return pglistValue.ganttConst.cell_width * ( pglistValue.ganttConst.colmnum + 1 );
+                var colmnum = pglistValue.ganttConst.maxcolmnum + 1;
+                return pglistValue.ganttConst.cell_width * colmnum;
             };
             $scope.__crGanttCell = function( doperiod ) {
                 var retval = pglistValue.ganttConst.ganttBackGrid;
-                retval += '<div class="ganttBar" style="left:10px;width:48px"></div>';
-                var wkstr = $sce.trustAsHtml( retval );
+                var scale_hash = pglistValue.ganttConst.scale_hash;
+                var periodDatas = doperiod.split(" ");
+                var unit = pglistValue.ganttConst.cell_width;
+                var cnt, curscale, date, times, start, end, bias, width, wkstr;
+                for ( cnt=0; cnt<periodDatas.length; cnt+=2 ) {
+                    date = periodDatas[cnt];
+                    curscale = scale_hash[date];
+                    times = periodDatas[cnt+1].split(/[:-]/);
+                    start = ( times[0] * 60 ) + ( times[1] * 1 );
+                    end   = ( times[2] * 60 ) + ( times[3] * 1 );
+                    bias  =  ( curscale[1] * unit )
+                           + ( ( ( start - curscale[0] ) * unit ) / 60 );
+                    width = ( ( end - start ) * unit ) / 60;
+                    retval += '<div class="ganttBar" style="left:'
+                            + bias
+                            + 'px;width:'
+                            + width
+                            + 'px"></div>';
+                }
+                wkstr = $sce.trustAsHtml( retval );
                 return wkstr;
             };
 

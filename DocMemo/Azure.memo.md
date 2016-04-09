@@ -50,7 +50,7 @@ else
 fi
 docker stop mysql
 docker rm mysql
-docker run  -d --restart='always' --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=xxxx -v `pwd`/mysql:/var/lib/mysql mysql:5.5
+docker run  -d --restart='always' --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=$MRPW -e HOSTNAME=mysql -v `pwd`/mysql:/var/lib/mysql mysql:5.5
 ''''
 
 1. dockerコンテナハートビート
