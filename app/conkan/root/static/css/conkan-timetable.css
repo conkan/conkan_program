@@ -68,6 +68,15 @@
     padding: 0px;
 }
 
+#timetable_edit_form table {
+    table-layout: fixed;
+}
+#timetable_edit_form th,
+#timetable_edit_form td {
+    overflow-x: hidden;
+    white-space: nowrap;
+}
+
 .ganttHead th {
     text-align: center;
     border: 1px solid gray;

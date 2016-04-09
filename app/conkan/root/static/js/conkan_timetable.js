@@ -23,19 +23,39 @@ var ConkanAppModule = angular.module('conkanTimeTable' );
 
 // 現在操作中企画サービス
 ConkanAppModule.factory( 'currentprgService',
-    function( $log ) {
-        return {
-            currentval: {
-                regpgid : '', subno :  '', pgid :  '', id : '', target : '',
+    function( $log, $http ) {
+        var currentval = {
+                regpgid : '', subno :  '', pgid :  '',
                 sname :   '', name :   '', stat :  '',
                 date1 :   '', shour1 : '', smin1 : '', ehour1 : '', emin1 : '',
                 date2 :   '', shour2 : '', smin2 : '', ehour2 : '', emin2 : '',
                 roomid :  ''
-            },
+        };
+        return {
+            currentval: currentval,
             query:   function(pgid) {
-                $log.log( pgid );
-                // pgidの企画情報を取得し、currentvalに設定
-                // subnoは前後に()付ける
+                $http.get('/timetable/' + pgid)
+                    .success(function (data, status, headers, config) {
+                        // pgidの企画情報を取得し、currentvalに設定
+                        // subnoは前後に()付ける
+                        currentval.regpgid = data.regpgid;
+                        currentval.subno   = '(' + data.subno + ')';
+                        currentval.pgid    = data.pgid;
+                        currentval.sname   = data.sname;
+                        currentval.name    = data.name;
+                        currentval.stat    = data.stat;
+                        currentval.date1   = data.date1;
+                        currentval.shour1  = data.shour1;
+                        currentval.smin1   = data.smin1;
+                        currentval.ehour1  = data.ehour1;
+                        currentval.emin1   = data.emin1;
+                        currentval.date2   = data.date2;
+                        currentval.shour2  = data.shour2;
+                        currentval.smin2   = data.smin2;
+                        currentval.ehour2  = data.ehour2;
+                        currentval.emin2   = data.emin2;
+                        currentval.roomid  = data.roomid;
+                    });
             }
         };
     }
@@ -181,8 +201,6 @@ ConkanAppModule.controller( 'timeformController',
                 $log.log( currentprgService.currentval.regpgid );
                 $log.log( currentprgService.currentval.subno );
                 $log.log( currentprgService.currentval.pgid );
-                $log.log( currentprgService.currentval.id );
-                $log.log( currentprgService.currentval.target );
                 $log.log( currentprgService.currentval.sname );
                 $log.log( currentprgService.currentval.name );
                 $log.log( currentprgService.currentval.stat );

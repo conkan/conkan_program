@@ -2,6 +2,7 @@ package conkan::Controller::Timetable;
 use Moose;
 use JSON;
 use String::Random qw/ random_string /;
+use Try::Tiny;
 use namespace::autoclean;
 use Data::Dumper;
 
@@ -155,6 +156,74 @@ sub createPeriod {
     }
     return $ret;
 }
+
+=head2 timetable
+-----------------------------------------------------------------------------
+タイムテーブル timetable_base  : Chainの起点
+
+=cut
+
+sub timetable_base : Chained('') : PathPart('timetable') : CaptureArgs(0) {
+    my ( $self, $c ) = @_;
+}
+
+=head2 timetable/*
+タイムテーブル timetable_get  : 個別詳細情報返却
+
+=cut
+
+sub timetable_get : Chained('timetable_base') :PathPart('') :Args(1) {
+    my ( $self, $c, $pgid ) = @_;
+
+    try {
+        my $row =
+            $c->model('ConkanDB::PgProgram')->find($pgid, 
+                            {
+                                'prefetch' => [ 'regpgid', 'roomid' ],
+                            },
+                        );
+$c->log->debug('>>>> get program:regpgid:['. $row->regpgid() . ']');
+$c->log->debug('>>>> get program:roomid:['. $row->roomid() . ']');
+        $c->stash->{'regpgid'}  = $row->regpgid->regpgid();
+        $c->stash->{'subno'}    = $row->subno();
+        $c->stash->{'pgid'}     = $row->pgid();
+        $c->stash->{'sname'}    = $row->sname();
+        $c->stash->{'name'}     = $row->regpgid->name();
+        $c->stash->{'stat'}     = $row->status();
+        if ( $row->date1() ) {
+            my @date  = split('T', $row->date1());
+            $date[0] =~ s[-][/]g;
+            my @stime = split(':', $row->stime1());
+            my @etime = split(':', $row->etime1());
+            $c->stash->{'date1'}    = $date[0];
+            $c->stash->{'shour1'}   = $stime[0];
+            $c->stash->{'smin1'}    = $stime[1];
+            $c->stash->{'ehour1'}   = $etime[0];
+            $c->stash->{'emin1'}    = $etime[1];
+        }
+        if ( $row->date2() ) {
+            my @date  = split('T', $row->date2());
+            $date[0] =~ s[-][/]g;
+            my @stime = split(':', $row->stime2());
+            my @etime = split(':', $row->etime2());
+            $c->stash->{'date2'}    = $date[0];
+            $c->stash->{'shour2'}   = $stime[0];
+            $c->stash->{'smin2'}    = $stime[1];
+            $c->stash->{'ehour2'}   = $etime[0];
+            $c->stash->{'emin2'}    = $etime[1];
+        }
+        if ( $row->roomid() ) {
+            $c->stash->{'roomid'}   = $row->roomid->roomid();
+        }
+    } catch {
+        my $e = shift;
+$c->log->error('>>> ' . localtime() . ' dbexp : ' . Dump($e) );
+        $c->stash->{'dberr'} = Dump( $e );
+    };
+$c->log->debug('>>>> get program:all');
+    $c->forward('conkan::View::JSON');
+}
+
 =encoding utf8
 
 =head1 AUTHOR

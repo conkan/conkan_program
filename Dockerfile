@@ -70,6 +70,8 @@ RUN cpanm -i Catalyst::Devel
 RUN cpanm -i Catalyst::Engine::Apache
 RUN cpanm -i Catalyst::View::TT
 RUN cpanm -i Catalyst::View::TT::ForceUTF8
+RUN cpanm -i Catalyst::View::JSON
+RUN cpanm -i Catalyst::View::Download::CSV
 RUN cpanm -i Catalyst::Model::DBI
 RUN cpanm -i Catalyst::Model::DBIC::Schema
 RUN cpanm -i Catalyst::Helper::Model::Email

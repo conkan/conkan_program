@@ -45,8 +45,6 @@
           <!-- Bottom: 場所/時刻設定フォーム -->
       <div class="form-group">
         <input type="hidden" ng-model="current.pgid">
-        <input type="hidden" ng-model="current.id">
-        <input type="hidden" ng-model="current.target">
       </div>
       <table class="table table-bordered table-condensed">
         <colgroup>
