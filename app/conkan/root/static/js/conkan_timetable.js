@@ -35,7 +35,7 @@ ConkanAppModule.factory( 'currentprgService',
             currentval: currentval,
             query:   function(pgid) {
                 $http.get('/timetable/' + pgid)
-                    .success(function (data, status, headers, config) {
+                    .success(function(data, status, headers, config) {
                         // pgidの企画情報を取得し、currentvalに設定
                         // subnoは前後に()付ける
                         currentval.regpgid = data.regpgid;
@@ -188,8 +188,8 @@ ConkanAppModule.controller( 'timetableController',
 
 // 設定フォームコントローラ
 ConkanAppModule.controller( 'timeformController',
-    [ '$scope', '$log', 'currentprgService', 'selectValue',
-        function( $scope, $log, currentprgService, selectValue ) {
+    [ '$scope', '$log', '$http', '$uibModal', 'currentprgService', 'selectValue',
+        function( $scope, $log, $http, $uibModal, currentprgService, selectValue ) {
             $scope.statuslist   = selectValue.statuslist;
             $scope.dateslist    = selectValue.dateslist;
             $scope.shourslist   = selectValue.shourslist;
@@ -198,23 +198,38 @@ ConkanAppModule.controller( 'timeformController',
             $scope.roomlist     = selectValue.roomlist;
             $scope.current      = currentprgService.currentval;
             $scope.doApply = function() {
-                $log.log( currentprgService.currentval.regpgid );
-                $log.log( currentprgService.currentval.subno );
-                $log.log( currentprgService.currentval.pgid );
-                $log.log( currentprgService.currentval.sname );
-                $log.log( currentprgService.currentval.name );
-                $log.log( currentprgService.currentval.stat );
-                $log.log( currentprgService.currentval.date1 );
-                $log.log( currentprgService.currentval.shour1 );
-                $log.log( currentprgService.currentval.smin1 );
-                $log.log( currentprgService.currentval.ehour1 );
-                $log.log( currentprgService.currentval.emin1 );
-                $log.log( currentprgService.currentval.date2 );
-                $log.log( currentprgService.currentval.shour2 );
-                $log.log( currentprgService.currentval.smin2 );
-                $log.log( currentprgService.currentval.ehour2 );
-                $log.log( currentprgService.currentval.emin2 );
-                $log.log( currentprgService.currentval.roomid );
+                var pgid = $scope.current.pgid;
+                $log.log( angular.toJson($scope.current, true ) );
+                $http.post('/timetable/' + pgid, $scope.current )
+                    .success(function(data, status, headers, config) {
+                        var modalinstance, templateval;
+                        if (data.status == 'update') {
+                            templateval = 'T_result_update';
+                        }
+                        else {
+                            templateval = 'T_result_fail';
+                        }
+                        modalinstance =
+                            $uibModal.open({
+                                templateUrl: templateval
+                            });
+                        modalinstance.result.then( function() {
+                            if (data.status == 'update') {
+                                location.reload();
+                            } else {
+                                currentprgService.query( pgid );
+                            }
+                        });
+                    })
+                    .error(function(data, status, headers, config) {
+                        var modalinstance =
+                            $uibModal.open({
+                                templateUrl:'T_result_dberr',
+                            });
+                        modalinstance.result.then( function() {
+                            currentprgService.query( pgid );
+                        });
+                    });
             };
           }
     ]

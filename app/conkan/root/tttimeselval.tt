@@ -4,7 +4,7 @@
 
 // conkanTimeTableモジュールの生成(グローバル変数)
 var ConkanAppModule = angular.module('conkanTimeTable',
-        ['ui.grid', 'ui.grid.resizeColumns', 'ui.grid.pinning'] );
+        ['ui.grid', 'ui.grid.resizeColumns', 'ui.grid.pinning', 'ui.bootstrap'] );
 
 // 企画データ
 ConkanAppModule.value( 'pglistValue', {

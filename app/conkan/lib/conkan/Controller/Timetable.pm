@@ -1,5 +1,6 @@
 package conkan::Controller::Timetable;
 use Moose;
+use utf8;
 use JSON;
 use String::Random qw/ random_string /;
 use Try::Tiny;
@@ -77,7 +78,7 @@ sub index :Path :Args(0) {
         ];
     my @roomlist = ();
     foreach my $pgm ( @$roomPgmlist ) {
-        my $doperiod = __PACKAGE__->createPeriod( $pgm );
+        my $doperiod = $c->forward('/timetable/createPeriod', [ $pgm, ], );
         push @roomlist, {
             'roomid'        => $pgm->roomid->roomid(),
             'roomname'      => $pgm->roomid->name(),
@@ -105,7 +106,7 @@ sub index :Path :Args(0) {
         ];
     my @castlist = ();
     foreach my $pgm ( @$castPgmlist ) {
-        my $doperiod = __PACKAGE__->createPeriod( $pgm );
+        my $doperiod = $c->forward('/timetable/createPeriod', [ $pgm, ], );
 
         foreach my $cast ( $pgm->pg_casts->all() ) {
             push @castlist, {
@@ -134,25 +135,24 @@ sub index :Path :Args(0) {
 
 =cut
         
-sub createPeriod {
-    my ( $self,
+sub createPeriod :Private {
+    my ( $self, $c,
          $pgm,  # DBレコードオブジェクト
        ) = @_;
     my $ret;
 
     my @date  = split('T', $pgm->date1());
     $date[0] =~ s[-][/]g;
-    my @stime = split(':', $pgm->stime1());
-    my @etime = split(':', $pgm->etime1());
+    $c->forward('/program/_trnSEtime', [ $pgm, ], );
     $ret = sprintf('%s %02d:%02d-%02d:%02d',
-                    $date[0], $stime[0], $stime[1], $etime[0], $etime[1] );
+                    $date[0], $pgm->{'shour1'}, $pgm->{'smin1'},
+                              $pgm->{'ehour1'}, $pgm->{'emin1'} );
     if ( $pgm->date2() ) {
         @date  = split('T', $pgm->date2());
         $date[0] =~ s[-][/]g;
-        @stime = split(':', $pgm->stime2());
-        @etime = split(':', $pgm->etime2());
         $ret .= sprintf(' %s %02d:%02d-%02d:%02d',
-                        $date[0], $stime[0], $stime[1], $etime[0], $etime[1] );
+                    $date[0], $pgm->{'shour2'}, $pgm->{'smin2'},
+                              $pgm->{'ehour2'}, $pgm->{'emin2'} );
     }
     return $ret;
 }
@@ -168,7 +168,7 @@ sub timetable_base : Chained('') : PathPart('timetable') : CaptureArgs(0) {
 }
 
 =head2 timetable/*
-タイムテーブル timetable_get  : 個別詳細情報返却
+タイムテーブル timetable_get  : 個別詳細情報返却/更新
 
 =cut
 
@@ -182,45 +182,57 @@ sub timetable_get : Chained('timetable_base') :PathPart('') :Args(1) {
                                 'prefetch' => [ 'regpgid', 'roomid' ],
                             },
                         );
-$c->log->debug('>>>> get program:regpgid:['. $row->regpgid() . ']');
-$c->log->debug('>>>> get program:roomid:['. $row->roomid() . ']');
-        $c->stash->{'regpgid'}  = $row->regpgid->regpgid();
-        $c->stash->{'subno'}    = $row->subno();
-        $c->stash->{'pgid'}     = $row->pgid();
-        $c->stash->{'sname'}    = $row->sname();
-        $c->stash->{'name'}     = $row->regpgid->name();
-        $c->stash->{'stat'}     = $row->status();
-        if ( $row->date1() ) {
-            my @date  = split('T', $row->date1());
-            $date[0] =~ s[-][/]g;
-            my @stime = split(':', $row->stime1());
-            my @etime = split(':', $row->etime1());
-            $c->stash->{'date1'}    = $date[0];
-            $c->stash->{'shour1'}   = $stime[0];
-            $c->stash->{'smin1'}    = $stime[1];
-            $c->stash->{'ehour1'}   = $etime[0];
-            $c->stash->{'emin1'}    = $etime[1];
+        if ( $c->request->method eq 'GET' ) {
+            # 更新表示
+            $c->stash->{'regpgid'}  = $row->regpgid->regpgid();
+            $c->stash->{'subno'}    = $row->subno();
+            $c->stash->{'pgid'}     = $row->pgid();
+            $c->stash->{'sname'}    = $row->sname();
+            $c->stash->{'name'}     = $row->regpgid->name();
+            $c->stash->{'stat'}     = $row->status();
+            $c->forward('/program/_trnSEtime', [ $row, ], );
+            if ( $row->date1() ) {
+                my @date  = split('T', $row->date1());
+                $date[0] =~ s[-][/]g;
+                $c->stash->{'date1'}    = $date[0];
+                $c->stash->{'shour1'}   = "$row->{'shour1'}";
+                $c->stash->{'smin1'}    = "$row->{'smin1'}";
+                $c->stash->{'ehour1'}   = "$row->{'ehour1'}";
+                $c->stash->{'emin1'}    = "$row->{'emin1'}";
+            }
+            if ( $row->date2() ) {
+                my @date  = split('T', $row->date2());
+                $date[0] =~ s[-][/]g;
+                my @stime = split(':', $row->stime2());
+                my @etime = split(':', $row->etime2());
+                $c->stash->{'date2'}    = $date[0];
+                $c->stash->{'shour2'}   = "$row->{'shour2'}";
+                $c->stash->{'smin2'}    = "$row->{'smin2'}";
+                $c->stash->{'ehour2'}   = "$row->{'ehour2'}";
+                $c->stash->{'emin2'}    = "$row->{'emin2'}";
+            }
+            if ( $row->roomid() ) {
+                $c->stash->{'roomid'}   = $row->roomid->roomid();
+            }
+            $c->session->{'updtic'} = time;
+            $row->update( {
+                'updateflg' => $c->sessionid . $c->session->{'updtic'}
+            } );
         }
-        if ( $row->date2() ) {
-            my @date  = split('T', $row->date2());
-            $date[0] =~ s[-][/]g;
-            my @stime = split(':', $row->stime2());
-            my @etime = split(':', $row->etime2());
-            $c->stash->{'date2'}    = $date[0];
-            $c->stash->{'shour2'}   = $stime[0];
-            $c->stash->{'smin2'}    = $stime[1];
-            $c->stash->{'ehour2'}   = $etime[0];
-            $c->stash->{'emin2'}    = $etime[1];
-        }
-        if ( $row->roomid() ) {
-            $c->stash->{'roomid'}   = $row->roomid->roomid();
+        else {
+            # 更新実施
+            if ( $row->updateflg eq 
+                    +( $c->sessionid . $c->session->{'updtic'}) ) {
+                $c->stash->{'status'} = 'update';
+            }
+            else {
+                $c->stash->{'status'} = 'fail';
+            }
         }
     } catch {
         my $e = shift;
 $c->log->error('>>> ' . localtime() . ' dbexp : ' . Dump($e) );
-        $c->stash->{'dberr'} = Dump( $e );
     };
-$c->log->debug('>>>> get program:all');
     $c->forward('conkan::View::JSON');
 }
 

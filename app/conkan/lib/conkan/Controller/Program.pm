@@ -1,7 +1,7 @@
 package conkan::Controller::Program;
 use Moose;
 use utf8;
-use Encode;
+# use Encode;
 use JSON;
 use String::Random qw/ random_string /;
 use Try::Tiny;
@@ -440,7 +440,7 @@ sub program_show : Chained('program_base') :PathPart('') :CaptureArgs(1) {
                     );
     my $regpgid = $c->stash->{'Program'}->regpgid->regpgid();
     # 企画開始終了時刻変換
-    $c->forward('/program/:Private _trnSEtime', [ $c->stash->{'Program'}, ], );
+    $c->forward('/program/_trnSEtime', [ $c->stash->{'Program'}, ], );
     $c->stash->{'RegProgram'} =
         $c->model('ConkanDB::PgRegProgram')->find($regpgid);
     $c->stash->{'RegCasts'} =
