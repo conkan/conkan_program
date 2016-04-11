@@ -745,9 +745,9 @@ sub _dberror :Private {
             '</FORM>');
     }
     else {
-        $c->log->error( localtime() . " dbexp : \n" . Dump($e) );
+        $c->log->error( localtime() . " dbexp : \n" . Dumper($e) );
         $c->clear_errors();
-        my $body = $c->response->body() || Dump( $e );
+        my $body = $c->response->body() || Dumper( $e );
         $c->response->body(
             '<FORM>更新失敗<br/><pre>' . $body . '</pre></FORM>');
         $c->response->status(200);

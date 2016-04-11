@@ -189,7 +189,7 @@ sub timetable_get : Chained('timetable_base') :PathPart('') :Args(1) {
             $c->stash->{'pgid'}     = $row->pgid();
             $c->stash->{'sname'}    = $row->sname();
             $c->stash->{'name'}     = $row->regpgid->name();
-            $c->stash->{'stat'}     = $row->status();
+            $c->stash->{'status'}   = $row->status();
             $c->forward('/program/_trnSEtime', [ $row, ], );
             if ( $row->date1() ) {
                 my @date  = split('T', $row->date1());
@@ -223,6 +223,13 @@ sub timetable_get : Chained('timetable_base') :PathPart('') :Args(1) {
             # 更新実施
             if ( $row->updateflg eq 
                     +( $c->sessionid . $c->session->{'updtic'}) ) {
+                my $items = [ qw/
+                                status
+                                date1 stime1 etime1 date2 stime2 etime2
+                                roomid
+                            / ];
+                my $value = $c->forward('/program/_trnReq2Hash', [ $items ] );
+                $row->update( $value ); 
                 $c->stash->{'status'} = 'update';
             }
             else {

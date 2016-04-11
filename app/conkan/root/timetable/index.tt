@@ -110,7 +110,7 @@
             </td>
             <th style="text-align: right" colspan="2">実行ステータス</th>
             <td>
-              <select class="col-sm-12" ng-model="current.stat"
+              <select class="col-sm-12" ng-model="current.status"
                   ng-options="i.id as i.val for i in statuslist"></select>
             </td>
             <td style="text-align: center">
@@ -131,7 +131,7 @@
   <!--  更新成功 -->
   <script type="text/ng-template" id="T_result_update">
     <div class="modal-header">
-      <button type="button" class="close" ng-click="$dismiss()" aria-hidden="true">×</button>
+      <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
     </div>
     <div class="modal-body">
       <H3><strong>更新しました</strong></H3>
@@ -143,7 +143,7 @@
   <!--  更新失敗 -->
   <script type="text/ng-template" id="T_result_fail">
     <div class="modal-header">
-      <button type="button" class="close" ng-click="$dismiss()" aria-hidden="true">×</button>
+      <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
     </div>
     <div class="modal-body">
       <H3><strong>更新できませんでした</strong></H3>
@@ -157,7 +157,7 @@
   <!--  更新失敗(DBエラー) -->
   <script type="text/ng-template" id="T_result_dberr">
     <div class="modal-header">
-      <button type="button" class="close" ng-click="$dismiss()" aria-hidden="true">×</button>
+      <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
     </div>
     <div class="modal-body">
       <H3><strong>DBエラー発生</strong></H3>

@@ -21,16 +21,6 @@ conkan::Controller::Program - Catalyst Controller
 
 =head1 METHODS
 
-=cut
-
-# 開始終了時刻変換テーブル
-my %timeArgTrn = (
-    'stime1' => [ 'shour1', 'smin1' ],
-    'etime1' => [ 'ehour1', 'emin1' ],
-    'stime2' => [ 'shour2', 'smin2' ],
-    'etime2' => [ 'ehour2', 'emin2' ],
-);
-
 =head2 index
 
 企画一覧にgo
@@ -719,29 +709,7 @@ sub _pgupdate :Private {
             $c->forward('/program/_trnSEtime', [ $c->stash->{'rs'}, ], );
         }
         else {
-            my $value = {};
-            for my $item (@{$up_items}) {
-                if ( exists( $timeArgTrn{$item} ) ) {
-                    my $hour =
-                        $c->request->body_params->{$timeArgTrn{$item}->[0]};
-                    my $min  =
-                        $c->request->body_params->{$timeArgTrn{$item}->[1]};
-                    $hour =~ s/\s+$//;
-                    $min  =~ s/\s+$//;
-                    if ( ( $hour ne '' ) || ( $min ne '' ) ) {
-                        $hour -= $c->config->{time_origin};
-                        $value->{$item} = sprintf( '%02d:%02d', $hour, $min );
-                    }
-                    else {
-                        $value->{$item} = undef;
-                    }
-                }
-                else {
-                   $value->{$item} = $c->request->body_params->{$item};
-                }
-                $value->{$item} =~ s/\s+$// if defined($value->{$item});
-                $value->{$item} = undef if ( $value->{$item} eq '' );
-            }
+            my $value = $c->forward('/program/_trnReq2Hash', [ $up_items ], );
             if ( defined( $rowprof ) ) {
                 # 更新実施
                 if ( $rowprof->updateflg eq 
@@ -778,12 +746,25 @@ DBエラー表示
 
 sub _dberror :Private {
     my ( $self, $c, $e) = @_; 
-    $c->log->error('>>> ' . localtime() . ' dbexp : ' . Dump($e) );
+    $c->log->error('>>> ' . localtime() . ' dbexp : ' . Dumper($e) );
     $c->clear_errors();
-    my $body = $c->response->body() || Dump( $e );
+    my $body = $c->response->body() || Dumper( $e );
     $c->response->body('<FORM>更新失敗<br/><pre>' . $body . '</pre></FORM>');
     $c->response->status(200);
 }
+
+=head2 TimeArgTrn
+
+開始終了時刻変換テーブル
+
+=cut
+
+my %TimeArgTrn = (
+    'stime1' => [ 'shour1', 'smin1' ],
+    'etime1' => [ 'ehour1', 'emin1' ],
+    'stime2' => [ 'shour2', 'smin2' ],
+    'etime2' => [ 'ehour2', 'emin2' ],
+);
 
 =head2 _trnSEtime
 
@@ -796,16 +777,56 @@ sub _trnSEtime :Private {
          $trgHash,      # 変換対象ハッシュ
        ) = @_;
 
-    foreach my $item (keys(%timeArgTrn)) {
+    foreach my $item (keys(%TimeArgTrn)) {
         my $wkval = eval( '$trgHash->' . $item );
         next unless defined($wkval);
         # 開始終了時刻を分解して時と分にわける
         my @wk = split( /:/, $wkval );
         if ( scalar( @wk ) >= 2 ) {
-            $trgHash->{$timeArgTrn{$item}->[0]} = $wk[0] + $c->config->{time_origin};
-            $trgHash->{$timeArgTrn{$item}->[1]} = $wk[1];
+            $trgHash->{$TimeArgTrn{$item}->[0]} = $wk[0] + $c->config->{time_origin};
+            $trgHash->{$TimeArgTrn{$item}->[1]} = $wk[1];
         }
     }
+}
+
+=head2 _trnReq2Hash
+
+POSTパラメータをDB更新用ハッシュに変換
+
+戻り値: DB更新用ハッシュ
+
+=cut
+
+sub _trnReq2Hash :Private {
+    my ( $self, $c, 
+         $up_items,     # 対象列名配列
+       ) = @_;
+
+    my $value = {};
+    for my $item (@{$up_items}) {
+        if ( exists( $TimeArgTrn{$item} ) ) {
+            my $hour = $c->request->body_params->{$TimeArgTrn{$item}->[0]};
+            my $min  = $c->request->body_params->{$TimeArgTrn{$item}->[1]};
+            $hour =~ s/\s+$// if defined($hour);
+            $min  =~ s/\s+$// if defined($min);
+            if ( defined($hour) && ( $hour ne '' ) ) {
+                $hour -= $c->config->{time_origin};
+                $min = 0 unless $min;
+                $value->{$item} = sprintf( '%02d:%02d', $hour, $min );
+            }
+            else {
+                $value->{$item} = undef;
+            }
+        }
+        else {
+           $value->{$item} = $c->request->body_params->{$item};
+        }
+        if ( defined( $value->{$item} ) ) {
+            $value->{$item} =~ s/\s+$//;
+            $value->{$item} = undef if ( $value->{$item} eq '' );
+        }
+    }
+    return $value;
 }
 
 =head2 _setSysConf

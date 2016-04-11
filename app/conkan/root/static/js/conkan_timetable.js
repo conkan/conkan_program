@@ -23,10 +23,10 @@ var ConkanAppModule = angular.module('conkanTimeTable' );
 
 // 現在操作中企画サービス
 ConkanAppModule.factory( 'currentprgService',
-    function( $log, $http ) {
+    function( $http ) {
         var currentval = {
                 regpgid : '', subno :  '', pgid :  '',
-                sname :   '', name :   '', stat :  '',
+                sname :   '', name :   '', status :  '',
                 date1 :   '', shour1 : '', smin1 : '', ehour1 : '', emin1 : '',
                 date2 :   '', shour2 : '', smin2 : '', ehour2 : '', emin2 : '',
                 roomid :  ''
@@ -34,28 +34,30 @@ ConkanAppModule.factory( 'currentprgService',
         return {
             currentval: currentval,
             query:   function(pgid) {
-                $http.get('/timetable/' + pgid)
-                    .success(function(data, status, headers, config) {
-                        // pgidの企画情報を取得し、currentvalに設定
-                        // subnoは前後に()付ける
-                        currentval.regpgid = data.regpgid;
-                        currentval.subno   = '(' + data.subno + ')';
-                        currentval.pgid    = data.pgid;
-                        currentval.sname   = data.sname;
-                        currentval.name    = data.name;
-                        currentval.stat    = data.stat;
-                        currentval.date1   = data.date1;
-                        currentval.shour1  = data.shour1;
-                        currentval.smin1   = data.smin1;
-                        currentval.ehour1  = data.ehour1;
-                        currentval.emin1   = data.emin1;
-                        currentval.date2   = data.date2;
-                        currentval.shour2  = data.shour2;
-                        currentval.smin2   = data.smin2;
-                        currentval.ehour2  = data.ehour2;
-                        currentval.emin2   = data.emin2;
-                        currentval.roomid  = data.roomid;
-                    });
+                $http({
+                    method  : 'GET',
+                    url     : '/timetable/' + pgid
+                }).success(function(data, status, headers, config) {
+                    // pgidの企画情報を取得し、currentvalに設定
+                    // subnoは前後に()付ける
+                    currentval.regpgid = data.regpgid;
+                    currentval.subno   = '(' + data.subno + ')';
+                    currentval.pgid    = data.pgid;
+                    currentval.sname   = data.sname;
+                    currentval.name    = data.name;
+                    currentval.status  = data.status;
+                    currentval.date1   = data.date1;
+                    currentval.shour1  = data.shour1;
+                    currentval.smin1   = data.smin1;
+                    currentval.ehour1  = data.ehour1;
+                    currentval.emin1   = data.emin1;
+                    currentval.date2   = data.date2;
+                    currentval.shour2  = data.shour2;
+                    currentval.smin2   = data.smin2;
+                    currentval.ehour2  = data.ehour2;
+                    currentval.emin2   = data.emin2;
+                    currentval.roomid  = data.roomid;
+                });
             }
         };
     }
@@ -188,8 +190,8 @@ ConkanAppModule.controller( 'timetableController',
 
 // 設定フォームコントローラ
 ConkanAppModule.controller( 'timeformController',
-    [ '$scope', '$log', '$http', '$uibModal', 'currentprgService', 'selectValue',
-        function( $scope, $log, $http, $uibModal, currentprgService, selectValue ) {
+    [ '$scope', '$http', '$uibModal', 'currentprgService', 'selectValue',
+        function( $scope, $http, $uibModal, currentprgService, selectValue ) {
             $scope.statuslist   = selectValue.statuslist;
             $scope.dateslist    = selectValue.dateslist;
             $scope.shourslist   = selectValue.shourslist;
@@ -199,37 +201,43 @@ ConkanAppModule.controller( 'timeformController',
             $scope.current      = currentprgService.currentval;
             $scope.doApply = function() {
                 var pgid = $scope.current.pgid;
-                $log.log( angular.toJson($scope.current, true ) );
-                $http.post('/timetable/' + pgid, $scope.current )
-                    .success(function(data, status, headers, config) {
-                        var modalinstance, templateval;
+                $http( {
+                    method : 'POST',
+                    url : '/timetable/' + pgid,
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+                    data: $.param($scope.current)
+                }).success(function(data, status, headers, config) {
+                    var modalinstance, templateval;
+                    if (data.status == 'update') {
+                        templateval = 'T_result_update';
+                    }
+                    else {
+                        templateval = 'T_result_fail';
+                    }
+                    modalinstance = $uibModal.open(
+                        {
+                            templateUrl : templateval,
+                            backdrop    : 'static'
+                        }
+                    );
+                    modalinstance.result.then( function() {
                         if (data.status == 'update') {
-                            templateval = 'T_result_update';
-                        }
-                        else {
-                            templateval = 'T_result_fail';
-                        }
-                        modalinstance =
-                            $uibModal.open({
-                                templateUrl: templateval
-                            });
-                        modalinstance.result.then( function() {
-                            if (data.status == 'update') {
-                                location.reload();
-                            } else {
-                                currentprgService.query( pgid );
-                            }
-                        });
-                    })
-                    .error(function(data, status, headers, config) {
-                        var modalinstance =
-                            $uibModal.open({
-                                templateUrl:'T_result_dberr',
-                            });
-                        modalinstance.result.then( function() {
+                            location.reload();
+                        } else {
                             currentprgService.query( pgid );
-                        });
+                        }
                     });
+                }).error(function(data, status, headers, config) {
+                    var modalinstance = $uibModal.open(
+                        {
+                            templateUrl : 'T_result_dberr',
+                            backdrop    : 'static'
+                        }
+                    );
+                    modalinstance.result.then( function() {
+                        currentprgService.query( pgid );
+                    });
+                });
             };
           }
     ]
