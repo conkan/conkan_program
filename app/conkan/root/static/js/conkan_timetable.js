@@ -34,6 +34,9 @@ ConkanAppModule.factory( 'currentprgService',
         return {
             currentval: currentval,
             query:   function(pgid) {
+                $('#valerr').text('');
+                $('#dh1').css('background-color', '');
+                $('#dh2').css('background-color', '');
                 $http({
                     method  : 'GET',
                     url     : '/timetable/' + pgid
@@ -77,8 +80,8 @@ ConkanAppModule.controller( 'unsetlistController',
 
 // タイムテーブルコントローラ
 ConkanAppModule.controller( 'timetableController',
-    [ '$scope', 'currentprgService', 'pglistValue', '$sce',
-        function( $scope, currentprgService, pglistValue, $sce ) {
+    [ '$scope', 'uiGridConstants', 'currentprgService', 'pglistValue', '$sce',
+        function( $scope, uiGridConstants, currentprgService, pglistValue, $sce ) {
             $scope.__getGanttWidth = function() {
                 var colmnum = pglistValue.ganttConst.maxcolmnum + 1;
                 return pglistValue.ganttConst.cell_width * colmnum;
@@ -86,16 +89,19 @@ ConkanAppModule.controller( 'timetableController',
             $scope.__crGanttCell = function( doperiod ) {
                 var retval = pglistValue.ganttConst.ganttBackGrid;
                 var scale_hash = pglistValue.ganttConst.scale_hash;
-                var periodDatas = doperiod.split(" ");
                 var unit = pglistValue.ganttConst.cell_width;
                 var cnt, curscale, date, times, start, end, bias, width, wkstr;
+                if ( !doperiod ) { // GroupHeaderの時呼ばれる
+                    return '';
+                }
+                var periodDatas = doperiod.split(" ");
                 for ( cnt=0; cnt<periodDatas.length; cnt+=2 ) {
                     date = periodDatas[cnt];
                     curscale = scale_hash[date];
                     times = periodDatas[cnt+1].split(/[:-]/);
                     start = ( times[0] * 60 ) + ( times[1] * 1 );
                     end   = ( times[2] * 60 ) + ( times[3] * 1 );
-                    bias  =  ( curscale[1] * unit )
+                    bias  =  ( curscale[2] * unit )
                            + ( ( ( start - curscale[0] ) * unit ) / 60 );
                     width = ( ( end - start ) * unit ) / 60;
                     retval += '<div class="ganttBar" style="left:'
@@ -113,18 +119,25 @@ ConkanAppModule.controller( 'timetableController',
                 enableSorting: false,
                 treeRowHeaderAlwaysVisible: false,
                 enableColumnResizing: true,
-                enableGridMenu: false
+                enableGridMenu: false,
+                onRegisterApi: function(gridApi) {
+                    $scope.grRoomApi = gridApi;
+                    $scope.grRoomApi.grid.registerDataChangeCallback(function() {
+                        $scope.grRoomApi.treeBase.expandAllRows();
+                    });
+                }
             };
             $scope.ttgridbyroom.columnDefs = [
                 { name : '部屋', field: 'room',
                     headerCellClass: 'gridheader',
-                    grouping: { groupPriority: 1 },
-                    sort: { priority: 0, direction: 'asc' }
+                    sort: { priority: 0, direction: uiGridConstants.ASC },
+                    grouping: { groupPriority: 0 },
+                    cellTemplate: '<div><div ng-if="!col.grouping || col.grouping.groupPriority === undefined || col.grouping.groupPriority === null || ( row.groupHeader && col.grouping.groupPriority === row.treeLevel )" class="ui-grid-cell-contents" title="TOOLTIP">{{COL_FIELD CUSTOM_FILTERS}}</div></div>'
                 },
                 { name : '企画名', field: 'prgname',
                     headerCellClass: 'gridheader',
-                    sort: { priority: 1, direction: 'asc' }, 
-                    cellTemplate: '<button class="btn primary prgcell" ng-click=grid.appScope.pgmclick(row.entity.prgname.pgid)>{{row.entity.prgname.name}}</button>'
+                    sort: { priority: 1, direction: uiGridConstants.DSC },
+                    cellTemplate: '<div ng-if="!row.groupHeader"><button class="btn primary prgcell" ng-click=grid.appScope.pgmclick(row.entity.prgname.pgid)>{{row.entity.prgname.name}}</button></div>'
                 },
                 { name : '期間',
                     headerCellTemplate: pglistValue.ganttConst.ganttHeader,
@@ -132,7 +145,7 @@ ConkanAppModule.controller( 'timetableController',
                     pinnedRight:true,
                     width: $scope.__getGanttWidth(),
                     cellTooltip: true,
-                    cellTemplate: '<div class="ganttRow ui-grid-cell-contents" title="TOOLTIP" ng-bind-html="grid.appScope.__crGanttCell(row.entity.doperiod)"></div>'
+                    cellTemplate: '<div ng-if="!row.groupHeader"><div class="ganttRow ui-grid-cell-contents" title="TOOLTIP" ng-bind-html="grid.appScope.__crGanttCell(row.entity.doperiod)"></div></div>'
                 }
             ];
             $scope.ttgridbyroom.data = pglistValue.roomprglist;
@@ -142,21 +155,29 @@ ConkanAppModule.controller( 'timetableController',
                 enableSorting: false,
                 treeRowHeaderAlwaysVisible: false,
                 enableColumnResizing: true,
-                enableGridMenu: false
+                enableGridMenu: false,
+                onRegisterApi: function(gridApi) {
+                    $scope.grCastApi = gridApi;
+                    $scope.grCastApi.grid.registerDataChangeCallback(function() {
+                        $scope.grCastApi.treeBase.expandAllRows();
+                    });
+                }
             };
             $scope.ttgridbycast.columnDefs = [
                 { name : '出演者', field: 'cast',
                     headerCellClass: 'gridheader',
-                    grouping: { groupPriority: 1 },
-                    sort: { priority: 0, direction: 'asc' }
+                    grouping: { groupPriority: 0 },
+                    sort: { priority: 0, direction: uiGridConstants.ASC },
+                    cellTemplate: '<div><div ng-if="!col.grouping || col.grouping.groupPriority === undefined || col.grouping.groupPriority === null || ( row.groupHeader && col.grouping.groupPriority === row.treeLevel )" class="ui-grid-cell-contents" title="TOOLTIP">{{COL_FIELD CUSTOM_FILTERS}}</div></div>'
                 },
                 { name : '企画名', field: 'prgname',
                     headerCellClass: 'gridheader',
-                    sort: { priority: 1, direction: 'asc' },
-                    cellTemplate: '<button class="btn primary prgcell" ng-click=grid.appScope.pgmclick(row.entity.prgname.pgid)>{{row.entity.prgname.name}}</button>'
+                    sort: { priority: 1, direction: uiGridConstants.DSC },
+                    cellTemplate: '<div ng-if="!row.groupHeader"><button class="btn primary prgcell" ng-click=grid.appScope.pgmclick(row.entity.prgname.pgid)>{{row.entity.prgname.name}}</button></div>'
                 },
                 { name : '部屋', field: 'room',
-                    headerCellClass: 'gridheader'
+                    headerCellClass: 'gridheader',
+                    cellTemplate: '<div ng-if="!row.groupHeader">{{COL_FIELD CUSTOM_FILTERS}}</div>'
                 },
                 { name : '期間',
                     headerCellTemplate: pglistValue.ganttConst.ganttHeader,
@@ -164,7 +185,7 @@ ConkanAppModule.controller( 'timetableController',
                     field: 'doperiod',
                     pinnedRight:true,
                     cellTooltip: true,
-                    cellTemplate: '<div class="ganttRow ui-grid-cell-contents" title="TOOLTIP" ng-bind-html="grid.appScope.__crGanttCell(row.entity.doperiod)"></div>'
+                    cellTemplate: '<div ng-if="!row.groupHeader"><div class="ganttRow ui-grid-cell-contents" title="TOOLTIP" ng-bind-html="grid.appScope.__crGanttCell(row.entity.doperiod)"></div></div>'
                 }
             ];
             $scope.ttgridbycast.data = pglistValue.castprglist;
@@ -199,8 +220,46 @@ ConkanAppModule.controller( 'timeformController',
             $scope.ehourslist   = selectValue.ehourslist;
             $scope.roomlist     = selectValue.roomlist;
             $scope.current      = currentprgService.currentval;
+            var scale_hash = selectValue.scale_hash;
             $scope.doApply = function() {
+                var ckarray, cnt, cur, scale, start, end;
                 var pgid = $scope.current.pgid;
+                // バリデーション
+                if (!(pgid)) {
+                    return;
+                }
+                ckarray = [
+                    {
+                        dh    : '#dh1',
+                        date  : $scope.current.date1,
+                        shour : $scope.current.shour1,
+                        smin  : $scope.current.smin1,
+                        ehour : $scope.current.ehour1,
+                        emin  : $scope.current.emin1
+                    },
+                    {
+                        dh    : '#dh2',
+                        date  : $scope.current.date2,
+                        shour : $scope.current.shour2,
+                        smin  : $scope.current.smin2,
+                        ehour : $scope.current.ehour2,
+                        emin  : $scope.current.emin2
+                    }
+                ];
+                for ( cnt in ckarray ) {
+                    if ( ckarray[cnt].date ) {
+                        cur = ckarray[cnt];
+                        scale = scale_hash[cur.date];
+                        start = ( cur.shour * 60 ) + ( cur.smin * 1 );
+                        end   = ( cur.ehour * 60 ) + ( cur.emin * 1 );
+                        if (   ( start >= end )
+                            || ( start < scale[0] ) || ( scale[1] < end ) ) {
+                            $('#valerr').text('時刻設定に矛盾があります');
+                            $(cur.dh).css('background-color', '#ff8e8e');
+                            return;
+                        }
+                    }
+                }
                 $http( {
                     method : 'POST',
                     url : '/timetable/' + pgid,

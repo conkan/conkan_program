@@ -143,9 +143,9 @@ sub setting :Local {
 タイムテーブルガントチャート表示用固定値算出
 
 戻り値 固定値配列参照 [0]ヘッダ [1]背景グリッド [2]カラム総数
-                      [3]タイムスケール表示用ハッシュ(JSON)
-                            キー: 日付
-                              値: [ 開始時刻(分表示), 先頭カラム数 ]
+              [3]タイムスケール表示用ハッシュ(JSON)
+                    キー: 日付
+                      値: [ 開始時刻(分表示), 終了時刻(分表示), 先頭カラム数 ]
 
 =cut
 
@@ -167,11 +167,12 @@ sub _crGntStr :Private {
     for ( my $cnt=0; $cnt<$daycnt; $cnt++ ) {
         my @swk = split( /:/, $starts[$cnt] );
         my @ewk = split( /:/, $ends[$cnt] );
+        $gantt_scale->{$dates[$cnt]} = [ ( ($swk[0] * 60) + $swk[1] ),
+                                         ( ($ewk[0] * 60) + $ewk[1] ),
+                                         $maxcolnum ];
         $ewk[0] += 1 if $ewk[1] > 0;
         $colnum[$cnt] = $ewk[0] - $swk[0];
         $shours[$cnt] = $swk[0];
-        $gantt_scale->{$dates[$cnt]} = [ ( ($swk[0] * 60) + $swk[1] ),
-                                         $maxcolnum ];
         $maxcolnum += $colnum[$cnt];
     }
 

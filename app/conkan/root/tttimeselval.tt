@@ -4,7 +4,7 @@
 
 // conkanTimeTableモジュールの生成(グローバル変数)
 var ConkanAppModule = angular.module('conkanTimeTable',
-        ['ui.grid', 'ui.grid.resizeColumns', 'ui.grid.pinning', 'ui.bootstrap'] );
+        ['ui.grid', 'ui.grid.grouping', 'ui.grid.resizeColumns', 'ui.grid.pinning', 'ui.bootstrap'] );
 
 // 企画データ
 ConkanAppModule.value( 'pglistValue', {
@@ -89,7 +89,8 @@ ConkanAppModule.value( 'selectValue', {
         [%- FOREACH opt = conf.roomlist %]
             { id : '[% opt.id %]', val : '[% opt.val %]' },
         [%- END %]
-     ]
+     ],
+     scale_hash : [% syscon.gantt_scale_str %],
 });
 </script>
 <!-- EOF -->
