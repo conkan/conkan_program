@@ -13,4 +13,4 @@ docker rm conkan
 if ! [ -e `pwd`/app/conkan/conkan.yml ]; then
   cp `pwd`/app/conkan/conkan.yml_default `pwd`/app/conkan/conkan.yml
 fi
-docker run -d --restart='always' --name conkan -p $HP:80 -p $HS:443 -v `pwd`/app:/root/app srem/conkan
+docker run -d --restart='always' --link mysql --name conkan -p $HP:80 -p $HS:443 -v `pwd`/app:/root/app srem/conkan
