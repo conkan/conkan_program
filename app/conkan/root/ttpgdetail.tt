@@ -147,7 +147,7 @@ END -%]
       </tr>
       <tr>
         <th>場所</th> <td colspan="2">[% Program.roomid.name | html %]</td>
-                      <td>[% Program.roomid.roomNo | html %]</td>
+                      <td>[% Program.roomid.roomno | html %]</td>
         <th>表示順序</th> <td colspan="2">[% Program.layerno | html %]</td>
       </tr>
       <tr>

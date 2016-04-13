@@ -530,18 +530,12 @@ sub pgup_program : Chained('program_show') : PathPart('program') : Args(0) {
         $rowprof = $c->stash->{'M'}->find( $pgid,
                      { 'prefetch' => [ 'regpgid', 'staffid', 'roomid' ], } );
         if ( $c->request->method eq 'GET' ) {
+            # staffid == 1 は adminなので排除
             $c->stash->{'stafflist'} = [
                 { 'id' => '', 'val' => '' },
                 map +{ 'id' => $_->staffid(), 'val' => $_->tname() }, 
                     $c->model('ConkanDB::PgStaff')->search(
                         { staffid => { '!=' =>  1 } } )
-                ];
-            # staffid == 1 は adminなので排除
-            $c->stash->{'roomlist'}  = [
-                { 'id' => '', 'val' => '' },
-                map +{ 'id'  => $_->roomid(),
-                       'val' => $_->name() . '(' . $_->roomno() . ')' },
-                    $c->model('ConkanDB::PgRoom')->all()
                 ];
             # 設定フォーム選択肢
             my $conf = $c->forward('/program/_setSysConf' );
@@ -553,6 +547,7 @@ sub pgup_program : Chained('program_show') : PathPart('program') : Args(0) {
             unshift( @{$conf->{'e_mins'}}, { 'id' => '', 'val' => '' } );
             unshift( @{$conf->{'status'}}, { 'id' => '', 'val' => '' } );
             unshift( @{$conf->{'nos'}}, { 'id' => '', 'val' => '' } );
+            unshift( @{$conf->{'roomlist'}}, { 'id' => '', 'val' => '' } );
             $c->stash->{'conf'}  = $conf;
         }
     } catch {

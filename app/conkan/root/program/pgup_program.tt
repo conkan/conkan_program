@@ -67,7 +67,7 @@
       </tr>
       <tr>
         <th>場所</th>
-        <td colspan="2">[% pgupselect( 'roomid', roomlist, rs.roomid.roomid, 12 ) %]</td>
+        <td colspan="2">[% pgupselect( 'roomid', conf.roomlist, rs.roomid.roomid, 12 ) %]</td>
         <th>表示順序</th>
         <td>[% pgupselect( 'layerno', conf.nos, rs.layerno, 4 ) %]</td>
       </tr>
