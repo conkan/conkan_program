@@ -1,0 +1,7 @@
+[Unit]
+Description=conkan log lotate
+Requires=docker.service
+
+[Service]
+ExecStart=docker exec conkan /etc/cron.daily/logrotate
+Type=oneshot

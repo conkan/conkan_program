@@ -96,11 +96,10 @@ ADD doccnf/nginx.conf /etc/nginx/nginx.conf
 ADD doccnf/my.cnf /etc/my.cnf
 
 # daemontools設定
-RUN mkdir -p /service/conkan; mkdir -p /var/log/conkan; mkdir -p /service/nginx;mkdir -p /service/crondum
+RUN mkdir -p /service/conkan; mkdir -p /var/log/conkan; mkdir -p /service/nginx
 ADD doccnf/conkan_run /service/conkan/run
 ADD doccnf/nginx_run /service/nginx/run
-ADD doccnf/crondum_run /service/crondum/run
-RUN chmod 755 /service/nginx/run; chmod 755 /service/conkan/run; chmod 755 /service/crondum/run
+RUN chmod 755 /service/nginx/run; chmod 755 /service/conkan/run
 
 #----------------------------------------------------------
 # 起動
