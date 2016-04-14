@@ -48,7 +48,6 @@ bind '"\C-p": history-search-backward'
 bind '"\C-k": kill-line'
 
 # enviroment variable
-export HOME="/root"
 export TERM="xterm"
 export PATH
 export CLICOLOR="1"
