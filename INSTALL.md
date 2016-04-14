@@ -100,12 +100,13 @@ $> git clone git://github.com/conkan/conkan_program <Dockerホーム>
 
 systemd利用開始処理として、以下のコマンドを実施
 
-稼働サーバ > sudo systemctl enable conkan.service           ★★★
-稼働サーバ > sudo systemctl enable conkandbbackup.service   ★★★
-稼働サーバ > sudo systemctl enable conkanloglotate.service  ★★★
-稼働サーバ > sudo systemctl daemon-reload
+稼働サーバ > sudo systemctl enable conkan.service
 稼働サーバ > sudo systemctl start conkandbbackup.timer
 稼働サーバ > sudo systemctl start conkanloglotate.timer
+
+※ 何らかの理由で設定ファイル(service, timer)を書き換えたら、
+    稼働サーバ > sudo systemctl daemon-reload
+を実施
 
 1.1 Docker利用TIPS
 

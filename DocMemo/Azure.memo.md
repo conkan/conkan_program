@@ -61,11 +61,10 @@ DBサーバで使用する設定ファイルが存在するので、個々に配
 
 systemd利用開始処理として、以下のコマンドを実施
 
-DBサーバ > sudo systemctl enable mysqld.service           ★★★
-DBサーバ > sudo systemctl enable mysqlloglotate.service   ★★★
-DBサーバ > sudo systemctl daemon-reload
+DBサーバ > sudo systemctl enable mysqld.service
 DBサーバ > sudo systemctl start mysqlloglotate.timer
 
+★ありゃ。loglotateはいらんかも
 
 1.1. コンテナの起動
     rootのパスワードは、起動時に環境変数 MYSQL_ROOT_PASSWORD で設定

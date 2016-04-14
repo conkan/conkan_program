@@ -2,8 +2,8 @@
 Description=daily mysql log lotate
 
 [Timer]
-OnCalendar=*-*-* 05:00:00   # 毎日朝05:00に実施
-Unit=loglotate.service      # 名称が同じなので省略可能
+OnCalendar=*-*-* 04:00:00
+Unit=mysqlloglotate.service
 
 [Install]
 WantedBy=timers.target

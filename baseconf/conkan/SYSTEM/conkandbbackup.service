@@ -3,5 +3,5 @@ Description=conkan db backup
 Requires=docker.service
 
 [Service]
-ExecStart=docker exec conkan /root/app/conkan/script/conkan_dbbackup.pl /root/app/conkan/conkan.yml /root/app/backup
+ExecStart=/usr/bin/docker exec conkan /root/app/conkan/script/conkan_dbbackup.pl /root/app/conkan/conkan.yml /root/app/backup
 Type=oneshot
