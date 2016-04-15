@@ -1,12 +1,16 @@
-package conkan::View::CSV;
+package conkan::View::Download::CSV;
 use Moose;
 use namespace::autoclean;
 
-extends 'Catalyst::View::Download';
+extends 'Catalyst::View::Download::CSV';
+
+__PACKAGE__->config(
+    'eol'           => "\r\n",
+);
 
 =head1 NAME
 
-conkan::View::CSV - Download View for conkan
+conkan::View::Download::CSV - Download View for conkan
 
 =head1 DESCRIPTION
 

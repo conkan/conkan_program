@@ -6,6 +6,7 @@ use String::Random qw/ random_string /;
 use Try::Tiny;
 use namespace::autoclean;
 use Data::Dumper;
+use POSIX qw/ strftime /;
 
 BEGIN { extends 'Catalyst::Controller'; }
 
@@ -155,6 +156,78 @@ sub createPeriod :Private {
                               $pgm->{'ehour2'}, $pgm->{'emin2'} );
     }
     return $ret;
+}
+
+=head2 csvdownload
+タイムテーブル csvdownload : CSVダウンロード
+
+=cut
+
+sub csvdownload :Local {
+    my ( $self, $c ) = @_;
+
+$c->log->debug('>>> ' . 'csvdownload' );
+                        
+    # 実施日時、開始時刻、終了時刻、実施場所が設定済
+    # 実行ステータスが「実行」あるいは「公開」
+    my $row =
+        [ $c->model('ConkanDB::PgProgram')->search(
+            { 'me.roomid' => \'IS NOT NULL',
+              'date1'  => \'IS NOT NULL', 
+              'stime1' => \'IS NOT NULL', 
+              'etime1' => \'IS NOT NULL',
+              -nest    => [
+                'status' => '実行',
+                'status' => '公開'
+                ],
+            },
+            {
+                'prefetch' => [ 'regpgid', 'roomid' ],
+                'order_by' => { '-asc' => [ 'me.regpgid' ] },
+            } )
+        ];
+
+    my @data;
+    foreach my $pgm ( @$row ) {
+        # 実施日付は YYYY/MM/DD、開始終了時刻は HH:MM (いずれも0サフィックス)
+        my @dates  = undef;
+        my @stms = undef;
+        my @etms = undef;
+        my @date  = split('T', $pgm->date1());
+        $date[0] =~ s[-][/]g;
+        @date = split('/', $date[0]);
+        $c->forward('/program/_trnSEtime', [ $pgm, ], );
+        $dates[0] = sprintf('%04d/%02d/%02d', @date);
+        $stms[0] = sprintf('%02d:%02d', $pgm->{'shour1'}, $pgm->{'smin1'});
+        $etms[0] = sprintf('%02d:%02d', $pgm->{'ehour1'}, $pgm->{'emin1'});
+        if ( $pgm->date2() ) {
+            @date  = split('T', $pgm->date2());
+            $date[0] =~ s[-][/]g;
+            @date = split('/', $date[0]);
+            $dates[1] = sprintf('%04d/%02d/%02d', @date);
+            $stms[1] = sprintf('%02d:%02d', $pgm->{'shour2'}, $pgm->{'smin2'});
+            $etms[1] = sprintf('%02d:%02d', $pgm->{'ehour2'}, $pgm->{'emin2'});
+        }
+        push ( @data, [
+            $pgm->regpgid->regpgid(),       # 企画ID,
+            $pgm->regpgid->name(),          # 企画名称,
+            $pgm->status(),                 # 実行ステータス,
+            $pgm->memo(),                   # 実行ステータス補足,
+            $pgm->roomid->roomno(),         # 部屋番号,
+            $pgm->roomid->name(),           # 実施場所,
+            $dates[0], $stms[0], $etms[0],  # 実施日付1,開始時刻1,終了時刻1,
+            $dates[1], $stms[1], $etms[1],  # 実施日付2,開始時刻2,終了時刻2,
+        ]);
+    }
+
+$c->log->debug('>>> ' . 'rowdata : ' . Dumper( \@data ) );
+
+    $c->stash->{'csv'} = \@data;
+    $c->response->header( 'Content-Disposition' =>
+        'attachment; filename=' .
+            strftime("%Y%m%d%H%M%S", localtime()) . '_timetable.csv' );
+
+    $c->forward('conkan::View::Download::CSV');
 }
 
 =head2 timetable

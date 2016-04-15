@@ -1,18 +1,27 @@
 $(window).resize(function() {
   // リサイズによるタイムテーブル領域の調整
   var
-  h,w,
+  h,w,gh,
   wh = window.innerHeight || $(window).innerHeight(),
   updiv   = $("#timetable_up"),
   downdiv = $("#timetable_down");
   h = wh - ( updiv.offset().top +
-             downdiv.outerHeight() +
-             parseFloat(downdiv.css('marginTop'))
+             downdiv.height()
            );
   updiv.css('height', h + 'px');
   updiv.css('max-height', h + 'px');
+  updiv.css('min-height', h + 'px');
+  $("#unset_pglist_wrap").css('height', h + 'px');
   $("#unset_pglist_wrap").css('min-height', h + 'px');
+  $("#unset_pglist_wrap").css('max-height', h + 'px');
+  $("#timetable_wrap").css('height', h + 'px');
   $("#timetable_wrap").css('min-height', h + 'px');
+  $("#timetable_wrap").css('max-height', h + 'px');
+  gh = h - ( $('#timetable_wrap>.row').height() +
+             $('.ui-grid-render-container-right .ui-grid-header').height() +
+             $('.ui-grid-scrollbar-placeholder').height() +
+             1);
+  $('.ui-grid-viewport').css('min-height', gh + 'px');
   w = $("#timetable_wrap").width();
   $("#timetable_room").width(w);
   $("#timetable_cast").width(w);

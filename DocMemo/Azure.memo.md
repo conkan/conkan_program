@@ -45,8 +45,6 @@ DBサーバで使用する設定ファイルが存在するので、個々に配
 <Dockerホーム>/baseconf/mysql/SYSTEM 下のものは、systemd利用時に配置
   ※coreOS上で動かす場合必須
     mysqld.service          =>  /etc/systemd/system/mysqld.service
-    mysqlloglotate.service  =>  /etc/systemd/system/mysqlloglotate.service
-    mysqlloglotate.timer    =>  /etc/systemd/system/mysqlloglotate.timer
 
 稼働サーバとDBサーバが同じVMの場合、以下は既に展開済み
 <Dockerホーム>/baseconf/base/HOME 下のものは、常時配置
@@ -62,9 +60,7 @@ DBサーバで使用する設定ファイルが存在するので、個々に配
 systemd利用開始処理として、以下のコマンドを実施
 
 DBサーバ > sudo systemctl enable mysqld.service
-DBサーバ > sudo systemctl start mysqlloglotate.timer
-
-★ありゃ。loglotateはいらんかも
+DBサーバ > sudo systemctl start mysqld.service
 
 1.1. コンテナの起動
     rootのパスワードは、起動時に環境変数 MYSQL_ROOT_PASSWORD で設定

@@ -1,0 +1,9 @@
+[Unit]
+Description=daily conkan log rotate
+
+[Timer]
+OnCalendar=*-*-* 20:00:00
+Unit=conkanlogrotate.service
+
+[Install]
+WantedBy=timers.target

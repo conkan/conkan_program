@@ -43,9 +43,6 @@
   <div class="row" id="timetable_down">
     <div id="timetable_edit_form" ng-controller="timeformController">
       <!-- Bottom: 場所/時刻設定フォーム -->
-      <div class="form-group">
-        <input type="hidden" ng-model="current.pgid">
-      </div>
       <table class="table table-bordered table-condensed">
         <colgroup>
           <col class="col-sm-1">
@@ -58,6 +55,19 @@
         </colgroup>
         <tbody>
           <tr>
+            <input type="hidden" ng-model="current.pgid">
+          </tr>
+          <tr>
+            <td colspan="6" style="COLOR:Red;" id="valerr"></td>
+            <td style="text-align: center">
+              <FORM method="GET" action="/timetable/csvdownload">
+                <button type="submit" class="btn" id="csvdlbtn">
+                  CSVダウンロード
+                </button>
+              </FORM>
+            </td>
+          </tr>
+          <tr>
             <td>
               {{current.regpgid}}{{current.subno}}
             </td>
@@ -66,8 +76,6 @@
             <td colspan="2">
               {{current.sname}}
             </td>
-          </tr>
-          <tr>
           </tr>
           <tr>
             <th style="text-align: right" id="dh1">日時1</th>
@@ -119,10 +127,6 @@
                   反映
                 </button>
             </td>
-          </tr>
-          <tr>
-            <td></td>
-            <td colspan="11" style="COLOR:Red;" id="valerr"></td>
           </tr>
         </tbody>
       </table>

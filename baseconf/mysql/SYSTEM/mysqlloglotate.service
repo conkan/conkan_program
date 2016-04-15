@@ -1,7 +1,0 @@
-[Unit]
-Description=mysql log lotate
-Requires=docker.service
-
-[Service]
-ExecStart=/usr/bin/docker exec conkan /etc/cron.daily/logrotate
-Type=oneshot

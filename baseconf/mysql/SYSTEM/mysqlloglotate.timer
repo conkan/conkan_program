@@ -1,9 +1,0 @@
-[Unit]
-Description=daily mysql log lotate
-
-[Timer]
-OnCalendar=*-*-* 04:00:00
-Unit=mysqlloglotate.service
-
-[Install]
-WantedBy=timers.target

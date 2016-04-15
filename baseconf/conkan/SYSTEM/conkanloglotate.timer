@@ -1,9 +1,0 @@
-[Unit]
-Description=daily conkan log lotate
-
-[Timer]
-OnCalendar=*-*-* 05:00:00
-Unit=conkanloglotate.service
-
-[Install]
-WantedBy=timers.target

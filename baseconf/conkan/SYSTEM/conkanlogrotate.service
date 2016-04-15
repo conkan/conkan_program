@@ -1,5 +1,5 @@
 [Unit]
-Description=conkan log lotate
+Description=conkan log rotate
 Requires=docker.service
 
 [Service]

@@ -28,8 +28,5 @@
   <!-- ui-bootstrap -->
   <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular-animate.min.js"></script>
   <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.14.3/ui-bootstrap-tpls.min.js"></script>
-  <!-- conkan-wijmo -->
-    <script type="text/javascript" src="/static/js/conkan_wijmo.js"></script>
-    <link rel="stylesheet" href="/static/css/conkan-wijmo.css" />
 [%- END %]
 <!-- #End Region "ttwijgethead.tt" -->
