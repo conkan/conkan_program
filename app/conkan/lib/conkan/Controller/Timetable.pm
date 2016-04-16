@@ -291,10 +291,14 @@ sub timetable_get : Chained('timetable_base') :PathPart('') :Args(1) {
             if ( $row->roomid() ) {
                 $c->stash->{'roomid'}   = $row->roomid->roomid();
             }
-            $c->session->{'updtic'} = time;
-            $row->update( {
-                'updateflg' => $c->sessionid . $c->session->{'updtic'}
-            } );
+            if (  ( $c->user->get('role') eq 'ROOT' )
+               || ( $c->user->get('role') eq 'PG'   ) ) {
+               # システム管理者/企画管理者の場合、更新可能
+                $c->session->{'updtic'} = time;
+                $row->update( {
+                    'updateflg' => $c->sessionid . $c->session->{'updtic'}
+                } );
+            }
         }
         else {
             # 更新実施

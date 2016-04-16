@@ -14,6 +14,10 @@
 </head>
 [%- SET self_li_id = 'timetable' -%]
 [%- PROCESS 'tthead.tt' -%]
+[%- SET editable = 0;
+IF cuRole == 'ROOT' || cuRole == 'PG';
+  SET editable = 1;
+END -%]
 <div class="container" ng-app="conkanTimeTable">
   <div class="row" id="timetable_up">
     <div id="unset_pglist_wrap" class="col-sm-2">
@@ -122,10 +126,12 @@
                   ng-options="i.id as i.val for i in statuslist"></select>
             </td>
             <td style="text-align: center">
+              [%- IF editable %]
                 <button type="submit" class="btn" id="applybtn"
                     ng-click="doApply()">
                   反映
                 </button>
+              [% END %]
             </td>
           </tr>
         </tbody>
