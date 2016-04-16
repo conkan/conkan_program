@@ -95,9 +95,11 @@ ConkanAppModule.controller( 'timetableController',
                 var colmnum = pglistValue.ganttConst.maxcolmnum + 1;
                 return pglistValue.ganttConst.cell_width * colmnum;
             };
-            $scope.__crGanttCell = function( doperiod ) {
+            $scope.__crGanttCell = function( doperiod, status ) {
                 var retval = pglistValue.ganttConst.ganttBackGrid;
                 var scale_hash = pglistValue.ganttConst.scale_hash;
+                var color_hash = pglistValue.ganttConst.color_hash;
+                var color = color_hash[status];
                 var unit = pglistValue.ganttConst.cell_width;
                 var cnt, curscale, date, times, start, end, bias, width, wkstr;
                 if ( !doperiod ) { // GroupHeaderの時呼ばれる
@@ -117,7 +119,9 @@ ConkanAppModule.controller( 'timetableController',
                             + bias
                             + 'px;width:'
                             + width
-                            + 'px"></div>';
+                            + 'px;background-color:'
+                            + color
+                            + ';"></div>';
                 }
                 wkstr = $sce.trustAsHtml( retval );
                 return wkstr;
@@ -154,7 +158,7 @@ ConkanAppModule.controller( 'timetableController',
                     pinnedRight:true,
                     width: $scope.__getGanttWidth(),
                     cellTooltip: true,
-                    cellTemplate: '<div ng-if="!row.groupHeader"><div class="ganttRow ui-grid-cell-contents" title="TOOLTIP" ng-bind-html="grid.appScope.__crGanttCell(row.entity.doperiod)"></div></div>'
+                    cellTemplate: '<div ng-if="!row.groupHeader"><div class="ganttRow ui-grid-cell-contents" title="TOOLTIP" ng-bind-html="grid.appScope.__crGanttCell(row.entity.doperiod, row.entity.status)"></div></div>'
                 }
             ];
             $scope.ttgridbyroom.data = pglistValue.roomprglist;
@@ -194,7 +198,7 @@ ConkanAppModule.controller( 'timetableController',
                     field: 'doperiod',
                     pinnedRight:true,
                     cellTooltip: true,
-                    cellTemplate: '<div ng-if="!row.groupHeader"><div class="ganttRow ui-grid-cell-contents" title="TOOLTIP" ng-bind-html="grid.appScope.__crGanttCell(row.entity.doperiod)"></div></div>'
+                    cellTemplate: '<div ng-if="!row.groupHeader"><div class="ganttRow ui-grid-cell-contents" title="TOOLTIP" ng-bind-html="grid.appScope.__crGanttCell(row.entity.doperiod, row.entity.status)"></div></div>'
                 }
             ];
             $scope.ttgridbycast.data = pglistValue.castprglist;

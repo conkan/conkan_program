@@ -34,6 +34,14 @@
         [% pguptextarea( 'pg_status_vals', cnf.pg_status_vals.pg_conf_value, 8 ) %]
       </div>
       <div class="form-group">
+        <label class="col-sm-3 text-right">[% cnf.pg_status_color.pg_conf_name %]</label>
+        [% pguptextarea( 'pg_status_color', cnf.pg_status_color.pg_conf_value, 8 ) %]
+      </div>
+      <div class="form-group">
+        <label class="col-sm-3 text-right">[% cnf.pg_active_status.pg_conf_name %]</label>
+        [% pguptextarea( 'pg_active_status', cnf.pg_active_status.pg_conf_value, 8 ) %]
+      </div>
+      <div class="form-group">
         <label class="col-sm-3 text-right">[% cnf.cast_status_vals.pg_conf_name %]</label>
         [% pguptextarea( 'cast_status_vals', cnf.cast_status_vals.pg_conf_value, 8 ) %]
       </div>

@@ -37,6 +37,7 @@ sub index :Path :Args(0) {
         'gantt_back_grid'   => $M->find('gantt_back_grid')->pg_conf_value(),
         'gantt_colmnum'     => $M->find('gantt_colmnum')->pg_conf_value(),
         'gantt_scale_str'   => $M->find('gantt_scale_str')->pg_conf_value(),
+        'gantt_color_str'   => $M->find('gantt_color_str')->pg_conf_value(),
         'shift_hour'        => $c->config->{time_origin},
     };
     $c->stash->{'syscon'} = $syscon;
@@ -89,6 +90,7 @@ sub index :Path :Args(0) {
             'subno'         => $pgm->subno(),
             'sname'         => $pgm->sname() || $pgm->regpgid->name(),
             'doperiod'      => $doperiod,
+            'status'        => $pgm->status(),
         };
     }
     $c->stash->{'roomProgram'} = \@roomlist;
@@ -120,6 +122,7 @@ sub index :Path :Args(0) {
                 'roomno'        => $pgm->roomid->roomno(),
                 'roomname'      => $pgm->roomid->name(),
                 'doperiod'      => $doperiod,
+                'status'        => $pgm->status(),
             };
         }
     }
@@ -167,19 +170,20 @@ sub csvdownload :Local {
     my ( $self, $c ) = @_;
 
 $c->log->debug('>>> ' . 'csvdownload' );
-                        
+
+    my $row = $c->model('ConkanDB::PgSystemConf')->find('pg_active_status');
+    my $pact_status = [
+        map +{ 'status' => $_ }, @{from_json( $row->pg_conf_value() )}
+    ];
     # 実施日時、開始時刻、終了時刻、実施場所が設定済
-    # 実行ステータスが「実行」あるいは「公開」
+    # 実行ステータスが有効
     my $row =
         [ $c->model('ConkanDB::PgProgram')->search(
             { 'me.roomid' => \'IS NOT NULL',
               'date1'  => \'IS NOT NULL', 
               'stime1' => \'IS NOT NULL', 
               'etime1' => \'IS NOT NULL',
-              -nest    => [
-                'status' => '実行',
-                'status' => '公開'
-                ],
+              -nest    => $pact_status,
             },
             {
                 'prefetch' => [ 'regpgid', 'roomid' ],

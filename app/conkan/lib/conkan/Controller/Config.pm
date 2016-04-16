@@ -96,7 +96,8 @@ sub setting :Local {
                            || ( $code eq 'gantt_header' )
                            || ( $code eq 'gantt_back_grid' )
                            || ( $code eq 'gantt_colmnums' )
-                           || ( $code eq 'gantt_scale_str' );
+                           || ( $code eq 'gantt_scale_str' )
+                           || ( $code eq 'gantt_color_str' );
                     $param->{$code} =~ s/\s+$//;
                     $pHwk->pg_conf_value( $param->{$pHwk->pg_conf_code} );
                     $pHwk->update();
@@ -125,6 +126,11 @@ sub setting :Local {
                     pg_conf_name => 'gantt_scale_str(cache)',
                     pg_conf_value => $ganttStrs->[3],
                 });
+                $sysconM->update_or_create( {
+                    pg_conf_code => 'gantt_color_str',
+                    pg_conf_name => 'gantt_color_str(cache)',
+                    pg_conf_value => $ganttStrs->[4],
+                });
 
                 $c->stash->{'state'} = 'success';
             } catch {
@@ -146,12 +152,15 @@ sub setting :Local {
               [3]タイムスケール表示用ハッシュ(JSON)
                     キー: 日付
                       値: [ 開始時刻(分表示), 終了時刻(分表示), 先頭カラム数 ]
+              [4]ガントバー色ハッシュ(JSON)
+                    キー: 実行ステータス
+                      値: 色コード
 
 =cut
 
 sub _crGntStr :Private {
     my ( $self, $c, 
-         $param,      # 日付列、開始時刻列、終了時刻列が入ったハッシュ
+         $param,      # 設定フォームパラメータハッシュ
        ) = @_;
 
     my @dates  = @{from_json($param->{'dates'})};
@@ -201,6 +210,17 @@ sub _crGntStr :Private {
     $ganttStrs[2] = $maxcolnum;
 
     $ganttStrs[3] = to_json($gantt_scale);
+
+    my @status = @{from_json($param->{'pg_status_vals'})};
+    my @colors = @{from_json($param->{'pg_status_color'})};
+    push @status, (""); # 未定分追加
+
+    my $stcnt = scalar(@status);
+    my $gantt_color = {};
+    for ( my $cnt=0; $cnt<$stcnt; $cnt++ ) {
+        $gantt_color->{$status[$cnt]} = $colors[$cnt];
+    }
+    $ganttStrs[4] = to_json($gantt_color);
 
     return \@ganttStrs;
 }
