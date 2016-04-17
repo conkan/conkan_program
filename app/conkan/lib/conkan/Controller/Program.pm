@@ -265,17 +265,9 @@ sub progress :Local {
     my $pgid    = $param->{'pgid'};
     my $regpgid = $param->{'regpgid'};
 
+    my $str = $param->{'progress'};
     try {
-        if ( $param->{'progress'} ) {
-            $c->model('ConkanDB::PgProgress')->create(
-                {
-                'regpgid'       => $regpgid,
-                'staffid'       => $c->user->get('staffid'),
-                'repdatetime'   => \'NOW()',
-                'report'        => $param->{'progress'},
-                },
-            );
-        }
+        $c->forward('/program/_crProgress', [ $regpgid, $str, ], ) if ( $str );
     } catch {
         $c->detach( '_dberror', [ shift ] );
     };
@@ -335,6 +327,16 @@ sub cpysep :Local {
                 $hval->{'regpgid'} = $regpgid;
                 $c->model('ConkanDB::PgRegEquip')->create( $hval );
             }
+            try {
+                my $prstr = 'copy to ' . $regpgid;
+                $c->forward('/program/_crProgress', [ $svregpgid, $prstr, ], );
+            } catch {
+                # 自動進捗登録時の失敗は、エラーログのみ残す
+                $c->response->status(200);
+                my $e = shift;
+                $c->log->error('_autoProgress error ' . localtime() .
+                    ' dbexp : ' . Dump($e) );
+            };
         }
         else {  # 分割
             # 企画管理のみ複製
@@ -351,6 +353,16 @@ $c->log->debug('>>>> maxsubno:[' . $row->get_column('maxsubno') . ']');
             $hval->{'subno'} = $row->get_column('maxsubno') + 1;
             $row = $c->model('ConkanDB::PgProgram')->create( $hval );
             $pgid = $row->pgid();
+            try {
+                my $prstr = 'split to ' . $hval->{'subno'};
+                $c->forward('/program/_crProgress', [ $svregpgid, $prstr, ], );
+            } catch {
+                # 自動進捗登録時の失敗は、エラーログのみ残す
+                $c->response->status(200);
+                my $e = shift;
+                $c->log->error('_autoProgress error ' . localtime() .
+                    ' dbexp : ' . Dump($e) );
+            };
         }
     } catch {
         $c->detach( '_dberror', [ shift ] );
@@ -705,10 +717,13 @@ sub _pgupdate :Private {
         }
         else {
             my $value = $c->forward('/program/_trnReq2Hash', [ $up_items ], );
+            my $regpgid = $c->stash->{'regpgid'};
             if ( defined( $rowprof ) ) {
                 # 更新実施
                 if ( $rowprof->updateflg eq 
                         +( $c->sessionid . $c->session->{'updtic'}) ) {
+                        $c->forward('/program/_autoProgress',
+                                [ $regpgid, $up_items, $rowprof, $value ] );
                         $rowprof->update( $value ); 
                         $c->response->body(
                             '<FORM><H1>更新しました</H1></FORM>');
@@ -722,6 +737,8 @@ sub _pgupdate :Private {
             }
             else {
                 # 追加
+                $c->forward('/program/_autoProgress',
+                                [ $regpgid, $up_items, undef, $value ] );
                 $c->stash->{'M'}->create( $value ); 
                 $c->response->body('<FORM><H1>追加しました</H1></FORM>');
             }
@@ -759,6 +776,11 @@ my %TimeArgTrn = (
     'etime1' => [ 'ehour1', 'emin1' ],
     'stime2' => [ 'shour2', 'smin2' ],
     'etime2' => [ 'ehour2', 'emin2' ],
+);
+
+my %DateArgTrn = (
+    'date1' => [ 'year1', 'month1', 'day1' ],
+    'date2' => [ 'year2', 'month2', 'day2' ],
 );
 
 =head2 _trnSEtime
@@ -822,6 +844,87 @@ sub _trnReq2Hash :Private {
         }
     }
     return $value;
+}
+
+=head2 _autoProgress
+
+更新内容自動進捗登録
+
+進捗文字列の順序を揃えるため、項目名配列を受け取る
+(ハッシュのキーの順序は不定のため)
+
+=cut
+
+sub _autoProgress :Private {
+    my ( $self, $c, 
+         $regpgid,  # 対象企画番号
+         $itemkeys, # 項目名配列
+         $row,      # 対象レコード(更新前)
+         $value,    # 更新用ハッシュ
+       ) = @_;
+
+$c->log->debug('>>> _autoProgress start regpgid:' . $regpgid );
+    try {
+        my $progstr = '';
+        if ( defined( $row ) ) { # 更新
+            for my $key (@{$itemkeys}) {
+                my $rowval = $row->get_column($key);
+                my $val = $value->{$key};
+                if ( defined( $rowval ) ) {
+                    if ( exists( $TimeArgTrn{$key} ) ) {
+                        my @times = split(':', $row->get_column($key));
+                        $rowval = sprintf( '%02d:%02d', @times );
+                    }
+                    elsif ( exists( $DateArgTrn{$key} ) ) {
+                        $rowval =~ s[-][/]g;
+                    }
+                }
+                if ( ($rowval ne $val ) ) {
+                    $c->log->debug('>>> _autoProgress key:' . $key . ' rowval:' . $rowval . ' val:' . $val );
+                    $progstr .= $key . ' change to ' . $val . ' ';
+                }
+            }
+        }
+        else { # 生成
+            $progstr = 'Create ';
+            for my $key (@{$itemkeys}) {
+                $progstr .= $key . ':' . $value->{$key} . ' ';
+            }
+        }
+        if ( $progstr ne '' ) {
+            $c->log->info( localtime()  . ' _autoProgress regpgid:' .$regpgid
+                                        . ' progstr:' . $progstr );
+            $c->forward('/program/_crProgress', [ $regpgid, $progstr, ], );
+        }
+    } catch {
+        # 自動進捗登録時の失敗は、エラーログのみ残す
+        $c->response->status(200);
+        my $e = shift;
+        $c->log->error('_autoProgress error ' . localtime() .
+            ' dbexp : ' . Dump($e) );
+    };
+}
+
+=head2 _crProgress
+
+進捗登録実施
+
+=cut
+
+sub _crProgress :Private {
+    my ( $self, $c, 
+         $regpgid,  # 対象企画番号
+         $progstr,  # 報告内容
+       ) = @_;
+
+    $c->model('ConkanDB::PgProgress')->create(
+        {
+            'regpgid'       => $regpgid,
+            'staffid'       => $c->user->get('staffid'),
+            'repdatetime'   => \'NOW()',
+            'report'        => $progstr,
+        },
+    );
 }
 
 =head2 _setSysConf

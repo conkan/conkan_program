@@ -171,9 +171,9 @@ sub csvdownload :Local {
 
 $c->log->debug('>>> ' . 'csvdownload' );
 
-    my $row = $c->model('ConkanDB::PgSystemConf')->find('pg_active_status');
+    my $rowconf = $c->model('ConkanDB::PgSystemConf')->find('pg_active_status');
     my $pact_status = [
-        map +{ 'status' => $_ }, @{from_json( $row->pg_conf_value() )}
+        map +{ 'status' => $_ }, @{from_json( $rowconf->pg_conf_value() )}
     ];
     # 実施日時、開始時刻、終了時刻、実施場所が設定済
     # 実行ステータスが有効
@@ -259,9 +259,10 @@ sub timetable_get : Chained('timetable_base') :PathPart('') :Args(1) {
                                 'prefetch' => [ 'regpgid', 'roomid' ],
                             },
                         );
+        my $regpgid = $row->regpgid->regpgid();
         if ( $c->request->method eq 'GET' ) {
             # 更新表示
-            $c->stash->{'regpgid'}  = $row->regpgid->regpgid();
+            $c->stash->{'regpgid'}  = $regpgid;
             $c->stash->{'subno'}    = $row->subno();
             $c->stash->{'pgid'}     = $row->pgid();
             $c->stash->{'sname'}    = $row->sname();
@@ -310,6 +311,7 @@ sub timetable_get : Chained('timetable_base') :PathPart('') :Args(1) {
                                 roomid
                             / ];
                 my $value = $c->forward('/program/_trnReq2Hash', [ $items ] );
+                $c->forward('/program/_autoProgress', [ $regpgid, $items, $row, $value ] );
                 $row->update( $value ); 
                 $c->stash->{'status'} = 'update';
             }
@@ -319,7 +321,8 @@ sub timetable_get : Chained('timetable_base') :PathPart('') :Args(1) {
         }
     } catch {
         my $e = shift;
-$c->log->error('>>> ' . localtime() . ' dbexp : ' . Dump($e) );
+        $c->log->error('timetable_get error ' . localtime() .
+            ' dbexp : ' . Dump($e) );
     };
     $c->forward('conkan::View::JSON');
 }
