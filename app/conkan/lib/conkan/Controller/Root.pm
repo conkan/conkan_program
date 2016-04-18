@@ -41,7 +41,11 @@ login処理と初期設定のみ組み込み。それ以外は別のコントロ
 sub auto :Private {
     my ( $self, $c ) = @_;
 
-    $c->log->info(localtime() . ' アクション内部パス:[' . $c->action->reverse . '][' . $c->request->method . ']' );
+    $c->log->info(localtime()
+        . ' アクション内部パス:[' . $c->action->reverse . ']['
+        . $c->request->method . '] userid :' 
+        . +( $c->user_exists ?  $c->user->get('staffid') : 'notlogin' )
+        . ']' );
     # 初期化済判断
     unless (exists($c->config->{inited})) {
         $c->log->info(localtime() . ' 未初期化');

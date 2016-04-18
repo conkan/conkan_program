@@ -110,21 +110,10 @@
     display: none;
 }
 
-.ui-grid-header {
-    padding: 0px;
-    border: 0px;
+.grid {
+    height: auto;
 }
 
-.ui-grid-canvas {
-    padding: 0px;
-}
-
-.container {
-    min-width: 1100px;
-}
-
-@media (min-width: 1520px) {
-    .container {
-        width: 1500px;
-    }
+#roomcastsel {
+    margin: 0px;
 }

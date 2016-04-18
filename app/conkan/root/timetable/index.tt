@@ -7,17 +7,15 @@
 <meta name="description" content="conkan profile">
 <meta name="author" content="Studio REM">
 <title>Conkan Timetable</title>
+[%- SET self_li_id = 'timetable' -%]
 [%- SET useWijGrid = 0 %]
 [%- SET useUiGrid = 1 %]
-[% PROCESS 'ttwijgethead.tt' -%]
-<link rel="stylesheet" href="/static/css/conkan-timetable.css" />
-</head>
-[%- SET self_li_id = 'timetable' -%]
 [%- PROCESS 'tthead.tt' -%]
 [%- SET editable = 0;
 IF cuRole == 'ROOT' || cuRole == 'PG';
   SET editable = 1;
 END -%]
+<link rel="stylesheet" href="/static/css/conkan-timetable.css" />
 <div class="container" ng-app="conkanTimeTable">
   <div class="row" id="timetable_up">
     <div id="unset_pglist_wrap" class="col-sm-2">
@@ -31,16 +29,16 @@ END -%]
       </dl>
     </div>
     <div id="timetable_wrap" class="col-sm-10" ng-controller="timetableController">
-      <div class="row">
+      <div class="row" id="roomcastsel">
           <div class="col-sm-6"></div>
           <div class="showbtnon showbtn col-sm-3" id="roombtn" ng-click="showbyroom()">部屋別</div>
           <div class="showbtn col-sm-3" id="castbtn" ng-click="showbycast()">出演者別</div>
       </div>
+      <!-- Main: タイムテーブル表示: 部屋別 -->
       <div id="timetable_room" ui-grid="ttgridbyroom" class="grid" ui-grid-resize-columns ui-grid-pinning ui-grid-grouping>
-        <!-- Main: タイムテーブル表示: 部屋別 -->
       </div>
+      <!-- Main: タイムテーブル表示: 出演者別 -->
       <div id="timetable_cast" ui-grid="ttgridbycast" class="grid" ui-grid-resize-columns ui-grid-pinning ui-grid-grouping>
-        <!-- Main: タイムテーブル表示: 出演者別 -->
       </div>
     </div>
   </div> <!-- End of timetable_up -->
@@ -138,50 +136,50 @@ END -%]
       </table>
     </div> <!-- End of timetable_edit_form -->
   </div> <!-- End of timetable_down -->
-  <!-- 各コントローラが使う値設定サービス(ttで初期化) -->
-  [% PROCESS 'tttimeselval.tt' %]
-  <!-- 更新結果表示用モーダル -->
-  <!--  更新成功 -->
-  <script type="text/ng-template" id="T_result_update">
-    <div class="modal-header">
-      <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
-    </div>
-    <div class="modal-body">
-      <H3><strong>更新しました</strong></H3>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-danger" ng-click="$close()">閉じる</button>
-    </div>
-  </script>
-  <!--  更新失敗 -->
-  <script type="text/ng-template" id="T_result_fail">
-    <div class="modal-header">
-      <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
-    </div>
-    <div class="modal-body">
-      <H3><strong>更新できませんでした</strong></H3>
-      他スタッフが変更した可能性があります<br/>
-      設定値を確認してください
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-danger" ng-click="$close()">閉じる</button>
-    </div>
-  </script>
-  <!--  更新失敗(DBエラー) -->
-  <script type="text/ng-template" id="T_result_dberr">
-    <div class="modal-header">
-      <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
-    </div>
-    <div class="modal-body">
-      <H3><strong>DBエラー発生</strong></H3>
-      更新できませんでした<br/>
-      システム管理者に連絡してください
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-danger" ng-click="$close()">閉じる</button>
-    </div>
-  </script>
-</div>
+</div> <!-- End of container ng-app "conkanTimeTable" -->
+<!-- 各コントローラが使う値設定サービス(ttで初期化) -->
+[% PROCESS 'tttimeselval.tt' %]
+<!-- 更新結果表示用モーダル -->
+<!--  更新成功 -->
+<script type="text/ng-template" id="T_result_update">
+  <div class="modal-header">
+    <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
+  </div>
+  <div class="modal-body">
+    <H3><strong>更新しました</strong></H3>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-danger" ng-click="$close()">閉じる</button>
+  </div>
+</script>
+<!--  更新失敗 -->
+<script type="text/ng-template" id="T_result_fail">
+  <div class="modal-header">
+    <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
+  </div>
+  <div class="modal-body">
+    <H3><strong>更新できませんでした</strong></H3>
+    他スタッフが変更した可能性があります<br/>
+    設定値を確認してください
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-danger" ng-click="$close()">閉じる</button>
+  </div>
+</script>
+<!--  更新失敗(DBエラー) -->
+<script type="text/ng-template" id="T_result_dberr">
+  <div class="modal-header">
+    <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
+  </div>
+  <div class="modal-body">
+    <H3><strong>DBエラー発生</strong></H3>
+    更新できませんでした<br/>
+    システム管理者に連絡してください
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-danger" ng-click="$close()">閉じる</button>
+  </div>
+</script>
 [% PROCESS 'tttail.tt' %]
 <script type="text/javascript" src="/static/js/conkan_timetable.js"></script>
 </body>

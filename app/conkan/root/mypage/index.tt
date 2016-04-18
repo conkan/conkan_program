@@ -7,9 +7,9 @@
 <meta name="description" content="conkan mypage">
 <meta name="author" content="Studio REM">
 <title>Conkan MyPage</title>
-[% PROCESS 'ttwijgethead.tt' -%]
-</head>
 [% SET self_li_id = 'mypage' %]
+[%- SET useWijGrid = 0 %]
+[%- SET useUiGrid = 0 %]
 [% PROCESS 'tthead.tt' %]
 <div class="container">
 [%- IF addroot %]

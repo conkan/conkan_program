@@ -7,9 +7,9 @@
 <meta name="description" content="conkan Program Detail">
 <meta name="author" content="Studio REM">
 <title>Conkan Program Detail</title>
-[% PROCESS 'ttwijgethead.tt' -%]
-</head>
 [%- DEFAULT self_li_id = 'program_list' -%]
+[%- SET useWijGrid = 0 %]
+[%- SET useUiGrid = 0 %]
 [% PROCESS 'tthead.tt' %]
 <div class="container">
   [% PROCESS 'ttpgdetail.tt' %]

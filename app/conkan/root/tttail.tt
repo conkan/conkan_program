@@ -22,6 +22,9 @@
     [%- IF useWijGrid %]
     wijGridResize();
     [%- END %]
+    [%- IF useUiGrid %]
+    uiGridResize();
+    [%- END %]
   });
 </script>
 <!-- #End Region "tttail.tt" -->

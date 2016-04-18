@@ -7,9 +7,9 @@
 <meta name="description" content="conkan profile">
 <meta name="author" content="Studio REM">
 <title>Conkan Profile</title>
-[% PROCESS 'ttwijgethead.tt' -%]
-</head>
 [%- SET self_li_id = 'mypage_profile' -%]
+[%- SET useWijGrid = 0 %]
+[%- SET useUiGrid = 0 %]
 [%- PROCESS 'tthead.tt' -%]
 [%- DEFAULT state = 'inputform' -%]
 [%- IF addstaff && state == 'success';

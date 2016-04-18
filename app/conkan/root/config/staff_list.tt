@@ -7,64 +7,19 @@
 <meta name="description" content="conkan stafflist">
 <meta name="author" content="Studio REM">
 <title>Conkan StaffList</title>
-[%- SET useWijGrid = 1 %]
-[% PROCESS 'ttwijgethead.tt' -%]
-</head>
 [%- SET self_li_id = 'config_staff' -%]
+[%- SET useWijGrid = 0 %]
+[%- SET useUiGrid = 1 %]
 [%- PROCESS 'tthead.tt' -%]
-<div class="container" ng-app="wijmo">
-  <div class="well" id="gridlist" ng-controller="MyController">
-    <wij-grid id="dataGrid" data="list"
-        class="table table-bordered"
-        allow-col-sizing="true"
-        allow-sorting="true"
-        allow-keyboard-navigation="true"
-        ensureColumnsPxWidth="true"
-        highlight-on-hover="false"
->
-      <scrolling-settings
-        mode="vertical"
-        static-row-index="-1"
-      ></scrolling-settings>
-      <columns>
-        <column width="23%" header-text="名前"></column>
-        <column width="23%" header-text="役割"></column>
-        <column width="23%" header-text="担当名"></column>
-        <column width="23%" header-text="最終ログイン日時"></column>
-        <column             header-text=""></column>
-      </columns>
-    </wij-grid>
-    <script type="text/javascript"> <!-- 貼り付けるdataはsrcではなく埋め込み -->
-      function MyController( $scope, $locale ) {
-        $scope.list = [
-          [% FOREACH item = list -%]
-            [%- IF item.rmdate;
-              SET rmcol = "style='background-color:gray;'";
-            ELSE;
-              SET rmcol = "";
-            END -%]
-                [ "<span [% rmcol %]>[% item.name | html %]</span>", "<span [% rmcol %]>
-              [%- SWITCH item.role -%]
-                [%- CASE 'NORM' -%] 企画スタッフ
-                [%- CASE 'PG'   -%] 企画管理スタッフ
-                [%- CASE 'ROOT' -%] システム管理者
-              [%- END -%]
-              </span>", "<span [% rmcol %]>[% item.tname | html %]</span>", "<span [% rmcol %]>[% item.lastlogin | html %]</span>", "<span [% rmcol %]><button type='button' class='btn btn-primary btn-xs'
-              [%- IF rmcol -%]
-                >無効
-              [%- ELSE -%]
-                data-toggle='modal' data-target='#editStaff' data-whatever='[% item.staffid %]' data-whatrole='[% item.role %]'>編集
-              [%- END -%]
-            </button></span>" ],
-          [% END %]
-            [ "", "", "", "", "" ]
-        ];
-      }
-    </script>
+<div class="container" ng-app="conkanStaffList">
+  <div class="well" id="gridlist" ng-controller="staffListController">
+    <div id="stafflist" ui-grid="staffgrid" class="grid" ui-grid-resize-columns ui-grid-pinning ui-grid-grouping>
+    </div>
   </div> <!-- End of well gridlist -->
-</div> <!-- End of container wijmo -->
-
-<!-- Modal -->
+</div> <!-- End of container ng-app "conkanStaffList" -->
+<!-- スタッフリスト値設定サービス(ttで初期化) -->
+[% PROCESS 'ttstaffval.tt' %]
+<!-- スタッフ詳細モーダル -->
 <div class="modal fade" id="editStaff" tabindex="-1" role="dialog" aria-labelledby="editStaffLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">

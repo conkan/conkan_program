@@ -7,10 +7,9 @@
 <meta name="description" content="conkan Program List">
 <meta name="author" content="Studio REM">
 <title>Conkan ProgramList</title>
-[%- SET useWijGrid = 1 %]
-[% PROCESS 'ttwijgethead.tt' -%]
-</head>
 [%- SET self_li_id = 'program_list' %]
+[%- SET useWijGrid = 1 %]
+[%- SET useUiGrid = 0 %]
 [% PROCESS 'tthead.tt' %]
 <div class="container" ng-app="wijmo">
   [%- SET allprg = 1 %]

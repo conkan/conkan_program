@@ -7,10 +7,9 @@
 <meta name="description" content="conkan equiplist">
 <meta name="author" content="Studio REM">
 <title>Conkan EquipList</title>
-[%- SET useWijGrid = 1 %]
-[% PROCESS 'ttwijgethead.tt' -%]
-</head>
 [%- SET self_li_id = 'config_equip' -%]
+[%- SET useWijGrid = 1 %]
+[%- SET useUiGrid = 0 %]
 [%- PROCESS 'tthead.tt' -%]
 <div class="container" ng-app="wijmo">
   <div class="well" id="gridlist" ng-controller="MyController">
