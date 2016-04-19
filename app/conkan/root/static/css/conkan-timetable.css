@@ -32,6 +32,7 @@
 .prgcell {
     text-align: left;
     border: thin ridge #686868;
+    width: 100%;
 }
 
 #timetable_wrap .prgcell {

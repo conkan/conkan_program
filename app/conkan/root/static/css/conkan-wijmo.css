@@ -1,18 +1,38 @@
+#gridlist {
+    margin-bottom: 0px;
+}
+
+#pgAddDiv {
+    margin-bottom: 10px;
+    padding-left: 10px;
+}
+
 .wijmo-wijgrid-innercell {
     white-space: pre-wrap !important;
     height: auto !important;
 }
+
 .ui-widget-content a {
     color: -webkit-link;
     text-decoration: underline;
 }
+
 .wijmo-wijgrid-headerrow,
 .wijmo-wijgrid-headerrow .ui-state-default {
     background-color: rgb(255, 204, 102);
 }
+
 .wijmo-wijgrid tr.wijmo-wijgrid-row td.ui-state-highlight {
     background-color: #B3BFC3;
 }
-#pgAddDiv {
-    padding-left: 10px;
+
+.container {
+    min-width: 1100px;
 }
+
+@media (min-width: 1520px) {
+    .container {
+        width: 1500px;
+    }
+}
+

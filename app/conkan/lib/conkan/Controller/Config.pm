@@ -8,6 +8,7 @@ use namespace::autoclean;
 use Data::Dumper;
 use YAML;
 use Encode;
+use DateTime;
 
 BEGIN { extends 'Catalyst::Controller'; }
 
@@ -738,6 +739,54 @@ sub _delete :Private {
     }
     $c->stash->{'rs'} = undef;
     $c->response->status(200);
+}
+
+=head2 loginlog
+-----------------------------------------------------------------------------
+ログイン履歴表示
+
+=cut
+
+sub loginlog :Local {
+    my ( $self, $c ) = @_;
+}
+
+=head2 loginlogget
+-----------------------------------------------------------------------------
+ログイン履歴取得
+
+=cut
+
+sub loginlogget :Local {
+    my ( $self, $c ) = @_;
+    try {
+        my @data;
+        my $rows = [
+            $c->model('ConkanDB::LoginLog')->search( {},
+                {
+                    'prefetch' => [ 'staffid' ],
+                    'order_by' => { -desc => 'login_date' },
+                }
+            )
+        ];
+        foreach my $row ( @$rows ) {
+            my $login_date = $row->login_date();
+            my $logdatestr = defined( $login_date )
+                    ? $login_date->strftime('%F %T')
+                    : '';
+            push ( @data, {
+                'staffname'  => $row->staffid->name(),
+                'login_date' => $logdatestr,
+            } );
+        }
+        $c->log->debug('loginlog data ' . Dumper( \@data ));
+        $c->stash->{'json'} = \@data;
+    } catch {
+        my $e = shift;
+        $c->log->error('timetable_get error ' . localtime() .
+            ' dbexp : ' . Dump($e) );
+    };
+    $c->forward('conkan::View::JSON');
 }
 
 =head2 _dberror

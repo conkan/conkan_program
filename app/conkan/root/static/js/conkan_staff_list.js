@@ -54,8 +54,8 @@ var ConkanAppModule = angular.module('conkanStaffList' );
 
 // スタッフリストコントローラ
 ConkanAppModule.controller( 'staffListController',
-    [ '$scope', 'uiGridConstants', 'staffValue', '$sce',
-        function( $scope, uiGridConstants, staffValue, $sce ) {
+    [ '$scope', 'staffValue', '$sce',
+        function( $scope, staffValue, $sce ) {
             $scope.__htmlsce = function( cont ) {
                 var wkstr = $sce.trustAsHtml( cont );
                 return wkstr;
@@ -70,18 +70,22 @@ ConkanAppModule.controller( 'staffListController',
             $scope.staffgrid.columnDefs = [
                 { name : '名前', field: 'name',
                     headerCellClass: 'gridheader',
+                    width: "23%",
                     cellTemplate: '<div class="ui-grid-cell-contents" ng-bind-html="grid.appScope.__htmlsce(row.entity.name)"></div>',
                 },
                 { name : '役割', field: 'role',
                     headerCellClass: 'gridheader',
+                    width: "23%",
                     cellTemplate: '<div class="ui-grid-cell-contents" ng-bind-html="grid.appScope.__htmlsce(row.entity.role)"></div>',
                 },
                 { name : '担当名', field: 'tname',
                     headerCellClass: 'gridheader',
+                    width: "23%",
                     cellTemplate: '<div class="ui-grid-cell-contents" ng-bind-html="grid.appScope.__htmlsce(row.entity.tname)"></div>',
                 },
                 { name : '最終ログイン日時', field: 'llogin',
                     headerCellClass: 'gridheader',
+                    width: "23%",
                     cellTemplate: '<div class="ui-grid-cell-contents" ng-bind-html="grid.appScope.__htmlsce(row.entity.llogin)"></div>',
                 },
                 { name : '', field: 'staffid',

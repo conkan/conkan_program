@@ -13,9 +13,14 @@
 [%- PROCESS 'tthead.tt' -%]
 <div class="container" ng-app="conkanStaffList">
   <div class="well" id="gridlist" ng-controller="staffListController">
-    <div id="stafflist" ui-grid="staffgrid" class="grid" ui-grid-resize-columns ui-grid-pinning ui-grid-grouping>
+    <div id="stafflist" ui-grid="staffgrid" class="grid" ui-grid-resize-columns>
     </div>
   </div> <!-- End of well gridlist -->
+  <div id="pgAddDiv">
+    <a href="/config/loginlog" type="button" class="btn btn-primary">
+      ログイン履歴
+    </a>
+  </div>
 </div> <!-- End of container ng-app "conkanStaffList" -->
 <!-- スタッフリスト値設定サービス(ttで初期化) -->
 [% PROCESS 'ttstaffval.tt' %]

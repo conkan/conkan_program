@@ -16,6 +16,7 @@ var wijGridResize = function () {
                   parseFloat(pgldiv.css('marginBottom')) +
                   parseFloat(wijdiv.css('borderTopWidth')) +
                   parseFloat(wijdiv.css('borderBottomWidth')) +
+                  parseFloat(adddiv.css('marginBottom')) +
                   adddiv.outerHeight() );
     scldiv.css('max-height', h + 'px');
   }

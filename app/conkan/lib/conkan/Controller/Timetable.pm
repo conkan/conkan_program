@@ -177,7 +177,7 @@ $c->log->debug('>>> ' . 'csvdownload' );
     ];
     # 実施日時、開始時刻、終了時刻、実施場所が設定済
     # 実行ステータスが有効
-    my $row =
+    my $rows =
         [ $c->model('ConkanDB::PgProgram')->search(
             { 'me.roomid' => \'IS NOT NULL',
               'date1'  => \'IS NOT NULL', 
@@ -192,33 +192,33 @@ $c->log->debug('>>> ' . 'csvdownload' );
         ];
 
     my @data;
-    foreach my $pgm ( @$row ) {
+    foreach my $row ( @$rows ) {
         # 実施日付は YYYY/MM/DD、開始終了時刻は HH:MM (いずれも0サフィックス)
         my @dates  = undef;
         my @stms = undef;
         my @etms = undef;
-        my @date  = split('T', $pgm->date1());
+        my @date  = split('T', $row->date1());
         $date[0] =~ s[-][/]g;
         @date = split('/', $date[0]);
-        $c->forward('/program/_trnSEtime', [ $pgm, ], );
+        $c->forward('/program/_trnSEtime', [ $row, ], );
         $dates[0] = sprintf('%04d/%02d/%02d', @date);
-        $stms[0] = sprintf('%02d:%02d', $pgm->{'shour1'}, $pgm->{'smin1'});
-        $etms[0] = sprintf('%02d:%02d', $pgm->{'ehour1'}, $pgm->{'emin1'});
-        if ( $pgm->date2() ) {
-            @date  = split('T', $pgm->date2());
+        $stms[0] = sprintf('%02d:%02d', $row->{'shour1'}, $row->{'smin1'});
+        $etms[0] = sprintf('%02d:%02d', $row->{'ehour1'}, $row->{'emin1'});
+        if ( $row->date2() ) {
+            @date  = split('T', $row->date2());
             $date[0] =~ s[-][/]g;
             @date = split('/', $date[0]);
             $dates[1] = sprintf('%04d/%02d/%02d', @date);
-            $stms[1] = sprintf('%02d:%02d', $pgm->{'shour2'}, $pgm->{'smin2'});
-            $etms[1] = sprintf('%02d:%02d', $pgm->{'ehour2'}, $pgm->{'emin2'});
+            $stms[1] = sprintf('%02d:%02d', $row->{'shour2'}, $row->{'smin2'});
+            $etms[1] = sprintf('%02d:%02d', $row->{'ehour2'}, $row->{'emin2'});
         }
         push ( @data, [
-            $pgm->regpgid->regpgid(),       # 企画ID,
-            $pgm->regpgid->name(),          # 企画名称,
-            $pgm->status(),                 # 実行ステータス,
-            $pgm->memo(),                   # 実行ステータス補足,
-            $pgm->roomid->roomno(),         # 部屋番号,
-            $pgm->roomid->name(),           # 実施場所,
+            $row->regpgid->regpgid(),       # 企画ID,
+            $row->regpgid->name(),          # 企画名称,
+            $row->status(),                 # 実行ステータス,
+            $row->memo(),                   # 実行ステータス補足,
+            $row->roomid->roomno(),         # 部屋番号,
+            $row->roomid->name(),           # 実施場所,
             $dates[0], $stms[0], $etms[0],  # 実施日付1,開始時刻1,終了時刻1,
             $dates[1], $stms[1], $etms[1],  # 実施日付2,開始時刻2,終了時刻2,
         ]);
