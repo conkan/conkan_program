@@ -1,0 +1,32 @@
+#gridlist {
+    margin-bottom: 0px;
+}
+
+#pgAddDiv {
+    margin-bottom: 10px;
+    padding-left: 10px;
+}
+
+.ui-grid-header {
+    padding: 0px;
+    border: 0px;
+}
+
+.ui-grid-canvas {
+    padding: 0px;
+}
+
+.grid {
+    height: 600px;
+    overflow: hidden;
+}
+
+.container {
+    min-width: 1100px;
+}
+
+@media (min-width: 1520px) {
+    .container {
+        width: 1500px;
+    }
+}
