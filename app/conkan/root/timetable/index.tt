@@ -23,7 +23,7 @@ END -%]
       <dl ng-controller="unsetlistController">
         <dt ng-repeat="prg in unsetprglist">
           <button class="btn primary prgcell" ng-click="unsetclick(prg.pgid)">
-            {{prg.regpgid}}({{prg.subno}}):{{prg.sname}}
+            <p ng-cloak>{{prg.regpgid}}({{prg.subno}}):{{prg.sname}}</p>
           </button>
         </dt>
       </dl>
@@ -71,12 +71,12 @@ END -%]
           </tr>
           <tr>
             <td>
-              {{current.regpgid}}{{current.subno}}
+              <p ng-cloak>{{current.regpgid}}{{current.subno}}</p>
             </td>
             <th style="text-align: right">企画名</th>
-            <th colspan="3">{{current.name}}</th>
+            <th colspan="3"><p ng-cloak>{{current.name}}</p></th>
             <td colspan="2">
-              {{current.sname}}
+              <p ng-cloak>{{current.sname}}</p>
             </td>
           </tr>
           <tr>

@@ -25,6 +25,11 @@
     min-width: 1100px;
 }
 
+.disableRow {
+    background-color:gray !important;
+    width: 100%;
+}
+
 @media (min-width: 1520px) {
     .container {
         width: 1500px;

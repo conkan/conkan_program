@@ -8,35 +8,13 @@ var ConkanAppModule = angular.module('conkanStaffList',
 ConkanAppModule.value( 'staffValue', {
     stafflist : [
         [% FOREACH item = list -%]
-            [%- IF item.rmdate;
-                SET rmcol  = 'style="background-color:gray;"';
-                SET rmbtn1 = '>無効';
-                SET rmbtn2 = '';
-                SET rmbtn3 = '';
-                SET wkid   = '';
-                SET wkrole = '';
-            ELSE;
-                SET rmcol  = '';
-                SET rmbtn1 = 'data-toggle="modal" data-target="#editStaff" data-whatever="';
-                SET rmbtn2 = '" data-whatrole="';
-                SET rmbtn3 = '">編集';
-                SET wkid   = item.staffid;
-                SET wkrole = item.role;
-            END;
-            SWITCH item.role;
-                CASE 'NORM';
-                    SET role = '企画スタッフ';
-                CASE 'PG';
-                    SET role = '企画管理スタッフ';
-                CASE 'ROOT';
-                    SET role = 'システム管理者';
-            END -%]
             {
-                name    : '<span [% rmcol %]>[% item.name | xml %]</span>',
-                role    : '<span [% rmcol %]>[% role | xml %]</span>',
-                tname   : '<span [% rmcol %]>[% item.tname | xml %]</span>',
-                llogin  : '<span [% rmcol %]>[% item.lastlogin.strftime("%F %T") | html %]</span>',
-                staffid : '<span [% rmcol %]><button type="button" class="btn btn-primary btn-xs" [% rmbtn1; wkid; rmbtn2; wkrole; rmbtn3 %]</button></span>'
+                rmdate  : '[% item.rmdate %]',
+                name    : '[% item.name | xml %]',
+                role    : '[% item.role %]',
+                tname   : '[% item.tname | xml %]',
+                llogin  : '[% item.lastlogin.strftime("%F %T") | xml %]',
+                staffid : '[% item.staffid %]',
             },
         [%- END -%]
     ],

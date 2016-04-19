@@ -50,16 +50,43 @@ $('#dodel').click(function(event) {
 } );
 
 // conkanStaffListモジュールの取得(生成済のもの)
-var ConkanAppModule = angular.module('conkanStaffList' );
+var ConkanAppModule = angular.module('conkanStaffList');
 
 // スタッフリストコントローラ
 ConkanAppModule.controller( 'staffListController',
-    [ '$scope', 'staffValue', '$sce',
-        function( $scope, staffValue, $sce ) {
-            $scope.__htmlsce = function( cont ) {
+    [ '$scope', 'staffValue', '$sce', '$http',
+        function( $scope, staffValue, $sce, $http ) {
+            $scope.__getRoll = function( role ) {
+                var cont;
+                switch (role) {
+                    case 'NORM':
+                        cont = '企画スタッフ';
+                        break;
+                    case 'PG':
+                        cont = '企画管理スタッフ';
+                        break;
+                    case 'ROOT':
+                        cont = 'システム管理者';
+                        break;
+                }
+                var wkstr = $sce.trustAsHtml( cont );
+                return wkstr;
+            }
+
+            $scope.__getEditbtn = function( rmdate, staffid, role ) {
+                var cont = '<button type="button" class="btn btn-xs';
+                if ( rmdate ) {
+                    cont += '">無効</button>';
+                }
+                else {
+                    cont += ' btn-primary" data-toggle="modal"'
+                        + ' data-target="#editStaff" data-whatever="' + staffid
+                        + '" data-whatrole="' + role + '">編集</button>';
+                }
                 var wkstr = $sce.trustAsHtml( cont );
                 return wkstr;
             };
+
             $scope.staffgrid = {
                 enableFiltering: false,
                 enableSorting: true,
@@ -67,30 +94,31 @@ ConkanAppModule.controller( 'staffListController',
                 enableColumnResizing: true,
                 enableGridMenu: false,
             };
+
             $scope.staffgrid.columnDefs = [
                 { name : '名前', field: 'name',
                     headerCellClass: 'gridheader',
                     width: "23%",
-                    cellTemplate: '<div class="ui-grid-cell-contents" ng-bind-html="grid.appScope.__htmlsce(row.entity.name)"></div>',
+                    cellTemplate: '<div ng-class="{ disableRow: row.entity.rmdate }">{{COL_FIELD}}</div>',
                 },
                 { name : '役割', field: 'role',
                     headerCellClass: 'gridheader',
                     width: "23%",
-                    cellTemplate: '<div class="ui-grid-cell-contents" ng-bind-html="grid.appScope.__htmlsce(row.entity.role)"></div>',
+                    cellTemplate: '<div ng-class="{ disableRow: row.entity.rmdate }"><span ng-bind-html="grid.appScope.__getRoll(row.entity.role)"></span></div>'
                 },
                 { name : '担当名', field: 'tname',
                     headerCellClass: 'gridheader',
                     width: "23%",
-                    cellTemplate: '<div class="ui-grid-cell-contents" ng-bind-html="grid.appScope.__htmlsce(row.entity.tname)"></div>',
+                    cellTemplate: '<div ng-class="{ disableRow: row.entity.rmdate }">{{COL_FIELD}}</div>',
                 },
                 { name : '最終ログイン日時', field: 'llogin',
                     headerCellClass: 'gridheader',
                     width: "23%",
-                    cellTemplate: '<div class="ui-grid-cell-contents" ng-bind-html="grid.appScope.__htmlsce(row.entity.llogin)"></div>',
+                    cellTemplate: '<div ng-class="{ disableRow: row.entity.rmdate }">&nbsp;{{COL_FIELD}}</div>',
                 },
                 { name : '', field: 'staffid',
                     headerCellClass: 'gridheader',
-                    cellTemplate: '<div class="ui-grid-cell-contents" ng-bind-html="grid.appScope.__htmlsce(row.entity.staffid)"></div>',
+                    cellTemplate: '<div ng-class="{ disableRow: row.entity.rmdate }"><span ng-bind-html="grid.appScope.__getEditbtn(row.entity.rmdate, row.entity.staffid, row.entity.role)"></span></div>'
                 },
             ];
             $scope.staffgrid.data = staffValue.stafflist;
