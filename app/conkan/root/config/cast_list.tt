@@ -8,8 +8,8 @@
 <meta name="author" content="Studio REM">
 <title>Conkan CastList</title>
 [%- SET self_li_id = 'config_cast' -%]
-[%- SET useWijGrid = 1 %]
-[%- SET useUiGrid = 0 %]
+[%- SET useWijGrid = 1 -%]
+[%- SET useUiGrid =  0 -%]
 [%- PROCESS 'tthead.tt' -%]
 <div class="container" ng-app="wijmo">
   <div class="well" id="gridlist" ng-controller="MyController">
@@ -72,7 +72,7 @@
     </div>
   </div>
 </div>
-[% PROCESS 'tttail.tt' %]
+[%- PROCESS 'tttail.tt' -%]
 <script type="text/javascript" src="/static/js/conkan_cast_list.js"></script>
 </body>
 </html>

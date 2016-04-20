@@ -1,7 +1,7 @@
+[%- # 本当はこれらはサーバに問い合わせて得たほうがいいのかもしれない -%]
+[%- # そうすれば、モジュールの生成もjsに持っていける -%]
+<!-- # Region tttimeselval.tt -->
 <script type="text/javascript">
-// 本当はこれらはサーバに問い合わせて得たほうがいいのかもしれない
-// そうすれば、モジュールの生成もjsに持っていける
-
 // conkanTimeTableモジュールの生成(グローバル変数)
 var ConkanAppModule = angular.module('conkanTimeTable',
         ['ui.grid', 'ui.grid.grouping', 'ui.grid.resizeColumns', 'ui.grid.pinning', 'ui.bootstrap'] );
@@ -96,4 +96,4 @@ ConkanAppModule.value( 'selectValue', {
      scale_hash : [% syscon.gantt_scale_str %],
 });
 </script>
-<!-- EOF -->
+<!-- # Region tttimeselval.tt -->

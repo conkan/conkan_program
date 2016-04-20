@@ -8,8 +8,8 @@
 <meta name="author" content="Studio REM">
 <title>Conkan StaffList</title>
 [%- SET self_li_id = 'config_staff' -%]
-[%- SET useWijGrid = 0 %]
-[%- SET useUiGrid = 1 %]
+[%- SET useWijGrid = 0 -%]
+[%- SET useUiGrid  = 1 -%]
 [%- PROCESS 'tthead.tt' -%]
 <div class="container" ng-app="conkanStaffList">
   <div class="well" id="gridlist" ng-controller="staffListController">
@@ -21,9 +21,8 @@
       ログイン履歴
     </a>
   </div>
+  [%- PROCESS 'T_httpget_fail.tt' -%]
 </div> <!-- End of container ng-app "conkanStaffList" -->
-<!-- スタッフリスト値設定サービス(ttで初期化) -->
-[% PROCESS 'ttstaffval.tt' %]
 <!-- スタッフ詳細モーダル -->
 <div class="modal fade" id="editStaff" tabindex="-1" role="dialog" aria-labelledby="editStaffLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -43,7 +42,7 @@
     </div>
   </div>
 </div>
-[% PROCESS 'tttail.tt' %]
+[%- PROCESS 'tttail.tt' -%]
 <script type="text/javascript" src="/static/js/conkan_staff_list.js"></script>
 </body>
 </html>

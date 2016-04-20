@@ -7,16 +7,16 @@
 <meta name="description" content="conkan mypage">
 <meta name="author" content="Studio REM">
 <title>Conkan MyPage</title>
-[% SET self_li_id = 'mypage' %]
-[%- SET useWijGrid = 1 %]
-[%- SET useUiGrid = 0 %]
-[% PROCESS 'tthead.tt' %]
+[%- SET self_li_id = 'mypage' -%]
+[%- SET useWijGrid = 1 -%]
+[%- SET useUiGrid  = 0 -%]
+[%- PROCESS 'tthead.tt' -%]
 <div class="container" ng-app="wijmo">
-  [%- SET allprg = 0 %]
+  [%- SET allprg = 0 -%]
   <div class="well" id="gridlist" ng-controller="MyController">
     [%- PROCESS 'ttpglist.tt' -%]
   </div>
 </div>
-[% PROCESS 'tttail.tt' %]
+[%- PROCESS 'tttail.tt' -%]
 </body>
 </html>

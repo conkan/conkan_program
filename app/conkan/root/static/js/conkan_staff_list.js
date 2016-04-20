@@ -49,13 +49,16 @@ $('#dodel').click(function(event) {
   $(content).load(staffid + '/del/ FORM', data );
 } );
 
-// conkanStaffListモジュールの取得(生成済のもの)
-var ConkanAppModule = angular.module('conkanStaffList');
+// // conkanStaffListモジュールの取得(生成済のもの)
+// var ConkanAppModule = angular.module('conkanStaffList');
+// conkanStaffListモジュールの生成(グローバル変数)
+var ConkanAppModule = angular.module('conkanStaffList',
+    ['ui.grid', 'ui.grid.resizeColumns', 'ui.bootstrap'] );
 
 // スタッフリストコントローラ
 ConkanAppModule.controller( 'staffListController',
-    [ '$scope', 'staffValue', '$sce', '$http',
-        function( $scope, staffValue, $sce, $http ) {
+    [ '$scope', '$sce', '$http', '$uibModal',
+        function( $scope, $sce, $http, $uibModal ) {
             $scope.__getRoll = function( role ) {
                 var cont;
                 switch (role) {
@@ -121,7 +124,16 @@ ConkanAppModule.controller( 'staffListController',
                     cellTemplate: '<div ng-class="{ disableRow: row.entity.rmdate }"><span ng-bind-html="grid.appScope.__getEditbtn(row.entity.rmdate, row.entity.staffid, row.entity.role)"></span></div>'
                 },
             ];
-            $scope.staffgrid.data = staffValue.stafflist;
+            $http.get('/config/staff/listget')
+            .success(function(data, status, headers, config) {
+                $scope.staffgrid.data = data.json;
+            })
+            .error(function(data, status, headers, config) {
+                var modalinstance = $uibModal.open(
+                    { templateUrl : 'T_httpget_fail' }
+                );
+                modalinstance.result.then( function() {} );
+            });
         }
     ]
 );

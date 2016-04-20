@@ -1,12 +1,4 @@
-#gridlist {
-    margin-bottom: 0px;
-}
-
-#pgAddDiv {
-    margin-bottom: 10px;
-    padding-left: 10px;
-}
-
+// ## conkan ui-grid css
 .ui-grid-header {
     padding: 0px;
     border: 0px;
@@ -21,17 +13,8 @@
     overflow: hidden;
 }
 
-.container {
-    min-width: 1100px;
-}
-
 .disableRow {
     background-color:gray !important;
     width: 100%;
 }
-
-@media (min-width: 1520px) {
-    .container {
-        width: 1500px;
-    }
-}
+// ## END of conkan ui-grid css

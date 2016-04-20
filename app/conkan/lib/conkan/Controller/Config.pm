@@ -233,9 +233,6 @@ sub _crGntStr :Private {
 
 sub staff_base : Chained('') : PathPart('config/staff') : CaptureArgs(0) {
     my ( $self, $c ) = @_;
-
-    # staffテーブルに対応したmodelオブジェクト取得
-    $c->stash->{'M'}   = $c->model('ConkanDB::PgStaff');
 }
 
 =head2 staff/list 
@@ -246,11 +243,44 @@ sub staff_base : Chained('') : PathPart('config/staff') : CaptureArgs(0) {
 
 sub staff_list : Chained('staff_base') : PathPart('list') : Args(0) {
     my ( $self, $c ) = @_;
-    $c->stash->{'list'} = [ $c->stash->{M}
-                            ->search( { 'account'  => { '!=' => 'admin' } },
-                                      { 'order_by' => { '-asc' => 'staffid' } } 
-                                    )
-                          ];
+}
+
+=head2 staff/listget
+
+スタッフ管理 staff_listget  : スタッフ一覧
+
+=cut
+
+sub staff_listget : Chained('staff_base') : PathPart('listget') : Args(0) {
+    my ( $self, $c ) = @_;
+
+    try {
+        my @data;
+        my $rows = [ $c->model('ConkanDB::PgStaff')->search(
+                        { 'account'  => { '!=' => 'admin' } },
+                        { 'order_by' => { '-asc' => 'staffid' } }
+                    )
+                ];
+        for my $row (@$rows) {
+            my $ll  = $row->lastlogin();
+            my $rm  = $row->rmdate();
+            push ( @data, {
+                'rmdate'   => +( defined( $rm ) ? $rm->strftime('%F %T') : '' ),
+                'name'     => $row->name(),
+                'role'     => $row->role(),
+                'tname'    => $row->tname(),
+                'llogin'   => +( defined( $ll ) ? $ll->strftime('%F %T') : '' ),
+                'staffid'  => $row->staffid(),
+            } );
+        }
+        $c->log->debug('staff/listget data ' . Dumper( \@data ));
+        $c->stash->{'json'} = \@data;
+    } catch {
+        my $e = shift;
+        $c->log->error('staff/listget error ' . localtime() .
+            ' dbexp : ' . Dump($e) );
+    };
+    $c->forward('conkan::View::JSON');
 }
 
 =head2 staff/*
@@ -262,7 +292,7 @@ sub staff_list : Chained('staff_base') : PathPart('list') : Args(0) {
 sub staff_show : Chained('staff_base') :PathPart('') :CaptureArgs(1) {
     my ( $self, $c, $staffid ) = @_;
     
-    my $rowstaff = $c->stash->{'M'}->find($staffid);
+    my $rowstaff = $c->model('ConkanDB::PgStaff')->find($staffid);
     $c->session->{'updtic'} = time;
     $rowstaff->update( { 
         'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
@@ -303,7 +333,7 @@ sub staff_edit : Chained('staff_show') : PathPart('edit') : Args(0) {
     }
     else {
         # 更新実施
-        my $rowstaff = $c->stash->{'M'}->find($staffid);
+        my $rowstaff = $c->model('ConkanDB::PgStaff')->find($staffid);
         if ( $rowstaff->updateflg eq 
                 +( $c->sessionid . $c->session->{'updtic'}) ) {
             my $value = {};
@@ -366,9 +396,6 @@ sub staff_del : Chained('staff_show') : PathPart('del') : Args(0) {
 
 sub room_base : Chained('') : PathPart('config/room') : CaptureArgs(0) {
     my ( $self, $c ) = @_;
-
-    # roomテーブルに対応したmodelオブジェクト取得
-    $c->stash->{'M'}   = $c->model('ConkanDB::PgRoom');
 }
 
 =head2 room/list 
@@ -379,7 +406,7 @@ sub room_base : Chained('') : PathPart('config/room') : CaptureArgs(0) {
 
 sub room_list : Chained('room_base') : PathPart('list') : Args(0) {
     my ( $self, $c ) = @_;
-    $c->stash->{'list'} = [ $c->stash->{M}
+    $c->stash->{'list'} = [ $c->model('ConkanDB::PgRoom')
                             ->search( { },
                                       { 'order_by' => { '-asc' => 'roomid' } } )
                           ];
@@ -394,6 +421,9 @@ sub room_list : Chained('room_base') : PathPart('list') : Args(0) {
 sub room_show : Chained('room_base') :PathPart('') :CaptureArgs(1) {
     my ( $self, $c, $roomid ) = @_;
     
+    # roomテーブルに対応したmodelオブジェクト取得
+    $c->stash->{'M'}   = $c->model('ConkanDB::PgRoom');
+
     my $rowroom;
     if ( $roomid != 0 ) {
         $rowroom = $c->stash->{'M'}->find($roomid);
@@ -481,9 +511,6 @@ sub room_del : Chained('room_show') : PathPart('del') : Args(0) {
 
 sub cast_base : Chained('') : PathPart('config/cast') : CaptureArgs(0) {
     my ( $self, $c ) = @_;
-
-    # allcastテーブルに対応したmodelオブジェクト取得
-    $c->stash->{'M'}   = $c->model('ConkanDB::PgAllCast');
 }
 
 =head2 cast/list 
@@ -494,7 +521,7 @@ sub cast_base : Chained('') : PathPart('config/cast') : CaptureArgs(0) {
 
 sub cast_list : Chained('cast_base') : PathPart('list') : Args(0) {
     my ( $self, $c ) = @_;
-    $c->stash->{'list'} = [ $c->stash->{M}
+    $c->stash->{'list'} = [ $c->model('ConkanDB::PgAllCast')
                             ->search( { },
                                       { 'order_by' => { '-asc' => 'castid' } } )
                           ];
@@ -509,6 +536,8 @@ sub cast_list : Chained('cast_base') : PathPart('list') : Args(0) {
 sub cast_show : Chained('cast_base') :PathPart('') :CaptureArgs(1) {
     my ( $self, $c, $castid ) = @_;
     
+    # castテーブルに対応したmodelオブジェクト取得
+    $c->stash->{'M'}   = $c->model('ConkanDB::PgAllCast');
     my $rowcast;
     if ( $castid != 0 ) {
         $rowcast = $c->stash->{'M'}->find($castid);
@@ -586,7 +615,7 @@ sub equip_base : Chained('') : PathPart('config/equip') : CaptureArgs(0) {
 
 sub equip_list : Chained('equip_base') : PathPart('list') : Args(0) {
     my ( $self, $c ) = @_;
-    $c->stash->{'list'} = [ $c->stash->{'M'}
+    $c->stash->{'list'} = [ $c->model('ConkanDB::PgAllEquip')
                             ->search( { },
                                       { 'order_by' => { '-asc' => 'equipid' } } )
                           ];
@@ -601,6 +630,8 @@ sub equip_list : Chained('equip_base') : PathPart('list') : Args(0) {
 sub equip_show : Chained('equip_base') :PathPart('') :CaptureArgs(1) {
     my ( $self, $c, $equipid ) = @_;
     
+    # equipテーブルに対応したmodelオブジェクト取得
+    $c->stash->{'M'}   = $c->model('ConkanDB::PgAllEquip');
     my $rowequip;
     if ( $equipid != 0 ) {
         $rowequip = $c->stash->{'M'}->find($equipid);

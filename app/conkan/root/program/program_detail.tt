@@ -8,13 +8,13 @@
 <meta name="author" content="Studio REM">
 <title>Conkan Program Detail</title>
 [%- DEFAULT self_li_id = 'program_list' -%]
-[%- SET useWijGrid = 0 %]
-[%- SET useUiGrid = 0 %]
-[% PROCESS 'tthead.tt' %]
+[%- SET useWijGrid = 0 -%]
+[%- SET useUiGrid  = 0 -%]
+[%- PROCESS 'tthead.tt' -%]
 <div class="container">
-  [% PROCESS 'ttpgdetail.tt' %]
+  [%- PROCESS 'ttpgdetail.tt' -%]
 </div>
-[% PROCESS 'tttail.tt' %]
+[%- PROCESS 'tttail.tt' -%]
 <script type="text/javascript" src="/static/js/conkan_prog_detail.js"></script>
 </body>
 </html>

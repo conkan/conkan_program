@@ -1,5 +1,5 @@
-[% SET urole = c.user.get('role') %]
-[% PROCESS 'ttpgupmc.tt' %]
+[%- SET urole = c.user.get('role') -%]
+[%- PROCESS 'ttpgupmc.tt' -%]
 <FORM method="POST" class="form-horizontal" role="form" id="progform">
   <p id="vha" data-vha= "[]"/>
   <div style="COLOR:Red;" id="valerr"></div>

@@ -1,3 +1,4 @@
+<!-- # Region ttpgupmc.tt -->
 [%- MACRO subtag ( bgcolor ) BLOCK -%]
   <div class="subtag row">
     <div class="col-sm-2 [% bgcolor.reg_program %] text-center">
@@ -41,3 +42,4 @@
     [%- END %]
   </select>
 [%- END -%]
+<!-- # END of Region ttpgupmc.tt -->

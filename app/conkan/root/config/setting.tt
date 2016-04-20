@@ -8,11 +8,11 @@
 <meta name="author" content="Studio REM">
 <title>Conkan Setting</title>
 [% SET self_li_id = 'config_conf' %]
-[%- SET useWijGrid = 0 %]
-[%- SET useUiGrid = 0 %]
-[% PROCESS 'tthead.tt' %]
+[%- SET useWijGrid = 0 -%]
+[%- SET useUiGrid  = 0 -%]
+[%- PROCESS 'tthead.tt' -%]
 [%- DEFAULT state = 'inputform' -%]
-[% PROCESS 'ttpgupmc.tt' %]
+[%- PROCESS 'ttpgupmc.tt' -%]
 <div class="container">
   <div class="well" id="inputform" style="display:none;">
     <FORM method="POST" class="form-horizontal" role="form" action="/config/setting" id="profform">
@@ -70,7 +70,7 @@
     <a class="btn btn-primary btn-large" href="/mypage/list">マイページに戻る</a>
   </div>
 </div>
-[% PROCESS 'tttail.tt' %]
+[%- PROCESS 'tttail.tt' -%]
 <script type="text/javascript"> <!-- TTマクロを使うのでsrcではなく埋め込み -->
   // 有効なdivを表示
   $(document).ready(function() {

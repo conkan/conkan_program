@@ -1,12 +1,13 @@
+<!-- # Region ttpgdetail.tt -->
 [%- SET editable = 0;
-SET urole = c.user.get('role');
-IF urole == 'ROOT' || urole == 'PG';
-  SET editable = 1;
-END;
-IF c.user.get('staffid') == Program.staffid.staffid;
-  SET editable = 1;
+  SET urole = c.user.get('role');
+  IF urole == 'ROOT' || urole == 'PG';
+    SET editable = 1;
+  END;
+  IF c.user.get('staffid') == Program.staffid.staffid;
+    SET editable = 1;
 END -%]
-[% PROCESS 'ttpgupmc.tt' %]
+[%- PROCESS 'ttpgupmc.tt' -%]
 <!-- 企画概要 -->
 <div class="well" id="reg_program">
   [% subtag( { 'reg_program' => 'bg-info' } ) %]
@@ -474,3 +475,4 @@ END -%]
     </div>
   </div>
 </div>
+<!-- # END of Region ttpgdetail.tt -->

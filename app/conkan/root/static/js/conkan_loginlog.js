@@ -1,17 +1,11 @@
-var storage = sessionStorage;
-$(document).ready(function(){
-  $(document).scrollTop( storage.getItem( 'sctop' ) );
-  storage.clear();
-});
-
 // conkanLoginLogモジュールの生成
 var ConkanAppModule = angular.module('conkanLoginLog',
         ['ui.grid', 'ui.grid.resizeColumns', 'ui.bootstrap'] );
 
 // スタッフリストコントローラ
 ConkanAppModule.controller( 'loginLogController',
-    [ '$scope', '$http',
-        function( $scope, $http ) {
+    [ '$scope', '$http', '$uibModal',
+        function( $scope, $http, $uibModal ) {
             $scope.lloggrid = {
                 enableFiltering: false,
                 enableSorting: true,
@@ -30,12 +24,15 @@ ConkanAppModule.controller( 'loginLogController',
                     width: '60%',
                 },
             ];
-            $scope.lloggrid.onRegisterApi = function (gridApi) {
-                $scope.gridApi = gridApi;
-            }
 
-            $http.get('/config/loginlogget').success(function (data) {
+            $http.get('/config/loginlogget')
+            .success(function (data) {
                 $scope.lloggrid.data = data.json;
+            })
+            .error(function(data) {
+                var modalinstance = $uibModal.open(
+                    { templateUrl : 'T_httpget_fail' }
+                );
             });
         }
     ]

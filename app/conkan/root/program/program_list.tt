@@ -7,14 +7,14 @@
 <meta name="description" content="conkan Program List">
 <meta name="author" content="Studio REM">
 <title>Conkan ProgramList</title>
-[%- SET self_li_id = 'program_list' %]
-[%- SET useWijGrid = 1 %]
-[%- SET useUiGrid = 0 %]
-[% PROCESS 'tthead.tt' %]
+[%- SET self_li_id = 'program_list' -%]
+[%- SET useWijGrid = 1 -%]
+[%- SET useUiGrid  = 0 -%]
+[%- PROCESS 'tthead.tt' -%]
 <div class="container" ng-app="wijmo">
   [%- SET allprg = 1 %]
   <div class="well" id="gridlist" ng-controller="MyController">
-    [% PROCESS 'ttpglist.tt' -%]
+    [%- PROCESS 'ttpglist.tt' -%]
   </div> <!-- End of well gridlist -->
   <div id="pgAddDiv">
   [%- IF cuRole == 'ROOT' %]
@@ -49,7 +49,7 @@
     </div>
   </div>
 </div>
-[% PROCESS 'tttail.tt' %]
+[%- PROCESS 'tttail.tt' -%]
 <script type="text/javascript" src="/static/js/conkan_prog_list.js"></script>
 </body>
 </html>

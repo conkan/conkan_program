@@ -8,9 +8,9 @@
 <meta name="author" content="Studio REM">
 <title>Conkan MyPage</title>
 [% SET self_li_id = 'mypage' %]
-[%- SET useWijGrid = 0 %]
-[%- SET useUiGrid = 0 %]
-[% PROCESS 'tthead.tt' %]
+[%- SET useWijGrid = 0 -%]
+[%- SET useUiGrid  = 0 -%]
+[%- PROCESS 'tthead.tt' -%]
 <div class="container">
 [%- IF addroot %]
   <div class="well">
@@ -39,6 +39,6 @@
   </div>
 [% END %]
 </div>
-[% PROCESS 'tttail.tt' %]
+[%- PROCESS 'tttail.tt' -%]
 </body>
 </html>

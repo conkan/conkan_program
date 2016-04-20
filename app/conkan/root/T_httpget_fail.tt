@@ -1,0 +1,17 @@
+<!-- ## Region T_httpget_fail.tt -->
+<!--  データ取得失敗ダイアログ -->
+<script type="text/ng-template" id="T_httpget_fail">
+  <div class="modal-header">
+    <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
+  </div>
+  <div class="modal-body">
+    <H3><strong>エラー発生</strong></H3>
+    データ取得できませんでした<br/>
+    システム管理者に連絡してください
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-danger" ng-click="$close()">閉じる</button>
+  </div>
+</script>
+<!-- ## END of Region T_httpget_fail.tt -->
+

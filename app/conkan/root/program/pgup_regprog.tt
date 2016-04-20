@@ -1,4 +1,4 @@
-[% PROCESS 'ttpgupmc.tt' %]
+[%- PROCESS 'ttpgupmc.tt' -%]
 <FORM method="POST" class="form-horizontal" role="form" id="progform">
   <p id="vha" data-vha= "[
 {&#34;id&#34;:&#34;name&#34;,      &#34;name&#34;:&#34;企画名称&#34;},

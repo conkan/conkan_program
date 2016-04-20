@@ -1,5 +1,5 @@
 <!-- #Region "tttail.tt" -->
-[% IF 0 %]
+[%- IF 0 -%]
   <HR/>
   [%- USE dumper(indent=1) -%]
   <pre>
@@ -9,7 +9,7 @@
   addstaff [% addstaff %]
   [% dumper.dump(c.user) %]
   </pre>
-[% END %]
+[%- END -%]
 <script type="text/javascript">
   // ナビのタブ アクティベイト
   $(document).ready(function() {
