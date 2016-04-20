@@ -1,4 +1,12 @@
 <!-- #Region "ttpglist.tt" -->
+<div class="container" ng-app="conkanProgList">
+  <div class="well" id="gridlist" ng-controller="progListController">
+    <div id="proglist" ui-grid="proggrid" class="grid" ui-grid-resize-columns>
+    </div>
+  </div> <!-- End of well gridlist -->
+  [%- PROCESS 'T_httpget_fail.tt' -%]
+</div> <!-- End of container ng-app "conkanProgList" -->
+
 <wij-grid id="dataGrid" data="list"
         class="table table-bordered"
         allow-col-sizing="true"

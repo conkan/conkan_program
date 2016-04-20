@@ -8,14 +8,15 @@
 <meta name="author" content="Studio REM">
 <title>Conkan ProgramList</title>
 [%- SET self_li_id = 'program_list' -%]
-[%- SET useWijGrid = 1 -%]
-[%- SET useUiGrid  = 0 -%]
+[%- SET useWijGrid = 0 -%]
+[%- SET useUiGrid  = 1 -%]
 [%- PROCESS 'tthead.tt' -%]
-<div class="container" ng-app="wijmo">
-  [%- SET allprg = 1 %]
-  <div class="well" id="gridlist" ng-controller="MyController">
-    [%- PROCESS 'ttpglist.tt' -%]
+<div class="container" ng-app="conkanProgList">
+  <div class="well" id="gridlist" ng-controller="progListController">
+    <div id="proglist" ui-grid="proggrid" class="grid" ui-grid-resize-columns>
+    </div>
   </div> <!-- End of well gridlist -->
+  [%- PROCESS 'T_httpget_fail.tt' -%]
   <div id="pgAddDiv">
   [%- IF cuRole == 'ROOT' %]
     <button type="button" class="btn btn-primary"
@@ -24,8 +25,8 @@
     </button>
   [% END -%]
   </div>
-</div> <!-- End of container wijmo -->
-<!-- Modal add -->
+</div> <!-- End of container ng-app "conkanProgList" -->
+<!-- 企画追加モーダル -->
 <div class="modal fade" id="addProgram" tabindex="-1" role="dialog" aria-labelledby="addProgramLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -50,6 +51,7 @@
   </div>
 </div>
 [%- PROCESS 'tttail.tt' -%]
+<script type="text/javascript">var allprg=true;</script>
 <script type="text/javascript" src="/static/js/conkan_prog_list.js"></script>
 </body>
 </html>

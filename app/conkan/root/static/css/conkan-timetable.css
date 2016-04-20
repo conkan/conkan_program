@@ -76,6 +76,13 @@
 #timetable_edit_form td {
     overflow-x: hidden;
     white-space: nowrap;
+    padding: 0px;
+    vertical-align: middle;
+}
+
+#timetable_edit_form .prgname {
+    margin-bottom: 0px;
+    margin-left: 10px;
 }
 
 .ganttHead th {

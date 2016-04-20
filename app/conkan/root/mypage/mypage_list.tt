@@ -8,15 +8,20 @@
 <meta name="author" content="Studio REM">
 <title>Conkan MyPage</title>
 [%- SET self_li_id = 'mypage' -%]
-[%- SET useWijGrid = 1 -%]
-[%- SET useUiGrid  = 0 -%]
+[%- SET useWijGrid = 0 -%]
+[%- SET useUiGrid  = 1 -%]
 [%- PROCESS 'tthead.tt' -%]
-<div class="container" ng-app="wijmo">
-  [%- SET allprg = 0 -%]
-  <div class="well" id="gridlist" ng-controller="MyController">
-    [%- PROCESS 'ttpglist.tt' -%]
+<div class="container" ng-app="conkanProgList">
+  <div class="well" id="gridlist" ng-controller="progListController">
+    <div id="proglist" ui-grid="proggrid" class="grid" ui-grid-resize-columns>
+    </div>
+  </div> <!-- End of well gridlist -->
+  [%- PROCESS 'T_httpget_fail.tt' -%]
+  <div id="pgAddDiv">
   </div>
-</div>
+</div> <!-- End of container ng-app "conkanProgList" -->
 [%- PROCESS 'tttail.tt' -%]
+<script type="text/javascript">var allprg=false;</script>
+<script type="text/javascript" src="/static/js/conkan_prog_list.js"></script>
 </body>
 </html>

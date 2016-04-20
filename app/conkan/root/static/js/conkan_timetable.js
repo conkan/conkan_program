@@ -37,7 +37,7 @@ var ConkanAppModule = angular.module('conkanTimeTable' );
 
 // 現在操作中企画サービス
 ConkanAppModule.factory( 'currentprgService',
-    function( $http ) {
+    function( $http, $sce ) {
         var currentval = {
                 regpgid : '', subno :  '', pgid :  '',
                 sname :   '', name :   '', status :  '',

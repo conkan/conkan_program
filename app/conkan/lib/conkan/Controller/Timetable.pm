@@ -244,6 +244,18 @@ sub timetable_base : Chained('') : PathPart('timetable') : CaptureArgs(0) {
     my ( $self, $c ) = @_;
 }
 
+=head2 timetable/detail/*
+タイムテーブル timetable_detail  : 個別詳細へジャンプ
+
+=cut
+
+sub timetable_detail : Chained('timetable_base') :PathPart('detail') :Args(1) {
+    my ( $self, $c, $pgid ) = @_;
+
+    $c->stash->{'self_li_id'} = 'timetable';
+    $c->go('/program/program_detail/', [ $pgid ], [] );
+}
+
 =head2 timetable/*
 タイムテーブル timetable_get  : 個別詳細情報返却/更新
 

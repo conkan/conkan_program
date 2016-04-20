@@ -71,12 +71,14 @@ END -%]
           </tr>
           <tr>
             <td>
-              <p ng-cloak>{{current.regpgid}}{{current.subno}}</p>
+              <p class="prgname" ng-cloak>{{current.regpgid}}{{current.subno}}</p>
             </td>
             <th style="text-align: right">企画名</th>
-            <th colspan="3"><p ng-cloak>{{current.name}}</p></th>
+            <th colspan="3"><p class="prgname" ng-cloak>
+              <a href="/timetable/detail/{{current.pgid}}">{{current.name}}</a>
+            </p></th>
             <td colspan="2">
-              <p ng-cloak>{{current.sname}}</p>
+              <p class="prgname" ng-cloak>{{current.sname}}</p>
             </td>
           </tr>
           <tr>

@@ -8,6 +8,7 @@ use Try::Tiny;
 use namespace::autoclean;
 use Data::Dumper;
 use YAML;
+use DateTime;
 
 BEGIN { extends 'Catalyst::Controller'; }
 
@@ -388,42 +389,63 @@ sub program_base : Chained('') : PathPart('program') : CaptureArgs(0) {
 
 sub program_list : Chained('program_base') : PathPart('list') : Args(0) {
     my ( $self, $c ) = @_;
+}
 
-    my $pgmlist =
-        [ $c->model('ConkanDB::PgProgram')->search( { },
-            {
-                'prefetch' => [ 'regpgid', 'staffid' ],
-                'order_by' => { '-asc' => [ 'me.regpgid', 'me.subno'] },
-            } )
-        ];
-    my $prglist =
-        [ $c->model('ConkanDB::PgProgress')->search( { },
-            {
-                'group_by' => [ 'regpgid' ],
-                'select'   => [ 'regpgid', { MAX => 'repdatetime'} ], 
-                'as'       => [ 'regpgid', 'lastprg' ],
-            } )
-        ];
-    my $lastprgs = {};
-    foreach my $prg ( @$prglist ) {
-        $lastprgs->{$prg->get_column('regpgid')} = $prg->get_column('lastprg');
-    }
+=head2 program/listget 
 
-    my @list = ();
-    foreach my $pgm ( @$pgmlist ) {
-        my $regpgid = $pgm->regpgid->regpgid();
-        push @list, {
-            'regpgid'       => $regpgid,
-            'pgid'          => $pgm->pgid(),
-            'sname'         => $pgm->sname(),
-            'subno'         => $pgm->subno(),
-            'name'          => $pgm->regpgid->name(),
-            'staff'         => $pgm->staffid ? $pgm->staffid->name() : '',
-            'status'        => $pgm->status(),
-            'repdatetime'   => $lastprgs->{$regpgid},
-        };
-    }
-    $c->stash->{'list'} = \@list;
+企画管理 program_listget  : 企画一覧取得
+
+=cut
+
+sub program_listget : Chained('program_base') : PathPart('listget') : Args(0) {
+    my ( $self, $c ) = @_;
+
+    try {
+        my $pgmlist = [ $c->model('ConkanDB::PgProgram')->search(
+                    { },
+                    {
+                        'prefetch' => [ 'regpgid', 'staffid' ],
+                        'order_by' => { '-asc' => [ 'me.regpgid', 'me.subno'] },
+                    }
+                )
+            ];
+        my $prglist = [ $c->model('ConkanDB::PgProgress')->search(
+                    { },
+                    {
+                        'group_by' => [ 'regpgid' ],
+                        'select'   => [ 'regpgid', { MAX => 'repdatetime'} ], 
+                        'as'       => [ 'regpgid', 'lastprg' ],
+                    }
+                )
+            ];
+        my $lpdts = {};
+        foreach my $prg ( @$prglist ) {
+            $lpdts->{$prg->get_column('regpgid')} = $prg->get_column('lastprg');
+        }
+
+        my @list = ();
+        foreach my $pgm ( @$pgmlist ) {
+            my $regpgid = $pgm->regpgid->regpgid();
+            my $sid = $pgm->staffid;
+            my $lpdt = $lpdts->{$regpgid};
+            push @list, {
+                'regpgid'       => $regpgid,
+                'pgid'          => $pgm->pgid(),
+                'sname'         => $pgm->sname(),
+                'subno'         => $pgm->subno(),
+                'name'          => $pgm->regpgid->name(),
+                'staff'         => +( $sid ? $sid->name() : '' ),
+                'status'        => $pgm->status(),
+                'repdatetime'   => +( $lpdt ? $lpdt : '' ),
+            };
+        }
+        $c->stash->{'json'} = \@list;
+    } catch {
+        my $e = shift;
+        $c->log->error('program/listget error ' . localtime() .
+            ' dbexp : ' . Dumper($e) );
+    };
+    $c->forward('conkan::View::JSON');
 }
 
 =head2 program/*
