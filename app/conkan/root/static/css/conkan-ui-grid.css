@@ -13,6 +13,10 @@
     overflow: hidden;
 }
 
+.gridcelbtn {
+    text-align: center !important;
+}
+
 .disableRow {
     background-color:gray !important;
     width: 100%;

@@ -49,8 +49,6 @@ $('#dodel').click(function(event) {
   $(content).load(staffid + '/del/ FORM', data );
 } );
 
-// // conkanStaffListモジュールの取得(生成済のもの)
-// var ConkanAppModule = angular.module('conkanStaffList');
 // conkanStaffListモジュールの生成(グローバル変数)
 var ConkanAppModule = angular.module('conkanStaffList',
     ['ui.grid', 'ui.grid.resizeColumns', 'ui.bootstrap'] );
@@ -121,7 +119,7 @@ ConkanAppModule.controller( 'staffListController',
                 },
                 { name : '', field: 'staffid',
                     headerCellClass: 'gridheader',
-                    cellTemplate: '<div ng-class="{ disableRow: row.entity.rmdate }"><span ng-bind-html="grid.appScope.__getEditbtn(row.entity.rmdate, row.entity.staffid, row.entity.role)"></span></div>'
+                    cellTemplate: '<div ng-class="{ disableRow: row.entity.rmdate }" class="gridcelbtn"><span ng-bind-html="grid.appScope.__getEditbtn(row.entity.rmdate, row.entity.staffid, row.entity.role)"></span></div>'
                 },
             ];
             $http.get('/config/staff/listget')

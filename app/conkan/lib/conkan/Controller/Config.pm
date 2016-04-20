@@ -247,7 +247,7 @@ sub staff_list : Chained('staff_base') : PathPart('list') : Args(0) {
 
 =head2 staff/listget
 
-スタッフ管理 staff_listget  : スタッフ一覧
+スタッフ管理 staff_listget  : スタッフ一覧取得
 
 =cut
 
@@ -273,7 +273,6 @@ sub staff_listget : Chained('staff_base') : PathPart('listget') : Args(0) {
                 'staffid'  => $row->staffid(),
             } );
         }
-        $c->log->debug('staff/listget data ' . Dumper( \@data ));
         $c->stash->{'json'} = \@data;
     } catch {
         my $e = shift;
@@ -521,12 +520,42 @@ sub cast_base : Chained('') : PathPart('config/cast') : CaptureArgs(0) {
 
 sub cast_list : Chained('cast_base') : PathPart('list') : Args(0) {
     my ( $self, $c ) = @_;
-    $c->stash->{'list'} = [ $c->model('ConkanDB::PgAllCast')
-                            ->search( { },
-                                      { 'order_by' => { '-asc' => 'castid' } } )
-                          ];
 }
 
+=head2 cast/listget
+
+出演者管理 cast_listget  : 出演者一覧取得
+
+=cut
+
+sub cast_listget : Chained('cast_base') : PathPart('listget') : Args(0) {
+    my ( $self, $c ) = @_;
+
+    try {
+        my @data;
+        my $rows = [ $c->model('ConkanDB::PgAllCast')->search(
+                        { },
+                        { 'order_by' => { '-asc' => 'castid' } }
+                    )
+                ];
+        for my $row (@$rows) {
+            push ( @data, {
+                'name'     => $row->name(),
+                'namef'    => $row->namef(),
+                'status'   => $row->status(),
+                'memo'     => $row->memo(),
+                'restdate' => $row->restdate(),
+                'castid'   => $row->castid(),
+            } );
+        }
+        $c->stash->{'json'} = \@data;
+    } catch {
+        my $e = shift;
+        $c->log->error('cast/listget error ' . localtime() .
+            ' dbexp : ' . Dump($e) );
+    };
+    $c->forward('conkan::View::JSON');
+}
 =head2 cast/*
 
 出演者管理 cast_show  : 出演者情報更新のための表示起点
@@ -810,7 +839,6 @@ sub loginlogget :Local {
                 'login_date' => $logdatestr,
             } );
         }
-        $c->log->debug('loginlog data ' . Dumper( \@data ));
         $c->stash->{'json'} = \@data;
     } catch {
         my $e = shift;
