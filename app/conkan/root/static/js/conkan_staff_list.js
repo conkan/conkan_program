@@ -75,15 +75,9 @@ ConkanAppModule.controller( 'staffListController',
             }
 
             $scope.__getEditbtn = function( rmdate, staffid, role ) {
-                var cont = '<button type="button" class="btn btn-xs';
-                if ( rmdate ) {
-                    cont += '">無効</button>';
-                }
-                else {
-                    cont += ' btn-primary" data-toggle="modal"'
-                        + ' data-target="#editStaff" data-whatever="' + staffid
-                        + '" data-whatrole="' + role + '">編集</button>';
-                }
+                var cont = uiGetEditbtn( rmdate, '#editStaff',
+                        [ { 'key' : 'whatever', 'val' : staffid },
+                          { 'key' : 'whatrole', 'val' : role } ] );
                 var wkstr = $sce.trustAsHtml( cont );
                 return wkstr;
             };
@@ -100,26 +94,39 @@ ConkanAppModule.controller( 'staffListController',
                 { name : '名前', field: 'name',
                     headerCellClass: 'gridheader',
                     width: "23%",
-                    cellTemplate: '<div ng-class="{ disableRow: row.entity.rmdate }">{{COL_FIELD}}</div>',
+                    cellClass: function(grid, row)
+                        { return uiGetCellCls(row.entity.rmdate); },
+                    enableHiding: false,
                 },
                 { name : '役割', field: 'role',
                     headerCellClass: 'gridheader',
                     width: "23%",
-                    cellTemplate: '<div ng-class="{ disableRow: row.entity.rmdate }"><span ng-bind-html="grid.appScope.__getRoll(row.entity.role)"></span></div>'
+                    cellClass: function(grid, row)
+                        { return uiGetCellCls(row.entity.rmdate); },
+                    enableHiding: false,
+                    cellTemplate: '<div ng-bind-html="grid.appScope.__getRoll(row.entity.role)"></div>'
                 },
                 { name : '担当名', field: 'tname',
                     headerCellClass: 'gridheader',
                     width: "23%",
-                    cellTemplate: '<div ng-class="{ disableRow: row.entity.rmdate }">{{COL_FIELD}}</div>',
+                    cellClass: function(grid, row)
+                        { return uiGetCellCls(row.entity.rmdate); },
+                    enableHiding: false,
                 },
                 { name : '最終ログイン日時', field: 'llogin',
                     headerCellClass: 'gridheader',
                     width: "23%",
-                    cellTemplate: '<div ng-class="{ disableRow: row.entity.rmdate }">&nbsp;{{COL_FIELD}}</div>',
+                    cellClass: function(grid, row)
+                        { return uiGetCellCls(row.entity.rmdate); },
+                    enableHiding: false,
                 },
                 { name : '', field: 'staffid',
-                    headerCellClass: 'gridheader',
-                    cellTemplate: '<div ng-class="{ disableRow: row.entity.rmdate }" class="gridcelbtn"><span ng-bind-html="grid.appScope.__getEditbtn(row.entity.rmdate, row.entity.staffid, row.entity.role)"></span></div>'
+                    headerCellClass: 'gridheader nogridmenu',
+                    cellClass: function(grid, row)
+                        { return uiGetCellCls(row.entity.rmdate); },
+                    enableSorting: false,
+                    enableHiding: false,
+                    cellTemplate: '<div class="gridcelbtn"><span ng-bind-html="grid.appScope.__getEditbtn(row.entity.rmdate, row.entity.staffid, row.entity.role)"></span></div>'
                 },
             ];
             $http.get('/config/staff/listget')

@@ -277,7 +277,7 @@ sub staff_listget : Chained('staff_base') : PathPart('listget') : Args(0) {
     } catch {
         my $e = shift;
         $c->log->error('staff/listget error ' . localtime() .
-            ' dbexp : ' . Dump($e) );
+            ' dbexp : ' . Dumper($e) );
     };
     $c->forward('conkan::View::JSON');
 }
@@ -291,19 +291,29 @@ sub staff_listget : Chained('staff_base') : PathPart('listget') : Args(0) {
 sub staff_show : Chained('staff_base') :PathPart('') :CaptureArgs(1) {
     my ( $self, $c, $staffid ) = @_;
     
-    my $rowstaff = $c->model('ConkanDB::PgStaff')->find($staffid);
-    $c->session->{'updtic'} = time;
-    $rowstaff->update( { 
-        'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
-    } );
-    $c->stash->{'rs'} = $rowstaff;
-    if ( $rowstaff->otheruid ) {
-        my $cybozu = decode_json( $rowstaff->otheruid );
-        while ( my( $key, $val ) = each( %$cybozu )) {
+    # Staffテーブルに対応したmodelオブジェクト取得
+    $c->stash->{'M'}   = $c->model('ConkanDB::PgStaff');
+
+    try {
+        my $rowstaff = $c->stash->{'M'}->find($staffid);
+        $c->session->{'updtic'} = time;
+        $rowstaff->update( { 
+            'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
+        } );
+        $c->stash->{'rs'} = $rowstaff;
+        if ( $rowstaff->otheruid ) {
+            my $cybozu = decode_json( $rowstaff->otheruid );
+            while ( my( $key, $val ) = each( %$cybozu )) {
             $c->stash->{'rs'}->{$key} = $val;
         }
-    }
-    $c->stash->{'rs'}->{'passwd'} = undef;
+        }
+        $c->stash->{'rs'}->{'passwd'} = undef;
+        $c->stash->{'staffid'} = $staffid;
+    } catch {
+        my $e = shift;
+        $c->log->error('staff/show error ' . localtime() .
+            ' dbexp : ' . Dumper($e) );
+    };
 }
 
 =head2 staff/*
@@ -325,14 +335,14 @@ sub staff_detail : Chained('staff_show') : PathPart('') : Args(0) {
 sub staff_edit : Chained('staff_show') : PathPart('edit') : Args(0) {
     my ( $self, $c ) = @_;
 
-    my $staffid = $c->stash->{'rs'}->staffid;
+    my $staffid = $c->stash->{'staffid'};
     # GETはおそらく直打ちとかなので再度
     if ( $c->request->method eq 'GET' ) {
         $c->go->( '/config/staff/' . $staffid );
     }
     else {
         # 更新実施
-        my $rowstaff = $c->model('ConkanDB::PgStaff')->find($staffid);
+        my $rowstaff = $c->stash->{'M'}->find($staffid);
         if ( $rowstaff->updateflg eq 
                 +( $c->sessionid . $c->session->{'updtic'}) ) {
             my $value = {};
@@ -377,7 +387,7 @@ sub staff_edit : Chained('staff_show') : PathPart('edit') : Args(0) {
 
 sub staff_del : Chained('staff_show') : PathPart('del') : Args(0) {
     my ( $self, $c ) = @_;
-    my $staffid = $c->stash->{'rs'}->staffid;
+    my $staffid = $c->stash->{'staffid'};
     # GETはおそらく直打ちとかなので再度
     if ( $c->request->method eq 'GET' ) {
         $c->go->( '/config/staff/' . $staffid );
@@ -405,10 +415,42 @@ sub room_base : Chained('') : PathPart('config/room') : CaptureArgs(0) {
 
 sub room_list : Chained('room_base') : PathPart('list') : Args(0) {
     my ( $self, $c ) = @_;
-    $c->stash->{'list'} = [ $c->model('ConkanDB::PgRoom')
-                            ->search( { },
-                                      { 'order_by' => { '-asc' => 'roomid' } } )
-                          ];
+}
+
+=head2 room/listget
+
+機材管理 room_listget  : 機材一覧取得
+
+=cut
+
+sub room_listget : Chained('room_base') : PathPart('listget') : Args(0) {
+    my ( $self, $c ) = @_;
+
+    try {
+        my @data;
+        my $rows = [ $c->model('ConkanDB::PgRoom')->search(
+                        { },
+                        { 'order_by' => { '-asc' => 'roomid' } }
+                    )
+                ];
+        for my $row (@$rows) {
+            my $rm  = $row->rmdate();
+            push ( @data, {
+                'name'     => $row->name(),
+                'roomno'   => $row->roomno(),
+                'type'     => $row->type(),
+                'size'     => $row->size(),
+                'roomid'   => $row->roomid(),
+                'rmdate'   => +( defined( $rm ) ? $rm->strftime('%F %T') : '' ),
+            } );
+        }
+        $c->stash->{'json'} = \@data;
+    } catch {
+        my $e = shift;
+        $c->log->error('room/listget error ' . localtime() .
+            ' dbexp : ' . Dumper($e) );
+    };
+    $c->forward('conkan::View::JSON');
 }
 
 =head2 room/*
@@ -492,7 +534,7 @@ sub room_edit : Chained('room_show') : PathPart('edit') : Args(0) {
 
 sub room_del : Chained('room_show') : PathPart('del') : Args(0) {
     my ( $self, $c ) = @_;
-    my $roomid = $c->stash->{'rs'}->{'roomid'};
+    my $roomid = $c->stash->{'roomid'};
     # GETはおそらく直打ちとかなので再度
     if ( $c->request->method eq 'GET' ) {
         $c->go->( '/config/room/' . $roomid );
@@ -552,7 +594,7 @@ sub cast_listget : Chained('cast_base') : PathPart('listget') : Args(0) {
     } catch {
         my $e = shift;
         $c->log->error('cast/listget error ' . localtime() .
-            ' dbexp : ' . Dump($e) );
+            ' dbexp : ' . Dumper($e) );
     };
     $c->forward('conkan::View::JSON');
 }
@@ -631,9 +673,6 @@ sub cast_edit : Chained('cast_show') : PathPart('edit') : Args(0) {
 
 sub equip_base : Chained('') : PathPart('config/equip') : CaptureArgs(0) {
     my ( $self, $c ) = @_;
-
-    # equipテーブルに対応したmodelオブジェクト取得
-    $c->stash->{'M'}   = $c->model('ConkanDB::PgAllEquip');
 }
 
 =head2 equip/list 
@@ -644,10 +683,41 @@ sub equip_base : Chained('') : PathPart('config/equip') : CaptureArgs(0) {
 
 sub equip_list : Chained('equip_base') : PathPart('list') : Args(0) {
     my ( $self, $c ) = @_;
-    $c->stash->{'list'} = [ $c->model('ConkanDB::PgAllEquip')
-                            ->search( { },
-                                      { 'order_by' => { '-asc' => 'equipid' } } )
-                          ];
+}
+
+=head2 equip/listget
+
+機材管理 equip_listget  : 機材一覧取得
+
+=cut
+
+sub equip_listget : Chained('equip_base') : PathPart('listget') : Args(0) {
+    my ( $self, $c ) = @_;
+
+    try {
+        my @data;
+        my $rows = [ $c->model('ConkanDB::PgAllEquip')->search(
+                        { },
+                        { 'order_by' => { '-asc' => 'equipid' } }
+                    )
+                ];
+        for my $row (@$rows) {
+            my $rm  = $row->rmdate();
+            push ( @data, {
+                'name'     => $row->name(),
+                'equipno'  => $row->equipno(),
+                'spec'     => $row->spec(),
+                'equipid'  => $row->equipid(),
+                'rmdate'   => +( defined( $rm ) ? $rm->strftime('%F %T') : '' ),
+            } );
+        }
+        $c->stash->{'json'} = \@data;
+    } catch {
+        my $e = shift;
+        $c->log->error('equip/listget error ' . localtime() .
+            ' dbexp : ' . Dumper($e) );
+    };
+    $c->forward('conkan::View::JSON');
 }
 
 =head2 equip/*
@@ -843,7 +913,7 @@ sub loginlogget :Local {
     } catch {
         my $e = shift;
         $c->log->error('timetable_get error ' . localtime() .
-            ' dbexp : ' . Dump($e) );
+            ' dbexp : ' . Dumper($e) );
     };
     $c->forward('conkan::View::JSON');
 }

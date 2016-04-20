@@ -17,8 +17,21 @@
     text-align: center !important;
 }
 
+.ui-grid-vcenter div {
+    position: relative;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%);
+}
+
 .disableRow {
-    background-color:gray !important;
+    background-color:lightgray !important;
     width: 100%;
 }
+
+.nogridmenu .ui-grid-column-menu-button {
+    display: none;
+}
+
 // ## END of conkan ui-grid css

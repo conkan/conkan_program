@@ -322,7 +322,7 @@ sub timetable_get : Chained('timetable_base') :PathPart('') :Args(1) {
     } catch {
         my $e = shift;
         $c->log->error('timetable_get error ' . localtime() .
-            ' dbexp : ' . Dump($e) );
+            ' dbexp : ' . Dumper($e) );
     };
     $c->forward('conkan::View::JSON');
 }

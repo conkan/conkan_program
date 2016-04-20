@@ -335,7 +335,7 @@ sub cpysep :Local {
                 $c->response->status(200);
                 my $e = shift;
                 $c->log->error('_autoProgress error ' . localtime() .
-                    ' dbexp : ' . Dump($e) );
+                    ' dbexp : ' . Dumper($e) );
             };
         }
         else {  # 分割
@@ -361,7 +361,7 @@ $c->log->debug('>>>> maxsubno:[' . $row->get_column('maxsubno') . ']');
                 $c->response->status(200);
                 my $e = shift;
                 $c->log->error('_autoProgress error ' . localtime() .
-                    ' dbexp : ' . Dump($e) );
+                    ' dbexp : ' . Dumper($e) );
             };
         }
     } catch {
@@ -901,7 +901,7 @@ $c->log->debug('>>> _autoProgress start regpgid:' . $regpgid );
         $c->response->status(200);
         my $e = shift;
         $c->log->error('_autoProgress error ' . localtime() .
-            ' dbexp : ' . Dump($e) );
+            ' dbexp : ' . Dumper($e) );
     };
 }
 

@@ -61,7 +61,6 @@ sub auto :Private {
     }
     else {
         # DBスキーマアップデート
-        $c->log->info( localtime() . ' Check DB Update');
         my $coninfo = $c->config->{'Model::ConkanDB'}->{connect_info};
         my $schema = conkan::Schema->connect(
             $coninfo->{'dsn'}, $coninfo->{'user'}, $coninfo->{'password'},
@@ -95,7 +94,7 @@ sub auto :Private {
     }
     # 強制login処理
     unless ( $c->user_exists ) {
-        $c->log->info( localtime() . ' 強制login' );
+        $c->log->info( localtime() . ' force login' );
         $c->visit( '/login' );
     }
     return 1;
@@ -140,8 +139,8 @@ sub default :Path {
               : ($action eq 'config/cast/list')       ? 'config_cast'
               : ($action eq 'config/equip/list')      ? 'config_equip'
               : 'mypage';
-    $c->log->debug('>>>' . localtime() . ' action : [' . $action . ']');
-    $c->log->debug('>>>' . localtime() . ' liid   : [' . $liid   . ']');
+    $c->log->debug('>>> ' . localtime() . ' action : [' . $action . ']');
+    $c->log->debug('>>> ' . localtime() . ' liid   : [' . $liid   . ']');
     $c->response->status(404);
     $c->stash->{self_li_id} = $liid;
     $c->stash->{template} = 'underconstract.tt';
@@ -171,7 +170,7 @@ sub login :Local {
     # (bodyparam->{init_role}は、initialprocessでのみ設定)
     my $init_role = $c->session->{init_role} ||
                     $c->request->body_params->{init_role};
-    $c->delete_session('login');
+    $c->delete_session('login') if ( $c->request->method eq 'POST' );
     $c->session->{init_role} = $init_role;
     my @r = $c->model('ConkanDB::PgStaff')->search({account=>{'!='=>'admin'}});
     if ( scalar @r ) {
@@ -228,8 +227,6 @@ sub LoginLogging {
         );
         $rowstaff = $c->model('ConkanDB::PgStaff')->find($staffid);
         my $logintime = $rowstaff->lastlogin();
-        $c->log->debug('>>>' . localtime() .
-                'StaffTbl last_login : [' . $logintime . ']' );
         $c->model('ConkanDB::LoginLog')->create(
             {
                 'staffid'       => $staffid,
