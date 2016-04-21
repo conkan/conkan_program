@@ -19,9 +19,6 @@
   // ナビのリサイズでBody開始位置を変える
   $(window).resize(function() {
     $(document.body).css('padding-top', $('#navbar').height()+30 );
-    [%- IF useWijGrid %]
-    wijGridResize();
-    [%- END %]
     [%- IF useUiGrid %]
     uiGridResize();
     [%- END %]

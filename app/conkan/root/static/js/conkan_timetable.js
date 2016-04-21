@@ -231,7 +231,6 @@ ConkanAppModule.controller( 'timetableController',
 ConkanAppModule.controller( 'timeformController',
     [ '$scope', '$http', '$uibModal', 'currentprgService',
         function( $scope, $http, $uibModal, currentprgService ) {
-            $scope.current      = currentprgService.currentval;
             $scope.__gethours = function(date) {
                 var hours = [],
                 st = date ? $scope.conf.scale_hash[date][3] * 1
@@ -245,9 +244,17 @@ ConkanAppModule.controller( 'timeformController',
                 return hours;
             };
 
-            $scope.datechange = function(date) {
-                return $scope.__gethours(date);
-            };
+            $scope.$watch('current.date1', function( n, o, scope ) {
+                if ( n != o ) {
+                    scope.conf['hours1'] = scope.__gethours(n);
+                }
+            });
+
+            $scope.$watch('current.date2', function( n, o, scope ) {
+                if ( n != o ) {
+                    scope.conf['hours2'] = scope.__gethours(n);
+                }
+            });
 
             $http.get('/config/confget')
             .success(function(data, status, headers, config) {
@@ -268,6 +275,8 @@ ConkanAppModule.controller( 'timeformController',
                 );
                 modalinstance.result.then( function() {} );
             });
+
+            $scope.current      = currentprgService.currentval;
 
             $scope.doApply = function() {
                 var ckarray, cnt, cur, scale, start, end;
@@ -297,7 +306,7 @@ ConkanAppModule.controller( 'timeformController',
                 for ( cnt in ckarray ) {
                     if ( ckarray[cnt].date ) {
                         cur = ckarray[cnt];
-                        scale = scale_hash[cur.date];
+                        scale = $scope.conf.scale_hash[cur.date];
                         start = ( cur.shour * 60 ) + ( cur.smin * 1 );
                         end   = ( cur.ehour * 60 ) + ( cur.emin * 1 );
                         if (   ( start >= end )

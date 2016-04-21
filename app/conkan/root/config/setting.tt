@@ -8,7 +8,6 @@
 <meta name="author" content="Studio REM">
 <title>Conkan Setting</title>
 [% SET self_li_id = 'config_conf' %]
-[%- SET useWijGrid = 0 -%]
 [%- SET useUiGrid  = 0 -%]
 [%- PROCESS 'tthead.tt' -%]
 [%- DEFAULT state = 'inputform' -%]

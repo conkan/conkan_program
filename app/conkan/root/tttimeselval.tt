@@ -60,40 +60,5 @@ ConkanAppModule.value( 'pglistValue', {
         [%- END %]
     ], 
 });
-
-// 設定フォームselect選択肢設定
-ConkanAppModule.value( 'selectValue', {
-    'statuslist' : [
-        [%- FOREACH opt = conf.status %]
-            { id : '[% opt.id %]', val : '[% opt.val %]' },
-        [%- END %]
-    ],
-    'dateslist' : [
-        [%- FOREACH opt = conf.dates %]
-            { id : '[% opt.id %]', val : '[% opt.val %]' },
-        [%- END %]
-    ],
-    'shourslist' : [
-        [%- FOREACH opt = conf.s_hours %]
-            { id : '[% opt.id %]', val : '[% opt.val %]' },
-        [%- END %]
-    ],
-    'minslist' : [
-        [%- FOREACH opt = conf.s_mins %]
-            { id : '[% opt.id %]', val : '[% opt.val %]' },
-        [%- END %]
-    ],
-    'ehourslist' : [
-        [%- FOREACH opt = conf.e_hours %]
-            { id : '[% opt.id %]', val : '[% opt.val %]' },
-        [%- END %]
-    ],
-    'roomlist' : [
-        [%- FOREACH opt = conf.roomlist %]
-            { id : '[% opt.id %]', val : '[% opt.val %]' },
-        [%- END %]
-     ],
-     scale_hash : [% syscon.gantt_scale_str %],
-});
 </script>
 <!-- # Region tttimeselval.tt -->

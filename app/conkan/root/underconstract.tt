@@ -7,7 +7,6 @@
 <meta name="description" content="conkan under constraction">
 <meta name="author" content="Studio REM">
 <title>Under Constraction</title>
-[%- SET useWijGrid = 0 -%]
 [%- SET useUiGrid  = 0 -%]
 [%- PROCESS 'tthead.tt' -%]
 <div class="container">
