@@ -229,16 +229,46 @@ ConkanAppModule.controller( 'timetableController',
 
 // 設定フォームコントローラ
 ConkanAppModule.controller( 'timeformController',
-    [ '$scope', '$http', '$uibModal', 'currentprgService', 'selectValue',
-        function( $scope, $http, $uibModal, currentprgService, selectValue ) {
-            $scope.statuslist   = selectValue.statuslist;
-            $scope.dateslist    = selectValue.dateslist;
-            $scope.shourslist   = selectValue.shourslist;
-            $scope.minslist     = selectValue.minslist;
-            $scope.ehourslist   = selectValue.ehourslist;
-            $scope.roomlist     = selectValue.roomlist;
+    [ '$scope', '$http', '$uibModal', 'currentprgService',
+        function( $scope, $http, $uibModal, currentprgService ) {
             $scope.current      = currentprgService.currentval;
-            var scale_hash = selectValue.scale_hash;
+            $scope.__gethours = function(date) {
+                var hours = [],
+                st = date ? $scope.conf.scale_hash[date][3] * 1
+                          : 0 + $scope.conf.time_origin * 1,
+                et = date ? $scope.conf.scale_hash[date][4] * 1
+                          : 23 + $scope.conf.time_origin * 1,
+                len = et - st;
+                for ( var cnt=0; cnt<=len; cnt++ ) {
+                    hours[cnt] = ( "00" + ( st + cnt ) ).substr(-2);
+                }
+                return hours;
+            };
+
+            $scope.datechange = function(date) {
+                return $scope.__gethours(date);
+            };
+
+            $http.get('/config/confget')
+            .success(function(data, status, headers, config) {
+                $scope.conf = {};
+                $scope.conf.scale_hash  = JSON.parse(data.json.gantt_scale_str);
+                $scope.conf.time_origin = data.json.time_origin;
+                $scope.conf.dates       = JSON.parse(data.json.dates);
+                $scope.conf.hours1      = $scope.__gethours('');
+                $scope.conf.hours2      = $scope.__gethours('');
+                $scope.conf.mins        = ['00','05','10','15','20','25',
+                                           '30','35','40','45','50','55' ];
+                $scope.conf.roomlist    = JSON.parse(data.json.roomlist);
+                $scope.conf.status      = JSON.parse(data.json.pg_status_vals);
+            })
+            .error(function(data, status, headers, config) {
+                var modalinstance = $uibModal.open(
+                    { templateUrl : 'T_httpget_fail' }
+                );
+                modalinstance.result.then( function() {} );
+            });
+
             $scope.doApply = function() {
                 var ckarray, cnt, cur, scale, start, end;
                 var pgid = $scope.current.pgid;

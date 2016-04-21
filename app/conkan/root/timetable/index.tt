@@ -85,45 +85,47 @@ END -%]
             <th style="text-align: right" id="dh1">日時1</th>
             <td>
               <select class="col-sm-12" ng-model="current.date1"
-                  ng-options="i.id as i.val for i in dateslist"></select>
+                  ng-options="i for i in conf.dates"
+                  ng-change="conf.hours1 = datechange(current.date1)"></select>
             </td>
             <td>
               <select class="col-sm-2" ng-model="current.shour1"
-                  ng-options="i.id as i.val for i in shourslist"></select>
+                  ng-options="i for i in conf.hours1"></select>
               <select class="col-sm-2" ng-model="current.smin1"
-                  ng-options="i.id as i.val for i in minslist"></select>
+                  ng-options="i for i in conf.mins"></select>
               <div align="center" class="col-sm-1"> - </div>
               <select class="col-sm-2" ng-model="current.ehour1"
-                  ng-options="i.id as i.val for i in ehourslist"></select>
+                  ng-options="i for i in conf.hours1"></select>
               <select class="col-sm-2" ng-model="current.emin1"
-                  ng-options="i.id as i.val for i in minslist"></select>
+                  ng-options="i for i in conf.mins"></select>
             <th style="text-align: right" id="dh2">日時2</th>
             <td colspan="2">
               <select class="col-sm-12" ng-model="current.date2"
-                  ng-options="i.id as i.val for i in dateslist"></select>
+                  ng-options="i for i in conf.dates"
+                  ng-change="conf.hour2 = datechange(current.date2")></select>
             </td>
             <td>
               <select class="col-sm-2" ng-model="current.shour2"
-                  ng-options="i.id as i.val for i in shourslist"></select>
+                  ng-options="i for i in conf.hours2"></select>
               <select class="col-sm-2" ng-model="current.smin2"
-                  ng-options="i.id as i.val for i in minslist"></select>
+                  ng-options="i for i in conf.mins"></select>
               <div align="center" class="col-sm-1"> - </div>
               <select class="col-sm-2" ng-model="current.ehour2"
-                  ng-options="i.id as i.val for i in ehourslist"></select>
+                  ng-options="i for i in conf.hours2"></select>
               <select class="col-sm-2" ng-model="current.emin2"
-                  ng-options="i.id as i.val for i in minslist"></select>
+                  ng-options="i for i in conf.mins"></select>
             </td>
           </tr>
           <tr>
             <th style="text-align: right">場所</th>
             <td colspan="2">
               <select class="col-sm-12" ng-model="current.roomid"
-                  ng-options="i.id as i.val for i in roomlist"></select>
+                  ng-options="i.id as i.val for i in conf.roomlist"></select>
             </td>
             <th style="text-align: right" colspan="2">実行ステータス</th>
             <td>
               <select class="col-sm-12" ng-model="current.status"
-                  ng-options="i.id as i.val for i in statuslist"></select>
+                  ng-options="i for i in conf.status"></select>
             </td>
             <td style="text-align: center">
               [%- IF editable %]
@@ -181,6 +183,7 @@ END -%]
       <button class="btn btn-danger" ng-click="$close()">閉じる</button>
     </div>
   </script>
+  [%- PROCESS 'T_httpget_fail.tt' -%]
 </div> <!-- End of container ng-app "conkanTimeTable" -->
 [%- PROCESS 'tttail.tt' -%]
 <script type="text/javascript" src="/static/js/conkan_timetable.js"></script>

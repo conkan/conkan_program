@@ -152,7 +152,8 @@ sub setting :Local {
 戻り値 固定値配列参照 [0]ヘッダ [1]背景グリッド [2]カラム総数
               [3]タイムスケール表示用ハッシュ(JSON)
                     キー: 日付
-                      値: [ 開始時刻(分表示), 終了時刻(分表示), 先頭カラム数 ]
+                      値: [ 開始時刻(分表示), 終了時刻(分表示), 先頭カラム数,
+                            開始時刻(時), 終了時刻(時) ]
               [4]ガントバー色ハッシュ(JSON)
                     キー: 実行ステータス
                       値: 色コード
@@ -179,7 +180,7 @@ sub _crGntStr :Private {
         my @ewk = split( /:/, $ends[$cnt] );
         $gantt_scale->{$dates[$cnt]} = [ ( ($swk[0] * 60) + $swk[1] ),
                                          ( ($ewk[0] * 60) + $ewk[1] ),
-                                         $maxcolnum ];
+                                         $maxcolnum, $swk[0], $ewk[0] ];
         $ewk[0] += 1 if $ewk[1] > 0;
         $colnum[$cnt] = $ewk[0] - $swk[0];
         $shours[$cnt] = $swk[0];
@@ -225,6 +226,42 @@ sub _crGntStr :Private {
 
     return \@ganttStrs;
 }
+
+=head2 confget
+
+confget  : システム設定値取得
+           部屋一覧も取得
+
+=cut
+
+sub confget :Local {
+    my ( $self, $c ) = @_;
+
+    try {
+        my @rowconf = $c->model('ConkanDB::PgSystemConf')->all;
+        my @rowroom = $c->model('ConkanDB::PgRoom')->search(
+                        { },
+                        { 'order_by' => { '-asc' => 'roomid' } }
+                    );
+        my $data = {};
+        foreach my $row ( @rowconf ) {
+            $data->{$row->pg_conf_code()} = $row->pg_conf_value();
+        }
+
+        my $rl = [ map +{ 'id'  => $_->roomid(),
+                          'val' => $_->roomno() . ' ' . $_->name() },
+                        @rowroom ];
+        $data->{'roomlist'} = to_json( $rl );
+        $data->{'time_origin'} = $c->config->{'time_origin'};
+        $c->stash->{'json'} = $data;
+    } catch {
+        my $e = shift;
+        $c->log->error('confget error ' . localtime() .
+            ' dbexp : ' . Dumper($e) );
+    };
+    $c->forward('conkan::View::JSON');
+}
+
 =head2 staff
 -----------------------------------------------------------------------------
 スタッフ管理 staff_base  : Chainの起点
