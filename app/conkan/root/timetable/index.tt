@@ -42,100 +42,105 @@ END -%]
     </div>
   </div> <!-- End of timetable_up -->
   <div class="row" id="timetable_down">
-    <div id="timetable_edit_form" ng-controller="timeformController">
+    <div id="timetable_edit_div" ng-controller="timeformController">
       <!-- Bottom: 場所/時刻設定フォーム -->
-      <table class="table table-bordered table-condensed">
-        <colgroup>
-          <col class="col-sm-1">
-          <col class="col-sm-2">
-          <col class="col-sm-3">
-          <col class="col-sm-1">
-          <col class="col-sm-1">
-          <col class="col-sm-1">
-          <col class="col-sm-3">
-        </colgroup>
-        <tbody>
-          <tr>
-            <input type="hidden" ng-model="current.pgid">
-          </tr>
-          <tr>
-            <td colspan="6" style="COLOR:Red;" id="valerr"></td>
-            <td style="text-align: center">
-              <FORM method="GET" action="/timetable/csvdownload">
-                <button type="submit" class="btn" id="csvdlbtn">
-                  CSVダウンロード
-                </button>
-              </FORM>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <p class="prgname" ng-cloak>{{current.regpgid}}{{current.subno}}</p>
-            </td>
-            <th style="text-align: right">企画名</th>
-            <th colspan="3"><p class="prgname" ng-cloak>
-              <a href="/timetable/detail/{{current.pgid}}">{{current.name}}</a>
-            </p></th>
-            <td colspan="2">
-              <p class="prgname" ng-cloak>{{current.sname}}</p>
-            </td>
-          </tr>
-          <tr>
-            <th style="text-align: right" id="dh1">日時1</th>
-            <td>
-              <select class="col-sm-12" ng-model="current.date1"
+      <form name="timetable_edit_form" novalidate>
+        <table class="table table-bordered table-condensed">
+          <colgroup>
+            <col class="col-sm-1">
+            <col class="col-sm-2">
+            <col class="col-sm-3">
+            <col class="col-sm-1">
+            <col class="col-sm-1">
+            <col class="col-sm-1">
+            <col class="col-sm-3">
+          </colgroup>
+          <tbody>
+            <tr>
+              <input type="hidden" ng-model="current.pgid">
+            </tr>
+            <tr>
+              <td colspan="1"></td>
+              <td colspan="5" id="valerr"></td>
+              <td style="text-align: center">
+                <div ng-form method="GET" action="/timetable/csvdownload">
+                  <button type="submit" class="btn" id="csvdlbtn">
+                    CSVダウンロード
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="prgname" ng-cloak>{{current.regpgid}}{{current.subno}}</p>
+              </td>
+              <th style="text-align: right">企画名</th>
+              <th colspan="3"><p class="prgname" ng-cloak>
+                <a href="/timetable/detail/{{current.pgid}}">{{current.name}}</a>
+              </p></th>
+              <td colspan="2">
+                <p class="prgname" ng-cloak>{{current.sname}}</p>
+              </td>
+            </tr>
+            <tr>
+              <th style="text-align: right">日時1</th>
+              <td>
+                <select class="col-sm-12" name="dh1date" ng-model="current.date1"
                   ng-options="i for i in conf.dates"></select>
-            </td>
-            <td>
-              <select class="col-sm-2" ng-model="current.shour1"
+              </td>
+              <td>
+                <select class="col-sm-2" name="dh1date" ng-model="current.shour1"
                   ng-options="i for i in conf.hours1"></select>
-              <select class="col-sm-2" ng-model="current.smin1"
+                <select class="col-sm-2" name="dh1date" ng-model="current.smin1"
                   ng-options="i for i in conf.mins"></select>
-              <div align="center" class="col-sm-1"> - </div>
-              <select class="col-sm-2" ng-model="current.ehour1"
+                <div align="center" class="col-sm-1"> - </div>
+                <select class="col-sm-2" name="dh1date" ng-model="current.ehour1"
                   ng-options="i for i in conf.hours1"></select>
-              <select class="col-sm-2" ng-model="current.emin1"
+                <select class="col-sm-2" name="dh1date" ng-model="current.emin1"
                   ng-options="i for i in conf.mins"></select>
-            <th style="text-align: right" id="dh2">日時2</th>
-            <td colspan="2">
-              <select class="col-sm-12" ng-model="current.date2"
+              </td>
+              <th style="text-align: right">日時2</th>
+              <td colspan="2">
+                <select class="col-sm-12" name="dh2date" ng-model="current.date2"
                   ng-options="i for i in conf.dates"></select>
-            </td>
-            <td>
-              <select class="col-sm-2" ng-model="current.shour2"
+              </td>
+              <td>
+                <select class="col-sm-2" name="dh2date" ng-model="current.shour2"
                   ng-options="i for i in conf.hours2"></select>
-              <select class="col-sm-2" ng-model="current.smin2"
+                <select class="col-sm-2" name="dh2date" ng-model="current.smin2"
                   ng-options="i for i in conf.mins"></select>
-              <div align="center" class="col-sm-1"> - </div>
-              <select class="col-sm-2" ng-model="current.ehour2"
+                <div align="center" class="col-sm-1"> - </div>
+                <select class="col-sm-2" name="dh2date" ng-model="current.ehour2"
                   ng-options="i for i in conf.hours2"></select>
-              <select class="col-sm-2" ng-model="current.emin2"
+                <select class="col-sm-2" name="dh2date" ng-model="current.emin2"
                   ng-options="i for i in conf.mins"></select>
-            </td>
-          </tr>
-          <tr>
-            <th style="text-align: right">場所</th>
-            <td colspan="2">
-              <select class="col-sm-12" ng-model="current.roomid"
+              </td>
+            </tr>
+            <tr>
+              <th style="text-align: right">場所</th>
+              <td colspan="2">
+                <select class="col-sm-12" ng-model="current.roomid"
                   ng-options="i.id as i.val for i in conf.roomlist"></select>
-            </td>
-            <th style="text-align: right" colspan="2">実行ステータス</th>
-            <td>
-              <select class="col-sm-12" ng-model="current.status"
+              </td>
+              <th style="text-align: right" colspan="2">実行ステータス</th>
+              <td>
+                <select class="col-sm-12" ng-model="current.status"
                   ng-options="i for i in conf.status"></select>
-            </td>
-            <td style="text-align: center">
-              [%- IF editable %]
-                <button type="submit" class="btn" id="applybtn"
+              </td>
+              <td style="text-align: center">
+                [%- IF editable %]
+                  <button type="submit" class="btn" id="applybtn"
+                    ng-disabled="timetable_edit_form.$invalid || timetable_edit_form.$pristine"
                     ng-click="doApply()">
-                  反映
-                </button>
-              [% END %]
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div> <!-- End of timetable_edit_form -->
+                    反映
+                  </button>
+                [% END %]
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </form> <!-- End of timetable_edit_form -->
+    </div> <!-- End of timetable_edit_div -->
   </div> <!-- End of timetable_down -->
   <!-- 各コントローラが使う値設定サービス(ttで初期化) -->
   [%- PROCESS 'tttimeselval.tt' -%]

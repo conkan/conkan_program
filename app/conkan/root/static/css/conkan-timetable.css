@@ -34,6 +34,15 @@
     text-align: left;
     border: thin ridge #686868;
     width: 100%;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    height: 30px;
+        /* ui-Gridのデフォルト行高さと同値にすること */
+}
+
+.prgcell p {
+    margin-top: 2px;
+    margin-bottom: 2px;
 }
 
 #timetable_wrap .prgcell {
@@ -61,26 +70,26 @@
     overflow-y: auto;
 }
 
-#timetable_edit_form {
+#timetable_edit_div {
     background: yellow;
 }
 
-#timetable_edit_form select {
+#timetable_edit_div select {
     padding: 0px;
 }
 
-#timetable_edit_form table {
+#timetable_edit_div table {
     table-layout: fixed;
 }
-#timetable_edit_form th,
-#timetable_edit_form td {
+#timetable_edit_div th,
+#timetable_edit_div td {
     overflow-x: hidden;
     white-space: nowrap;
     padding: 0px;
     vertical-align: middle;
 }
 
-#timetable_edit_form .prgname {
+#timetable_edit_div .prgname {
     margin-bottom: 0px;
     margin-left: 10px;
 }

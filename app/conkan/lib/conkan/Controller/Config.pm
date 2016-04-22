@@ -250,7 +250,7 @@ sub confget :Local {
 
         my $rl = [ map +{ 'id'  => $_->roomid(),
                           'val' => $_->roomno() . ' ' . $_->name() },
-                        @rowroom ];
+                                @rowroom ];
         $data->{'roomlist'} = to_json( $rl );
         $data->{'time_origin'} = $c->config->{'time_origin'};
         $c->stash->{'json'} = $data;

@@ -63,16 +63,32 @@ ConkanAppModule.factory( 'currentprgService',
                     currentval.sname   = data.sname;
                     currentval.name    = data.name;
                     currentval.status  = data.status;
-                    currentval.date1   = data.date1;
-                    currentval.shour1  = data.shour1;
-                    currentval.smin1   = data.smin1;
-                    currentval.ehour1  = data.ehour1;
-                    currentval.emin1   = data.emin1;
+                    currentval.date1   = data.date1 ? data.date1 : '';
+                    currentval.shour1  = data.shour1
+                                            ? ( "00" + data.shour1 ).substr(-2)
+                                            : undefined;
+                    currentval.smin1   = data.smin1
+                                            ? ( "00" + data.smin1  ).substr(-2)
+                                            : undefined;
+                    currentval.ehour1  = data.ehour1
+                                            ? ( "00" + data.ehour1 ).substr(-2)
+                                            : undefined;
+                    currentval.emin1   = data.emin1
+                                            ? ( "00" + data.emin1  ).substr(-2)
+                                            : undefined;
                     currentval.date2   = data.date2;
-                    currentval.shour2  = data.shour2;
-                    currentval.smin2   = data.smin2;
-                    currentval.ehour2  = data.ehour2;
-                    currentval.emin2   = data.emin2;
+                    currentval.shour2  = data.shour2
+                                            ? ( "00" + data.shour2 ).substr(-2)
+                                            : undefined;
+                    currentval.smin2   = data.smin2
+                                            ? ( "00" + data.smin2  ).substr(-2)
+                                            : undefined;
+                    currentval.ehour2  = data.ehour2
+                                            ? ( "00" + data.ehour2 ).substr(-2)
+                                            : undefined;
+                    currentval.emin2   = data.emin2
+                                            ? ( "00" + data.emin2  ).substr(-2)
+                                            : undefined;
                     currentval.roomid  = data.roomid;
                 });
             }
@@ -247,12 +263,30 @@ ConkanAppModule.controller( 'timeformController',
             $scope.$watch('current.date1', function( n, o, scope ) {
                 if ( n != o ) {
                     scope.conf['hours1'] = scope.__gethours(n);
+                    if (!n) {
+                        scope.current.shour1 = undefined;
+                        scope.current.smin1 = undefined;
+                        scope.current.ehour1 = undefined;
+                        scope.current.emin1 = undefined;
+                    }
                 }
             });
 
             $scope.$watch('current.date2', function( n, o, scope ) {
                 if ( n != o ) {
                     scope.conf['hours2'] = scope.__gethours(n);
+                    if (!n) {
+                        scope.current.shour2 = undefined;
+                        scope.current.smin2  = undefined;
+                        scope.current.ehour2 = undefined;
+                        scope.current.emin2  = undefined;
+                    }
+                }
+            });
+
+            $scope.$watch('current.pgid', function( n, o, scope ) {
+                if ( n != o ) {
+                    $('form[name=timetable_edit_form]').$pristine = true;
                 }
             });
 
@@ -262,12 +296,13 @@ ConkanAppModule.controller( 'timeformController',
                 $scope.conf.scale_hash  = JSON.parse(data.json.gantt_scale_str);
                 $scope.conf.time_origin = data.json.time_origin;
                 $scope.conf.dates       = JSON.parse(data.json.dates);
-                $scope.conf.hours1      = $scope.__gethours('');
-                $scope.conf.hours2      = $scope.__gethours('');
+                $scope.conf.hours1      = $scope.__gethours();
+                $scope.conf.hours2      = $scope.__gethours();
                 $scope.conf.mins        = ['00','05','10','15','20','25',
                                            '30','35','40','45','50','55' ];
                 $scope.conf.roomlist    = JSON.parse(data.json.roomlist);
                 $scope.conf.status      = JSON.parse(data.json.pg_status_vals);
+                $scope.conf.dates.unshift(''); // 2日目をなしにする
             })
             .error(function(data, status, headers, config) {
                 var modalinstance = $uibModal.open(
@@ -287,7 +322,7 @@ ConkanAppModule.controller( 'timeformController',
                 }
                 ckarray = [
                     {
-                        dh    : '#dh1',
+                        dh    : 'dh1date',
                         date  : $scope.current.date1,
                         shour : $scope.current.shour1,
                         smin  : $scope.current.smin1,
@@ -295,7 +330,7 @@ ConkanAppModule.controller( 'timeformController',
                         emin  : $scope.current.emin1
                     },
                     {
-                        dh    : '#dh2',
+                        dh    : 'dh2date',
                         date  : $scope.current.date2,
                         shour : $scope.current.shour2,
                         smin  : $scope.current.smin2,
@@ -303,6 +338,14 @@ ConkanAppModule.controller( 'timeformController',
                         emin  : $scope.current.emin2
                     }
                 ];
+                for ( cnt in ckarray ) {
+                    cur = ckarray[cnt];
+                    $('*[name=' + cur.dh + ']').each(function() {
+                        $(this).removeClass('ng-invalid');
+                        $(this).addClass('ng-valid');
+                        $(this).$invalid = false;
+                    });
+                }
                 for ( cnt in ckarray ) {
                     if ( ckarray[cnt].date ) {
                         cur = ckarray[cnt];
@@ -312,7 +355,11 @@ ConkanAppModule.controller( 'timeformController',
                         if (   ( start >= end )
                             || ( start < scale[0] ) || ( scale[1] < end ) ) {
                             $('#valerr').text('時刻設定に矛盾があります');
-                            $(cur.dh).css('background-color', '#ff8e8e');
+                            $('*[name=' + cur.dh + ']').each(function() {
+                                $(this).addClass('ng-invalid');
+                                $(this).removeClass('ng-valid');
+                                $(this).$invalid = true;
+                            });
                             return;
                         }
                     }

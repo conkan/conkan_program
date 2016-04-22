@@ -8,6 +8,15 @@
     padding-left: 10px;
 }
 
+.ng-dirty .ng-invalid {
+    background-color: #ff8e8e;
+}
+
+#valerr {
+    margin-left: 10px;
+    color: Red;
+}
+
 .form-group {
     margin-bottom: 10px;
 }
