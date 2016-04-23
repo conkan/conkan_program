@@ -98,8 +98,8 @@ $('#pgcpysepform button').click(function(event) {
   $('#pgcpysepform #cpysep_act').val(act);
 } );
 
-// conkanProgressListモジュールの生成
-var ConkanAppModule = angular.module('conkanProgressList',
+// conkanProgDetailモジュールの生成
+var ConkanAppModule = angular.module('conkanProgDetail',
     ['ui.grid', 'ui.grid.resizeColumns', 'ui.grid.pagination', 'ui.bootstrap'] );
 
 // 進捗リストコントローラ

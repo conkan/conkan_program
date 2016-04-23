@@ -516,6 +516,7 @@ sub program_show : Chained('program_base') :PathPart('') :CaptureArgs(1) {
     $c->stash->{'regpgid'}  = $regpgid;
     $c->stash->{'subno'}    = $c->stash->{'Program'}->subno();
     $c->stash->{'pgname'}   = $c->stash->{'RegProgram'}->name();
+    $c->stash->{'self_li_id'} = $c->stash->{'self_li_id'} || 'program_list';
 }
 
 =head2 program/*/
@@ -562,7 +563,6 @@ sub program_progressget : Chained('program_show') : PathPart('progress') : Args(
         $c->stash->{'totalItems'} = $prgcnt;
         $c->stash->{'json'} = \@list;
         $c->component('View::JSON')->{expose_stash} = [ 'json', 'totalItems' ];
-$c->log->debug('>>> program_progressget expose_stash:' . Dumper($c->component('View::JSON')->{expose_stash}));
     } catch {
         my $e = shift;
         $c->log->error('program/progressget error ' . localtime() .
