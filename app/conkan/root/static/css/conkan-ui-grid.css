@@ -34,4 +34,8 @@
     display: none;
 }
 
+#progresslist {
+    height: 212px;
+    /* ui-Gridのデフォルト行高さ * ( 1ページ行数 + ヘッダ行 ) + panel高  */
+    /* 30 * ( 5 + 1 ) + 32 ) */
 // ## END of conkan ui-grid css

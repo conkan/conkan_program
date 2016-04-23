@@ -291,7 +291,7 @@ ConkanAppModule.controller( 'timeformController',
             });
 
             $http.get('/config/confget')
-            .success(function(data, status, headers, config) {
+            .success(function(data) {
                 $scope.conf = {};
                 $scope.conf.scale_hash  = JSON.parse(data.json.gantt_scale_str);
                 $scope.conf.time_origin = data.json.time_origin;
@@ -304,7 +304,7 @@ ConkanAppModule.controller( 'timeformController',
                 $scope.conf.status      = JSON.parse(data.json.pg_status_vals);
                 $scope.conf.dates.unshift(''); // 2日目をなしにする
             })
-            .error(function(data, status, headers, config) {
+            .error(function(data) {
                 var modalinstance = $uibModal.open(
                     { templateUrl : 'T_httpget_fail' }
                 );
@@ -369,7 +369,7 @@ ConkanAppModule.controller( 'timeformController',
                     url : '/timetable/' + pgid,
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
                     data: $.param($scope.current)
-                }).success(function(data, status, headers, config) {
+                }).success(function(data) {
                     var modalinstance, templateval;
                     if (data.status == 'update') {
                         templateval = 'T_result_update';
@@ -390,7 +390,7 @@ ConkanAppModule.controller( 'timeformController',
                             currentprgService.query( pgid );
                         }
                     });
-                }).error(function(data, status, headers, config) {
+                }).error(function(data) {
                     var modalinstance = $uibModal.open(
                         {
                             templateUrl : 'T_result_dberr',

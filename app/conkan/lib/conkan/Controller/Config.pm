@@ -254,6 +254,7 @@ sub confget :Local {
         $data->{'roomlist'} = to_json( $rl );
         $data->{'time_origin'} = $c->config->{'time_origin'};
         $c->stash->{'json'} = $data;
+        $c->component('View::JSON')->{expose_stash} = undef;
     } catch {
         my $e = shift;
         $c->log->error('confget error ' . localtime() .

@@ -13,11 +13,11 @@ $('#addProgram').on('hide.bs.modal', function (event) {
   location.reload(true);
 } );
 
-// conkanProgListモジュールの生成(グローバル変数)
+// conkanProgListモジュールの生成
 var ConkanAppModule = angular.module('conkanProgList',
     ['ui.grid', 'ui.grid.resizeColumns', 'ui.bootstrap'] );
 
-// スタッフリストコントローラ
+// 企画リストコントローラ
 ConkanAppModule.controller( 'progListController',
     [ '$scope', '$sce', '$http', '$uibModal',
         function( $scope, $sce, $http, $uibModal ) {
@@ -81,11 +81,12 @@ ConkanAppModule.controller( 'progListController',
                     enableHiding: false,
                 },
             ];
-            $http.get('/program/listget')
-            .success(function(data, status, headers, config) {
+            var url = '/program/listget' + ( allprg ? '_a' : '_r' );
+            $http.get(url)
+            .success(function(data) {
                 $scope.proggrid.data = data.json;
             })
-            .error(function(data, status, headers, config) {
+            .error(function(data) {
                 var modalinstance = $uibModal.open(
                     { templateUrl : 'T_httpget_fail' }
                 );

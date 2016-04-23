@@ -383,39 +383,20 @@ END -%]
 <div class="well" id="progress">
   [% subtag( { 'progress' => 'bg-info' } ) %]
   <FORM id="addProgress" role="form" method="POST" action="/program/progress">
-    <div class="form-group">
-      <input type="hidden" name="regpgid", id="progress_regpgid"
-            value="[% RegProgram.regpgid %]"/>
-      <input type="hidden" name="pgid", id="progress_pgid"
-            value="[% Program.pgid %]"/>
-      <button type="submit" class="btn btn-primary btn-xs">下記内容を進捗として追加</button>
-      [% pguptextarea( 'progress', '', 12, 3 ) %]
-    </div>
+    <input type="hidden" name="regpgid", id="progress_regpgid"
+        value="[% RegProgram.regpgid %]"/>
+    <input type="hidden" name="pgid", id="progress_pgid"
+        value="[% Program.pgid %]"/>
+    [% pguptextarea( 'progress', '', 12, 3 ) %]
+    <button type="submit" class="btn btn-primary btn-xs">上記内容を進捗として追加</button>
   </FORM>
-  <table class="table table-bordered table-condensed"
-   style="background-color:white;">
-    <colgroup>
-      <col class="col-sm-2">
-      <col class="col-sm-2">
-      <col class="col-sm-8">
-    </colgroup>
-    <thead>
-      <tr>
-        <th style="text-align:center;">報告日時</th>
-        <th style="text-align:center;">報告者</th>
-        <th style="text-align:center;">内容</th>
-      </tr>
-    </thead>
-    <tbody>
-      [% FOREACH item = Progress %]
-        <tr>
-          <td>[% item.repdatetime   | html %]</td>
-          <td>[% item.staffid.tname | html %]</td>
-          <td>[% item.report        | html %]</td>
-        </tr>
-      [% END %]
-    </tbody>
-  </table>
+  <div class="" ng-app="conkanProgressList">
+    <div id="gridlist" ng-controller="progressListController">
+      <div id="progresslist" ui-grid="progressgrid" class="grid" ui-grid-resize-columns ui-grid-pagination>
+      </div>
+    </div> <!-- End of well gridlist -->
+    [%- PROCESS 'T_httpget_fail.tt' -%]
+  </div> <!-- End of container ng-app "conkanProgressList" -->
 </div>
 <!-- 複製/分割 -->
 [%- IF editable %]

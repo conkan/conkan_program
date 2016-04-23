@@ -130,10 +130,10 @@ ConkanAppModule.controller( 'staffListController',
                 },
             ];
             $http.get('/config/staff/listget')
-            .success(function(data, status, headers, config) {
+            .success(function(data) {
                 $scope.staffgrid.data = data.json;
             })
-            .error(function(data, status, headers, config) {
+            .error(function(data) {
                 var modalinstance = $uibModal.open(
                     { templateUrl : 'T_httpget_fail' }
                 );

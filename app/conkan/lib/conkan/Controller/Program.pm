@@ -391,18 +391,33 @@ sub program_list : Chained('program_base') : PathPart('list') : Args(0) {
     my ( $self, $c ) = @_;
 }
 
-=head2 program/listget 
+=head2 program/listget_a program/listget_r 
 
-企画管理 program_listget  : 企画一覧取得
+企画管理 program_listget  : 企画一覧取得 _a:全企画 _r:担当企画
 
 =cut
 
-sub program_listget : Chained('program_base') : PathPart('listget') : Args(0) {
+sub program_listget_a : Chained('program_base') : PathPart('listget_a') : Args(0) {
     my ( $self, $c ) = @_;
+    $c->detach( 'program_listget', [ 1 ] );
+}
+
+sub program_listget_r : Chained('program_base') : PathPart('listget_r') : Args(0) {
+    my ( $self, $c ) = @_;
+    $c->detach( 'program_listget', [ 0 ] );
+}
+
+sub program_listget : Private {
+    my ( $self, $c,
+         $getall,      # 全企画を取得するか
+       ) = @_;
 
     try {
+        my $searchcond = +( $getall
+            ? {}
+            : { 'me.staffid' => $c->user->get('staffid') } );
         my $pgmlist = [ $c->model('ConkanDB::PgProgram')->search(
-                    { },
+                    $searchcond,
                     {
                         'prefetch' => [ 'regpgid', 'staffid' ],
                         'order_by' => { '-asc' => [ 'me.regpgid', 'me.subno'] },
@@ -481,14 +496,6 @@ sub program_show : Chained('program_base') :PathPart('') :CaptureArgs(1) {
                             'order_by' => { '-asc' => 'id' },
                         }
                     ) ];
-    $c->stash->{'Progress'}  =
-        [ $c->model('ConkanDB::PgProgress')->search(
-                        { regpgid => $regpgid },
-                        {
-                            'prefetch' => [ 'staffid' ],
-                            'order_by' => { '-desc' => 'repdatetime' },
-                        }
-                    ) ];
     $c->stash->{'Casts'} =
         [ $c->model('ConkanDB::PgCast')->search(
                         { pgid => $pgid },
@@ -519,6 +526,49 @@ sub program_show : Chained('program_base') :PathPart('') :CaptureArgs(1) {
 
 sub program_detail : Chained('program_show') : PathPart('') : Args(0) {
     my ( $self, $c ) = @_;
+}
+
+=head2 program/*/progress/*/*
+---------------------------------------------
+企画管理 program_progressget   : 進捗報告取得
+
+=cut
+sub program_progressget : Chained('program_show') : PathPart('progress') : Args(2) {
+    my ( $self, $c, $pageno, $pagesize ) = @_;
+    my $regpgid = $c->stash->{'regpgid'};
+    try {
+        my $prgcnt = $c->model('ConkanDB::PgProgress')->search(
+                        { regpgid => $regpgid },
+                    )->count;
+        my $prglist = [ $c->model('ConkanDB::PgProgress')->search(
+                        { regpgid => $regpgid },
+                        {
+                            'prefetch' => [ 'staffid' ],
+                            'order_by' => { '-desc' => 'repdatetime' },
+                            'rows'      => $pagesize,
+                            'page'      => $pageno,
+                        }
+                    )
+                ];
+        my @list = ();
+        foreach my $prg ( @$prglist ) {
+            my $rdt = $prg->repdatetime();
+            push @list, {
+                'repdatetime'   => +( defined( $rdt ) ? $rdt->strftime('%F %T') : '' ),
+                'tname'         => $prg->staffid->tname(),
+                'report'        => $prg->report(),
+            };
+        }
+        $c->stash->{'totalItems'} = $prgcnt;
+        $c->stash->{'json'} = \@list;
+        $c->component('View::JSON')->{expose_stash} = [ 'json', 'totalItems' ];
+$c->log->debug('>>> program_progressget expose_stash:' . Dumper($c->component('View::JSON')->{expose_stash}));
+    } catch {
+        my $e = shift;
+        $c->log->error('program/progressget error ' . localtime() .
+            ' dbexp : ' . Dumper($e) );
+    };
+    $c->forward('conkan::View::JSON');
 }
 
 =head2 program/*/regprogram

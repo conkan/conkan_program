@@ -104,10 +104,10 @@ ConkanAppModule.controller( 'equipListController',
                 },
             ];
             $http.get('/config/equip/listget')
-            .success(function(data, status, headers, config) {
+            .success(function(data) {
                 $scope.equipgrid.data = data.json;
             })
-            .error(function(data, status, headers, config) {
+            .error(function(data) {
                 var modalinstance = $uibModal.open(
                     { templateUrl : 'T_httpget_fail' }
                 );

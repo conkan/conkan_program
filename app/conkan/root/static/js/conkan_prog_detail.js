@@ -97,3 +97,75 @@ $('#pgcpysepform button').click(function(event) {
   var act  = $(event.target).data('cpysep');
   $('#pgcpysepform #cpysep_act').val(act);
 } );
+
+// conkanProgressListモジュールの生成
+var ConkanAppModule = angular.module('conkanProgressList',
+    ['ui.grid', 'ui.grid.resizeColumns', 'ui.grid.pagination', 'ui.bootstrap'] );
+
+// 進捗リストコントローラ
+ConkanAppModule.controller( 'progressListController',
+    [ '$scope', '$sce', '$http', '$uibModal', 'uiGridConstants',
+        function( $scope, $sce, $http, $uibModal, uiGridConstants ) {
+            var pageSize = 5;
+            $scope.progressgrid = {
+                enableFiltering: false,
+                enableSorting: false,
+                treeRowHeaderAlwaysVisible: false,
+                enableColumnResizing: true,
+                enableGridMenu: false,
+                paginationPageSize: pageSize,
+                paginationPageSizes: [ pageSize ],
+                useExternalPagination: true,
+                enableHorizontalScrollbar: uiGridConstants.scrollbars.NEVER,
+                enableVerticalScrollbar: uiGridConstants.scrollbars.NEVER,
+                onRegisterApi: function(gridApi) {
+                    $scope.gridApi = gridApi;
+                    gridApi.pagination.on.paginationChanged($scope,
+                        function(nPage) {
+                            getPage(nPage);
+                        });
+                }
+            };
+
+            $scope.progressgrid.columnDefs = [
+                { name : '報告日時', field : 'repdatetime',
+                    headerCellClass: 'gridheader',
+                    width: "17%",
+                    cellClass: 'ui-grid-vcenter',
+                    enableHiding: false,
+                },
+                { name : '報告者', field : 'tname',
+                    headerCellClass: 'gridheader',
+                    width: "17%",
+                    cellClass: 'ui-grid-vcenter',
+                    enableHiding: false,
+                },
+                { name : '内容', field : 'report',
+                    headerCellClass: 'gridheader',
+                    cellClass: 'ui-grid-vcenter',
+                    enableHiding: false,
+                },
+            ];
+            var getPage = function( newPage ) {
+                var pgid = $('#progress_pgid').val();
+                var url = '/program/' + pgid + '/progress/'
+                            + newPage + '/' + pageSize + '/';
+                $http.get(url)
+                .success(function(data) {
+                    $scope.progressgrid.totalItems = data.totalItems;
+                    $scope.progressgrid.data = data.json;
+                })
+                .error(function(data) {
+                    var modalinstance = $uibModal.open(
+                        { templateUrl : 'T_httpget_fail' }
+                    );
+                    modalinstance.result.then( function() {} );
+                });
+            };
+
+            getPage(1);
+        }
+    ]
+);
+
+// -- EOF --
