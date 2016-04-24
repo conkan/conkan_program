@@ -130,7 +130,7 @@ __PACKAGE__->belongs_to(
   "regpgid",
   "conkan::Schema::Result::PgRegProgram",
   { regpgid => "regpgid" },
-  { is_deferrable => 1, on_delete => "NO ACTION", on_update => "NO ACTION" },
+  { is_deferrable => 1, on_delete => "NO ACTION", on_update => "CASCADE" },
 );
 
 =head2 staffid
@@ -149,8 +149,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-06-11 16:41:47
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:+OlK0iNt1J26HMc/QH9NgQ
+# Created by DBIx::Class::Schema::Loader v0.07045 @ 2016-04-24 21:29:35
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:dY59yZkpQ1LIAe/s7AD0zw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
