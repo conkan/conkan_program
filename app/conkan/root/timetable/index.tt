@@ -44,7 +44,7 @@ END -%]
   <div class="row" id="timetable_down">
     <div id="timetable_edit_div" ng-controller="timeformController">
       <!-- Bottom: 場所/時刻設定フォーム -->
-      <form name="timetable_edit_form" novalidate>
+      <form name="timetable_edit_form" id="timetable_edit_form" novalidate>
         <table class="table table-bordered table-condensed">
           <colgroup>
             <col class="col-sm-1">
@@ -145,47 +145,7 @@ END -%]
   <!-- 各コントローラが使う値設定サービス(ttで初期化) -->
   [%- PROCESS 'tttimeselval.tt' -%]
   <!-- 更新結果表示用モーダル -->
-  <!--  更新成功 -->
-  <script type="text/ng-template" id="T_result_update">
-    <div class="modal-header">
-      <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
-    </div>
-    <div class="modal-body">
-      <H3><strong>更新しました</strong></H3>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-danger" ng-click="$close()">閉じる</button>
-    </div>
-  </script>
-  <!--  更新失敗 -->
-  <script type="text/ng-template" id="T_result_fail">
-    <div class="modal-header">
-      <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
-    </div>
-    <div class="modal-body">
-      <H3><strong>更新できませんでした</strong></H3>
-      他スタッフが変更した可能性があります<br/>
-      設定値を確認してください
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-danger" ng-click="$close()">閉じる</button>
-    </div>
-  </script>
-  <!--  更新失敗(DBエラー) -->
-  <script type="text/ng-template" id="T_result_dberr">
-    <div class="modal-header">
-      <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
-    </div>
-    <div class="modal-body">
-      <H3><strong>DBエラー発生</strong></H3>
-      更新できませんでした<br/>
-      システム管理者に連絡してください
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-danger" ng-click="$close()">閉じる</button>
-    </div>
-  </script>
-  [%- PROCESS 'T_httpget_fail.tt' -%]
+  [%- PROCESS 'T_httpget_result.tt' -%]
 </div> <!-- End of container ng-app "conkanTimeTable" -->
 [%- PROCESS 'tttail.tt' -%]
 <script type="text/javascript" src="/static/js/conkan_timetable.js"></script>

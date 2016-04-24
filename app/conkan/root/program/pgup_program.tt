@@ -1,7 +1,25 @@
 [%- SET urole = c.user.get('role') -%]
 [%- PROCESS 'ttpgupmc.tt' -%]
-<FORM method="POST" class="form-horizontal" role="form" id="progform">
+<FORM method="POST" class="form-horizontal" role="form" id="progform"
+             ng-controller="progformController">
   <p id="vha" data-vha= "[]"/>
+  <script type="text/javascript">
+    var prog = {};
+    prog.date1   = [% rs.date1.strftime('%Y/%m/%d') %];
+    prog.shour1  = [% rs.shour1 %];
+    prog.smin1   = [% rs.smin1 %];
+    prog.ehour1  = [% rs.ehour1 %];
+    prog.emin1   = [% rs.emin1 %];
+    prog.date2   = [% rs.date2.strftime('%Y/%m/%d') %];
+    prog.shour2  = [% rs.shour2 %];
+    prog.smin2   = [% rs.smin2 %];
+    prog.ehour2  = [% rs.ehour2 %];
+    prog.emin2   = [% rs.emin2 %];
+    prog.staffid = [% rs.staffid.staffid %];
+    prog.status  = [% rs.status %];
+    prog.roomid  = [% rs.roomid.roomid %];
+    prog.layerno = [% rs.layerno %];
+  </script>
   <div style="COLOR:Red;" id="valerr"></div>
   <div class="form-group">
     <input type="hidden" name="regpgid" id="regpgid" value="[% regpgid %]">
@@ -29,7 +47,8 @@
         <th>担当スタッフ</th>
         <td>
           [%- IF urole == 'ROOT' || urole == 'PG' -%]
-            [% pgupselect( 'staffid', stafflist, rs.staffid.staffid, 12 ) %]
+            <select class="col-sm-12" name="staffid" ng-model="prog.staffid"
+              ng-options="i.id as i.val for i in conf.stafflist"></select>
           [%- ELSE -%]
             <input type="hidden" name="staffid" id="staffid" value="
             [%- rs.staffid.staffid -%]">
@@ -37,39 +56,58 @@
           [%- END -%]
         </td> 
         <th>実行ステータス</th>
-        <td>[% pgupselect( 'status', conf.status, rs.status, 12 ) %]</td>
+        <td>
+          <select class="col-sm-12" ng-model="prog.status"
+            ng-options="i for i in conf.status"></select>
+        </td>
         <td>[% pgupinputtext( 'memo', rs.memo, 12 ) %]</td>
       </tr>
       <tr>
         <th>日時1</th>
         <td>
-          [%- pgupselect( 'date1', conf.dates, rs.date1.strftime('%Y/%m/%d'), 12 ) -%]
+          <select class="col-sm-12" name="dh1date" ng-model="prog.date1"
+            ng-options="i for i in conf.dates"></select>
         </td>
         <td colspan="3">
-          [%- pgupselect( 'shour1', conf.s_hours, rs.shour1, 2 ) -%]
-          [%- pgupselect( 'smin1', conf.s_mins, rs.smin1, 2 ) -%]
+          <select class="col-sm-2" name="dh1date" ng-model="prog.shour1"
+            ng-options="i for i in conf.hours1"></select>
+          <select class="col-sm-2" name="dh1date" ng-model="prog.smin1"
+            ng-options="i for i in conf.mins"></select>
           <div align="center" class="col-sm-1"> - </div>
-          [%- pgupselect( 'ehour1', conf.e_hours, rs.ehour1, 2 ) -%]
-          [%- pgupselect( 'emin1', conf.s_mins, rs.emin1, 2 ) -%]
+          <select class="col-sm-2" name="dh1date" ng-model="prog.ehour1"
+            ng-options="i for i in conf.hours1"></select>
+          <select class="col-sm-2" name="dh1date" ng-model="prog.emin1"
+            ng-options="i for i in conf.mins"></select>
         </td>
       </tr>
       <tr>
         <th>日時2</th>
         <td>
-          [%- pgupselect( 'date2', conf.dates, rs.date2.strftime('%Y/%m/%d'), 12 ) -%]
+          <select class="col-sm-12" name="dh2date" ng-model="prog.date2"
+            ng-options="i for i in conf.dates"></select>
         <td colspan="3">
-          [%- pgupselect( 'shour2', conf.s_hours, rs.shour2, 2 ) -%]
-          [%- pgupselect( 'smin2', conf.s_mins, rs.smin2, 2 ) -%]
+          <select class="col-sm-2" name="dh2date" ng-model="prog.shour2"
+            ng-options="i for i in conf.hours2"></select>
+          <select class="col-sm-2" name="dh2date" ng-model="prog.smin2"
+            ng-options="i for i in conf.mins"></select>
           <div align="center" class="col-sm-1"> - </div>
-          [%- pgupselect( 'ehour2', conf.e_hours, rs.ehour2, 2 ) -%]
-          [%- pgupselect( 'emin2', conf.s_mins, rs.emin2, 2 ) -%]
+          <select class="col-sm-2" name="dh2date" ng-model="prog.ehour2"
+            ng-options="i for i in conf.hours2"></select>
+          <select class="col-sm-2" name="dh2date" ng-model="prog.emin2"
+            ng-options="i for i in conf.mins"></select>
         </td>
       </tr>
       <tr>
         <th>場所</th>
-        <td colspan="2">[% pgupselect( 'roomid', conf.roomlist, rs.roomid.roomid, 12 ) %]</td>
+        <td colspan="2">
+          <select class="col-sm-12" name="roomid" ng-model="prog.roomid"
+            ng-options="i.id as i.val for i in conf.roomlist"></select>
+        </td>
         <th>表示順序</th>
-        <td>[% pgupselect( 'layerno', conf.nos, rs.layerno, 4 ) %]</td>
+        <td>
+          <select class="col-sm-4" name="layerno" ng-model="prog.layerno"
+            ng-options="i.id as i.val for i in conf.nos"></select>
+        </td>
       </tr>
       <tr>
         <th>企画紹介文</th>

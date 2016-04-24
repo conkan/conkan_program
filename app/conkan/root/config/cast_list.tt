@@ -22,7 +22,7 @@
       追加
     </button>
   </div>
-  [%- PROCESS 'T_httpget_fail.tt' -%]
+  [%- PROCESS 'T_httpget_result.tt' -%]
 </div> <!-- End of container ng-app "conkanCastList -->
 <!-- 出演者詳細モーダル -->
 <div class="modal fade" id="editCast" tabindex="-1" role="dialog" aria-labelledby="editCastLabel" aria-hidden="true">

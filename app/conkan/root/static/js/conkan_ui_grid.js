@@ -61,4 +61,40 @@ var uiGetEditbtn = function( disable, target, datas ) {
     return cont;
 };
 
+// 日付から時刻範囲を得る
+//  date: 日付
+//  conf: 設定オブジェクト
+var GetHours = function( date, conf ) {
+    var hours = [],
+    st = date ? conf.scale_hash[date][3] * 1
+              : 0 + conf.time_origin * 1,
+    et = date ? conf.scale_hash[date][4] * 1
+              : 23 + conf.time_origin * 1,
+    len = et - st;
+    for ( var cnt=0; cnt<=len; cnt++ ) {
+        hours[cnt] = ( "00" + ( st + cnt ) ).substr(-2);
+    }
+    return hours;
+};
+//
+// 取得したJSON情報を設定オブジェクトに変換
+//  data: JSON情報
+var ConfDataCnv = function( data ) { 
+    var wkcnf = {};
+    wkcnf.scale_hash  = JSON.parse(data.json.gantt_scale_str);
+    wkcnf.time_origin = data.json.time_origin;
+    wkcnf.dates       = JSON.parse(data.json.dates);
+    wkcnf.hours1      = GetHours(undefined,wkcnf);
+    wkcnf.hours2      = GetHours(undefined,wkcnf);
+    wkcnf.mins        = ['00','05','10','15','20','25',
+                         '30','35','40','45','50','55' ];
+    wkcnf.roomlist    = JSON.parse(data.json.roomlist);
+    wkcnf.stafflist   = JSON.parse(data.json.stafflist);
+    wkcnf.nos         = [ '0', '1', '2', '3', '4' ];
+    wkcnf.status      = JSON.parse(data.json.pg_status_vals);
+    wkcnf.dates.unshift(''); // 日付初期化用
 
+    return wkcnf;
+};
+
+// EOF --

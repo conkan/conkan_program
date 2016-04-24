@@ -15,7 +15,7 @@
     <div id="proglist" ui-grid="proggrid" class="grid" ui-grid-resize-columns>
     </div>
   </div> <!-- End of well gridlist -->
-  [%- PROCESS 'T_httpget_fail.tt' -%]
+  [%- PROCESS 'T_httpget_result.tt' -%]
   <div id="pgAddDiv">
   [%- IF cuRole == 'ROOT' %]
     <button type="button" class="btn btn-primary"

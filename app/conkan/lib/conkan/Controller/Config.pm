@@ -243,6 +243,10 @@ sub confget :Local {
                         { },
                         { 'order_by' => { '-asc' => 'roomid' } }
                     );
+        my @rowstaff = $c->model('ConkanDB::PgStaff')->search(
+                        { staffid => { '!=' =>  1 } },
+                        { 'order_by' => { '-asc' => 'staffid' } }
+                    );
         my $data = {};
         foreach my $row ( @rowconf ) {
             $data->{$row->pg_conf_code()} = $row->pg_conf_value();
@@ -251,7 +255,10 @@ sub confget :Local {
         my $rl = [ map +{ 'id'  => $_->roomid(),
                           'val' => $_->roomno() . ' ' . $_->name() },
                                 @rowroom ];
+        my $sl = [ map +{ 'id' => $_->staffid(), 'val' => $_->tname() }, 
+                                @rowstaff ];
         $data->{'roomlist'} = to_json( $rl );
+        $data->{'stafflist'} = to_json( $sl );
         $data->{'time_origin'} = $c->config->{'time_origin'};
         $c->stash->{'json'} = $data;
         $c->component('View::JSON')->{expose_stash} = undef;

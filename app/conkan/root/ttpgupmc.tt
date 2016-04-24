@@ -24,12 +24,12 @@
 [%- END -%]
 [%- MACRO pgupinputtext ( item, val, size ) BLOCK -%]
   <input type="text" name="[% item %]" id="[% item %]" class="col-sm-[% size %]"
-    value="[% val | trim | html %]"/>
+    value="[% val | html %]"/>
 [%- END -%]
 [%- MACRO pguptextarea ( item, val, size, row ) BLOCK -%]
   [% DEFAULT row = 2 %]
   <textarea name="[% item %]" id="[% item %]"
-    class="col-sm-[% size %]" rows="[% row %]">[%- val | trim | html -%]</textarea>
+    class="col-sm-[% size %]" rows="[% row %]">[%- val | html -%]</textarea>
 [%- END -%]
 [%- MACRO pgupselect ( item, list, selid, size ) BLOCK -%]
   <select class="col-sm-[% size %]" name="[% item %]" id="[% item %]">

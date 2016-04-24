@@ -278,8 +278,7 @@ sub timetable_get : Chained('timetable_base') :PathPart('') :Args(1) {
             $c->stash->{'subno'}    = $row->subno();
             $c->stash->{'pgid'}     = $row->pgid();
             $c->stash->{'sname'}    = $row->sname();
-            $c->stash->{'name'}     = $row->regpgid->name();
-            $c->stash->{'status'}   = $row->status();
+            $c->stash->{'name'}     = $row->regpgid->name() if ( $regpgid );
             $c->forward('/program/_trnSEtime', [ $row, ], );
             if ( $row->date1() ) {
                 my @date  = split('T', $row->date1());
@@ -293,17 +292,20 @@ sub timetable_get : Chained('timetable_base') :PathPart('') :Args(1) {
             if ( $row->date2() ) {
                 my @date  = split('T', $row->date2());
                 $date[0] =~ s[-][/]g;
-                my @stime = split(':', $row->stime2());
-                my @etime = split(':', $row->etime2());
                 $c->stash->{'date2'}    = $date[0];
                 $c->stash->{'shour2'}   = "$row->{'shour2'}";
                 $c->stash->{'smin2'}    = "$row->{'smin2'}";
                 $c->stash->{'ehour2'}   = "$row->{'ehour2'}";
                 $c->stash->{'emin2'}    = "$row->{'emin2'}";
             }
-            if ( $row->roomid() ) {
-                $c->stash->{'roomid'}   = $row->roomid->roomid();
-            }
+            $c->stash->{'status'}   = $row->status();
+            $c->stash->{'layerno'}  = $row->layerno();
+            $c->stash->{'staffid'}  = $row->staffid->staffid()
+                if ( $row->staffid() );
+            $c->stash->{'roomid'}   = $row->roomid->roomid()
+                if ( $row->roomid() );
+            $c->stash->{'memo'}     = $row->memo();
+            $c->stash->{'progressprp'} = $row->progressprp();
             if (  ( $c->user->get('role') eq 'ROOT' )
                || ( $c->user->get('role') eq 'PG'   ) ) {
                # システム管理者/企画管理者の場合、更新可能
@@ -318,9 +320,9 @@ sub timetable_get : Chained('timetable_base') :PathPart('') :Args(1) {
             if ( $row->updateflg eq 
                     +( $c->sessionid . $c->session->{'updtic'}) ) {
                 my $items = [ qw/
-                                status
+                                sname staffid status memo
                                 date1 stime1 etime1 date2 stime2 etime2
-                                roomid
+                                roomid layerno progressprp
                             / ];
                 my $value = $c->forward('/program/_trnReq2Hash', [ $items ] );
                 $c->forward('/program/_autoProgress', [ $regpgid, $items, $row, $value ] );

@@ -49,12 +49,10 @@ ConkanAppModule.factory( 'currentprgService',
             currentval: currentval,
             query:   function(pgid) {
                 $('#valerr').text('');
-                $('#dh1').css('background-color', '');
-                $('#dh2').css('background-color', '');
                 $http({
                     method  : 'GET',
                     url     : '/timetable/' + pgid
-                }).success(function(data, status, headers, config) {
+                }).success(function(data) {
                     // pgidの企画情報を取得し、currentvalに設定
                     // subnoは前後に()付ける
                     currentval.regpgid = data.regpgid;
@@ -63,32 +61,16 @@ ConkanAppModule.factory( 'currentprgService',
                     currentval.sname   = data.sname;
                     currentval.name    = data.name;
                     currentval.status  = data.status;
-                    currentval.date1   = data.date1 ? data.date1 : '';
-                    currentval.shour1  = data.shour1
-                                            ? ( "00" + data.shour1 ).substr(-2)
-                                            : undefined;
-                    currentval.smin1   = data.smin1
-                                            ? ( "00" + data.smin1  ).substr(-2)
-                                            : undefined;
-                    currentval.ehour1  = data.ehour1
-                                            ? ( "00" + data.ehour1 ).substr(-2)
-                                            : undefined;
-                    currentval.emin1   = data.emin1
-                                            ? ( "00" + data.emin1  ).substr(-2)
-                                            : undefined;
-                    currentval.date2   = data.date2;
-                    currentval.shour2  = data.shour2
-                                            ? ( "00" + data.shour2 ).substr(-2)
-                                            : undefined;
-                    currentval.smin2   = data.smin2
-                                            ? ( "00" + data.smin2  ).substr(-2)
-                                            : undefined;
-                    currentval.ehour2  = data.ehour2
-                                            ? ( "00" + data.ehour2 ).substr(-2)
-                                            : undefined;
-                    currentval.emin2   = data.emin2
-                                            ? ( "00" + data.emin2  ).substr(-2)
-                                            : undefined;
+                    currentval.date1   = data.date1  ? data.date1  : undefined;
+                    currentval.shour1  = data.shour1 ? data.shour1 : undefined;
+                    currentval.smin1   = data.smin1  ? data.smin1  : undefined;
+                    currentval.ehour1  = data.ehour1 ? data.ehour1 : undefined;
+                    currentval.emin1   = data.emin1  ? data.emin1  : undefined;
+                    currentval.date2   = data.date2  ? data.date2  : undefined;
+                    currentval.shour2  = data.shour2 ? data.shour2 : undefined;
+                    currentval.smin2   = data.smin2  ? data.smin2  : undefined;
+                    currentval.ehour2  = data.ehour2 ? data.ehour2 : undefined;
+                    currentval.emin2   = data.emin2  ? data.emin22 : undefined;
                     currentval.roomid  = data.roomid;
                 });
             }
@@ -247,22 +229,9 @@ ConkanAppModule.controller( 'timetableController',
 ConkanAppModule.controller( 'timeformController',
     [ '$scope', '$http', '$uibModal', 'currentprgService',
         function( $scope, $http, $uibModal, currentprgService ) {
-            $scope.__gethours = function(date) {
-                var hours = [],
-                st = date ? $scope.conf.scale_hash[date][3] * 1
-                          : 0 + $scope.conf.time_origin * 1,
-                et = date ? $scope.conf.scale_hash[date][4] * 1
-                          : 23 + $scope.conf.time_origin * 1,
-                len = et - st;
-                for ( var cnt=0; cnt<=len; cnt++ ) {
-                    hours[cnt] = ( "00" + ( st + cnt ) ).substr(-2);
-                }
-                return hours;
-            };
-
             $scope.$watch('current.date1', function( n, o, scope ) {
                 if ( n != o ) {
-                    scope.conf['hours1'] = scope.__gethours(n);
+                    scope.conf['hours1'] = GetHours(n, scope.conf);
                     if (!n) {
                         scope.current.shour1 = undefined;
                         scope.current.smin1 = undefined;
@@ -274,7 +243,7 @@ ConkanAppModule.controller( 'timeformController',
 
             $scope.$watch('current.date2', function( n, o, scope ) {
                 if ( n != o ) {
-                    scope.conf['hours2'] = scope.__gethours(n);
+                    scope.conf['hours2'] = GetHours(n,scope.conf);
                     if (!n) {
                         scope.current.shour2 = undefined;
                         scope.current.smin2  = undefined;
@@ -292,17 +261,7 @@ ConkanAppModule.controller( 'timeformController',
 
             $http.get('/config/confget')
             .success(function(data) {
-                $scope.conf = {};
-                $scope.conf.scale_hash  = JSON.parse(data.json.gantt_scale_str);
-                $scope.conf.time_origin = data.json.time_origin;
-                $scope.conf.dates       = JSON.parse(data.json.dates);
-                $scope.conf.hours1      = $scope.__gethours();
-                $scope.conf.hours2      = $scope.__gethours();
-                $scope.conf.mins        = ['00','05','10','15','20','25',
-                                           '30','35','40','45','50','55' ];
-                $scope.conf.roomlist    = JSON.parse(data.json.roomlist);
-                $scope.conf.status      = JSON.parse(data.json.pg_status_vals);
-                $scope.conf.dates.unshift(''); // 2日目をなしにする
+                $scope.conf = ConfDataCnv( data, $scope.conf );
             })
             .error(function(data) {
                 var modalinstance = $uibModal.open(
@@ -316,8 +275,11 @@ ConkanAppModule.controller( 'timeformController',
             $scope.doApply = function() {
                 var ckarray, cnt, cur, scale, start, end;
                 var pgid = $scope.current.pgid;
-                // バリデーション
+                // 二重クリック回避
+                $('#applybtn').attr('disabled', 'disabled');
+                // バリデーション ## 共通化対象
                 if (!(pgid)) {
+                    $('#applybtn').removeAttr('disabled');
                     return;
                 }
                 ckarray = [
@@ -360,10 +322,12 @@ ConkanAppModule.controller( 'timeformController',
                                 $(this).removeClass('ng-valid');
                                 $(this).$invalid = true;
                             });
+                            $('#applybtn').removeAttr('disabled');
                             return;
                         }
                     }
                 }
+                // バリデーション完了
                 $http( {
                     method : 'POST',
                     url : '/timetable/' + pgid,
@@ -387,6 +351,7 @@ ConkanAppModule.controller( 'timeformController',
                         if (data.status == 'update') {
                             location.reload();
                         } else {
+                            $('#applybtn').removeAttr('disabled');
                             currentprgService.query( pgid );
                         }
                     });
@@ -398,11 +363,12 @@ ConkanAppModule.controller( 'timeformController',
                         }
                     );
                     modalinstance.result.then( function() {
+                        $('#applybtn').removeAttr('disabled');
                         currentprgService.query( pgid );
                     });
                 });
             };
-          }
+        }
     ]
 );
 

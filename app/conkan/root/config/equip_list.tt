@@ -22,7 +22,7 @@
       追加
     </button>
   </div>
-  [%- PROCESS 'T_httpget_fail.tt' -%]
+  [%- PROCESS 'T_httpget_result.tt' -%]
 </div> <!-- End of container ng-app "conkanEquipList" -->
 <!-- 機材詳細モーダル -->
 <div class="modal fade" id="editEquip" tabindex="-1" role="dialog" aria-labelledby="editEquipLabel" aria-hidden="true">

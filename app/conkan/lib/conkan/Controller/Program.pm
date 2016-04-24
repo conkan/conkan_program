@@ -872,8 +872,10 @@ sub _trnSEtime :Private {
         # 開始終了時刻を分解して時と分にわける
         my @wk = split( /:/, $wkval );
         if ( scalar( @wk ) >= 2 ) {
-            $trgHash->{$TimeArgTrn{$item}->[0]} = $wk[0] + $c->config->{time_origin};
-            $trgHash->{$TimeArgTrn{$item}->[1]} = $wk[1];
+            $trgHash->{$TimeArgTrn{$item}->[0]} =
+                sprintf('%02d', $wk[0] + $c->config->{time_origin});
+            $trgHash->{$TimeArgTrn{$item}->[1]} =
+                sprintf('%02d', $wk[1]);
         }
     }
 }
@@ -951,7 +953,7 @@ $c->log->debug('>>> _autoProgress start regpgid:' . $regpgid );
                         $rowval =~ s[-][/]g;
                     }
                 }
-                if ( ($rowval ne $val ) ) {
+                if ( defined( $val ) && ($rowval ne $val ) ) {
                     $c->log->debug('>>> _autoProgress key:' . $key . ' rowval:' . $rowval . ' val:' . $val );
                     $progstr .= $key . ' change to ' . $val . ' ';
                 }
