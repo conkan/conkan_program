@@ -21,7 +21,6 @@
 ]">
   <div style="COLOR:Red;" id="valerr"></div>
   <div class="form-group">
-    <input type="hidden" name="regpgid" id="regpgid" value="[% regpgid %]">
     <input type="hidden" name="pgid" id="pgid"   value="[% pgid %]">
     <input type="hidden" name="id"   id="id"     value="-">
     <input type="hidden" name="target" id="target" value="regprogram">
@@ -35,8 +34,10 @@
     <tbody>
       <tr>
         <th style="background-color:#FFcc66">企画ID</th>
-        <th style="background-color:#FFcc66">[% regpgid %] ([% subno %])</th>
-        <td style="background-color:#FFcc66"></td>
+        <th>
+          [% pgupinputtext( 'regpgid', rs.regpgid, 12 ) %]
+        </th>
+        <td style="background-color:#FFcc66">([% subno %])</td>
       </tr>
       <tr>
         <td colspan="3">
@@ -59,7 +60,7 @@
       <tr>
         <td>[% pgupinputtext( 'regname', rs.regname, 12 ) %]</td>
         <td>[% rs.regdate | html %]</td>
-        <td>[% rs.experience | html %]</td>
+        <td>[% pgupinputtext( 'experience', rs.experience, 12 ) %]</td>
       </tr>
         <th>大会登録番号</th>
         <th colspan="2">メールアドレス</th>

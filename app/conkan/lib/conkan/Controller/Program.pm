@@ -579,7 +579,7 @@ sub program_progressget : Chained('program_show') : PathPart('progress') : Args(
 sub pgup_regprog : Chained('program_show') : PathPart('regprogram') : Args(0) {
     my ( $self, $c ) = @_;
     my $up_items = [ qw/
-                    name namef regma regno telno faxno celno
+                    regpgid name namef regma experience regno telno faxno celno
                     type place layout date classlen expmaxcnt
                     content contentpub realpub afterpub openpg restpg
                     avoiddup experience comment
@@ -794,6 +794,22 @@ sub _pgupdate :Private {
                 # 更新実施
                 if ( $rowprof->updateflg eq 
                         +( $c->sessionid . $c->session->{'updtic'}) ) {
+                        my $newregpgid = $value->{'regpgid'};
+                        if ( defined($newregpgid) &&
+                             ( $regpgid != $newregpgid ) ) {
+$c->log->debug('>>>> regpgid: ' . $regpgid . ' -> ' . $newregpgid);
+                            # 企画番号更新時特殊チェック
+                            my $cannot = $c->model('ConkanDB::PgRegProgram')
+                                    ->find($newregpgid);
+                            if ( $cannot ) {
+                                $c->stash->{'rs'} = undef;
+                                $c->response->body(
+                                    '<FORM><H1>更新できませんでした</H1><BR/>' .
+                                    '<H2>企画番号が重複しています</H2><BR/>' .
+                                    '再度やり直してください</FORM>');
+                                return;
+                            }
+                        }
                         $c->forward('/program/_autoProgress',
                                 [ $regpgid, $up_items, $rowprof, $value ] );
                         $rowprof->update( $value ); 
@@ -937,7 +953,6 @@ sub _autoProgress :Private {
          $value,    # 更新用ハッシュ
        ) = @_;
 
-$c->log->debug('>>> _autoProgress start regpgid:' . $regpgid );
     try {
         my $progstr = '';
         if ( defined( $row ) ) { # 更新
