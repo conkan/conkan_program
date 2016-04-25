@@ -704,23 +704,18 @@ sub pgup_equipdel : Chained('pgup_equiptop') : PathPart('del') : Args(0) {
     $c->detach( '/program/' . $pgid . '/equip/' . $id )
         if ( ( $c->request->method eq 'GET' ) || ( $id == 0 ) );
 
-    try {
-        my $rowprof = $c->stash->{'M'}->find( $id );
-        if ( $rowprof->updateflg eq 
-                +( $c->sessionid . $c->session->{'updtic'}) ) {
-            # 削除実施
-            $rowprof->delete(); 
-            $c->response->body('<FORM><H1>削除しました</H1></FORM>');
-        }
-        else {
-            $c->stash->{'rs'} = undef;
-            $c->response->body =
-                '<FORM><H1>削除できませんでした</H1><BR/>' .
-                '他スタッフが変更した可能性があります</FORM>';
-        }
-    } catch {
-        $c->detach( '_dberror', [ shift ] );
-    };
+    $c->detach( '_pgdelete' );
+}
+
+=head2 program/*/cast/*
+---------------------------------------------
+企画管理 pgup_casttop  : 決定出演者追加/更新/削除 起点
+
+=cut
+sub pgup_casttop : Chained('program_show') : PathPart('cast') : CaptureArgs(1) {
+    my ( $self, $c, $id ) = @_;
+    $c->stash->{'id'} = $id;
+    $c->stash->{'M'} = $c->model('ConkanDB::PgCast');
 }
 
 =head2 program/*/cast/*/
@@ -728,12 +723,13 @@ sub pgup_equipdel : Chained('pgup_equiptop') : PathPart('del') : Args(0) {
 企画管理 pgup_cast  : 決定出演者追加/更新
 
 =cut
-sub pgup_cast : Chained('program_show') : PathPart('cast') : Args(1) {
-    my ( $self, $c, $id ) = @_;
+sub pgup_cast : Chained('pgup_casttop') : PathPart('') : Args(0) {
+    my ( $self, $c ) = @_;
+
+    my $id = $c->stash->{'id'};
     my $up_items = [ qw/
                     castid status memo name namef title
                     / ];
-    $c->stash->{'M'} = $c->model('ConkanDB::PgCast');
     my $rowprof = undef;
     try {
         if ( $id == 0 ) {   # 追加
@@ -760,6 +756,24 @@ sub pgup_cast : Chained('program_show') : PathPart('cast') : Args(1) {
         $c->detach( '_dberror', [ shift ] );
     };
     $c->detach( '_pgupdate', [ $rowprof, $up_items ] );
+}
+
+=head2 program/*/cast/*/del
+
+企画管理 pgup_castdel  : 決定出演者削除
+
+=cut
+sub pgup_castdel : Chained('pgup_casttop') : PathPart('del') : Args(0) {
+    my ( $self, $c ) = @_;
+
+    my $pgid = $c->stash->{'pgid'};
+    my $id   = $c->stash->{'id'};
+
+    # あり得ないが念のため
+    $c->detach( '/program/' . $pgid . '/cast/' . $id )
+        if ( ( $c->request->method eq 'GET' ) || ( $id == 0 ) );
+
+    $c->detach( '_pgdelete' );
 }
 
 =head2 _pgupdate
@@ -832,6 +846,34 @@ $c->log->debug('>>>> regpgid: ' . $regpgid . ' -> ' . $newregpgid);
             }
             $c->stash->{'rs'} = undef;
             $c->response->status(200);
+        }
+    } catch {
+        $c->detach( '_dberror', [ shift ] );
+    };
+}
+
+=head2 _pgdelete
+---------------------------------------------
+企画削除実施
+
+=cut
+
+sub _pgdelete :Private {
+    my ( $self, $c ) = @_;
+
+    try {
+        my $rowprof = $c->stash->{'M'}->find( $c->stash->{'id'} );
+        if ( $rowprof->updateflg eq 
+                +( $c->sessionid . $c->session->{'updtic'}) ) {
+            # 削除実施
+            $rowprof->delete(); 
+            $c->response->body('<FORM><H1>削除しました</H1></FORM>');
+        }
+        else {
+            $c->stash->{'rs'} = undef;
+            $c->response->body =
+                '<FORM><H1>削除できませんでした</H1><BR/>' .
+                '他スタッフが変更した可能性があります</FORM>';
         }
     } catch {
         $c->detach( '_dberror', [ shift ] );

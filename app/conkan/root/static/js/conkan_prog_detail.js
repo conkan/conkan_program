@@ -28,7 +28,7 @@ $('#PgEdit').on('show.bs.modal', function (event) {
       $('#dobtn').text('追加');
   }
   $('#dobtn').show();
-  if ( target == "equip" && id ) {
+  if ( target != "regprogram" && id ) {
       $('#dodel').show();
   } else {
       $('#dodel').hide();
