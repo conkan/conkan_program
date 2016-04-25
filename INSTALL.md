@@ -9,6 +9,11 @@
 Azureなどクラウドサービスが提供するmysqlを使用する場合には、
 それぞれのサービスで割り当てられるDB名、管理ユーザ名、パスワードを控えておく
 
+＊管理ユーザに、DBに対する全権限と、全てに対するreload権限を与えること
+
+もちろん、AzureなどのクラウドサービスのVM上に、
+Dockerコンテナとしてmysqlを動かす(手動でデータベース作成)してもよい
+
 手動でデータベースを作成する場合には、以下の処理をmysqlのrootユーザで実行
 (DB名、管理ユーザ名、パスワードは、任意の値)
 
@@ -70,12 +75,59 @@ $> git clone git://github.com/conkan/conkan_program <Dockerホーム>
 
 以下、展開したディレクトリを<Dockerホーム>と表記する
 
+1. 稼働サーバの設定ファイル展開
+
+<Dockerホーム>/baseconf/ 下に、
+稼働サーバで使用する設定ファイルが存在するので、個々に配置する。
+
+<Dockerホーム>/baseconf/base/HOME 下のものは、常時配置
+    _bashrc                 =>  ~/.bashrc   (0644)
+    _cshrc                  =>  ~/.cshrc    (0644)
+    _my.cnf                 =>  ~/.my.cnf   (0644)
+    _tcshrc                 =>  ~/.tcshrc   (0644)
+    _vimrc                  =>  ~/.vimrc    (0644)
+
+<Dockerホーム>/baseconf/base/OPTBIN 下のものは、常時配置
+    docker-enter            =>  /opt/bin/docker-enter   (755)
+
+<Dockerホーム>/baseconf/conkan/SYSTEM 下のものは、systemd利用時に配置
+  ※coreOS上で動かす場合必須
+    conkan.service          =>  /etc/systemd/system/conkan.service
+    conkandbbackup.service  =>  /etc/systemd/system/conkandbbackup.service
+    conkandbbackup.timer    =>  /etc/systemd/system/conkandbbackup.timer
+    conkanlogrotate.service =>  /etc/systemd/system/conkanlogrotate.service
+    conkanlogrotate.timer   =>  /etc/systemd/system/conkanlogrotate.timer
+
+systemd利用開始処理として、以下のコマンドを実施
+
+稼働サーバ > sudo systemctl enable conkan.service
+稼働サーバ > sudo systemctl start conkan.service
+稼働サーバ > sudo systemctl start conkandbbackup.timer
+稼働サーバ > sudo systemctl start conkanlogrotate.timer
+
+※ 何らかの理由で設定ファイル(service, timer)を書き換えたら、
+    稼働サーバ > sudo systemctl daemon-reload
+を実施
+
+1.1 Docker利用TIPS
+
+ - 一般ユーザでdockerを利用可能にする方法
+
+    dockerグループに対象ユーザを追加しておく
+
+    稼働サーバ > sudo vigr
+    稼働サーバ > sudo vigr -s
+
+ - dockerの動作ログ参照方法
+
+    稼働サーバ > sudo journalctl -u docker
+
 1. サーバ証明書の生成
 
 <稼働サーバ>で実施
 
-docker > cd <Dockerホーム>
-docker > sudo ./cert.sh <conkanトップURL>
+稼働サーバ > cd <Dockerホーム>
+稼働サーバ > sudo ./cert.sh <conkanトップURLのFQDN>
 
 ここで生成したサーバ証明書は、dockerコンテナ起動時(nginx起動時)に読み込む
 
@@ -83,32 +135,28 @@ docker > sudo ./cert.sh <conkanトップURL>
 
 <稼働サーバ>で実施
 
-docker > cd <Dockerホーム>/app/conkan
-docker > cp conkan.yml_default conkan.yml
+稼働サーバ > cd <Dockerホーム>/app/conkan
+稼働サーバ > cp conkan.yml_default conkan.yml
 
 1. dockerイメージの取得
 
 <稼働サーバ>で実施
 
-docker > docker pull srem/conkan
+稼働サーバ > docker pull srem/conkan
 
 1. dockerコンテナの起動
 
 <稼働サーバ>で実施
 
-docker > cd <Dockerホーム>
-docker > ./run.sh product
+稼働サーバ > cd <Dockerホーム>
+稼働サーバ > ./run.sh product
 
 引数 product を指定しなかった場合、外部(The Internet)からのconkanへのアクセスポートは
   HTTP  30080
   HTTPS 30443
 となるので注意
 
-dockerコンテナの起動により、nginx,conkan自体,cron処理も自動的に起動する。
-    cron処理に含まれているのは、
-        - DBバックアップ (conkanのDB専用処理)
-        - ログローテート (nginxとconkanのログ)
-    の2つの処理である。
+dockerコンテナの起動により、nginx,conkan自体も自動的に起動する。
 
 conkan初期化処理
 ====

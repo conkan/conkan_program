@@ -7,26 +7,25 @@
 <meta name="description" content="conkan Program List">
 <meta name="author" content="Studio REM">
 <title>Conkan ProgramList</title>
-[%- SET useWijGrid = 1 %]
-[% PROCESS 'ttwijgethead.tt' -%]
-</head>
-[%- SET self_li_id = 'program_list' %]
-[% PROCESS 'tthead.tt' %]
-<div class="container" ng-app="wijmo">
-  [%- SET allprg = 1 %]
-  <div class="well" id="gridlist" ng-controller="MyController">
-    [% PROCESS 'ttpglist.tt' -%]
-    <div id="pgAddDiv">
-    [%- IF cuRole == 'ROOT' %]
-      <button type="button" class="btn btn-primary"
-              data-toggle="modal" data-target="#addProgram">
-        追加
-      </button>
-    [% END -%]
+[%- SET self_li_id = 'program_list' -%]
+[%- SET useUiGrid  = 1 -%]
+[%- PROCESS 'tthead.tt' -%]
+<div class="container" ng-app="conkanProgList">
+  <div class="well" id="gridlist" ng-controller="progListController">
+    <div id="proglist" ui-grid="proggrid" class="grid" ui-grid-resize-columns>
     </div>
   </div> <!-- End of well gridlist -->
-</div> <!-- End of container wijmo -->
-<!-- Modal add -->
+  [%- PROCESS 'T_httpget_result.tt' -%]
+  <div id="pgAddDiv">
+  [%- IF cuRole == 'ROOT' %]
+    <button type="button" class="btn btn-primary"
+            data-toggle="modal" data-target="#addProgram">
+      追加
+    </button>
+  [% END -%]
+  </div>
+</div> <!-- End of container ng-app "conkanProgList" -->
+<!-- 企画追加モーダル -->
 <div class="modal fade" id="addProgram" tabindex="-1" role="dialog" aria-labelledby="addProgramLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -50,7 +49,8 @@
     </div>
   </div>
 </div>
-[% PROCESS 'tttail.tt' %]
+[%- PROCESS 'tttail.tt' -%]
+<script type="text/javascript">var allprg=true;</script>
 <script type="text/javascript" src="/static/js/conkan_prog_list.js"></script>
 </body>
 </html>

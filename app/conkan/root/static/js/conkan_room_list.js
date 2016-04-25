@@ -52,3 +52,80 @@ $('#dodel').click(function(event) {
   $('#dodel').hide();
   $(content).load(roomid + '/del/ FORM', data );
 } );
+
+// conkanRoomListモジュールの生成(グローバル変数)
+var ConkanAppModule = angular.module('conkanRoomList',
+    ['ui.grid', 'ui.grid.resizeColumns', 'ui.bootstrap'] );
+
+// 部屋リストコントローラ
+ConkanAppModule.controller( 'roomListController',
+    [ '$scope', '$sce', '$http', '$uibModal',
+        function( $scope, $sce, $http, $uibModal ) {
+            $scope.__getEditbtn = function( rmdate, roomid ) {
+                var cont = uiGetEditbtn( rmdate, '#editRoom',
+                        [ { 'key' : 'whatever', 'val' : roomid },
+                          { 'key' : 'rmcol', 'val' : rmdate } ] );
+                var wkstr = $sce.trustAsHtml( cont );
+                return wkstr;
+            };
+            $scope.roomgrid = {
+                enableFiltering: false,
+                enableSorting: true,
+                treeRowHeaderAlwaysVisible: false,
+                enableColumnResizing: true,
+                enableGridMenu: false,
+            };
+
+            $scope.roomgrid.columnDefs = [
+                { name : '部屋名', field: 'name',
+                    headerCellClass: 'gridheader',
+                    width: "24%",
+                    cellClass: function(grid, row)
+                        { return uiGetCellCls(row.entity.rmdate); },
+                    enableHiding: false,
+                },
+                { name : '部屋番号', field: 'roomno',
+                    headerCellClass: 'gridheader',
+                    width: "16%",
+                    cellClass: function(grid, row)
+                        { return uiGetCellCls(row.entity.rmdate); },
+                    enableHiding: false,
+                },
+                { name : '形式', field: 'type',
+                    headerCellClass: 'gridheader',
+                    width: "24%",
+                    cellClass: function(grid, row)
+                        { return uiGetCellCls(row.entity.rmdate); },
+                    enableHiding: false,
+                },
+                { name : '面積', field: 'size',
+                    headerCellClass: 'gridheader',
+                    width: "16%",
+                    cellClass: function(grid, row)
+                        { return uiGetCellCls(row.entity.rmdate); },
+                    enableHiding: false,
+                },
+                { name : '', field: 'roomid',
+                    headerCellClass: 'gridheader nogridmenu',
+                    cellClass: function(grid, row)
+                        { return uiGetCellCls(row.entity.rmdate); },
+                    enableSorting: false,
+                    enableHiding: false,
+                    cellTemplate: '<div class="gridcelbtn"><span ng-bind-html="grid.appScope.__getEditbtn(row.entity.rmdate, row.entity.roomid)"></span></div>'
+                },
+            ];
+            $http.get('/config/room/listget')
+            .success(function(data) {
+                $scope.roomgrid.data = data.json;
+            })
+            .error(function(data) {
+                var modalinstance = $uibModal.open(
+                    { templateUrl : 'T_httpget_fail' }
+                );
+                modalinstance.result.then( function() {} );
+            });
+        }
+    ]
+);
+
+// -- EOF --

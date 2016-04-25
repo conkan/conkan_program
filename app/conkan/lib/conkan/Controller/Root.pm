@@ -7,7 +7,7 @@ use namespace::autoclean;
 use DBI;
 use Try::Tiny;
 use String::Random qw/ random_string /;
-
+use namespace::autoclean;
 use Data::Dumper;
 use Encode;
 use conkan::Schema;
@@ -41,7 +41,11 @@ login処理と初期設定のみ組み込み。それ以外は別のコントロ
 sub auto :Private {
     my ( $self, $c ) = @_;
 
-    $c->log->info(localtime() . ' アクション内部パス:[' . $c->action->reverse . '][' . $c->request->method . ']' );
+    $c->log->info(localtime()
+        . ' アクション内部パス:[' . $c->action->reverse . ']['
+        . $c->request->method . '] userid :' 
+        . +( $c->user_exists ?  $c->user->get('staffid') : 'notlogin' )
+        . ']' );
     # 初期化済判断
     unless (exists($c->config->{inited})) {
         $c->log->info(localtime() . ' 未初期化');
@@ -57,7 +61,6 @@ sub auto :Private {
     }
     else {
         # DBスキーマアップデート
-        $c->log->info( localtime() . ' Check DB Update');
         my $coninfo = $c->config->{'Model::ConkanDB'}->{connect_info};
         my $schema = conkan::Schema->connect(
             $coninfo->{'dsn'}, $coninfo->{'user'}, $coninfo->{'password'},
@@ -91,7 +94,7 @@ sub auto :Private {
     }
     # 強制login処理
     unless ( $c->user_exists ) {
-        $c->log->info( localtime() . ' 強制login' );
+        $c->log->info( localtime() . ' force login' );
         $c->visit( '/login' );
     }
     return 1;
@@ -136,8 +139,8 @@ sub default :Path {
               : ($action eq 'config/cast/list')       ? 'config_cast'
               : ($action eq 'config/equip/list')      ? 'config_equip'
               : 'mypage';
-    $c->log->debug('>>>' . localtime() . ' action : [' . $action . ']');
-    $c->log->debug('>>>' . localtime() . ' liid   : [' . $liid   . ']');
+    $c->log->debug('>>> ' . localtime() . ' action : [' . $action . ']');
+    $c->log->debug('>>> ' . localtime() . ' liid   : [' . $liid   . ']');
     $c->response->status(404);
     $c->stash->{self_li_id} = $liid;
     $c->stash->{template} = 'underconstract.tt';
@@ -167,7 +170,7 @@ sub login :Local {
     # (bodyparam->{init_role}は、initialprocessでのみ設定)
     my $init_role = $c->session->{init_role} ||
                     $c->request->body_params->{init_role};
-    $c->delete_session('login');
+    $c->delete_session('login') if ( $c->request->method eq 'POST' );
     $c->session->{init_role} = $init_role;
     my @r = $c->model('ConkanDB::PgStaff')->search({account=>{'!='=>'admin'}});
     if ( scalar @r ) {
@@ -186,6 +189,7 @@ sub login :Local {
                 $c->session->{init_role} = undef;
             }
             if ( $c->user->get('passwd') && !$c->user->get('rmdate') ) {
+                __PACKAGE__->LoginLogging( $c );
                 if ( $c->action->reverse eq 'login' ) {
                     $c->response->redirect( '/mypage' );
                 }
@@ -198,6 +202,55 @@ sub login :Local {
     else {
         $c->error('Fatal access at '. scalar localtime );
     }
+}
+
+=head2 LoginLogging
+                
+ログイン履歴保存
+
+スタッフテーブルの最終ログイン日時更新 & ログイン履歴レコード追加
+
+=cut
+
+sub LoginLogging {
+    my ( $self,
+         $c,            # コンテキスト
+       ) = @_;
+
+    try {
+        my $staffid = $c->user->get('staffid');
+        my $rowstaff = $c->model('ConkanDB::PgStaff')->find($staffid);
+        $rowstaff->update(
+            { 
+                'lastlogin' =>  \'NOW()',
+            },
+        );
+        $rowstaff = $c->model('ConkanDB::PgStaff')->find($staffid);
+        my $logintime = $rowstaff->lastlogin();
+        $c->model('ConkanDB::LoginLog')->create(
+            {
+                'staffid'       => $staffid,
+                'login_date'    => $logintime,
+            },
+        );
+    } catch {
+        $c->detach( '_dberror', [ shift ] );
+    };
+}
+
+=head2 _dberror
+
+DBエラー表示
+
+=cut
+
+sub _dberror :Private {
+    my ( $self, $c, $e) = @_; 
+    $c->log->error('>>> ' . localtime() . ' dbexp : ' . Dumper($e) );
+    $c->clear_errors();
+    my $body = $c->response->body() || Dumper( $e );
+    $c->response->body('<FORM>更新失敗<br/><pre>' . $body . '</pre></FORM>');
+    $c->response->status(200);
 }
 
 =head2 logout
@@ -351,8 +404,9 @@ sub _doInitialProc :Private {
                 dsn      => $dsn,
                 user     => $dbus,
                 password => $dbpw,
+                AutoCommit => q{1},
                 mysql_enable_utf8 => 1,
-                on_connect_do => ["SET NAMES utf8"],
+                on_connect_do => ["SET NAMES utf8", "SET time_zone='+09:00'", ],
             };
 
         # conkan.ymlを書き出す(必要な物だけ)

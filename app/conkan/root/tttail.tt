@@ -1,5 +1,5 @@
 <!-- #Region "tttail.tt" -->
-[% IF 0 %]
+[%- IF 0 -%]
   <HR/>
   [%- USE dumper(indent=1) -%]
   <pre>
@@ -7,24 +7,26 @@
   acname  [% acname %]
   updstaff [% updstaff %]
   addstaff [% addstaff %]
+  self_li_id [% self_li_id %]
   [% dumper.dump(c.user) %]
   </pre>
-[% END %]
+[%- END -%]
+[%- IF 0 -%]
+<script type="text/javascript">
+  console.log( 'self_li_id:[% self_li_id -%]' );
+</script>
+[%- END -%]
 <script type="text/javascript">
   // ナビのタブ アクティベイト
   $(document).ready(function() {
-    $('#[%- self_li_id | html -%]').addClass('active');
-    $(document.body).css('padding-top', $('#navbar').height()+30 );
-    [%- IF useWijGrid %]
-    wijGridResize();
-    [%- END %]
+    $('#[%- self_li_id -%]').addClass('active');
     $(window).resize();
   });
   // ナビのリサイズでBody開始位置を変える
   $(window).resize(function() {
     $(document.body).css('padding-top', $('#navbar').height()+30 );
-    [%- IF useWijGrid %]
-    wijGridResize();
+    [%- IF useUiGrid %]
+    uiGridResize();
     [%- END %]
   });
 </script>

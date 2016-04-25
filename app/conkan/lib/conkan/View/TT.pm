@@ -11,6 +11,8 @@ __PACKAGE__->config(
     TEMPLATE_EXTENSION => '.tt',
     ENCODING   => 'utf8',
     render_die => 1,
+    COMPILE_EXT => '.ttc',
+    COMPILE_DIR => './ttctmp',
 );
 
 =head1 NAME

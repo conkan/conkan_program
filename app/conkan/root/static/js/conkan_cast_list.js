@@ -27,3 +27,74 @@ $('#dobtn').click(function(event) {
   $('#dobtn').hide();
   $(content).load(castid + '/edit/ FORM', data );
 } );
+
+// conkanCastListモジュールの生成(グローバル変数)
+var ConkanAppModule = angular.module('conkanCastList',
+    ['ui.grid', 'ui.grid.resizeColumns', 'ui.bootstrap'] );
+
+// 出演者リストコントローラ
+ConkanAppModule.controller( 'castListController',
+    [ '$scope', '$sce', '$http', '$uibModal',
+        function( $scope, $sce, $http, $uibModal ) {
+            $scope.castgrid = {
+                enableFiltering: false,
+                enableSorting: true,
+                treeRowHeaderAlwaysVisible: false,
+                enableColumnResizing: true,
+                enableGridMenu: false,
+            };
+
+            $scope.castgrid.columnDefs = [
+                { name : '氏名', field: 'name',
+                    headerCellClass: 'gridheader',
+                    width: "16%",
+                    cellClass: 'ui-grid-vcenter',
+                    enableHiding: false,
+                },
+                { name : 'フリガナ', field: 'namef',
+                    headerCellClass: 'gridheader',
+                    width: "16%",
+                    cellClass: 'ui-grid-vcenter',
+                    enableHiding: false,
+                },
+                { name : 'コンタクトステータス', field: 'status',
+                    headerCellClass: 'gridheader',
+                    width: "24%",
+                    cellClass: 'ui-grid-vcenter',
+                    enableHiding: false,
+                },
+                { name : '補足(連絡先)', field: 'memo',
+                    headerCellClass: 'gridheader',
+                    width: "16%",
+                    cellClass: 'ui-grid-vcenter',
+                    enableHiding: false,
+                },
+                { name : '補足(制限事項)', field: 'restdate',
+                    headerCellClass: 'gridheader',
+                    width: "16%",
+                    cellClass: 'ui-grid-vcenter',
+                    enableHiding: false,
+                },
+                { name : '', field: 'castid',
+                    headerCellClass: 'gridheader nogridmenu',
+                    cellClass: 'ui-grid-vcenter',
+                    enableSorting: false,
+                    enableHiding: false,
+                    cellTemplate: '<div class="gridcelbtn"><button type="button" class="btn btn-xs btn-primary" data-toggle="modal" data-target="#editCast" data-whatever="{{COL_FIELD}}">編集</button></div>',
+                },
+            ];
+            $http.get('/config/cast/listget')
+            .success(function(data) {
+                $scope.castgrid.data = data.json;
+            })
+            .error(function(data) {
+                var modalinstance = $uibModal.open(
+                    { templateUrl : 'T_httpget_fail' }
+                );
+                modalinstance.result.then( function() {} );
+            });
+        }
+    ]
+);
+
+// -- EOF --

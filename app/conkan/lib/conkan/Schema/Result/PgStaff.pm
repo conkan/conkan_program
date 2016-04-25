@@ -109,6 +109,12 @@ __PACKAGE__->table("pg_staff");
   data_type: 'text'
   is_nullable: 1
 
+=head2 lastlogin
+
+  data_type: 'datetime'
+  datetime_undef_if_invalid: 1
+  is_nullable: 1
+
 =head2 updateflg
 
   data_type: 'varchar'
@@ -157,6 +163,12 @@ __PACKAGE__->add_columns(
   { data_type => "text", is_nullable => 1 },
   "otheruid",
   { data_type => "text", is_nullable => 1 },
+  "lastlogin",
+  {
+    data_type => "datetime",
+    datetime_undef_if_invalid => 1,
+    is_nullable => 1,
+  },
   "updateflg",
   { data_type => "varchar", is_nullable => 1, size => 64 },
   "rmdate",
@@ -195,6 +207,21 @@ __PACKAGE__->add_unique_constraint("account_UNIQUE", ["account"]);
 
 =head1 RELATIONS
 
+=head2 login_logs
+
+Type: has_many
+
+Related object: L<conkan::Schema::Result::LoginLog>
+
+=cut
+
+__PACKAGE__->has_many(
+  "login_logs",
+  "conkan::Schema::Result::LoginLog",
+  { "foreign.staffid" => "self.staffid" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
 =head2 pg_programs
 
 Type: has_many
@@ -226,8 +253,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-04-25 21:37:17
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:lhhFuCQqo4UN7gqRSNUGzA
+# Created by DBIx::Class::Schema::Loader v0.07043 @ 2016-02-26 20:09:58
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:CXwG5gMwdfWyrSf24d968g
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

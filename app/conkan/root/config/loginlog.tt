@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="conkan login log">
+<meta name="author" content="Studio REM">
+<title>Conkan Login Log</title>
+[%- SET self_li_id = 'config_staff' -%]
+[%- SET useUiGrid  = 1 -%]
+[%- PROCESS 'tthead.tt' -%]
+<div class="container" style="max-width:600px;" ng-app="conkanLoginLog">
+  <div class="well" id="gridlist" ng-controller="loginLogController">
+    <div id="loginlog" ui-grid="lloggrid" class="grid" ui-grid-resize-columns>
+    </div>
+  </div> <!-- End of well gridlist -->
+  <div id="pgAddDiv">
+    <a href="/config/staff/list" type="button" class="btn btn-primary">
+      スタッフ管理
+    </a>
+  </div>
+</div> <!-- End of container ng-app "conkanLoginLog" -->
+[%- PROCESS 'tttail.tt' -%]
+<script type="text/javascript" src="/static/js/conkan_loginlog.js"></script>
+</body>
+</html>

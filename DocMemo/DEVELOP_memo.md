@@ -20,7 +20,7 @@ conkanをdeployしたサーバで、conkan::Schema を含むモデルクラス�
 
 ````
 $> cd [conkan_root]
-$> ./script/conkan_create.pl model ConkanDB DBIC::Schema conkan::Schema create=static dbi:mysql:conkan:[DBサーバ] [管理ユーザ名] [管理パスワード] AutoCommit=1 on_connect_do='["SET NAMES utf8"]'
+$> ./script/conkan_create.pl model ConkanDB DBIC::Schema conkan::Schema create=static dbi:mysql:conkan:[DBサーバ] [管理ユーザ名] [管理パスワード] AutoCommit=1 mysql_enable_utf8=1 on_connect_do='["SET NAMES utf8", "SET time_zone='"'+09:00'"'"]'
 ````
 モデルクラス作成(更新)後、[conkan_root]/lib/conkan/Schema.pm の$VERSIONの値を
 増やすのを忘れないこと

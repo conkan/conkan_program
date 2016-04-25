@@ -1,0 +1,10 @@
+[Unit]
+Description=conkan
+After=docker.service
+Requires=docker.service
+
+[Service]
+ExecStart=/usr/bin/docker start conkan
+
+[Install]
+WantedBy=multi-user.target

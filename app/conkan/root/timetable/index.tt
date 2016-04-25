@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="conkan profile">
+<meta name="author" content="Studio REM">
+<title>Conkan Timetable</title>
+[%- SET self_li_id = 'timetable' -%]
+[%- SET useUiGrid  = 1 -%]
+[%- PROCESS 'tthead.tt' -%]
+[%- SET editable = 0;
+IF cuRole == 'ROOT' || cuRole == 'PG';
+  SET editable = 1;
+END -%]
+<link rel="stylesheet" href="/static/css/conkan-timetable.css" />
+<div class="container" ng-app="conkanTimeTable">
+  <div class="row" id="timetable_up">
+    <div id="unset_pglist_wrap" class="col-sm-2">
+      <!-- Left: 場所/時刻 未設定企画一覧 -->
+      <dl ng-controller="unsetlistController">
+        <dt ng-repeat="prg in unsetprglist">
+          <button class="btn primary prgcell" ng-click="unsetclick(prg.pgid)">
+            <p ng-cloak>{{prg.regpgid}}({{prg.subno}}):{{prg.sname}}</p>
+          </button>
+        </dt>
+      </dl>
+    </div>
+    <div id="timetable_wrap" class="col-sm-10" ng-controller="timetableController">
+      <div class="row" id="roomcastsel">
+          <div class="col-sm-6"></div>
+          <div class="showbtnon showbtn col-sm-3" id="roombtn" ng-click="showbyroom()">部屋別</div>
+          <div class="showbtn col-sm-3" id="castbtn" ng-click="showbycast()">出演者別</div>
+      </div>
+      <!-- Main: タイムテーブル表示: 部屋別 -->
+      <div id="timetable_room" ui-grid="ttgridbyroom" class="grid" ui-grid-resize-columns ui-grid-pinning ui-grid-grouping>
+      </div>
+      <!-- Main: タイムテーブル表示: 出演者別 -->
+      <div id="timetable_cast" ui-grid="ttgridbycast" class="grid" ui-grid-resize-columns ui-grid-pinning ui-grid-grouping>
+      </div>
+    </div>
+  </div> <!-- End of timetable_up -->
+  <div class="row" id="timetable_down">
+    <div id="timetable_edit_div" ng-controller="timeformController">
+      <!-- Bottom: 場所/時刻設定フォーム -->
+      <form name="timetable_edit_form" id="timetable_edit_form" novalidate>
+        <table class="table table-bordered table-condensed">
+          <colgroup>
+            <col class="col-sm-1">
+            <col class="col-sm-2">
+            <col class="col-sm-3">
+            <col class="col-sm-1">
+            <col class="col-sm-1">
+            <col class="col-sm-1">
+            <col class="col-sm-3">
+          </colgroup>
+          <tbody>
+            <tr>
+              <input type="hidden" ng-model="current.pgid">
+            </tr>
+            <tr>
+              <td colspan="1"></td>
+              <td colspan="5" id="valerr"></td>
+              <td style="text-align: center">
+                <div ng-form method="GET" action="/timetable/csvdownload">
+                  <button type="submit" class="btn" id="csvdlbtn">
+                    CSVダウンロード
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <p class="prgname" ng-cloak>{{current.regpgid}}{{current.subno}}</p>
+              </td>
+              <th style="text-align: right">企画名</th>
+              <th colspan="3"><p class="prgname" ng-cloak>
+                <a href="/timetable/detail/{{current.pgid}}">{{current.name}}</a>
+              </p></th>
+              <td colspan="2">
+                <p class="prgname" ng-cloak>{{current.sname}}</p>
+              </td>
+            </tr>
+            <tr>
+              <th style="text-align: right">日時1</th>
+              <td>
+                <select class="col-sm-12" name="dh1date" ng-model="current.date1"
+                  ng-options="i for i in conf.dates"></select>
+              </td>
+              <td>
+                <select class="col-sm-2" name="dh1date" ng-model="current.shour1"
+                  ng-options="i for i in conf.hours1"></select>
+                <select class="col-sm-2" name="dh1date" ng-model="current.smin1"
+                  ng-options="i for i in conf.mins"></select>
+                <div align="center" class="col-sm-1"> - </div>
+                <select class="col-sm-2" name="dh1date" ng-model="current.ehour1"
+                  ng-options="i for i in conf.hours1"></select>
+                <select class="col-sm-2" name="dh1date" ng-model="current.emin1"
+                  ng-options="i for i in conf.mins"></select>
+              </td>
+              <th style="text-align: right">日時2</th>
+              <td colspan="2">
+                <select class="col-sm-12" name="dh2date" ng-model="current.date2"
+                  ng-options="i for i in conf.dates"></select>
+              </td>
+              <td>
+                <select class="col-sm-2" name="dh2date" ng-model="current.shour2"
+                  ng-options="i for i in conf.hours2"></select>
+                <select class="col-sm-2" name="dh2date" ng-model="current.smin2"
+                  ng-options="i for i in conf.mins"></select>
+                <div align="center" class="col-sm-1"> - </div>
+                <select class="col-sm-2" name="dh2date" ng-model="current.ehour2"
+                  ng-options="i for i in conf.hours2"></select>
+                <select class="col-sm-2" name="dh2date" ng-model="current.emin2"
+                  ng-options="i for i in conf.mins"></select>
+              </td>
+            </tr>
+            <tr>
+              <th style="text-align: right">場所</th>
+              <td colspan="2">
+                <select class="col-sm-12" ng-model="current.roomid"
+                  ng-options="i.id as i.val for i in conf.roomlist"></select>
+              </td>
+              <th style="text-align: right" colspan="2">実行ステータス</th>
+              <td>
+                <select class="col-sm-12" ng-model="current.status"
+                  ng-options="i for i in conf.status"></select>
+              </td>
+              <td style="text-align: center">
+                [%- IF editable %]
+                  <button type="submit" class="btn" id="applybtn"
+                    ng-disabled="timetable_edit_form.$invalid || timetable_edit_form.$pristine"
+                    ng-click="doApply()">
+                    反映
+                  </button>
+                [% END %]
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </form> <!-- End of timetable_edit_form -->
+    </div> <!-- End of timetable_edit_div -->
+  </div> <!-- End of timetable_down -->
+  <!-- 各コントローラが使う値設定サービス(ttで初期化) -->
+  [%- PROCESS 'tttimeselval.tt' -%]
+  <!-- 更新結果表示用モーダル -->
+  [%- PROCESS 'T_httpget_result.tt' -%]
+</div> <!-- End of container ng-app "conkanTimeTable" -->
+[%- PROCESS 'tttail.tt' -%]
+<script type="text/javascript" src="/static/js/conkan_timetable.js"></script>
+</body>
+</html>
+

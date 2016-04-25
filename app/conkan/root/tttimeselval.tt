@@ -1,0 +1,64 @@
+[%- # 本当はこれらはサーバに問い合わせて得たほうがいいのかもしれない -%]
+[%- # そうすれば、モジュールの生成もjsに持っていける -%]
+<!-- # Region tttimeselval.tt -->
+<script type="text/javascript">
+// conkanTimeTableモジュールの生成(グローバル変数)
+var ConkanAppModule = angular.module('conkanTimeTable',
+        ['ui.grid', 'ui.grid.grouping', 'ui.grid.resizeColumns', 'ui.grid.pinning', 'ui.bootstrap'] );
+
+// 企画データ
+ConkanAppModule.value( 'pglistValue', {
+    // タイムテーブルガントチャート表示用固定値
+    ganttConst : {
+        ganttHeader     : "[% syscon.gantt_header %]",
+        ganttBackGrid   : "[% syscon.gantt_back_grid %]",
+        maxcolmnum      : [% syscon.gantt_colmnum %],
+        scale_hash      : [% syscon.gantt_scale_str %],
+        color_hash      : [% syscon.gantt_color_str %],
+        shift_hour      : [% syscon.shift_hour %],
+        cell_width      : 24,
+            // conkan-timetable.css:.ganttCell.widthと同値にすること
+    },
+    // 未設定企画リスト
+    unsetprglist : [
+        [%- FOREACH prg = unsetProgram %]
+            {
+                regpgid : '[% prg.regpgid | format('%04d') %]',
+                subno   : '[% prg.subno | format('%01d') %]',
+                sname   : '[% prg.sname | xml %]',
+                pgid    : '[% prg.pgid %]',
+            },
+        [%- END %]
+    ],
+    // 部屋別企画リスト
+    roomprglist : [
+        [%- FOREACH prg = roomProgram %]
+            {
+                room     : '[% prg.roomno %] [% prg.roomname | xml %]',
+                prgname  : {
+                    name: '[% prg.regpgid | format('%04d') %]([% prg.subno | format('%01d') %]) [% prg.sname | xml %]',
+                    pgid    : '[% prg.pgid %]',
+                },
+                doperiod : '[% prg.doperiod %]',
+                status :   '[% prg.status %]'
+            },
+        [%- END %]
+    ], 
+    // 出演者別企画リスト
+    castprglist : [
+        [%- FOREACH prg = castProgram %]
+            {
+                cast : '[% prg.castid | format('%04d') %] [% prg.castname | xml %]',
+                prgname  : {
+                    name: '[% prg.regpgid | format('%04d') %]([% prg.subno | format('%01d') %]) [% prg.sname | xml %]',
+                    pgid    : '[% prg.pgid %]',
+                },
+                room     : '[% prg.roomno %] [% prg.roomname | xml %]',
+                doperiod : '[% prg.doperiod %]',
+                status :   '[% prg.status %]'
+            },
+        [%- END %]
+    ], 
+});
+</script>
+<!-- # Region tttimeselval.tt -->

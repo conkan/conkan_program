@@ -7,64 +7,24 @@
 <meta name="description" content="conkan equiplist">
 <meta name="author" content="Studio REM">
 <title>Conkan EquipList</title>
-[%- SET useWijGrid = 1 %]
-[% PROCESS 'ttwijgethead.tt' -%]
-</head>
 [%- SET self_li_id = 'config_equip' -%]
+[%- SET useUiGrid  = 1 -%]
 [%- PROCESS 'tthead.tt' -%]
-<div class="container" ng-app="wijmo">
-  <div class="well" id="gridlist" ng-controller="MyController">
-    <wij-grid id="dataGrid" data="list"
-        class="table table-bordered"
-        allow-col-sizing="true"
-        allow-sorting="true"
-        allow-keyboard-navigation="true"
-        ensureColumnsPxWidth="true"
-        highlight-on-hover="false"
->
-      <scrolling-settings
-        mode="vertical"
-        static-row-index="-1"
-      ></scrolling-settings>
-      <columns>
-        <column width="32%" header-text="名称"></column>
-        <column width="24%" header-text="機材番号"></column>
-        <column width="32%" header-text="仕様"></column>
-        <column             header-text=""></column>
-      </columns>
-    </wij-grid>
-    <script type="text/javascript"> <!-- 貼り付けるdataはsrcではなく埋め込み -->
-      function MyController( $scope, $locale ) {
-        $scope.list = [
-          [% FOREACH item = list -%]
-            [%- IF item.rmdate;
-              SET rmcol = "style='background-color:gray;'";
-            ELSE;
-              SET rmcol = "";
-            END -%]
-            [ "<span [% rmcol %]>[% item.name | html %]</span>", "<span [% rmcol %]>[% item.equipno | html %]</span>", "<span [% rmcol %]>[% item.spec | html %]</span>", "<span [% rmcol %]><button type='button' class='btn btn-xs btn-primary'
-              [%- IF rmcol -%]
-                >無効
-              [%- ELSE -%]
-                data-toggle='modal' data-target='#editEquip' data-whatever='[% item.equipid %]' data-rmcol='[% rmcol %]' >編集
-              [%- END -%]
-            </button></span>" ],
-          [% END %]
-            [ "", "", "", "" ]
-        ];
-      }
-    </script>
-    <div id="pgAddDiv">
-      <button type="button" class="btn btn-primary"
-              data-toggle="modal" data-target="#editEquip"
-              data-whatever="0" data-rmcol="">
-        追加
-      </button>
+<div class="container" ng-app="conkanEquipList">
+  <div class="well" id="gridlist" ng-controller="equipListController">
+    <div id="equiplist" ui-grid="equipgrid" class="grid" ui-grid-resize-columns>
     </div>
+  </div> <!-- End of well gridlist -->
+  <div id="pgAddDiv">
+    <button type="button" class="btn btn-primary"
+            data-toggle="modal" data-target="#editEquip"
+            data-whatever="0" data-rmcol="">
+      追加
+    </button>
   </div>
-</div>
-
-<!-- Modal -->
+  [%- PROCESS 'T_httpget_result.tt' -%]
+</div> <!-- End of container ng-app "conkanEquipList" -->
+<!-- 機材詳細モーダル -->
 <div class="modal fade" id="editEquip" tabindex="-1" role="dialog" aria-labelledby="editEquipLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
@@ -83,7 +43,7 @@
     </div>
   </div>
 </div>
-[% PROCESS 'tttail.tt' %]
+[%- PROCESS 'tttail.tt' -%]
 <script type="text/javascript" src="/static/js/conkan_equip_list.js"></script>
 </body>
 </html>

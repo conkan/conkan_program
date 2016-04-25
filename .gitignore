@@ -29,5 +29,5 @@ cybozulive.consumer.sec
 conkan.yml
 app/.ssh/cert*.*
 app/backup/
-app/conkan/sql
 supervise/
+ttctmp/

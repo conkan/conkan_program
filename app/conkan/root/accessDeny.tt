@@ -7,13 +7,12 @@
 <meta name="description" content="conkan access deny">
 <meta name="author" content="Studio REM">
 <title>412 Access Deny</title>
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-</head>
-[% PROCESS 'tthead.tt' %]
+[%- SET useUiGrid  = 0 -%]
+[%- PROCESS 'tthead.tt' -%]
 <div class="container">
   <H1>412 Access Deny</H1>
   アクセスする権限がありません
 </div>
-[% PROCESS 'tttail.tt' %]
+[%- PROCESS 'tttail.tt' -%]
 </body>
 </html>

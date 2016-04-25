@@ -7,18 +7,20 @@
 <meta name="description" content="conkan mypage">
 <meta name="author" content="Studio REM">
 <title>Conkan MyPage</title>
-[%- SET useWijGrid = 1 %]
-[%- PROCESS 'ttwijgethead.tt' -%]
-</head>
-[% SET self_li_id = 'mypage' %]
-[%- SET useWijGrid = 1 %]
-[% PROCESS 'tthead.tt' %]
-<div class="container" ng-app="wijmo">
-  [%- SET allprg = 0 %]
-  <div class="well" id="gridlist" ng-controller="MyController">
-    [%- PROCESS 'ttpglist.tt' -%]
+[%- SET self_li_id = 'mypage' -%]
+[%- SET useUiGrid  = 1 -%]
+[%- PROCESS 'tthead.tt' -%]
+<div class="container" ng-app="conkanProgList">
+  <div class="well" id="gridlist" ng-controller="progListController">
+    <div id="proglist" ui-grid="proggrid" class="grid" ui-grid-resize-columns>
+    </div>
+  </div> <!-- End of well gridlist -->
+  [%- PROCESS 'T_httpget_result.tt' -%]
+  <div id="pgAddDiv">
   </div>
-</div>
-[% PROCESS 'tttail.tt' %]
+</div> <!-- End of container ng-app "conkanProgList" -->
+[%- PROCESS 'tttail.tt' -%]
+<script type="text/javascript">var allprg=false;</script>
+<script type="text/javascript" src="/static/js/conkan_prog_list.js"></script>
 </body>
 </html>

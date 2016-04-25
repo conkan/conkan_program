@@ -7,9 +7,8 @@
 <meta name="description" content="conkan profile">
 <meta name="author" content="Studio REM">
 <title>Conkan Profile</title>
-[% PROCESS 'ttwijgethead.tt' -%]
-</head>
 [%- SET self_li_id = 'mypage_profile' -%]
+[%- SET useUiGrid  = 0 -%]
 [%- PROCESS 'tthead.tt' -%]
 [%- DEFAULT state = 'inputform' -%]
 [%- IF addstaff && state == 'success';
@@ -28,10 +27,10 @@ END -%]
       </div>
     [% END %]
     <FORM method="POST" class="form-horizontal" role="form" action="/mypage/profile" id="profform">
-      [% PROCESS 'ttprofinput.tt' %]
+      [%- PROCESS 'ttprofinput.tt' -%]
       <BR/>
       <div class="form-group">
-        <span class="col-sm-1"></span>
+        <span class="col-sm-4"></span>
         <button type="submit" class="col-sm-2 text-center btn btn-primary btn-large" id="dobtn">
           [%- IF addstaff %]
             登録
@@ -72,7 +71,7 @@ END -%]
     <a class="btn btn-primary btn-large" href="/logout">login</a>
   </div>
 </div>
-[% PROCESS 'tttail.tt' %]
+[%- PROCESS 'tttail.tt' -%]
 <script type="text/javascript"> <!-- TTマクロを含むので、srcではなく埋め込み -->
   // 役割 選択リスト アクティベイト, 有効なdivを表示
   $(document).ready(function() {

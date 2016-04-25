@@ -50,41 +50,6 @@ sub mypage_base : Chained('') : PathPart('mypage') : CaptureArgs(0) {
 =cut
 sub mypage_list : Chained('mypage_base') : PathPart('list') : Args(0) {
     my ( $self, $c ) = @_;
-
-    my $uid = $c->user->get('staffid');
-    my $pgmlist =
-        [ $c->model('ConkanDB::PgProgram')->search( { 'me.staffid' => $uid },
-            {
-                'prefetch' => [ 'regpgid', 'staffid' ],
-                'order_by' => { '-asc' => [ 'me.regpgid', 'me.subno' ] },
-            } )
-        ];
-    my $prglist =
-        [ $c->model('ConkanDB::PgProgress')->search( { },
-            {
-                'group_by' => [ 'regpgid' ],
-                'select'   => [ 'regpgid', { MAX => 'repdatetime'} ], 
-                'as'       => [ 'regpgid', 'lastprg' ],
-            } )
-        ];
-    my $lastprgs = {};
-    foreach my $prg ( @$prglist ) {
-        $lastprgs->{$prg->get_column('regpgid')} = $prg->get_column('lastprg');
-    }
-
-    my @list = ();
-    foreach my $pgm ( @$pgmlist ) {
-        my $regpgid = $pgm->regpgid->regpgid();
-        push @list, {
-            'regpgid'       => $regpgid,
-            'pgid'          => $pgm->pgid(),
-            'subno'         => $pgm->subno(),
-            'name'          => $pgm->regpgid->name(),
-            'status'        => $pgm->status(),
-            'repdatetime'   => $lastprgs->{$regpgid},
-        };
-    }
-    $c->stash->{'list'} = \@list;
 }
 
 =head2 mypage/*

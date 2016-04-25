@@ -7,14 +7,13 @@
 <meta name="description" content="conkan under constraction">
 <meta name="author" content="Studio REM">
 <title>Under Constraction</title>
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-</head>
-[% PROCESS 'tthead.tt' %]
+[%- SET useUiGrid  = 0 -%]
+[%- PROCESS 'tthead.tt' -%]
 <div class="container">
   <div class="well">
   <H1>Page not found</H1>(開発中)
   </div>
 </div>
-[% PROCESS 'tttail.tt' %]
+[%- PROCESS 'tttail.tt' -%]
 </body>
 </html>

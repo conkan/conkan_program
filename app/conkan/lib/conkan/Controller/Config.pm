@@ -4,11 +4,11 @@ use utf8;
 use JSON;
 use String::Random qw/ random_string /;
 use Try::Tiny;
-use DateTime;
 use namespace::autoclean;
 use Data::Dumper;
 use YAML;
 use Encode;
+use DateTime;
 
 BEGIN { extends 'Catalyst::Controller'; }
 
@@ -92,11 +92,47 @@ sub setting :Local {
             my $param = $c->request->body_params;
             try {
                 foreach my $pHwk ( @rowconf ) {
-                    next if ( $pHwk->pg_conf_code eq 'updateflg' );
-                    $param->{$pHwk->pg_conf_code} =~ s/\s+$//;
+                    my $code = $pHwk->pg_conf_code;
+                    next if   ( $code eq 'updateflg' )
+                           || ( $code eq 'gantt_header' )
+                           || ( $code eq 'gantt_back_grid' )
+                           || ( $code eq 'gantt_colmnums' )
+                           || ( $code eq 'gantt_scale_str' )
+                           || ( $code eq 'gantt_color_str' );
+                    $param->{$code} =~ s/\s+$//;
                     $pHwk->pg_conf_value( $param->{$pHwk->pg_conf_code} );
                     $pHwk->update();
                 }
+                # タイムテーブルガントチャート表示用固定値算出設定
+                # 日付、開始時刻列、終了時刻列を修正した場合のみでよいが、
+                # めったにないので毎回設定
+                my $ganttStrs = $c->forward('/config/_crGntStr', [ $param, ], );
+                $sysconM->update_or_create( {
+                    pg_conf_code => 'gantt_header',
+                    pg_conf_name => 'gantt_header(cache)',
+                    pg_conf_value => $ganttStrs->[0],
+                });
+                $sysconM->update_or_create( {
+                    pg_conf_code => 'gantt_back_grid',
+                    pg_conf_name => 'gantt_back_grid(cache)',
+                    pg_conf_value => $ganttStrs->[1],
+                });
+                $sysconM->update_or_create( {
+                    pg_conf_code => 'gantt_colmnum',
+                    pg_conf_name => 'gantt_colmnum(cache)',
+                    pg_conf_value => $ganttStrs->[2],
+                });
+                $sysconM->update_or_create( {
+                    pg_conf_code => 'gantt_scale_str',
+                    pg_conf_name => 'gantt_scale_str(cache)',
+                    pg_conf_value => $ganttStrs->[3],
+                });
+                $sysconM->update_or_create( {
+                    pg_conf_code => 'gantt_color_str',
+                    pg_conf_name => 'gantt_color_str(cache)',
+                    pg_conf_value => $ganttStrs->[4],
+                });
+
                 $c->stash->{'state'} = 'success';
             } catch {
                 $c->detach( '_dberror', [ shift ] );
@@ -109,6 +145,131 @@ sub setting :Local {
     }
 }
 
+=head2 _crGntStr
+
+タイムテーブルガントチャート表示用固定値算出
+
+戻り値 固定値配列参照 [0]ヘッダ [1]背景グリッド [2]カラム総数
+              [3]タイムスケール表示用ハッシュ(JSON)
+                    キー: 日付
+                      値: [ 開始時刻(分表示), 終了時刻(分表示), 先頭カラム数,
+                            開始時刻(時), 終了時刻(時) ]
+              [4]ガントバー色ハッシュ(JSON)
+                    キー: 実行ステータス
+                      値: 色コード
+
+=cut
+
+sub _crGntStr :Private {
+    my ( $self, $c, 
+         $param,      # 設定フォームパラメータハッシュ
+       ) = @_;
+
+    my @dates  = @{from_json($param->{'dates'})};
+    my @starts = @{from_json($param->{'start_hours'})};
+    my @ends   = @{from_json($param->{'end_hours'})};
+
+    my $daycnt = scalar(@dates);
+    my @colnum = ();
+    my $maxcolnum = 0;
+
+    my @shours;
+    my $gantt_scale = {};
+    for ( my $cnt=0; $cnt<$daycnt; $cnt++ ) {
+        my @swk = split( /:/, $starts[$cnt] );
+        my @ewk = split( /:/, $ends[$cnt] );
+        $gantt_scale->{$dates[$cnt]} = [ ( ($swk[0] * 60) + $swk[1] ),
+                                         ( ($ewk[0] * 60) + $ewk[1] ),
+                                         $maxcolnum, $swk[0], $ewk[0] ];
+        $ewk[0] += 1 if $ewk[1] > 0;
+        $colnum[$cnt] = $ewk[0] - $swk[0];
+        $shours[$cnt] = $swk[0];
+        $maxcolnum += $colnum[$cnt];
+    }
+
+    my @ganttStrs = ();
+    $ganttStrs[0] = "<table class=ganttHead><tr>";
+    for ( my $cnt=0; $cnt<$daycnt; $cnt++ ) {
+        $ganttStrs[0] .= "<th colspan=$colnum[$cnt]>$dates[$cnt]</th>";
+    }
+    $ganttStrs[0] .= "</tr><tr>";
+    for ( my $cnt=0; $cnt<$daycnt; $cnt++ ) {
+        for ( my $hcnt=0; $hcnt<$colnum[$cnt]; $hcnt++ ) {
+            my $wkhstr = sprintf( '%02d', $shours[$cnt] + $hcnt );
+            $ganttStrs[0] .= "<td class=ganttCell>$wkhstr</td>";
+        }
+    }
+    $ganttStrs[0] .= "</tr></table>";
+
+    $ganttStrs[1] = "<table class=ganttRowBack><tr class=ui-grid-row>";
+    for ( my $cnt=0; $cnt<$daycnt; $cnt++ ) {
+        for ( my $hcnt=0; $hcnt<$colnum[$cnt]; $hcnt++ ) {
+            $ganttStrs[1] .= "<td class=ganttCell></td>";
+        }
+    }
+    $ganttStrs[1] .= "</tr></table>";
+
+    $ganttStrs[2] = $maxcolnum;
+
+    $ganttStrs[3] = to_json($gantt_scale);
+
+    my @status = @{from_json($param->{'pg_status_vals'})};
+    my @colors = @{from_json($param->{'pg_status_color'})};
+    push @status, (""); # 未定分追加
+
+    my $stcnt = scalar(@status);
+    my $gantt_color = {};
+    for ( my $cnt=0; $cnt<$stcnt; $cnt++ ) {
+        $gantt_color->{$status[$cnt]} = $colors[$cnt];
+    }
+    $ganttStrs[4] = to_json($gantt_color);
+
+    return \@ganttStrs;
+}
+
+=head2 confget
+
+confget  : システム設定値取得
+           部屋一覧も取得
+
+=cut
+
+sub confget :Local {
+    my ( $self, $c ) = @_;
+
+    try {
+        my @rowconf = $c->model('ConkanDB::PgSystemConf')->all;
+        my @rowroom = $c->model('ConkanDB::PgRoom')->search(
+                        { },
+                        { 'order_by' => { '-asc' => 'roomid' } }
+                    );
+        my @rowstaff = $c->model('ConkanDB::PgStaff')->search(
+                        { staffid => { '!=' =>  1 } },
+                        { 'order_by' => { '-asc' => 'staffid' } }
+                    );
+        my $data = {};
+        foreach my $row ( @rowconf ) {
+            $data->{$row->pg_conf_code()} = $row->pg_conf_value();
+        }
+
+        my $rl = [ map +{ 'id'  => $_->roomid(),
+                          'val' => $_->roomno() . ' ' . $_->name() },
+                                @rowroom ];
+        my $sl = [ map +{ 'id' => $_->staffid(), 'val' => $_->tname() }, 
+                                @rowstaff ];
+        $data->{'roomlist'} = to_json( $rl );
+        $data->{'stafflist'} = to_json( $sl );
+        $data->{'time_origin'} = $c->config->{'time_origin'};
+        $c->stash->{'json'} = $data;
+        $c->component('View::JSON')->{expose_stash} = undef;
+    } catch {
+        my $e = shift;
+        $c->log->error('confget error ' . localtime() .
+            ' dbexp : ' . Dumper($e) );
+    };
+    $c->forward('conkan::View::JSON');
+}
+
 =head2 staff
 -----------------------------------------------------------------------------
 スタッフ管理 staff_base  : Chainの起点
@@ -117,9 +278,6 @@ sub setting :Local {
 
 sub staff_base : Chained('') : PathPart('config/staff') : CaptureArgs(0) {
     my ( $self, $c ) = @_;
-
-    # staffテーブルに対応したmodelオブジェクト取得
-    $c->stash->{'M'}   = $c->model('ConkanDB::PgStaff');
 }
 
 =head2 staff/list 
@@ -130,11 +288,43 @@ sub staff_base : Chained('') : PathPart('config/staff') : CaptureArgs(0) {
 
 sub staff_list : Chained('staff_base') : PathPart('list') : Args(0) {
     my ( $self, $c ) = @_;
-    $c->stash->{'list'} = [ $c->stash->{M}
-                            ->search( { 'account'  => { '!=' => 'admin' } },
-                                      { 'order_by' => { '-asc' => 'staffid' } } 
-                                    )
-                          ];
+}
+
+=head2 staff/listget
+
+スタッフ管理 staff_listget  : スタッフ一覧取得
+
+=cut
+
+sub staff_listget : Chained('staff_base') : PathPart('listget') : Args(0) {
+    my ( $self, $c ) = @_;
+
+    try {
+        my @data;
+        my $rows = [ $c->model('ConkanDB::PgStaff')->search(
+                        { 'account'  => { '!=' => 'admin' } },
+                        { 'order_by' => { '-asc' => 'staffid' } }
+                    )
+                ];
+        for my $row (@$rows) {
+            my $ll  = $row->lastlogin();
+            my $rm  = $row->rmdate();
+            push ( @data, {
+                'rmdate'   => +( defined( $rm ) ? $rm->strftime('%F %T') : '' ),
+                'name'     => $row->name(),
+                'role'     => $row->role(),
+                'tname'    => $row->tname(),
+                'llogin'   => +( defined( $ll ) ? $ll->strftime('%F %T') : '' ),
+                'staffid'  => $row->staffid(),
+            } );
+        }
+        $c->stash->{'json'} = \@data;
+    } catch {
+        my $e = shift;
+        $c->log->error('staff/listget error ' . localtime() .
+            ' dbexp : ' . Dumper($e) );
+    };
+    $c->forward('conkan::View::JSON');
 }
 
 =head2 staff/*
@@ -146,19 +336,29 @@ sub staff_list : Chained('staff_base') : PathPart('list') : Args(0) {
 sub staff_show : Chained('staff_base') :PathPart('') :CaptureArgs(1) {
     my ( $self, $c, $staffid ) = @_;
     
-    my $rowstaff = $c->stash->{'M'}->find($staffid);
-    $c->session->{'updtic'} = time;
-    $rowstaff->update( { 
-        'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
-    } );
-    $c->stash->{'rs'} = $rowstaff;
-    if ( $rowstaff->otheruid ) {
-        my $cybozu = decode_json( $rowstaff->otheruid );
-        while ( my( $key, $val ) = each( %$cybozu )) {
+    # Staffテーブルに対応したmodelオブジェクト取得
+    $c->stash->{'M'}   = $c->model('ConkanDB::PgStaff');
+
+    try {
+        my $rowstaff = $c->stash->{'M'}->find($staffid);
+        $c->session->{'updtic'} = time;
+        $rowstaff->update( { 
+            'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
+        } );
+        $c->stash->{'rs'} = $rowstaff;
+        if ( $rowstaff->otheruid ) {
+            my $cybozu = decode_json( $rowstaff->otheruid );
+            while ( my( $key, $val ) = each( %$cybozu )) {
             $c->stash->{'rs'}->{$key} = $val;
         }
-    }
-    $c->stash->{'rs'}->{'passwd'} = undef;
+        }
+        $c->stash->{'rs'}->{'passwd'} = undef;
+        $c->stash->{'staffid'} = $staffid;
+    } catch {
+        my $e = shift;
+        $c->log->error('staff/show error ' . localtime() .
+            ' dbexp : ' . Dumper($e) );
+    };
 }
 
 =head2 staff/*
@@ -180,7 +380,7 @@ sub staff_detail : Chained('staff_show') : PathPart('') : Args(0) {
 sub staff_edit : Chained('staff_show') : PathPart('edit') : Args(0) {
     my ( $self, $c ) = @_;
 
-    my $staffid = $c->stash->{'rs'}->staffid;
+    my $staffid = $c->stash->{'staffid'};
     # GETはおそらく直打ちとかなので再度
     if ( $c->request->method eq 'GET' ) {
         $c->go->( '/config/staff/' . $staffid );
@@ -232,7 +432,7 @@ sub staff_edit : Chained('staff_show') : PathPart('edit') : Args(0) {
 
 sub staff_del : Chained('staff_show') : PathPart('del') : Args(0) {
     my ( $self, $c ) = @_;
-    my $staffid = $c->stash->{'rs'}->staffid;
+    my $staffid = $c->stash->{'staffid'};
     # GETはおそらく直打ちとかなので再度
     if ( $c->request->method eq 'GET' ) {
         $c->go->( '/config/staff/' . $staffid );
@@ -250,9 +450,6 @@ sub staff_del : Chained('staff_show') : PathPart('del') : Args(0) {
 
 sub room_base : Chained('') : PathPart('config/room') : CaptureArgs(0) {
     my ( $self, $c ) = @_;
-
-    # roomテーブルに対応したmodelオブジェクト取得
-    $c->stash->{'M'}   = $c->model('ConkanDB::PgRoom');
 }
 
 =head2 room/list 
@@ -263,10 +460,42 @@ sub room_base : Chained('') : PathPart('config/room') : CaptureArgs(0) {
 
 sub room_list : Chained('room_base') : PathPart('list') : Args(0) {
     my ( $self, $c ) = @_;
-    $c->stash->{'list'} = [ $c->stash->{M}
-                            ->search( { },
-                                      { 'order_by' => { '-asc' => 'roomid' } } )
-                          ];
+}
+
+=head2 room/listget
+
+機材管理 room_listget  : 機材一覧取得
+
+=cut
+
+sub room_listget : Chained('room_base') : PathPart('listget') : Args(0) {
+    my ( $self, $c ) = @_;
+
+    try {
+        my @data;
+        my $rows = [ $c->model('ConkanDB::PgRoom')->search(
+                        { },
+                        { 'order_by' => { '-asc' => 'roomid' } }
+                    )
+                ];
+        for my $row (@$rows) {
+            my $rm  = $row->rmdate();
+            push ( @data, {
+                'name'     => $row->name(),
+                'roomno'   => $row->roomno(),
+                'type'     => $row->type(),
+                'size'     => $row->size(),
+                'roomid'   => $row->roomid(),
+                'rmdate'   => +( defined( $rm ) ? $rm->strftime('%F %T') : '' ),
+            } );
+        }
+        $c->stash->{'json'} = \@data;
+    } catch {
+        my $e = shift;
+        $c->log->error('room/listget error ' . localtime() .
+            ' dbexp : ' . Dumper($e) );
+    };
+    $c->forward('conkan::View::JSON');
 }
 
 =head2 room/*
@@ -278,6 +507,9 @@ sub room_list : Chained('room_base') : PathPart('list') : Args(0) {
 sub room_show : Chained('room_base') :PathPart('') :CaptureArgs(1) {
     my ( $self, $c, $roomid ) = @_;
     
+    # roomテーブルに対応したmodelオブジェクト取得
+    $c->stash->{'M'}   = $c->model('ConkanDB::PgRoom');
+
     my $rowroom;
     if ( $roomid != 0 ) {
         $rowroom = $c->stash->{'M'}->find($roomid);
@@ -347,7 +579,7 @@ sub room_edit : Chained('room_show') : PathPart('edit') : Args(0) {
 
 sub room_del : Chained('room_show') : PathPart('del') : Args(0) {
     my ( $self, $c ) = @_;
-    my $roomid = $c->stash->{'rs'}->{'roomid'};
+    my $roomid = $c->stash->{'roomid'};
     # GETはおそらく直打ちとかなので再度
     if ( $c->request->method eq 'GET' ) {
         $c->go->( '/config/room/' . $roomid );
@@ -365,9 +597,6 @@ sub room_del : Chained('room_show') : PathPart('del') : Args(0) {
 
 sub cast_base : Chained('') : PathPart('config/cast') : CaptureArgs(0) {
     my ( $self, $c ) = @_;
-
-    # allcastテーブルに対応したmodelオブジェクト取得
-    $c->stash->{'M'}   = $c->model('ConkanDB::PgAllCast');
 }
 
 =head2 cast/list 
@@ -378,12 +607,42 @@ sub cast_base : Chained('') : PathPart('config/cast') : CaptureArgs(0) {
 
 sub cast_list : Chained('cast_base') : PathPart('list') : Args(0) {
     my ( $self, $c ) = @_;
-    $c->stash->{'list'} = [ $c->stash->{M}
-                            ->search( { },
-                                      { 'order_by' => { '-asc' => 'castid' } } )
-                          ];
 }
 
+=head2 cast/listget
+
+出演者管理 cast_listget  : 出演者一覧取得
+
+=cut
+
+sub cast_listget : Chained('cast_base') : PathPart('listget') : Args(0) {
+    my ( $self, $c ) = @_;
+
+    try {
+        my @data;
+        my $rows = [ $c->model('ConkanDB::PgAllCast')->search(
+                        { },
+                        { 'order_by' => { '-asc' => 'castid' } }
+                    )
+                ];
+        for my $row (@$rows) {
+            push ( @data, {
+                'name'     => $row->name(),
+                'namef'    => $row->namef(),
+                'status'   => $row->status(),
+                'memo'     => $row->memo(),
+                'restdate' => $row->restdate(),
+                'castid'   => $row->castid(),
+            } );
+        }
+        $c->stash->{'json'} = \@data;
+    } catch {
+        my $e = shift;
+        $c->log->error('cast/listget error ' . localtime() .
+            ' dbexp : ' . Dumper($e) );
+    };
+    $c->forward('conkan::View::JSON');
+}
 =head2 cast/*
 
 出演者管理 cast_show  : 出演者情報更新のための表示起点
@@ -393,6 +652,8 @@ sub cast_list : Chained('cast_base') : PathPart('list') : Args(0) {
 sub cast_show : Chained('cast_base') :PathPart('') :CaptureArgs(1) {
     my ( $self, $c, $castid ) = @_;
     
+    # castテーブルに対応したmodelオブジェクト取得
+    $c->stash->{'M'}   = $c->model('ConkanDB::PgAllCast');
     my $rowcast;
     if ( $castid != 0 ) {
         $rowcast = $c->stash->{'M'}->find($castid);
@@ -457,9 +718,6 @@ sub cast_edit : Chained('cast_show') : PathPart('edit') : Args(0) {
 
 sub equip_base : Chained('') : PathPart('config/equip') : CaptureArgs(0) {
     my ( $self, $c ) = @_;
-
-    # equipテーブルに対応したmodelオブジェクト取得
-    $c->stash->{'M'}   = $c->model('ConkanDB::PgAllEquip');
 }
 
 =head2 equip/list 
@@ -470,10 +728,41 @@ sub equip_base : Chained('') : PathPart('config/equip') : CaptureArgs(0) {
 
 sub equip_list : Chained('equip_base') : PathPart('list') : Args(0) {
     my ( $self, $c ) = @_;
-    $c->stash->{'list'} = [ $c->stash->{'M'}
-                            ->search( { },
-                                      { 'order_by' => { '-asc' => 'equipid' } } )
-                          ];
+}
+
+=head2 equip/listget
+
+機材管理 equip_listget  : 機材一覧取得
+
+=cut
+
+sub equip_listget : Chained('equip_base') : PathPart('listget') : Args(0) {
+    my ( $self, $c ) = @_;
+
+    try {
+        my @data;
+        my $rows = [ $c->model('ConkanDB::PgAllEquip')->search(
+                        { },
+                        { 'order_by' => { '-asc' => 'equipid' } }
+                    )
+                ];
+        for my $row (@$rows) {
+            my $rm  = $row->rmdate();
+            push ( @data, {
+                'name'     => $row->name(),
+                'equipno'  => $row->equipno(),
+                'spec'     => $row->spec(),
+                'equipid'  => $row->equipid(),
+                'rmdate'   => +( defined( $rm ) ? $rm->strftime('%F %T') : '' ),
+            } );
+        }
+        $c->stash->{'json'} = \@data;
+    } catch {
+        my $e = shift;
+        $c->log->error('equip/listget error ' . localtime() .
+            ' dbexp : ' . Dumper($e) );
+    };
+    $c->forward('conkan::View::JSON');
 }
 
 =head2 equip/*
@@ -485,6 +774,8 @@ sub equip_list : Chained('equip_base') : PathPart('list') : Args(0) {
 sub equip_show : Chained('equip_base') :PathPart('') :CaptureArgs(1) {
     my ( $self, $c, $equipid ) = @_;
     
+    # equipテーブルに対応したmodelオブジェクト取得
+    $c->stash->{'M'}   = $c->model('ConkanDB::PgAllEquip');
     my $rowequip;
     if ( $equipid != 0 ) {
         $rowequip = $c->stash->{'M'}->find($equipid);
@@ -610,7 +901,7 @@ sub _delete :Private {
     if ( $row->updateflg eq 
             +( $c->sessionid . $c->session->{'updtic'}) ) {
         try {
-            $row->update( { 'rmdate'   => DateTime->now() } );
+            $row->update( { 'rmdate'   => \'NOW()', } );
             $c->response->body('<FORM><H1>削除しました</H1></FORM>');
         } catch {
             $c->detach( '_dberror', [ shift ] );
@@ -623,6 +914,53 @@ sub _delete :Private {
     }
     $c->stash->{'rs'} = undef;
     $c->response->status(200);
+}
+
+=head2 loginlog
+-----------------------------------------------------------------------------
+ログイン履歴表示
+
+=cut
+
+sub loginlog :Local {
+    my ( $self, $c ) = @_;
+}
+
+=head2 loginlogget
+-----------------------------------------------------------------------------
+ログイン履歴取得
+
+=cut
+
+sub loginlogget :Local {
+    my ( $self, $c ) = @_;
+    try {
+        my @data;
+        my $rows = [
+            $c->model('ConkanDB::LoginLog')->search( {},
+                {
+                    'prefetch' => [ 'staffid' ],
+                    'order_by' => { -desc => 'login_date' },
+                }
+            )
+        ];
+        foreach my $row ( @$rows ) {
+            my $login_date = $row->login_date();
+            my $logdatestr = defined( $login_date )
+                    ? $login_date->strftime('%F %T')
+                    : '';
+            push ( @data, {
+                'staffname'  => $row->staffid->name(),
+                'login_date' => $logdatestr,
+            } );
+        }
+        $c->stash->{'json'} = \@data;
+    } catch {
+        my $e = shift;
+        $c->log->error('timetable_get error ' . localtime() .
+            ' dbexp : ' . Dumper($e) );
+    };
+    $c->forward('conkan::View::JSON');
 }
 
 =head2 _dberror
@@ -651,9 +989,9 @@ sub _dberror :Private {
             '</FORM>');
     }
     else {
-        $c->log->error( localtime() . " dbexp : \n" . Dump($e) );
+        $c->log->error( localtime() . " dbexp : \n" . Dumper($e) );
         $c->clear_errors();
-        my $body = $c->response->body() || Dump( $e );
+        my $body = $c->response->body() || Dumper( $e );
         $c->response->body(
             '<FORM>更新失敗<br/><pre>' . $body . '</pre></FORM>');
         $c->response->status(200);

@@ -7,12 +7,11 @@
 <meta name="description" content="conkan setting">
 <meta name="author" content="Studio REM">
 <title>Conkan Setting</title>
-[% PROCESS 'ttwijgethead.tt' -%]
-</head>
 [% SET self_li_id = 'config_conf' %]
-[% PROCESS 'tthead.tt' %]
+[%- SET useUiGrid  = 0 -%]
+[%- PROCESS 'tthead.tt' -%]
 [%- DEFAULT state = 'inputform' -%]
-[% PROCESS 'ttpgupmc.tt' %]
+[%- PROCESS 'ttpgupmc.tt' -%]
 <div class="container">
   <div class="well" id="inputform" style="display:none;">
     <FORM method="POST" class="form-horizontal" role="form" action="/config/setting" id="profform">
@@ -32,6 +31,14 @@
       <div class="form-group">
         <label class="col-sm-3 text-right">[% cnf.pg_status_vals.pg_conf_name %]</label>
         [% pguptextarea( 'pg_status_vals', cnf.pg_status_vals.pg_conf_value, 8 ) %]
+      </div>
+      <div class="form-group">
+        <label class="col-sm-3 text-right">[% cnf.pg_status_color.pg_conf_name %]</label>
+        [% pguptextarea( 'pg_status_color', cnf.pg_status_color.pg_conf_value, 8 ) %]
+      </div>
+      <div class="form-group">
+        <label class="col-sm-3 text-right">[% cnf.pg_active_status.pg_conf_name %]</label>
+        [% pguptextarea( 'pg_active_status', cnf.pg_active_status.pg_conf_value, 8 ) %]
       </div>
       <div class="form-group">
         <label class="col-sm-3 text-right">[% cnf.cast_status_vals.pg_conf_name %]</label>
@@ -62,7 +69,7 @@
     <a class="btn btn-primary btn-large" href="/mypage/list">マイページに戻る</a>
   </div>
 </div>
-[% PROCESS 'tttail.tt' %]
+[%- PROCESS 'tttail.tt' -%]
 <script type="text/javascript"> <!-- TTマクロを使うのでsrcではなく埋め込み -->
   // 有効なdivを表示
   $(document).ready(function() {

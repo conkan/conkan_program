@@ -1,0 +1,7 @@
+[Unit]
+Description=conkan log rotate
+Requires=docker.service
+
+[Service]
+ExecStart=/usr/bin/docker exec conkan /etc/cron.daily/logrotate
+Type=oneshot

@@ -1,0 +1,138 @@
+// ## conkan timetable css
+#timetable_down {
+}
+
+#unset_pglist_wrap {
+    background-color: #ddd;
+    overflow-x: hidden;
+    padding:    0px;
+}
+
+#unset_pglist_wrap a {
+    white-space:    nowrap;
+    padding:    0px;
+}
+
+#timetable_wrap .showbtn {
+    -moz-user-select: none;
+    border-style: ridge;
+    border-color:   black
+    background-color: #F0F0F0;
+    text-align: center;
+    cursor: pointer;
+}
+
+#timetable_wrap .showbtnon {
+    background-color: #C0C0FF;
+}
+
+#timetable_wrap .gridheader {
+    text-align: center;
+}
+
+.prgcell {
+    text-align: left;
+    border: thin ridge #686868;
+    width: 100%;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    height: 30px;
+        /* ui-Gridのデフォルト行高さと同値にすること */
+}
+
+.prgcell p {
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+#timetable_wrap .prgcell {
+    width: 100%;
+}
+
+#timetable_wrap .doperiod {
+    min-width: 480px;
+}
+
+#timetable_room {
+    background: lightgray;
+    position: absolute;
+    visibility: visible;
+}
+
+#timetable_cast {
+    background: lightgray;
+    position: absolute;
+    visibility: hidden;
+}
+
+#unset_pglist_wrap, #timetable_wrap {
+    height: 500px;
+    overflow-y: auto;
+}
+
+#timetable_edit_div {
+    background: yellow;
+}
+
+#timetable_edit_div select {
+    padding: 0px;
+}
+
+#timetable_edit_div table {
+    table-layout: fixed;
+}
+#timetable_edit_div th,
+#timetable_edit_div td {
+    overflow-x: hidden;
+    white-space: nowrap;
+    padding: 0px;
+    vertical-align: middle;
+}
+
+#timetable_edit_div .prgname {
+    margin-bottom: 0px;
+    margin-left: 10px;
+}
+
+.ganttHead th {
+    text-align: center;
+    border: 1px solid gray;
+}
+
+.ganttCell {
+    border: 1px dashed gray;
+    width: 24px;
+        /* tttimeselval.tt:pglistValue.ganttConst.cell_widthと同値にすること */
+}
+
+.ganttRow {
+    height: 100%;
+    position: relative;
+    padding: 0px;
+}
+
+.ganttRowBack {
+    top: 0px;
+    left: 0px;
+    height: 100%;
+}
+
+.ganttBar {
+    height: 15px;
+    opacity: 0.7;
+    position: absolute;
+    top: 10px;
+}
+
+.ui-grid-column-menu-button {
+    display: none;
+}
+
+.grid {
+    height: auto;
+}
+
+#roomcastsel {
+    margin: 0px;
+}
+// ## END of conkan timetable css

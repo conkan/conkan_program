@@ -1,0 +1,19 @@
+" パスのセパレータを変更 (\ -> /)
+set shellslash
+" タブ幅を4に
+set ts=4 sw=4 sts=0
+" タブをスペースに展開する (noexpandtab:展開しない)
+set expandtab
+" テキスト挿入中の自動折り返しを日本語に対応させる
+set formatoptions+=mM
+" 長い行を折り返す (nowrap:折り返さない)
+set wrap
+" 常にステータス行を表示 (詳細は:help laststatus)
+set laststatus=2
+" ステータスラインに表示する項目の指定 - <Function GetStatusEx()> を使用
+set statusline=\ %y\ %{GetStatusEx()}\ %-0.40F%m%r%=<C\ %c\ :\ L\ %l/%L>
+hi Visual term=reverse cterm=reverse ctermbg=7 guifg=Grey guibg=fg
+hi StatusLine cterm=bold ctermbg=blue ctermfg=yellow guibg=gold guifg=blue
+hi clear MatchParen
+
+set cmdheight=1

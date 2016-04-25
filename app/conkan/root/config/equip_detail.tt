@@ -1,4 +1,4 @@
-[% PROCESS 'ttpgupmc.tt' %]
+[%- PROCESS 'ttpgupmc.tt' -%]
 <FORM method="POST" class="form-horizontal" role="form" id="equipform">
   <div style="COLOR:Red;" id="valerr"></div>
   <div class="form-group">

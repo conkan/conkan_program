@@ -7,65 +7,24 @@
 <meta name="description" content="conkan roomlist">
 <meta name="author" content="Studio REM">
 <title>Conkan RoomList</title>
-[%- SET useWijGrid = 1 %]
-[% PROCESS 'ttwijgethead.tt' -%]
-</head>
 [%- SET self_li_id = 'config_room' -%]
+[%- SET useUiGrid  = 1 -%]
 [%- PROCESS 'tthead.tt' -%]
-<div class="container" ng-app="wijmo">
-  <div class="well" id="gridlist" ng-controller="MyController">
-    <wij-grid id="dataGrid" data="list"
-        class="table table-bordered"
-        allow-col-sizing="true"
-        allow-sorting="true"
-        allow-keyboard-navigation="true"
-        ensureColumnsPxWidth="true"
-        highlight-on-hover="false"
->
-      <scrolling-settings
-        mode="vertical"
-        static-row-index="-1"
-      ></scrolling-settings>
-      <columns>
-        <column width="34%" header-text="部屋名"></column>
-        <column width="16%" header-text="部屋番号"></column>
-        <column width="24%" header-text="形式"></column>
-        <column width="16%" header-text="面積(㎡)"></column>
-        <column             header-text=""></column>
-      </columns>
-    </wij-grid>
-    <script type="text/javascript"> <!-- 貼り付けるdataはsrcではなく埋め込み -->
-      function MyController( $scope, $locale ) {
-        $scope.list = [
-          [% FOREACH item = list -%]
-            [%- IF item.rmdate;
-              SET rmcol = "style='background-color:gray;'";
-            ELSE;
-              SET rmcol = "";
-            END -%]
-            [ "<span [% rmcol %]>[% item.name | html %]</span>", "<span [% rmcol %]>[% item.roomno | html %]</span>", "<span [% rmcol %]>[% item.type | html %]</span>", "<span [% rmcol %]>[% item.size | html %]</span>", "<span [% rmcol %]><button type='button' class='btn btn-xs btn-primary'
-              [%- IF rmcol -%]
-                >無効
-              [%- ELSE -%]
-                data-toggle='modal' data-target='#editRoom' data-whatever='[% item.roomid %]' data-rmcol='[% rmcol %]'>編集
-              [%- END -%]
-            </button></span>" ],
-          [% END %]
-           [ "", "", "", "", "" ]
-        ];
-      }
-    </script>
-    <div id="pgAddDiv">
-      <button type="button" class="btn btn-primary"
-              data-toggle="modal" data-target="#editRoom"
-              data-whatever="0" data-rmcol="">
-        追加
-      </button>
+<div class="container" ng-app="conkanRoomList">
+  <div class="well" id="gridlist" ng-controller="roomListController">
+    <div id="roomlist" ui-grid="roomgrid" class="grid" ui-grid-resize-columns>
     </div>
+  </div> <!-- End of well gridlist -->
+  <div id="pgAddDiv">
+    <button type="button" class="btn btn-primary"
+            data-toggle="modal" data-target="#editRoom"
+            data-whatever="0" data-rmcol="">
+      追加
+    </button>
   </div>
-</div>
-
-<!-- Modal -->
+  [%- PROCESS 'T_httpget_result.tt' -%]
+</div> <!-- End of container ng-app "conkanRoomList -->
+<!-- 部屋詳細モーダル -->
 <div class="modal fade" id="editRoom" tabindex="-1" role="dialog" aria-labelledby="editRoomLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
@@ -84,7 +43,7 @@
     </div>
   </div>
 </div>
-[% PROCESS 'tttail.tt' %]
+[%- PROCESS 'tttail.tt' -%]
 <script type="text/javascript" src="/static/js/conkan_room_list.js"></script>
 </body>
 </html>

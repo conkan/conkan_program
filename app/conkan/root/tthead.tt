@@ -1,22 +1,47 @@
 [%- # TT制御パラメータの設定;
-DEFAULT addstaff = 0;
-DEFAULT updstaff = 0;
-SET acname = c.user.get('name');
-IF! acname;
-  SET addstaff = 1;
-  IF updstaff == 1;
-    SET acname = '更新登録';
-  ELSE;
-    SET acname = '新規登録';
+  DEFAULT addstaff = 0;
+  DEFAULT updstaff = 0;
+  SET acname = c.user.get('name');
+  IF! acname;
+    SET addstaff = 1;
+    IF updstaff == 1;
+      SET acname = '更新登録';
+    ELSE;
+      SET acname = '新規登録';
+    END;
   END;
-END;
-SET addroot = 0;
-IF c.session.init_role == 'addroot';
-  SET addroot = 1;
-END;
-DEFAULT self_li_id = 'mypage';
-SET cuRole = c.user.get('role') -%]
+  SET addroot = 0;
+  IF c.session.init_role == 'addroot';
+    SET addroot = 1;
+  END;
+  DEFAULT self_li_id = 'mypage';
+  SET cuRole = c.user.get('role');
+## <-- 制御パラメータの設定 -%]
 <!-- #Region "tthead.tt" -->
+<!-- ## script/css include -->
+  <!-- jQuery -->
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.0/jquery-ui.min.js"></script>
+  <!-- bootstrap -->
+    <script type="text/javascript" src="//maxcdn.bootstrapcdn.com/bootstrap/latest/js/bootstrap.min.js"></script>
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="/static/css/conkan-common.css" />
+  [%- IF useUiGrid %]
+  <!-- ## script/css for ui-grid -->
+    <!-- angular -->
+      <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.min.js"></script>
+    <!-- angular ui grid-->
+      <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-grid/3.1.1/ui-grid.min.js"></script>
+      <link href="//cdnjs.cloudflare.com/ajax/libs/angular-ui-grid/3.1.1/ui-grid.min.css" rel="stylesheet" type="text/css" />
+    <!-- conkan-ui-grid -->
+      <script type="text/javascript" src="/static/js/conkan_ui_grid.js"></script>
+      <link rel="stylesheet" href="/static/css/conkan-ui-grid.css" />
+    <!-- ui-bootstrap -->
+      <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.14.3/ui-bootstrap-tpls.min.js"></script>
+  <!-- ## END of script/css for ui-grid -->
+  [%- END %]
+<!-- ## END of script/css include -->
+</head>
 <body style="padding-top:200px;">
 <div class="navbar navbar-default navbar-fixed-top" id="navbar">
   <div class="container-fluid">

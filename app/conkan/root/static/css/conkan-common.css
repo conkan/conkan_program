@@ -1,0 +1,33 @@
+// ## conkan common css
+#gridlist {
+    margin-bottom: 0px;
+}
+
+#pgAddDiv {
+    margin-bottom: 10px;
+    padding-left: 10px;
+}
+
+.ng-dirty .ng-invalid {
+    background-color: #ff8e8e;
+}
+
+#valerr {
+    margin-left: 10px;
+    color: Red;
+}
+
+.form-group {
+    margin-bottom: 10px;
+}
+
+.container {
+    min-width: 1100px;
+}
+
+@media (min-width: 1520px) {
+    .container {
+        width: 1500px;
+    }
+}
+// ## END of conkan common css

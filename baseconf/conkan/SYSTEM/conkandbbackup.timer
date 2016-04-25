@@ -1,0 +1,9 @@
+[Unit]
+Description=daily conkan db backup
+
+[Timer]
+OnCalendar=*-*-* 19:00:00
+Unit=conkandbbackup.service
+
+[Install]
+WantedBy=timers.target

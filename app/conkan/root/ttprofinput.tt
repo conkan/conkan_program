@@ -1,8 +1,9 @@
+<!-- # Region ttprofinput.tt -->
 [% SET cuRole = c.user.get('role') -%]
 [% IF rs.staffid == c.user.get('staffid');
   SET selfUpdate = 1;
 END %]
-[% PROCESS 'ttpgupmc.tt' %]
+[%- PROCESS 'ttpgupmc.tt' -%]
 <div style="COLOR:Red;" id="valerr"></div>
 <div class="form-group">
   <input type="hidden" name="staffid", id="staffid" value="[% rs.staffid %]"/>
@@ -18,6 +19,10 @@ END %]
 <div class="form-group">
   <label class="col-sm-3 text-right">アカウント</label>
   [% pgupinputtext( 'account', rs.account, 4 ) %]
+</div>
+<div class="form-group">
+  <label class="col-sm-3 text-right">最終ログイン日時</label>
+  <span class="col-sm-4">[% rs.lastlogin | html %]</span>
 </div>
 <div class="form-group">
   <label class="col-sm-3 text-right">パスワード</label>
@@ -70,3 +75,4 @@ END %]
   <label class="col-sm-3 text-right">備考</label>
   [% pguptextarea( 'comment', rs.comment, 8 ) %]
 </div>
+<!-- # END of Region ttprofinput.tt -->

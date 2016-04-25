@@ -1,0 +1,11 @@
+[Unit]
+Description=mysqld
+After=docker.service
+Requires=docker.service
+#After/Requiresはそのサービスが起動後に実行される
+
+[Service]
+ExecStart=/usr/bin/docker start mysql
+
+[Install]
+WantedBy=multi-user.target

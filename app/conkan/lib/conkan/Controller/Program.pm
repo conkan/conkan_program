@@ -1,14 +1,14 @@
 package conkan::Controller::Program;
 use Moose;
 use utf8;
-use Encode;
+# use Encode;
 use JSON;
 use String::Random qw/ random_string /;
 use Try::Tiny;
-use DateTime;
 use namespace::autoclean;
 use Data::Dumper;
 use YAML;
+use DateTime;
 
 BEGIN { extends 'Catalyst::Controller'; }
 
@@ -21,16 +21,6 @@ conkan::Controller::Program - Catalyst Controller
 企画管理
 
 =head1 METHODS
-
-=cut
-
-# 開始終了時刻変換テーブル
-my %timeArgTrn = (
-    'stime1' => [ 'shour1', 'smin1' ],
-    'etime1' => [ 'ehour1', 'emin1' ],
-    'stime2' => [ 'shour2', 'smin2' ],
-    'etime2' => [ 'ehour2', 'emin2' ],
-);
 
 =head2 index
 
@@ -79,9 +69,10 @@ sub add :Local {
             $hval = __PACKAGE__->ParseRegist(
                             $pginfo, $regcnf->{'items'}->[0], undef, ''  );
             if ( ref($hval) eq 'HASH' ) {
-$c->log->debug('>>>> add reg_program:[' . $hval->{'regpgid'} . '][' . $hval->{'name'} . ']');
+$c->log->debug('>>>> add reg_program:name [' . $hval->{'name'} . ']');
                 my $row =
                     $c->model('ConkanDB::' . $regcnf->{'schema'})->create( $hval );
+$c->log->debug('>>>> add reg_program:regpgid [' . $row->regpgid . ']');
                 ## $pginfo->{企画ID}の値を再設定 (autoinc対応)
                 $pginfo->{'企画ID'} = $row->regpgid;
             }
@@ -275,17 +266,9 @@ sub progress :Local {
     my $pgid    = $param->{'pgid'};
     my $regpgid = $param->{'regpgid'};
 
+    my $str = $param->{'progress'};
     try {
-        if ( $param->{'progress'} ) {
-            $c->model('ConkanDB::PgProgress')->create(
-                {
-                'regpgid'       => $regpgid,
-                'staffid'       => $c->user->get('staffid'),
-                'repdatetime'   => \'NOW()',
-                'report'        => $param->{'progress'},
-                },
-            );
-        }
+        $c->forward('/program/_crProgress', [ $regpgid, $str, ], ) if ( $str );
     } catch {
         $c->detach( '_dberror', [ shift ] );
     };
@@ -345,6 +328,16 @@ sub cpysep :Local {
                 $hval->{'regpgid'} = $regpgid;
                 $c->model('ConkanDB::PgRegEquip')->create( $hval );
             }
+            try {
+                my $prstr = 'copy to ' . $regpgid;
+                $c->forward('/program/_crProgress', [ $svregpgid, $prstr, ], );
+            } catch {
+                # 自動進捗登録時の失敗は、エラーログのみ残す
+                $c->response->status(200);
+                my $e = shift;
+                $c->log->error('_autoProgress error ' . localtime() .
+                    ' dbexp : ' . Dumper($e) );
+            };
         }
         else {  # 分割
             # 企画管理のみ複製
@@ -361,6 +354,16 @@ $c->log->debug('>>>> maxsubno:[' . $row->get_column('maxsubno') . ']');
             $hval->{'subno'} = $row->get_column('maxsubno') + 1;
             $row = $c->model('ConkanDB::PgProgram')->create( $hval );
             $pgid = $row->pgid();
+            try {
+                my $prstr = 'split to ' . $hval->{'subno'};
+                $c->forward('/program/_crProgress', [ $svregpgid, $prstr, ], );
+            } catch {
+                # 自動進捗登録時の失敗は、エラーログのみ残す
+                $c->response->status(200);
+                my $e = shift;
+                $c->log->error('_autoProgress error ' . localtime() .
+                    ' dbexp : ' . Dumper($e) );
+            };
         }
     } catch {
         $c->detach( '_dberror', [ shift ] );
@@ -386,42 +389,78 @@ sub program_base : Chained('') : PathPart('program') : CaptureArgs(0) {
 
 sub program_list : Chained('program_base') : PathPart('list') : Args(0) {
     my ( $self, $c ) = @_;
+}
 
-    my $pgmlist =
-        [ $c->model('ConkanDB::PgProgram')->search( { },
-            {
-                'prefetch' => [ 'regpgid', 'staffid' ],
-                'order_by' => { '-asc' => [ 'me.regpgid', 'me.subno'] },
-            } )
-        ];
-    my $prglist =
-        [ $c->model('ConkanDB::PgProgress')->search( { },
-            {
-                'group_by' => [ 'regpgid' ],
-                'select'   => [ 'regpgid', { MAX => 'repdatetime'} ], 
-                'as'       => [ 'regpgid', 'lastprg' ],
-            } )
-        ];
-    my $lastprgs = {};
-    foreach my $prg ( @$prglist ) {
-        $lastprgs->{$prg->get_column('regpgid')} = $prg->get_column('lastprg');
-    }
+=head2 program/listget_a program/listget_r 
 
-    my @list = ();
-    foreach my $pgm ( @$pgmlist ) {
-        my $regpgid = $pgm->regpgid->regpgid();
-        push @list, {
-            'regpgid'       => $regpgid,
-            'pgid'          => $pgm->pgid(),
-            'sname'         => $pgm->sname(),
-            'subno'         => $pgm->subno(),
-            'name'          => $pgm->regpgid->name(),
-            'staff'         => $pgm->staffid ? $pgm->staffid->name() : '',
-            'status'        => $pgm->status(),
-            'repdatetime'   => $lastprgs->{$regpgid},
-        };
-    }
-    $c->stash->{'list'} = \@list;
+企画管理 program_listget  : 企画一覧取得 _a:全企画 _r:担当企画
+
+=cut
+
+sub program_listget_a : Chained('program_base') : PathPart('listget_a') : Args(0) {
+    my ( $self, $c ) = @_;
+    $c->detach( 'program_listget', [ 1 ] );
+}
+
+sub program_listget_r : Chained('program_base') : PathPart('listget_r') : Args(0) {
+    my ( $self, $c ) = @_;
+    $c->detach( 'program_listget', [ 0 ] );
+}
+
+sub program_listget : Private {
+    my ( $self, $c,
+         $getall,      # 全企画を取得するか
+       ) = @_;
+
+    try {
+        my $searchcond = +( $getall
+            ? {}
+            : { 'me.staffid' => $c->user->get('staffid') } );
+        my $pgmlist = [ $c->model('ConkanDB::PgProgram')->search(
+                    $searchcond,
+                    {
+                        'prefetch' => [ 'regpgid', 'staffid' ],
+                        'order_by' => { '-asc' => [ 'me.regpgid', 'me.subno'] },
+                    }
+                )
+            ];
+        my $prglist = [ $c->model('ConkanDB::PgProgress')->search(
+                    { },
+                    {
+                        'group_by' => [ 'regpgid' ],
+                        'select'   => [ 'regpgid', { MAX => 'repdatetime'} ], 
+                        'as'       => [ 'regpgid', 'lastprg' ],
+                    }
+                )
+            ];
+        my $lpdts = {};
+        foreach my $prg ( @$prglist ) {
+            $lpdts->{$prg->get_column('regpgid')} = $prg->get_column('lastprg');
+        }
+
+        my @list = ();
+        foreach my $pgm ( @$pgmlist ) {
+            my $regpgid = $pgm->regpgid->regpgid();
+            my $sid = $pgm->staffid;
+            my $lpdt = $lpdts->{$regpgid};
+            push @list, {
+                'regpgid'       => $regpgid,
+                'pgid'          => $pgm->pgid(),
+                'sname'         => $pgm->sname(),
+                'subno'         => $pgm->subno(),
+                'name'          => $pgm->regpgid->name(),
+                'staff'         => +( $sid ? $sid->name() : '' ),
+                'status'        => $pgm->status(),
+                'repdatetime'   => +( $lpdt ? $lpdt : '' ),
+            };
+        }
+        $c->stash->{'json'} = \@list;
+    } catch {
+        my $e = shift;
+        $c->log->error('program/listget error ' . localtime() .
+            ' dbexp : ' . Dumper($e) );
+    };
+    $c->forward('conkan::View::JSON');
 }
 
 =head2 program/*
@@ -457,14 +496,6 @@ sub program_show : Chained('program_base') :PathPart('') :CaptureArgs(1) {
                             'order_by' => { '-asc' => 'id' },
                         }
                     ) ];
-    $c->stash->{'Progress'}  =
-        [ $c->model('ConkanDB::PgProgress')->search(
-                        { regpgid => $regpgid },
-                        {
-                            'prefetch' => [ 'staffid' ],
-                            'order_by' => { '-desc' => 'repdatetime' },
-                        }
-                    ) ];
     $c->stash->{'Casts'} =
         [ $c->model('ConkanDB::PgCast')->search(
                         { pgid => $pgid },
@@ -485,7 +516,8 @@ sub program_show : Chained('program_base') :PathPart('') :CaptureArgs(1) {
     $c->stash->{'regpgid'}  = $regpgid;
     $c->stash->{'subno'}    = $c->stash->{'Program'}->subno();
     $c->stash->{'pgname'}   = $c->stash->{'RegProgram'}->name();
-};
+    $c->stash->{'self_li_id'} = $c->stash->{'self_li_id'} || 'program_list';
+}
 
 =head2 program/*/
 
@@ -495,6 +527,48 @@ sub program_show : Chained('program_base') :PathPart('') :CaptureArgs(1) {
 
 sub program_detail : Chained('program_show') : PathPart('') : Args(0) {
     my ( $self, $c ) = @_;
+}
+
+=head2 program/*/progress/*/*
+---------------------------------------------
+企画管理 program_progressget   : 進捗報告取得
+
+=cut
+sub program_progressget : Chained('program_show') : PathPart('progress') : Args(2) {
+    my ( $self, $c, $pageno, $pagesize ) = @_;
+    my $regpgid = $c->stash->{'regpgid'};
+    try {
+        my $prgcnt = $c->model('ConkanDB::PgProgress')->search(
+                        { regpgid => $regpgid },
+                    )->count;
+        my $prglist = [ $c->model('ConkanDB::PgProgress')->search(
+                        { regpgid => $regpgid },
+                        {
+                            'prefetch' => [ 'staffid' ],
+                            'order_by' => { '-desc' => 'repdatetime' },
+                            'rows'      => $pagesize,
+                            'page'      => $pageno,
+                        }
+                    )
+                ];
+        my @list = ();
+        foreach my $prg ( @$prglist ) {
+            my $rdt = $prg->repdatetime();
+            push @list, {
+                'repdatetime'   => +( defined( $rdt ) ? $rdt->strftime('%F %T') : '' ),
+                'tname'         => $prg->staffid->tname(),
+                'report'        => $prg->report(),
+            };
+        }
+        $c->stash->{'totalItems'} = $prgcnt;
+        $c->stash->{'json'} = \@list;
+        $c->component('View::JSON')->{expose_stash} = [ 'json', 'totalItems' ];
+    } catch {
+        my $e = shift;
+        $c->log->error('program/progressget error ' . localtime() .
+            ' dbexp : ' . Dumper($e) );
+    };
+    $c->forward('conkan::View::JSON');
 }
 
 =head2 program/*/regprogram
@@ -540,55 +614,24 @@ sub pgup_program : Chained('program_show') : PathPart('program') : Args(0) {
         $rowprof = $c->stash->{'M'}->find( $pgid,
                      { 'prefetch' => [ 'regpgid', 'staffid', 'roomid' ], } );
         if ( $c->request->method eq 'GET' ) {
+            # staffid == 1 は adminなので排除
             $c->stash->{'stafflist'} = [
                 { 'id' => '', 'val' => '' },
                 map +{ 'id' => $_->staffid(), 'val' => $_->tname() }, 
                     $c->model('ConkanDB::PgStaff')->search(
                         { staffid => { '!=' =>  1 } } )
                 ];
-            # staffid == 1 は adminなので排除
-            $c->stash->{'roomlist'}  = [
-                { 'id' => '', 'val' => '' },
-                map +{ 'id'  => $_->roomid(),
-                       'val' => $_->name() . '(' . $_->roomno() . ')' },
-                    $c->model('ConkanDB::PgRoom')->all()
-                ];
-            my $conf  = {};
-            my $M = $c->model('ConkanDB::PgSystemConf');
-            my $time_origin = $c->config->{time_origin};
-            $conf->{'dates'}   = [
-                { 'id' => '', 'val' => '' },
-                map +{ 'id' => $_, 'val' => $_ },
-                    @{from_json( $M->find('dates')->pg_conf_value() )}
-                ];
-            $conf->{'s_hours'} = [
-                { 'id' => '', 'val' => '' },
-                  map +{ 'id' => sprintf('%02d', $_), 'val' => sprintf('%02d', $_) },
-                        ( $time_origin .. $time_origin+23 )
-                ];
-            $conf->{'s_mins'} = [
-                { 'id' => '', 'val' => '' },
-                  map +{ 'id' => sprintf('%02d', $_*5), 'val' => sprintf('%02d', $_*5) },
-                        ( 0 .. 11 )
-                ];
-            $conf->{'e_hours'} = [
-                { 'id' => '', 'val' => '' },
-                  map +{ 'id' => sprintf('%02d', $_), 'val' => sprintf('%02d', $_) },
-                        ( $time_origin .. $time_origin+23 )
-                ];
-            $conf->{'e_mins'} = [
-                { 'id' => '', 'val' => '' },
-                  map +{ 'id' => sprintf('%02d', $_*5), 'val' => sprintf('%02d', $_*5) },
-                        ( 0 .. 11 )
-                ];
-            $conf->{'status'}  = [
-                { 'id' => '', 'val' => '' },
-                map +{ 'id' => $_, 'val' => $_ },
-                    @{from_json( $M->find('pg_status_vals')->pg_conf_value() )}
-                ];
-            $conf->{'nos'}     = [
-                  map +{ 'id' => $_, 'val' => $_ }, qw/ 0 1 2 3 4 /
-                ];
+            # 設定フォーム選択肢
+            my $conf = $c->forward('/program/_setSysConf' );
+            # select直記述時の特殊処理 (angular化したら不要)
+            unshift( @{$conf->{'dates'}}, { 'id' => '', 'val' => '' } );
+            unshift( @{$conf->{'s_hours'}}, { 'id' => '', 'val' => '' } );
+            unshift( @{$conf->{'s_mins'}}, { 'id' => '', 'val' => '' } );
+            unshift( @{$conf->{'e_hours'}}, { 'id' => '', 'val' => '' } );
+            unshift( @{$conf->{'e_mins'}}, { 'id' => '', 'val' => '' } );
+            unshift( @{$conf->{'status'}}, { 'id' => '', 'val' => '' } );
+            unshift( @{$conf->{'nos'}}, { 'id' => '', 'val' => '' } );
+            unshift( @{$conf->{'roomlist'}}, { 'id' => '', 'val' => '' } );
             $c->stash->{'conf'}  = $conf;
         }
     } catch {
@@ -745,33 +788,14 @@ sub _pgupdate :Private {
             $c->forward('/program/_trnSEtime', [ $c->stash->{'rs'}, ], );
         }
         else {
-            my $value = {};
-            for my $item (@{$up_items}) {
-                if ( exists( $timeArgTrn{$item} ) ) {
-                    my $hour =
-                        $c->request->body_params->{$timeArgTrn{$item}->[0]};
-                    my $min  =
-                        $c->request->body_params->{$timeArgTrn{$item}->[1]};
-                    $hour =~ s/\s+$//;
-                    $min  =~ s/\s+$//;
-                    if ( ( $hour ne '' ) || ( $min ne '' ) ) {
-                        $hour -= $c->config->{time_origin};
-                        $value->{$item} = sprintf( '%02d:%02d', $hour, $min );
-                    }
-                    else {
-                        $value->{$item} = undef;
-                    }
-                }
-                else {
-                   $value->{$item} = $c->request->body_params->{$item};
-                }
-                $value->{$item} =~ s/\s+$// if defined($value->{$item});
-                $value->{$item} = undef if ( $value->{$item} eq '' );
-            }
+            my $value = $c->forward('/program/_trnReq2Hash', [ $up_items ], );
+            my $regpgid = $c->stash->{'regpgid'};
             if ( defined( $rowprof ) ) {
                 # 更新実施
                 if ( $rowprof->updateflg eq 
                         +( $c->sessionid . $c->session->{'updtic'}) ) {
+                        $c->forward('/program/_autoProgress',
+                                [ $regpgid, $up_items, $rowprof, $value ] );
                         $rowprof->update( $value ); 
                         $c->response->body(
                             '<FORM><H1>更新しました</H1></FORM>');
@@ -785,6 +809,8 @@ sub _pgupdate :Private {
             }
             else {
                 # 追加
+                $c->forward('/program/_autoProgress',
+                                [ $regpgid, $up_items, undef, $value ] );
                 $c->stash->{'M'}->create( $value ); 
                 $c->response->body('<FORM><H1>追加しました</H1></FORM>');
             }
@@ -804,12 +830,30 @@ DBエラー表示
 
 sub _dberror :Private {
     my ( $self, $c, $e) = @_; 
-    $c->log->error('>>> ' . localtime() . ' dbexp : ' . Dump($e) );
+    $c->log->error('>>> ' . localtime() . ' dbexp : ' . Dumper($e) );
     $c->clear_errors();
-    my $body = $c->response->body() || Dump( $e );
+    my $body = $c->response->body() || Dumper( $e );
     $c->response->body('<FORM>更新失敗<br/><pre>' . $body . '</pre></FORM>');
     $c->response->status(200);
 }
+
+=head2 TimeArgTrn
+
+開始終了時刻変換テーブル
+
+=cut
+
+my %TimeArgTrn = (
+    'stime1' => [ 'shour1', 'smin1' ],
+    'etime1' => [ 'ehour1', 'emin1' ],
+    'stime2' => [ 'shour2', 'smin2' ],
+    'etime2' => [ 'ehour2', 'emin2' ],
+);
+
+my %DateArgTrn = (
+    'date1' => [ 'year1', 'month1', 'day1' ],
+    'date2' => [ 'year2', 'month2', 'day2' ],
+);
 
 =head2 _trnSEtime
 
@@ -822,17 +866,189 @@ sub _trnSEtime :Private {
          $trgHash,      # 変換対象ハッシュ
        ) = @_;
 
-    foreach my $item (keys(%timeArgTrn)) {
+    foreach my $item (keys(%TimeArgTrn)) {
         my $wkval = eval( '$trgHash->' . $item );
         next unless defined($wkval);
         # 開始終了時刻を分解して時と分にわける
         my @wk = split( /:/, $wkval );
         if ( scalar( @wk ) >= 2 ) {
-            $trgHash->{$timeArgTrn{$item}->[0]} = $wk[0] + $c->config->{time_origin};
-            $trgHash->{$timeArgTrn{$item}->[1]} = $wk[1];
+            $trgHash->{$TimeArgTrn{$item}->[0]} =
+                sprintf('%02d', $wk[0] + $c->config->{time_origin});
+            $trgHash->{$TimeArgTrn{$item}->[1]} =
+                sprintf('%02d', $wk[1]);
         }
     }
 }
+
+=head2 _trnReq2Hash
+
+POSTパラメータをDB更新用ハッシュに変換
+
+戻り値: DB更新用ハッシュ
+
+=cut
+
+sub _trnReq2Hash :Private {
+    my ( $self, $c, 
+         $up_items,     # 対象列名配列
+       ) = @_;
+
+    my $value = {};
+    for my $item (@{$up_items}) {
+        if ( exists( $TimeArgTrn{$item} ) ) {
+            my $hour = $c->request->body_params->{$TimeArgTrn{$item}->[0]};
+            my $min  = $c->request->body_params->{$TimeArgTrn{$item}->[1]};
+            $hour =~ s/\s+$// if defined($hour);
+            $min  =~ s/\s+$// if defined($min);
+            if ( defined($hour) && ( $hour ne '' ) ) {
+                $hour -= $c->config->{time_origin};
+                $min = 0 unless $min;
+                $value->{$item} = sprintf( '%02d:%02d', $hour, $min );
+            }
+            else {
+                $value->{$item} = undef;
+            }
+        }
+        else {
+           $value->{$item} = $c->request->body_params->{$item};
+        }
+        if ( defined( $value->{$item} ) ) {
+            $value->{$item} =~ s/\s+$//;
+            $value->{$item} = undef if ( $value->{$item} eq '' );
+        }
+    }
+    return $value;
+}
+
+=head2 _autoProgress
+
+更新内容自動進捗登録
+
+進捗文字列の順序を揃えるため、項目名配列を受け取る
+(ハッシュのキーの順序は不定のため)
+
+=cut
+
+sub _autoProgress :Private {
+    my ( $self, $c, 
+         $regpgid,  # 対象企画番号
+         $itemkeys, # 項目名配列
+         $row,      # 対象レコード(更新前)
+         $value,    # 更新用ハッシュ
+       ) = @_;
+
+$c->log->debug('>>> _autoProgress start regpgid:' . $regpgid );
+    try {
+        my $progstr = '';
+        if ( defined( $row ) ) { # 更新
+            for my $key (@{$itemkeys}) {
+                my $rowval = $row->get_column($key);
+                my $val = $value->{$key};
+                if ( defined( $rowval ) ) {
+                    if ( exists( $TimeArgTrn{$key} ) ) {
+                        my @times = split(':', $row->get_column($key));
+                        $rowval = sprintf( '%02d:%02d', @times );
+                    }
+                    elsif ( exists( $DateArgTrn{$key} ) ) {
+                        $rowval =~ s[-][/]g;
+                    }
+                }
+                if ( defined( $val ) && ($rowval ne $val ) ) {
+                    $c->log->debug('>>> _autoProgress key:' . $key . ' rowval:' . $rowval . ' val:' . $val );
+                    $progstr .= $key . ' change to ' . $val . ' ';
+                }
+            }
+        }
+        else { # 生成
+            $progstr = 'Create ';
+            for my $key (@{$itemkeys}) {
+                $progstr .= $key . ':' . $value->{$key} . ' ';
+            }
+        }
+        if ( $progstr ne '' ) {
+            $c->log->info( localtime()  . ' _autoProgress regpgid:' .$regpgid
+                                        . ' progstr:' . $progstr );
+            $c->forward('/program/_crProgress', [ $regpgid, $progstr, ], );
+        }
+    } catch {
+        # 自動進捗登録時の失敗は、エラーログのみ残す
+        $c->response->status(200);
+        my $e = shift;
+        $c->log->error('_autoProgress error ' . localtime() .
+            ' dbexp : ' . Dumper($e) );
+    };
+}
+
+=head2 _crProgress
+
+進捗登録実施
+
+=cut
+
+sub _crProgress :Private {
+    my ( $self, $c, 
+         $regpgid,  # 対象企画番号
+         $progstr,  # 報告内容
+       ) = @_;
+
+    $c->model('ConkanDB::PgProgress')->create(
+        {
+            'regpgid'       => $regpgid,
+            'staffid'       => $c->user->get('staffid'),
+            'repdatetime'   => \'NOW()',
+            'report'        => $progstr,
+        },
+    );
+}
+
+=head2 _setSysConf
+
+企画情報選択肢設定
+
+=cut
+
+sub _setSysConf :Private {
+    my ( $self, $c, 
+       ) = @_;
+
+    my $conf  = {};
+    my $M = $c->model('ConkanDB::PgSystemConf');
+    my $time_origin = $c->config->{time_origin};
+    $conf->{'dates'}   = [
+        map +{ 'id' => $_, 'val' => $_ },
+            @{from_json( $M->find('dates')->pg_conf_value() )}
+        ];
+    $conf->{'s_hours'} = [
+          map +{ 'id' => sprintf('%02d', $_), 'val' => sprintf('%02d', $_) },
+                ( $time_origin .. $time_origin+23 )
+        ];
+    $conf->{'s_mins'} = [
+          map +{ 'id' => sprintf('%02d', $_*5), 'val' => sprintf('%02d', $_*5) },
+                ( 0 .. 11 )
+        ];
+    $conf->{'e_hours'} = [
+          map +{ 'id' => sprintf('%02d', $_), 'val' => sprintf('%02d', $_) },
+                ( $time_origin .. $time_origin+23 )
+        ];
+    $conf->{'e_mins'} = [
+          map +{ 'id' => sprintf('%02d', $_*5), 'val' => sprintf('%02d', $_*5) },
+                ( 0 .. 11 )
+        ];
+    $conf->{'status'}  = [
+        map +{ 'id' => $_, 'val' => $_ },
+            @{from_json( $M->find('pg_status_vals')->pg_conf_value() )}
+        ];
+    $conf->{'nos'}     = [
+          map +{ 'id' => $_, 'val' => $_ }, qw/ 0 1 2 3 4 /
+        ];
+    $conf->{'roomlist'}  = [
+          map +{ 'id'  => $_->roomid(),
+                 'val' => $_->roomno() . ' ' . $_->name() },
+                $c->model('ConkanDB::PgRoom')->all()
+        ];
+    return $conf;
+}
+
 =encoding utf8
 
 =head1 AUTHOR
