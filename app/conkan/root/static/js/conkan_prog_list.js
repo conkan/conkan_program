@@ -1,3 +1,4 @@
+// conkan_prog_list.js --- 企画一覧用 JS ---
 // 追加実施時、ボタンを無効にする
 $('#doadd').click(function(event) {
   $('#doadd').addClass('disabled');

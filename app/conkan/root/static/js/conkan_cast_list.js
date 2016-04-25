@@ -1,3 +1,4 @@
+// conkan_cast_list.js --- 出演者一覧用 JS ---
 var storage = sessionStorage;
 $(document).ready(function(){
   $(document).scrollTop( storage.getItem( 'sctop' ) );

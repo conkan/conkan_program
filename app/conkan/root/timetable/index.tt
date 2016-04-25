@@ -72,7 +72,11 @@ END -%]
             </tr>
             <tr>
               <td>
-                <p class="prgname" ng-cloak>{{current.regpgid}}{{current.subno}}</p>
+                <div ng-if="current.regpgid">
+                  <span class="prgname" ng-cloak>
+                    {{current.regpgid}}({{current.subno}})
+                  </span>
+                </div>
               </td>
               <th style="text-align: right">企画名</th>
               <th colspan="3"><p class="prgname" ng-cloak>
