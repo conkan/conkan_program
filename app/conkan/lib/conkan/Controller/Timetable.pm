@@ -127,8 +127,6 @@ sub index :Path :Args(0) {
         }
     }
     $c->stash->{'castProgram'} = \@castlist;
-    # 設定フォーム選択肢
-    $c->stash->{'conf'}  = $c->forward('/program/_setSysConf' );
 }
 
 =head2 createPeriod

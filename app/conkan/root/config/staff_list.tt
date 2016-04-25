@@ -35,7 +35,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
-        <button type="button" class="btn " id="dodel">削除</button>
+        <button type="button" class="btn " id="dodel">無効化</button>
         <button type="button" class="btn btn-primary" id="dobtn">更新</button>
       </div>
     </div>

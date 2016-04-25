@@ -613,27 +613,6 @@ sub pgup_program : Chained('program_show') : PathPart('program') : Args(0) {
     try {
         $rowprof = $c->stash->{'M'}->find( $pgid,
                      { 'prefetch' => [ 'regpgid', 'staffid', 'roomid' ], } );
-        if ( $c->request->method eq 'GET' ) {
-            # staffid == 1 は adminなので排除
-            $c->stash->{'stafflist'} = [
-                { 'id' => '', 'val' => '' },
-                map +{ 'id' => $_->staffid(), 'val' => $_->tname() }, 
-                    $c->model('ConkanDB::PgStaff')->search(
-                        { staffid => { '!=' =>  1 } } )
-                ];
-            # 設定フォーム選択肢
-            my $conf = $c->forward('/program/_setSysConf' );
-            # select直記述時の特殊処理 (angular化したら不要)
-            unshift( @{$conf->{'dates'}}, { 'id' => '', 'val' => '' } );
-            unshift( @{$conf->{'s_hours'}}, { 'id' => '', 'val' => '' } );
-            unshift( @{$conf->{'s_mins'}}, { 'id' => '', 'val' => '' } );
-            unshift( @{$conf->{'e_hours'}}, { 'id' => '', 'val' => '' } );
-            unshift( @{$conf->{'e_mins'}}, { 'id' => '', 'val' => '' } );
-            unshift( @{$conf->{'status'}}, { 'id' => '', 'val' => '' } );
-            unshift( @{$conf->{'nos'}}, { 'id' => '', 'val' => '' } );
-            unshift( @{$conf->{'roomlist'}}, { 'id' => '', 'val' => '' } );
-            $c->stash->{'conf'}  = $conf;
-        }
     } catch {
         $c->detach( '_dberror', [ shift ] );
     };
@@ -677,7 +656,10 @@ sub pgup_equip : Chained('pgup_equiptop') : PathPart('') : Args(0) {
                 { 'id' => '', 'val' => '' },
                 map +{ 'id' => $_->equipid,
                        'val' => $_->name . '(' . $_->equipno . ')' }, 
-                    $c->model('ConkanDB::PgAllEquip')->all()
+                    $c->model('ConkanDB::PgAllEquip')->search(
+                        { 'rmdate' => { '<=' => '0/0/0' } },
+                        { 'order_by' => { '-asc' => 'equipno' } }
+                    )
                 ];
             $c->stash->{'nos'}     = [
                 map +{ 'id' => $_, 'val' => $_ }, qw/ 0 1 2 3 4 5 6 7 8 9/
@@ -832,9 +814,9 @@ $c->log->debug('>>>> regpgid: ' . $regpgid . ' -> ' . $newregpgid);
                 }
                 else {
                     $c->stash->{'rs'} = undef;
-                    $c->response->body =
+                    $c->response->body(
                         '<FORM><H1>更新できませんでした</H1><BR/>' .
-                        '他スタッフが変更した可能性があります</FORM>';
+                        '他スタッフが変更した可能性があります</FORM>');
                 }
             }
             else {
@@ -871,9 +853,9 @@ sub _pgdelete :Private {
         }
         else {
             $c->stash->{'rs'} = undef;
-            $c->response->body =
+            $c->response->body(
                 '<FORM><H1>削除できませんでした</H1><BR/>' .
-                '他スタッフが変更した可能性があります</FORM>';
+                '他スタッフが変更した可能性があります</FORM>');
         }
     } catch {
         $c->detach( '_dberror', [ shift ] );
@@ -1056,54 +1038,6 @@ sub _crProgress :Private {
             'report'        => $progstr,
         },
     );
-}
-
-=head2 _setSysConf
-
-企画情報選択肢設定
-
-=cut
-
-sub _setSysConf :Private {
-    my ( $self, $c, 
-       ) = @_;
-
-    my $conf  = {};
-    my $M = $c->model('ConkanDB::PgSystemConf');
-    my $time_origin = $c->config->{time_origin};
-    $conf->{'dates'}   = [
-        map +{ 'id' => $_, 'val' => $_ },
-            @{from_json( $M->find('dates')->pg_conf_value() )}
-        ];
-    $conf->{'s_hours'} = [
-          map +{ 'id' => sprintf('%02d', $_), 'val' => sprintf('%02d', $_) },
-                ( $time_origin .. $time_origin+23 )
-        ];
-    $conf->{'s_mins'} = [
-          map +{ 'id' => sprintf('%02d', $_*5), 'val' => sprintf('%02d', $_*5) },
-                ( 0 .. 11 )
-        ];
-    $conf->{'e_hours'} = [
-          map +{ 'id' => sprintf('%02d', $_), 'val' => sprintf('%02d', $_) },
-                ( $time_origin .. $time_origin+23 )
-        ];
-    $conf->{'e_mins'} = [
-          map +{ 'id' => sprintf('%02d', $_*5), 'val' => sprintf('%02d', $_*5) },
-                ( 0 .. 11 )
-        ];
-    $conf->{'status'}  = [
-        map +{ 'id' => $_, 'val' => $_ },
-            @{from_json( $M->find('pg_status_vals')->pg_conf_value() )}
-        ];
-    $conf->{'nos'}     = [
-          map +{ 'id' => $_, 'val' => $_ }, qw/ 0 1 2 3 4 /
-        ];
-    $conf->{'roomlist'}  = [
-          map +{ 'id'  => $_->roomid(),
-                 'val' => $_->roomno() . ' ' . $_->name() },
-                $c->model('ConkanDB::PgRoom')->all()
-        ];
-    return $conf;
 }
 
 =encoding utf8

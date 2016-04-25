@@ -229,8 +229,7 @@ sub _crGntStr :Private {
 
 =head2 confget
 
-confget  : システム設定値取得
-           部屋一覧も取得
+confget  : システム設定値、スタッフ一覧、部屋一覧 取得(有効なもの)
 
 =cut
 
@@ -240,11 +239,12 @@ sub confget :Local {
     try {
         my @rowconf = $c->model('ConkanDB::PgSystemConf')->all;
         my @rowroom = $c->model('ConkanDB::PgRoom')->search(
-                        { },
-                        { 'order_by' => { '-asc' => 'roomid' } }
+                        { 'rmdate' => { '<=' => '0/0/0' } },
+                        { 'order_by' => { '-asc' => 'roomno' } }
                     );
         my @rowstaff = $c->model('ConkanDB::PgStaff')->search(
-                        { staffid => { '!=' =>  1 } },
+                        { 'staffid' => { '!=' =>  1 },
+                          'rmdate'  => { '<=' =>  '0/0/0' }, },
                         { 'order_by' => { '-asc' => 'staffid' } }
                     );
         my $data = {};
@@ -417,7 +417,7 @@ sub staff_edit : Chained('staff_show') : PathPart('edit') : Args(0) {
         }
         else {
             $c->stash->{'rs'} = undef;
-            $c->response->body = '<FORM><H1>更新できませんでした</H1><BR/>他のシステム管理者が変更した可能性があります</FORM>';
+            $c->response->body( '<FORM><H1>更新できませんでした</H1><BR/>他のシステム管理者が変更した可能性があります</FORM>');
         }
         $c->stash->{'rs'} = undef;
         $c->response->status(200);
@@ -438,7 +438,7 @@ sub staff_del : Chained('staff_show') : PathPart('del') : Args(0) {
         $c->go->( '/config/staff/' . $staffid );
     }
     else {
-        $c->detach( '_delete', [ $staffid ] );
+        $c->detach( '_delete', [ $staffid, 'PgProgram', 'staffid' ] );
     }
 }
 
@@ -475,7 +475,7 @@ sub room_listget : Chained('room_base') : PathPart('listget') : Args(0) {
         my @data;
         my $rows = [ $c->model('ConkanDB::PgRoom')->search(
                         { },
-                        { 'order_by' => { '-asc' => 'roomid' } }
+                        { 'order_by' => { '-asc' => 'roomno' } }
                     )
                 ];
         for my $row (@$rows) {
@@ -585,7 +585,7 @@ sub room_del : Chained('room_show') : PathPart('del') : Args(0) {
         $c->go->( '/config/room/' . $roomid );
     }
     else {
-        $c->detach( '_delete', [ $roomid ] );
+        $c->detach( '_delete', [ $roomid, 'PgProgram', 'roomid' ] );
     }
 }
 
@@ -839,7 +839,7 @@ sub equip_del : Chained('equip_show') : PathPart('del') : Args(0) {
         $c->go->( '/config/equip/' . $equipid );
     }
     else {
-        $c->detach( '_delete', [ $equipid ] );
+        $c->detach( '_delete', [ $equipid, 'PgEquip', 'equipid' ] );
     }
 }
 
@@ -870,9 +870,9 @@ sub _updatecreate :Private {
                 $c->response->body('<FORM><H1>更新しました</H1></FORM>');
             }
             else {
-                $c->response->body =
+                $c->response->body(
                         '<FORM><H1>更新できませんでした</H1><BR/>' .
-                        '他のシステム管理者が変更した可能性があります</FORM>';
+                        '他のシステム管理者が変更した可能性があります</FORM>');
             }
         }
         else { # 新規登録
@@ -895,23 +895,34 @@ sub _updatecreate :Private {
 sub _delete :Private {
     my ( $self, $c, 
          $id,           # 対象ID
+         $ckTable,      # 使用中チェックテーブル名
+         $ckkey,        # 使用中チェック項目名
        ) = @_;
 
-    my $row = $c->stash->{'M'}->find($id);
-    if ( $row->updateflg eq 
+    try {
+        my $row = $c->stash->{'M'}->find($id);
+        if ( $row->updateflg eq 
             +( $c->sessionid . $c->session->{'updtic'}) ) {
-        try {
-            $row->update( { 'rmdate'   => \'NOW()', } );
-            $c->response->body('<FORM><H1>削除しました</H1></FORM>');
-        } catch {
-            $c->detach( '_dberror', [ shift ] );
-        };
-    }
-    else {
-        $c->response->body =
-                    '<FORM><H1>削除できませんでした</H1><BR/>' .
-                    '他のシステム管理者が変更した可能性があります</FORM>';
-    }
+            # 対象IDを使用中でないか確認
+            my $usecnt = $c->model('ConkanDB::' . $ckTable)->search(
+                            { $ckkey => $id } )->count;
+            if ( $usecnt > 0 ) {
+                $c->response->body(
+                    '<FORM><H1>使用中なので無効にできません</H1><BR/></FORM>');
+            }
+            else {
+                $row->update( { 'rmdate'   => \'NOW()', } );
+                $c->response->body('<FORM><H1>無効にしました</H1></FORM>');
+            }
+        }
+        else {
+            $c->response->body(
+                    '<FORM><H1>無効にできませんでした</H1><BR/>' .
+                    '他のシステム管理者が変更した可能性があります</FORM>');
+        }
+    } catch {
+        $c->detach( '_dberror', [ shift ] );
+    };
     $c->stash->{'rs'} = undef;
     $c->response->status(200);
 }
