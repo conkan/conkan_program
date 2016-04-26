@@ -661,9 +661,6 @@ sub pgup_equip : Chained('pgup_equiptop') : PathPart('') : Args(0) {
                         { 'order_by' => { '-asc' => 'equipno' } }
                     )
                 ];
-            $c->stash->{'nos'}     = [
-                map +{ 'id' => $_, 'val' => $_ }, qw/ 0 1 2 3 4 5 6 7 8 9/
-                ];
         }
     } catch {
         $c->detach( '_dberror', [ shift ] );

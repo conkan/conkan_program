@@ -113,7 +113,7 @@ sub index :Path :Args(0) {
 
         foreach my $cast ( $pgm->pg_casts->all() ) {
             push @castlist, {
-                'castid'        => $cast->castid->castid(),
+                'regno'         => $cast->castid->regno(),
                 'castname'      => $cast->name() || $cast->castid->name(),
                 'regpgid'       => $pgm->regpgid->regpgid(),
                 'pgid'          => $pgm->pgid(),

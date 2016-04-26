@@ -48,7 +48,7 @@ ConkanAppModule.value( 'pglistValue', {
     castprglist : [
         [%- FOREACH prg = castProgram %]
             {
-                cast : '[% prg.castid | format('%04d') %] [% prg.castname | xml %]',
+                cast : '[% prg.regno | format('%04d') %] [% prg.castname | xml %]',
                 prgname  : {
                     name: '[% prg.regpgid | format('%04d') %]([% prg.subno | format('%01d') %]) [% prg.sname | xml %]',
                     pgid    : '[% prg.pgid %]',
