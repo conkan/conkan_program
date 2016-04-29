@@ -239,12 +239,12 @@ sub confget :Local {
     try {
         my @rowconf = $c->model('ConkanDB::PgSystemConf')->all;
         my @rowroom = $c->model('ConkanDB::PgRoom')->search(
-                        { 'rmdate' => { '<=' => '0/0/0' } },
+                        { 'rmdate' => { '>' => '0/0/0' } },
                         { 'order_by' => { '-asc' => 'roomno' } }
                     );
         my @rowstaff = $c->model('ConkanDB::PgStaff')->search(
                         { 'staffid' => { '!=' =>  1 },
-                          'rmdate'  => { '<=' =>  '0/0/0' }, },
+                          'rmdate'  => { '>' =>  '0/0/0' }, },
                         { 'order_by' => { '-asc' => 'staffid' } }
                     );
         my $data = {};
