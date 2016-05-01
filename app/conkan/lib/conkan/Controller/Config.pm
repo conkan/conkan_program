@@ -627,6 +627,7 @@ sub cast_listget : Chained('cast_base') : PathPart('listget') : Args(0) {
                 ];
         for my $row (@$rows) {
             push ( @data, {
+                'regno'    => $row->regno(),
                 'name'     => $row->name(),
                 'namef'    => $row->namef(),
                 'status'   => $row->status(),

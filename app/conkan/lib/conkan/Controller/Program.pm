@@ -721,7 +721,7 @@ sub pgup_cast : Chained('pgup_casttop') : PathPart('') : Args(0) {
         if ( $c->request->method eq 'GET' ) {
             $c->stash->{'castlist'} = [ 
                 { 'id' => '', 'val' => '' },
-                map +{ 'id' => $_->castid, 'val' => $_->name }, 
+                map +{ 'id' => $_->castid, 'val' => $_->regno . ' ' . $_->name }, 
                     $c->model('ConkanDB::PgAllCast')->all()
                 ];
             my $M = $c->model('ConkanDB::PgSystemConf');
