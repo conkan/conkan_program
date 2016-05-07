@@ -583,7 +583,7 @@ sub pgup_regprog : Chained('program_show') : PathPart('regprogram') : Args(0) {
                     regpgid name namef regma experience regno telno faxno celno
                     type place layout date classlen expmaxcnt
                     content contentpub realpub afterpub openpg restpg
-                    avoiddup experience comment
+                    avoiddup comment
                     / ];
     my $regpgid = $c->stash->{'regpgid'};
     $c->stash->{'M'} = $c->model('ConkanDB::PgRegProgram');
@@ -629,6 +629,7 @@ sub pgup_equiptop : Chained('program_show') : PathPart('equip') : CaptureArgs(1)
     my ( $self, $c, $id ) = @_;
     $c->stash->{'id'} = $id;
     $c->stash->{'M'} = $c->model('ConkanDB::PgEquip');
+    $c->stash->{'target'} = 'equip';
 }
 
 =head2 program/*/equip/*/
@@ -677,6 +678,10 @@ sub pgup_equip : Chained('pgup_equiptop') : PathPart('') : Args(0) {
 sub pgup_equipdel : Chained('pgup_equiptop') : PathPart('del') : Args(0) {
     my ( $self, $c ) = @_;
 
+    my $up_items = [ qw/
+                    equipid
+                    / ];
+
     my $pgid = $c->stash->{'pgid'};
     my $id   = $c->stash->{'id'};
 
@@ -684,7 +689,7 @@ sub pgup_equipdel : Chained('pgup_equiptop') : PathPart('del') : Args(0) {
     $c->detach( '/program/' . $pgid . '/equip/' . $id )
         if ( ( $c->request->method eq 'GET' ) || ( $id == 0 ) );
 
-    $c->detach( '_pgdelete' );
+    $c->detach( '_pgdelete', [ $up_items ] );
 }
 
 =head2 program/*/cast/*
@@ -696,6 +701,7 @@ sub pgup_casttop : Chained('program_show') : PathPart('cast') : CaptureArgs(1) {
     my ( $self, $c, $id ) = @_;
     $c->stash->{'id'} = $id;
     $c->stash->{'M'} = $c->model('ConkanDB::PgCast');
+    $c->stash->{'target'} = 'cast';
 }
 
 =head2 program/*/cast/*/
@@ -746,6 +752,9 @@ sub pgup_cast : Chained('pgup_casttop') : PathPart('') : Args(0) {
 sub pgup_castdel : Chained('pgup_casttop') : PathPart('del') : Args(0) {
     my ( $self, $c ) = @_;
 
+    my $up_items = [ qw/
+                    castid name
+                    / ];
     my $pgid = $c->stash->{'pgid'};
     my $id   = $c->stash->{'id'};
 
@@ -753,7 +762,7 @@ sub pgup_castdel : Chained('pgup_casttop') : PathPart('del') : Args(0) {
     $c->detach( '/program/' . $pgid . '/cast/' . $id )
         if ( ( $c->request->method eq 'GET' ) || ( $id == 0 ) );
 
-    $c->detach( '_pgdelete' );
+    $c->detach( '_pgdelete', [ $up_items ] );
 }
 
 =head2 _pgupdate
@@ -839,13 +848,19 @@ $c->log->debug('>>>> regpgid: ' . $regpgid . ' -> ' . $newregpgid);
 =cut
 
 sub _pgdelete :Private {
-    my ( $self, $c ) = @_;
+    my ( $self, $c,
+         $up_items,     # 対象列名配列
+    ) = @_;
 
     try {
         my $rowprof = $c->stash->{'M'}->find( $c->stash->{'id'} );
+        my $regpgid = $c->stash->{'regpgid'};
+
         if ( $rowprof->updateflg eq 
                 +( $c->sessionid . $c->session->{'updtic'}) ) {
             # 削除実施
+            $c->forward('/program/_autoProgress',
+                                [ $regpgid, $up_items, $rowprof, undef ] );
             $rowprof->delete(); 
             $c->response->body('<FORM><H1>削除しました</H1></FORM>');
         }
@@ -976,28 +991,36 @@ sub _autoProgress :Private {
        ) = @_;
 
     try {
-        my $progstr = '';
-        if ( defined( $row ) ) { # 更新
-            for my $key (@{$itemkeys}) {
-                my $rowval = $row->get_column($key);
-                my $val = $value->{$key};
-                if ( defined( $rowval ) ) {
-                    if ( exists( $TimeArgTrn{$key} ) ) {
-                        my @times = split(':', $row->get_column($key));
-                        $rowval = sprintf( '%02d:%02d', @times );
+        my $progstr = '[Auto Progress] ';
+        if ( defined( $row ) ) {
+            if ( defined( $value ) ) { # 更新
+                for my $key (@{$itemkeys}) {
+                    my $rowval = $row->get_column($key);
+                    my $val = $value->{$key};
+                    if ( defined( $rowval ) ) {
+                        if ( exists( $TimeArgTrn{$key} ) ) {
+                            my @times = split(':', $row->get_column($key));
+                            $rowval = sprintf( '%02d:%02d', @times );
+                        }
+                        elsif ( exists( $DateArgTrn{$key} ) ) {
+                            $rowval =~ s[-][/]g;
+                        }
                     }
-                    elsif ( exists( $DateArgTrn{$key} ) ) {
-                        $rowval =~ s[-][/]g;
+                    if ( defined( $val ) && ($rowval ne $val ) ) {
+                        $c->log->debug('>>> _autoProgress key:' . $key . ' rowval:' . $rowval . ' val:' . $val );
+                        $progstr .= $key . ' change to ' . $val . ' ';
                     }
                 }
-                if ( defined( $val ) && ($rowval ne $val ) ) {
-                    $c->log->debug('>>> _autoProgress key:' . $key . ' rowval:' . $rowval . ' val:' . $val );
-                    $progstr .= $key . ' change to ' . $val . ' ';
+            }
+            else { # 削除
+                $progstr .= 'Delete ' . $c->stash->{'target'} . ' ';
+                for my $key (@{$itemkeys}) {
+                    $progstr .= $key . ':' . $row->get_column($key) . ' ';
                 }
             }
         }
         else { # 生成
-            $progstr = 'Create ';
+            $progstr .= 'Create ';
             for my $key (@{$itemkeys}) {
                 $progstr .= $key . ':' . $value->{$key} . ' ';
             }
