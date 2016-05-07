@@ -174,10 +174,6 @@ ConkanAppModule.controller( 'timetableController',
                     sort: { priority: 1, direction: uiGridConstants.DSC },
                     cellTemplate: '<div ng-if="!row.groupHeader"><button class="btn primary prgcell" ng-click=grid.appScope.pgmclick(row.entity.prgname.pgid)>{{row.entity.prgname.name}}</button></div>'
                 },
-                { name : '部屋', field: 'room',
-                    headerCellClass: 'gridheader',
-                    cellTemplate: '<div ng-if="!row.groupHeader">{{COL_FIELD CUSTOM_FILTERS}}</div>'
-                },
                 { name : '期間',
                     headerCellTemplate: pglistValue.ganttConst.ganttHeader,
                     width: $scope.__getGanttWidth(),
