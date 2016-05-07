@@ -451,6 +451,7 @@ sub program_listget : Private {
                 'name'          => $pgm->regpgid->name(),
                 'staff'         => +( $sid ? $sid->name() : '' ),
                 'status'        => $pgm->status(),
+                'contentpub'    => $pgm->regpgid->contentpub(),
                 'repdatetime'   => +( $lpdt ? $lpdt : '' ),
             };
         }
