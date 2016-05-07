@@ -54,7 +54,7 @@
           更新
         </button>
         <span class="col-sm-1"></span>
-        <a id="cancel" class="col-sm-2 text-center btn btn-large" href="">リセット</a>
+        <a id="cancel" class="col-sm-2 text-center btn btn-large" href="">更新破棄</a>
       </div>
     </FORM>
   </div>

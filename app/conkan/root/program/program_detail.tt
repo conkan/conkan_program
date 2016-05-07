@@ -500,7 +500,7 @@ END -%]
                 <select class="col-sm-12" name="staffid"
                     ng-model="prog.staffid"
                     ng-options="i.id as i.val for i in conf.stafflist">
-                [%- IF urole != 'ROOT' && urole != 'PG' -%]
+                [%- IF urole == 'NORM' -%]
                   <option>ngReadonly</option>
                 [%- END -%]
                 </select>

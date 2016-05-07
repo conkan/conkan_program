@@ -31,7 +31,9 @@ conkan::Controller::Config - Catalyst Controller
 sub auto :Private {
     my ( $self, $c ) = @_;
 
+    return 1 if ( $c->action->reverse eq 'config/confget' );
     return 1 if ( $c->user->get('role') eq 'ROOT' );
+    return 1 if ( $c->user->get('role') eq 'PG' );
     return 1 if ( $c->user->get('role') eq 'ADMIN' );
 
     $c->response->status(412);
@@ -62,6 +64,11 @@ sub index :Path :Args(0) {
 sub setting :Local {
     my ( $self, $c ) = @_;
 
+    if ( $c->user->get('role') eq 'PG' ) {
+        $c->response->status(412);
+        $c->stash->{template} = 'accessDeny.tt';
+        return 0;
+    }
     my $sysconM = $c->model('ConkanDB::PgSystemConf');
     my @rowconf = $sysconM->all;
     my $pHconf = {};

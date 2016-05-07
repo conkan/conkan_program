@@ -68,10 +68,12 @@
           [%- IF cuRole == 'ROOT' || cuRole == 'ADMIN' %]
             <li id="config_staff"><a href="/config/staff/list">スタッフ管理</a></li>
           [% END %]
-          [%- IF cuRole == 'ROOT' %]
+          [%- IF cuRole == 'ROOT' || cuRole == 'PG' %]
             <li id="config_cast"><a href="/config/cast/list">出演者管理</a></li>
             <li id="config_room"><a href="/config/room/list">部屋管理</a></li>
             <li id="config_equip"><a href="/config/equip/list">機材管理</a></li>
+          [%- END -%]
+          [%- IF cuRole == 'ROOT' %]
             <li id="config_conf"><a href="/config/setting">設定</a></li>
           [%- END -%]
           <li class="pull-right"><a href="/logout" class="btn btn-info">

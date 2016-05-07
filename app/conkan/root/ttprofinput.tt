@@ -35,7 +35,7 @@ END %]
 <div class="form-group">
   <label class="col-sm-3 text-right">役割</label>
   <select class="col-sm-4" name="role" id="role">
-  [% IF cuRole == 'ROOT' || cuRole == 'ADMIN' %]
+  [% IF cuRole == 'ROOT' || cuRole == 'PG' || cuRole == 'ADMIN' %]
     <option id="NORM" value="NORM">企画スタッフ</option>
     <option id="PG"   value="PG">企画管理スタッフ</option>
     <option id="ROOT" value="ROOT">システム管理者</option>
