@@ -63,11 +63,11 @@ END -%]
               <td colspan="1"></td>
               <td colspan="5" id="valerr"></td>
               <td style="text-align: center">
-                <div ng-form method="GET" action="/timetable/csvdownload">
-                  <button type="submit" class="btn" id="csvdlbtn">
+                <a href="/timetable/csvdownload">
+                  <button name="csvdlbtn" class="btn" id="csvdlbtn">
                     CSVダウンロード
                   </button>
-                </div>
+                </a>
               </td>
             </tr>
             <tr>
