@@ -657,7 +657,7 @@ sub pgup_equip : Chained('pgup_equiptop') : PathPart('') : Args(0) {
                 map +{ 'id' => $_->equipid,
                        'val' => $_->name . '(' . $_->equipno . ')' }, 
                     $c->model('ConkanDB::PgAllEquip')->search(
-                        { 'rmdate' => { '<=' => '0/0/0' } },
+                        { 'rmdate' => \'IS NULL' },
                         { 'order_by' => { '-asc' => 'equipno' } }
                     )
                 ];
