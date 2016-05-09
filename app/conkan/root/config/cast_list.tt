@@ -18,7 +18,7 @@
   <div id="pgAddDiv">
     <button type="button" class="btn btn-primary"
             data-toggle="modal" data-target="#editCast"
-            data-whatever="0">
+            data-whatever="0" data-rmcol="">
       追加
     </button>
   </div>
@@ -37,6 +37,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
+        <button type="button" class="btn " id="dodel">無効化</button>
         <button type="button" class="btn btn-primary" id="dobtn">登録/更新</button>
       </div>
     </div>

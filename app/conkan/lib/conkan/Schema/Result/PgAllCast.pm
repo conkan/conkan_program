@@ -47,9 +47,9 @@ __PACKAGE__->table("pg_all_cast");
 
 =head2 regno
 
-  data_type: 'integer'
-  extra: {unsigned => 1}
+  data_type: 'varchar'
   is_nullable: 1
+  size: 64
 
 =head2 name
 
@@ -85,6 +85,12 @@ __PACKAGE__->table("pg_all_cast");
   is_nullable: 1
   size: 64
 
+=head2 rmdate
+
+  data_type: 'datetime'
+  datetime_undef_if_invalid: 1
+  is_nullable: 1
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -96,7 +102,7 @@ __PACKAGE__->add_columns(
     is_nullable => 0,
   },
   "regno",
-  { data_type => "integer", extra => { unsigned => 1 }, is_nullable => 1 },
+  { data_type => "varchar", is_nullable => 1, size => 64 },
   "name",
   { data_type => "varchar", is_nullable => 0, size => 64 },
   "namef",
@@ -109,6 +115,12 @@ __PACKAGE__->add_columns(
   { data_type => "text", is_nullable => 1 },
   "updateflg",
   { data_type => "varchar", is_nullable => 1, size => 64 },
+  "rmdate",
+  {
+    data_type => "datetime",
+    datetime_undef_if_invalid => 1,
+    is_nullable => 1,
+  },
 );
 
 =head1 PRIMARY KEY
@@ -124,18 +136,6 @@ __PACKAGE__->add_columns(
 __PACKAGE__->set_primary_key("castid");
 
 =head1 UNIQUE CONSTRAINTS
-
-=head2 C<name_UNIQUE>
-
-=over 4
-
-=item * L</name>
-
-=back
-
-=cut
-
-__PACKAGE__->add_unique_constraint("name_UNIQUE", ["name"]);
 
 =head2 C<regno_UNIQUE>
 
@@ -167,8 +167,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07043 @ 2016-01-17 19:41:07
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:g7KEKQ1tfeXXZiLhpGsE4w
+# Created by DBIx::Class::Schema::Loader v0.07045 @ 2016-05-09 14:06:17
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:fofqy2Mt7Ckut7ZsowJQYw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

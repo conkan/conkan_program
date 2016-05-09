@@ -103,7 +103,7 @@ sub setting :Local {
                     next if   ( $code eq 'updateflg' )
                            || ( $code eq 'gantt_header' )
                            || ( $code eq 'gantt_back_grid' )
-                           || ( $code eq 'gantt_colmnums' )
+                           || ( $code eq 'gantt_colmnum' )
                            || ( $code eq 'gantt_scale_str' )
                            || ( $code eq 'gantt_color_str' );
                     $param->{$code} =~ s/\s+$//;
@@ -633,6 +633,7 @@ sub cast_listget : Chained('cast_base') : PathPart('listget') : Args(0) {
                     )
                 ];
         for my $row (@$rows) {
+            my $rm  = $row->rmdate();
             push ( @data, {
                 'regno'    => $row->regno(),
                 'name'     => $row->name(),
@@ -641,6 +642,7 @@ sub cast_listget : Chained('cast_base') : PathPart('listget') : Args(0) {
                 'memo'     => $row->memo(),
                 'restdate' => $row->restdate(),
                 'castid'   => $row->castid(),
+                'rmdate'   => +( defined( $rm ) ? $rm->strftime('%F %T') : '' ),
             } );
         }
         $c->stash->{'json'} = \@data;
@@ -715,6 +717,24 @@ sub cast_edit : Chained('cast_show') : PathPart('edit') : Args(0) {
     else {
         my $items = [ qw/ regno name namef status memo restdate / ];
         $c->detach( '_updatecreate', [ $castid, $items ] );
+    }
+}
+
+=head2 cast/*/del
+
+出演者管理 cast_del   : 出演者削除
+
+=cut
+
+sub cast_del : Chained('cast_show') : PathPart('del') : Args(0) {
+    my ( $self, $c ) = @_;
+    my $castid = $c->stash->{'castid'};
+    # GETはおそらく直打ちとかなので再度
+    if ( $c->request->method eq 'GET' ) {
+        $c->go->( '/config/room/' . $castid );
+    }
+    else {
+        $c->detach( '_delete', [ $castid, 'PgCast', 'castid' ] );
     }
 }
 
@@ -896,7 +916,7 @@ sub _updatecreate :Private {
 
 =head2 _delete
 
-スタッフ、部屋、機材 削除実施
+スタッフ、部屋、機材、出演者 削除実施
 
 =cut
 

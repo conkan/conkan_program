@@ -9,7 +9,14 @@ $('#editCast').on('show.bs.modal', function (event) {
   var castid = $(event.relatedTarget).data('whatever');
   var content = $('#editCastContent');
   $(content).load(castid + '/ FORM');
-  $('#dobtn').show();
+  if ( $(event.relatedTarget).data('rmcol') ) {
+    $('#dobtn').hide();
+    $('#dodel').hide();
+  }
+  else {
+    $('#dobtn').show();
+    $('#dodel').show();
+  }
 } );
 // モーダルダイアログ非表示
 $('#editCast').on('hide.bs.modal', function (event) {
@@ -26,7 +33,17 @@ $('#dobtn').click(function(event) {
   var data = $('#castform').serializeArray();
   var castid = $('#castid').val();
   $('#dobtn').hide();
+  $('#dodel').hide();
   $(content).load(castid + '/edit/ FORM', data );
+} );
+// 削除
+$('#dodel').click(function(event) {
+  var content = $('#editCastContent');
+  var data = $('#castform').serializeArray();
+  var castid = $('#castid').val();
+  $('#dobtn').hide();
+  $('#dodel').hide();
+  $(content).load(castid + '/del/ FORM', data );
 } );
 
 // conkanCastListモジュールの生成(グローバル変数)
@@ -37,6 +54,14 @@ var ConkanAppModule = angular.module('conkanCastList',
 ConkanAppModule.controller( 'castListController',
     [ '$scope', '$sce', '$http', '$uibModal',
         function( $scope, $sce, $http, $uibModal ) {
+            $scope.__getEditbtn = function( rmdate, castid ) {
+                var cont = uiGetEditbtn( rmdate, '#editCast',
+                        [ { 'key' : 'whatever', 'val' : castid },
+                          { 'key' : 'rmcol', 'val' : rmdate } ] );
+                var wkstr = $sce.trustAsHtml( cont );
+                return wkstr;
+            };
+
             $scope.castgrid = {
                 enableFiltering: false,
                 enableSorting: true,
@@ -49,45 +74,52 @@ ConkanAppModule.controller( 'castListController',
                 { name : '氏名', field: 'name',
                     headerCellClass: 'gridheader',
                     width: "16%",
-                    cellClass: 'ui-grid-vcenter',
+                    cellClass: function(grid, row)
+                        { return uiGetCellCls(row.entity.rmdate); },
                     enableHiding: false,
                 },
                 { name : 'フリガナ', field: 'namef',
                     headerCellClass: 'gridheader',
                     width: "16%",
-                    cellClass: 'ui-grid-vcenter',
+                    cellClass: function(grid, row)
+                        { return uiGetCellCls(row.entity.rmdate); },
                     enableHiding: false,
                 },
                 { name : '登録番号', field: 'regno',
                     headerCellClass: 'gridheader',
                     width: "8%",
-                    cellClass: 'ui-grid-vcenter',
+                    cellClass: function(grid, row)
+                        { return uiGetCellCls(row.entity.rmdate); },
                     enableHiding: false,
                 },
                 { name : 'コンタクトステータス', field: 'status',
                     headerCellClass: 'gridheader',
                     width: "20%",
-                    cellClass: 'ui-grid-vcenter',
+                    cellClass: function(grid, row)
+                        { return uiGetCellCls(row.entity.rmdate); },
                     enableHiding: false,
                 },
                 { name : '補足(連絡先)', field: 'memo',
                     headerCellClass: 'gridheader',
                     width: "16%",
-                    cellClass: 'ui-grid-vcenter',
+                    cellClass: function(grid, row)
+                        { return uiGetCellCls(row.entity.rmdate); },
                     enableHiding: false,
                 },
                 { name : '補足(制限事項)', field: 'restdate',
                     headerCellClass: 'gridheader',
                     width: "16%",
-                    cellClass: 'ui-grid-vcenter',
+                    cellClass: function(grid, row)
+                        { return uiGetCellCls(row.entity.rmdate); },
                     enableHiding: false,
                 },
                 { name : '', field: 'castid',
                     headerCellClass: 'gridheader nogridmenu',
-                    cellClass: 'ui-grid-vcenter',
+                    cellClass: function(grid, row)
+                        { return uiGetCellCls(row.entity.rmdate); },
                     enableSorting: false,
                     enableHiding: false,
-                    cellTemplate: '<div class="gridcelbtn"><button type="button" class="btn btn-xs btn-primary" data-toggle="modal" data-target="#editCast" data-whatever="{{COL_FIELD}}">編集</button></div>',
+                    cellTemplate: '<div class="gridcelbtn"><span ng-bind-html="grid.appScope.__getEditbtn(row.entity.rmdate, row.entity.castid)"></span></div>'
                 },
             ];
             $http.get('/config/cast/listget')

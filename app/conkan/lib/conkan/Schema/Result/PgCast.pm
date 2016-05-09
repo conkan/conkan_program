@@ -173,12 +173,12 @@ __PACKAGE__->belongs_to(
   "pgid",
   "conkan::Schema::Result::PgProgram",
   { pgid => "pgid" },
-  { is_deferrable => 1, on_delete => "NO ACTION", on_update => "CASCADE" },
+  { is_deferrable => 1, on_delete => "NO ACTION", on_update => "NO ACTION" },
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07045 @ 2016-04-24 21:29:35
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:q/kJYBcPg7J1nBOZZn69vQ
+# Created by DBIx::Class::Schema::Loader v0.07045 @ 2016-05-09 14:06:17
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:ewy/VWFN8qk0XZRPBsH1Xg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

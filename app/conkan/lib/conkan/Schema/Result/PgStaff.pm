@@ -83,9 +83,9 @@ __PACKAGE__->table("pg_staff");
 
 =head2 regno
 
-  data_type: 'integer'
-  extra: {unsigned => 1}
+  data_type: 'varchar'
   is_nullable: 1
+  size: 64
 
 =head2 tname
 
@@ -154,7 +154,7 @@ __PACKAGE__->add_columns(
   "telno",
   { data_type => "varchar", is_nullable => 1, size => 64 },
   "regno",
-  { data_type => "integer", extra => { unsigned => 1 }, is_nullable => 1 },
+  { data_type => "varchar", is_nullable => 1, size => 64 },
   "tname",
   { data_type => "varchar", is_nullable => 1, size => 64 },
   "tnamef",
@@ -253,8 +253,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07043 @ 2016-02-26 20:09:58
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:CXwG5gMwdfWyrSf24d968g
+# Created by DBIx::Class::Schema::Loader v0.07045 @ 2016-05-09 14:06:17
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:qeFZvTw2Nhus9W5BUlW4QA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
