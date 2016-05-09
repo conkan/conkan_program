@@ -467,13 +467,12 @@ sub staffcsvdownload :Local {
     # adminでなく、無効でない
     my $rows =
         [ $c->model('ConkanDB::PgStaff')->search(
-            { 'account'  => { '!=' => 'admin' },
-              'rmdate' => \'IS NULL'
-            },
             {
-                'order_by' => { '-asc' => [ 'staffid' ] },
-            } )
-        ];
+                'account'  => { '!=' => 'admin' },
+                'rmdate' => \'IS NULL',
+            },
+            { 'order_by' => { '-asc' => [ 'staffid' ] }, }
+        ) ];
     my @data;
     foreach my $row ( @$rows ) {
         push ( @data, [
@@ -661,13 +660,9 @@ sub roomcsvdownload :Local {
     # 無効でない
     my $rows =
         [ $c->model('ConkanDB::PgRoom')->search(
-            { 
-              'rmdate' => \'IS NULL'
-            },
-            {
-                'order_by' => { '-asc' => [ 'roomno' ] },
-            } )
-        ];
+            { 'rmdate' => \'IS NULL' },
+            { 'order_by' => { '-asc' => [ 'roomno' ] }, }
+        ) ];
     my @data;
     foreach my $row ( @$rows ) {
         push ( @data, [
@@ -846,13 +841,9 @@ sub castcsvdownload :Local {
     # 無効でない
     my $rows =
         [ $c->model('ConkanDB::PgAllCast')->search(
-            { 
-              'rmdate' => \'IS NULL'
-            },
-            {
-                'order_by' => { '-asc' => [ 'regno' ] },
-            } )
-        ];
+            { 'rmdate' => \'IS NULL' },
+            { 'order_by' => { '-asc' => [ 'regno' ] }, }
+        ) ];
     my @data;
     foreach my $row ( @$rows ) {
         push ( @data, [
@@ -872,7 +863,6 @@ sub castcsvdownload :Local {
 
     $c->forward('conkan::View::Download::CSV');
 }
-
 
 =head2 equip
 -----------------------------------------------------------------------------
@@ -1006,6 +996,40 @@ sub equip_del : Chained('equip_show') : PathPart('del') : Args(0) {
         $c->detach( '_delete', [ $equipid, 'PgEquip', 'equipid' ] );
     }
 }
+
+=head2 equipcsvdownload
+機材管理 equipcsvdownload : CSVダウンロード
+
+=cut
+
+sub equipcsvdownload :Local {
+    my ( $self, $c ) = @_;
+
+    # 無効でない
+    my $rows =
+        [ $c->model('ConkanDB::PgAllEquip')->search(
+            { 'rmdate' => \'IS NULL' },
+            { 'order_by' => { '-asc' => 'equipno' } }
+        ) ];
+    my @data;
+    foreach my $row ( @$rows ) {
+        push ( @data, [
+            $row->equipno(),                # 機材番号
+            $row->name(),                   # 名前
+            $row->spec(),                   # 仕様
+            $row->comment(),                # 備考
+        ]);
+    }
+
+    $c->stash->{'csv'} = \@data;
+    $c->response->header( 'Content-Disposition' =>
+        'attachment; filename=' .
+            strftime("%Y%m%d%H%M%S", localtime()) . '_equiplist.csv' );
+
+    $c->forward('conkan::View::Download::CSV');
+}
+
+=head2 更新削除共通
 
 =head2 _updatecreate
 
