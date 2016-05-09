@@ -835,6 +835,45 @@ sub cast_del : Chained('cast_show') : PathPart('del') : Args(0) {
     }
 }
 
+=head2 castcsvdownload
+部屋管理 castcsvdownload : CSVダウンロード
+
+=cut
+
+sub castcsvdownload :Local {
+    my ( $self, $c ) = @_;
+
+    # 無効でない
+    my $rows =
+        [ $c->model('ConkanDB::PgAllCast')->search(
+            { 
+              'rmdate' => \'IS NULL'
+            },
+            {
+                'order_by' => { '-asc' => [ 'regno' ] },
+            } )
+        ];
+    my @data;
+    foreach my $row ( @$rows ) {
+        push ( @data, [
+            $row->regno(),                  # 大会登録番号
+            $row->name(),                   # 名前
+            $row->namef(),                  # フリガナ
+            $row->status(),                 # コンタクトステータス
+            $row->memo(),                   # 備考(連絡先)
+            $row->restdate(),               # 備考(制限事項)
+        ]);
+    }
+
+    $c->stash->{'csv'} = \@data;
+    $c->response->header( 'Content-Disposition' =>
+        'attachment; filename=' .
+            strftime("%Y%m%d%H%M%S", localtime()) . '_castlist.csv' );
+
+    $c->forward('conkan::View::Download::CSV');
+}
+
+
 =head2 equip
 -----------------------------------------------------------------------------
 機材管理 equip_base  : Chainの起点
