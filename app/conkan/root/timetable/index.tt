@@ -89,56 +89,66 @@ END -%]
             <tr>
               <th style="text-align: right">日時1</th>
               <td>
-                <select class="col-sm-12" name="dh1date" ng-model="current.date1"
+                <select class="col-sm-12" name="dh1date"
+                  ng-disabled="current.noteditable" ng-model="current.date1"
                   ng-options="i for i in conf.dates"></select>
               </td>
               <td>
-                <select class="col-sm-2" name="dh1date" ng-model="current.shour1"
+                <select class="col-sm-2" name="dh1date"
+                  ng-disabled="current.noteditable "ng-model="current.shour1"
                   ng-options="i for i in conf.hours1"></select>
-                <select class="col-sm-2" name="dh1date" ng-model="current.smin1"
+                <select class="col-sm-2" name="dh1date"
+                  ng-disabled="current.noteditable" ng-model="current.smin1"
                   ng-options="i for i in conf.mins"></select>
                 <div align="center" class="col-sm-1"> - </div>
-                <select class="col-sm-2" name="dh1date" ng-model="current.ehour1"
+                <select class="col-sm-2" name="dh1date"
+                  ng-disabled="current.noteditable" ng-model="current.ehour1"
                   ng-options="i for i in conf.hours1"></select>
-                <select class="col-sm-2" name="dh1date" ng-model="current.emin1"
+                <select class="col-sm-2" name="dh1date"
+                  ng-disabled="current.noteditable" ng-model="current.emin1"
                   ng-options="i for i in conf.mins"></select>
               </td>
               <th style="text-align: right">日時2</th>
               <td colspan="2">
-                <select class="col-sm-12" name="dh2date" ng-model="current.date2"
+                <select class="col-sm-12" name="dh2date"
+                  ng-disabled="current.noteditable" ng-model="current.date2"
                   ng-options="i for i in conf.dates"></select>
               </td>
               <td>
-                <select class="col-sm-2" name="dh2date" ng-model="current.shour2"
+                <select class="col-sm-2" name="dh2date"
+                  ng-disabled="current.noteditable" ng-model="current.shour2"
                   ng-options="i for i in conf.hours2"></select>
-                <select class="col-sm-2" name="dh2date" ng-model="current.smin2"
+                <select class="col-sm-2" name="dh2date"
+                  ng-disabled="current.noteditable" ng-model="current.smin2"
                   ng-options="i for i in conf.mins"></select>
                 <div align="center" class="col-sm-1"> - </div>
-                <select class="col-sm-2" name="dh2date" ng-model="current.ehour2"
+                <select class="col-sm-2" name="dh2date"
+                  ng-disabled="current.noteditable" ng-model="current.ehour2"
                   ng-options="i for i in conf.hours2"></select>
-                <select class="col-sm-2" name="dh2date" ng-model="current.emin2"
+                <select class="col-sm-2" name="dh2date"
+                  ng-disabled="current.noteditable" ng-model="current.emin2"
                   ng-options="i for i in conf.mins"></select>
               </td>
             </tr>
             <tr>
               <th style="text-align: right">場所</th>
               <td colspan="2">
-                <select class="col-sm-12" ng-model="current.roomid"
+                <select class="col-sm-12"
+                  ng-disabled="current.noteditable" ng-model="current.roomid"
                   ng-options="i.id as i.val for i in conf.roomlist"></select>
               </td>
               <th style="text-align: right" colspan="2">実行ステータス</th>
               <td>
-                <select class="col-sm-12" ng-model="current.status"
+                <select class="col-sm-12"
+                  ng-disabled="current.noteditable" ng-model="current.status"
                   ng-options="i for i in conf.status"></select>
               </td>
               <td style="text-align: center">
-                [%- IF editable %]
-                  <button type="submit" class="btn" id="applybtn"
-                    ng-disabled="timetable_edit_form.$invalid || timetable_edit_form.$pristine"
-                    ng-click="doApply()">
-                    反映
-                  </button>
-                [% END %]
+                <button type="submit" class="btn" id="applybtn"
+                  ng-disabled="timetable_edit_form.$invalid || timetable_edit_form.$pristine || current.noteditable"
+                  ng-click="doApply()">
+                  反映
+                </button>
               </td>
             </tr>
           </tbody>

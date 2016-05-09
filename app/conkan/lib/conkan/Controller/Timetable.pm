@@ -29,7 +29,6 @@ Timetableを表示する Catalyst Controller.
 
 sub index :Path :Args(0) {
     my ( $self, $c ) = @_;
-    my $uid = $c->user->get('staffid');
     # タイムテーブルガントチャート表示用固定値
     my $M = $c->model('ConkanDB::PgSystemConf');
     my $syscon = {
@@ -304,9 +303,13 @@ sub timetable_get : Chained('timetable_base') :PathPart('') :Args(1) {
                 if ( $row->roomid() );
             $c->stash->{'memo'}     = $row->memo();
             $c->stash->{'progressprp'} = $row->progressprp();
-            if (  ( $c->user->get('role') eq 'ROOT' )
-               || ( $c->user->get('role') eq 'PG'   ) ) {
-               # システム管理者/企画管理者の場合、更新可能
+            $c->stash->{'csid'} = $c->user->get('staffid');
+            $c->stash->{'crole'} = $c->user->get('role');
+            if (  ( $c->stash->{'crole'} eq 'ROOT' )
+               || ( $c->stash->{'crole'} eq 'PG'   )
+               || ( $c->stash->{'staffid'} eq $c->stash->{'csid'} )
+              ) {
+               # システム管理者/企画管理者/担当企画の場合、更新可能
                 $c->session->{'updtic'} = time;
                 $row->update( {
                     'updateflg' => $c->sessionid . $c->session->{'updtic'}

@@ -44,7 +44,7 @@ ConkanAppModule.factory( 'currentprgService',
                 sname :   '', name :   '', status :  '',
                 date1 :   '', shour1 : '', smin1 : '', ehour1 : '', emin1 : '',
                 date2 :   '', shour2 : '', smin2 : '', ehour2 : '', emin2 : '',
-                roomid :  ''
+                roomid :  '', noteditable : true
         };
         return {
             currentval: currentval,

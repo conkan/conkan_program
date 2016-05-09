@@ -128,9 +128,15 @@ var ProgDataCnv = function( data, prog ) {
     prog.status  = data.status;
     prog.layerno = data.layerno;
     prog.staffid = data.staffid;
+    prog.csid    = data.csid;
+    prog.crole   = data.crole;
     prog.roomid  = data.roomid;
     prog.memo    = data.memo;
     prog.progressprp = data.progressprp;
+    prog.noteditable = 
+        (   ( data.crole == 'ROOT' )
+         || ( data.crole == 'PG' ) 
+         || ( data.staffid == data.csid ) ) ? false : true;
 };
 
 // 企画時刻バリデーション
