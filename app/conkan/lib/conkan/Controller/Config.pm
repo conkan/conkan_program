@@ -9,6 +9,7 @@ use Data::Dumper;
 use YAML;
 use Encode;
 use DateTime;
+use POSIX qw/ strftime /;
 
 BEGIN { extends 'Catalyst::Controller'; }
 
@@ -447,6 +448,53 @@ sub staff_del : Chained('staff_show') : PathPart('del') : Args(0) {
     else {
         $c->detach( '_delete', [ $staffid, 'PgProgram', 'staffid' ] );
     }
+}
+
+=head2 staffcsvdownload
+スタッフ管理 staffcsvdownload : CSVダウンロード
+
+=cut
+
+my %RoleTrn = (
+    'NORM'  => '企画スタッフ',
+    'PG'    => '企画管理スタッフ',
+    'ROOT'  => 'システム管理者',
+);
+
+sub staffcsvdownload :Local {
+    my ( $self, $c ) = @_;
+
+    # adminでなく、無効でない
+    my $rows =
+        [ $c->model('ConkanDB::PgStaff')->search(
+            { 'account'  => { '!=' => 'admin' },
+              'rmdate' => \'IS NULL'
+            },
+            {
+                'order_by' => { '-asc' => [ 'staffid' ] },
+            } )
+        ];
+    my @data;
+    foreach my $row ( @$rows ) {
+        push ( @data, [
+            $row->name(),                   # 名前
+            $row->account(),                # アカウント
+            $RoleTrn{$row->role()},         # 役割
+            $row->ma(),                     # メールアドレス
+            $row->telno(),                  # 電話番号,
+            $row->regno(),                  # 大会登録番号
+            $row->tname(),                  # 担当名
+            $row->tnamef(),                 # 担当名ふりがな
+            $row->comment(),                # 備考
+        ]);
+    }
+
+    $c->stash->{'csv'} = \@data;
+    $c->response->header( 'Content-Disposition' =>
+        'attachment; filename=' .
+            strftime("%Y%m%d%H%M%S", localtime()) . '_stafflist.csv' );
+
+    $c->forward('conkan::View::Download::CSV');
 }
 
 =head2 room
