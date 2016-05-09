@@ -644,6 +644,55 @@ sub room_del : Chained('room_show') : PathPart('del') : Args(0) {
     }
 }
 
+=head2 roomcsvdownload
+部屋管理 roomcsvdownload : CSVダウンロード
+
+=cut
+
+my %NetTrn = (
+    'NORM'  => '無',
+    'W'     => '無線',
+    'E'     => '有線',
+);
+
+sub roomcsvdownload :Local {
+    my ( $self, $c ) = @_;
+
+    # 無効でない
+    my $rows =
+        [ $c->model('ConkanDB::PgRoom')->search(
+            { 
+              'rmdate' => \'IS NULL'
+            },
+            {
+                'order_by' => { '-asc' => [ 'roomno' ] },
+            } )
+        ];
+    my @data;
+    foreach my $row ( @$rows ) {
+        push ( @data, [
+            $row->roomno(),                 # 部屋番号
+            $row->name(),                   # 名前
+            $row->max(),                    # 定員
+            $row->type(),                   # 形式
+            $row->size(),                   # 面積
+            $row->useabletime(),            # 利用可能時間
+            $row->tablecnt(),               # 机数
+            $row->chaircnt(),               # イス数
+            $row->equips(),                 # 附属設備
+            $NetTrn{$row->net()},           # インタネット回線
+            $row->comment(),                # 備考
+        ]);
+    }
+
+    $c->stash->{'csv'} = \@data;
+    $c->response->header( 'Content-Disposition' =>
+        'attachment; filename=' .
+            strftime("%Y%m%d%H%M%S", localtime()) . '_roomlist.csv' );
+
+    $c->forward('conkan::View::Download::CSV');
+}
+
 =head2 cast
 -----------------------------------------------------------------------------
 出演者管理 cast_base  : Chainの起点
