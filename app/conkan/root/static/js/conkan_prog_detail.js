@@ -1,3 +1,4 @@
+// conkan_timetable.js --- 企画詳細表示用 JS ---
 var storage = sessionStorage;
 $(document).ready(function(){
   $(document).scrollTop( storage.getItem( 'sctop' ) );
@@ -27,7 +28,7 @@ $('#PgEdit').on('show.bs.modal', function (event) {
       $('#dobtn').text('追加');
   }
   $('#dobtn').show();
-  if ( target == "equip" && id ) {
+  if ( target != "regprogram" && id ) {
       $('#dodel').show();
   } else {
       $('#dodel').hide();
@@ -106,7 +107,7 @@ var ConkanAppModule = angular.module('conkanProgDetail',
 ConkanAppModule.controller( 'progDetailController',
     [ '$scope', '$http', '$uibModal',
         function( $scope, $http, $uibModal ) {
-            // 企画概要フォーム
+            // 企画更新フォーム
             $scope.openPgEditForm = function( pgid ) {
                 $scope.pgid = pgid;
                 $uibModal.open({
@@ -127,24 +128,12 @@ ConkanAppModule.controller( 'progFormController',
         function( $scope, $http, $uibModal, $uibModalInstance ) {
             $scope.$watch('prog.date1', function( n, o, scope ) {
                 if ( n != o ) {
-                    scope.conf['hours1'] = GetHours(n, scope.conf);
-                    if (!n) {
-                        scope.prog.shour1 = undefined;
-                        scope.prog.smin1 = undefined;
-                        scope.prog.ehour1 = undefined;
-                        scope.prog.emin1 = undefined;
-                    }
+                    scope.conf['hours1'] = GetHours(n, scope.conf, scope.prog, '1' );
                 }
             });
             $scope.$watch('prog.date2', function( n, o, scope ) {
                 if ( n != o ) {
-                    scope.conf['hours2'] = GetHours(n, scope.conf);
-                    if (!n) {
-                        scope.prog.shour2 = undefined;
-                        scope.prog.smin2 = undefined;
-                        scope.prog.ehour2 = undefined;
-                        scope.prog.emin2 = undefined;
-                    }
+                    scope.conf['hours2'] = GetHours(n, scope.conf, scope.prog, '2');
                 }
             });
 
@@ -152,57 +141,12 @@ ConkanAppModule.controller( 'progFormController',
                 // 二重クリック回避
                 var pgid = $scope.prog.pgid;
                 $('#prgapplybtn').attr('disabled', 'disabled');
-                // バリデーション ## 共通化対象
-                if (!(pgid)) {
+                // バリデーション
+                if ( ProgTimeValid( $scope.prog, $scope.conf.scale_hash ) ) {
+                    $('#valerr').text('時刻設定に矛盾があります');
                     $('#prgapplybtn').removeAttr('disabled');
                     return;
                 }
-                ckarray = [
-                    {
-                        dh    : 'dh1date',
-                        date  : $scope.prog.date1,
-                        shour : $scope.prog.shour1,
-                        smin  : $scope.prog.smin1,
-                        ehour : $scope.prog.ehour1,
-                        emin  : $scope.prog.emin1
-                    },
-                    {
-                        dh    : 'dh2date',
-                        date  : $scope.prog.date2,
-                        shour : $scope.prog.shour2,
-                        smin  : $scope.prog.smin2,
-                        ehour : $scope.prog.ehour2,
-                        emin  : $scope.prog.emin2
-                    }
-                ];
-                for ( cnt in ckarray ) {
-                    cur = ckarray[cnt];
-                    $('*[name=' + cur.dh + ']').each(function() {
-                        $(this).removeClass('ng-invalid');
-                        $(this).addClass('ng-valid');
-                        $(this).$invalid = false;
-                    });
-                }
-                for ( cnt in ckarray ) {
-                    if ( ckarray[cnt].date ) {
-                        cur = ckarray[cnt];
-                        scale = $scope.conf.scale_hash[cur.date];
-                        start = ( cur.shour * 60 ) + ( cur.smin * 1 );
-                        end   = ( cur.ehour * 60 ) + ( cur.emin * 1 );
-                        if (   ( start >= end )
-                            || ( start < scale[0] ) || ( scale[1] < end ) ) {
-                            $('#valerr').text('時刻設定に矛盾があります');
-                            $('*[name=' + cur.dh + ']').each(function() {
-                                $(this).addClass('ng-invalid');
-                                $(this).removeClass('ng-valid');
-                                $(this).$invalid = true;
-                            });
-                            $('#prgapplybtn').removeAttr('disabled');
-                            return;
-                        }
-                    }
-                }
-                // バリデーション完了
                 $http( {
                     method : 'POST',
                     url : '/timetable/' + pgid,
@@ -258,30 +202,9 @@ ConkanAppModule.controller( 'progFormController',
                 method  : 'GET',
                 url     : '/timetable/' + $scope.pgid
             })
-            .success(function(data, status, headers, config) {
-               // ここは共通化したい
+            .success(function(data) {
                $scope.prog = {};
-               $scope.prog.regpgid = data.regpgid;
-               $scope.prog.subno   = data.subno;
-               $scope.prog.pgid    = data.pgid;
-               $scope.prog.sname   = data.sname;
-               $scope.prog.name    = data.name;
-               $scope.prog.date1   = data.date1  ? data.date1  : undefined;
-               $scope.prog.shour1  = data.shour1 ? data.shour1 : undefined;
-               $scope.prog.smin1   = data.smin1  ? data.smin1  : undefined;
-               $scope.prog.ehour1  = data.ehour1 ? data.ehour1 : undefined;
-               $scope.prog.emin1   = data.emin1  ? data.emin1  : undefined;
-               $scope.prog.date2   = data.date2  ? data.date2  : undefined;
-               $scope.prog.shour2  = data.shour2 ? data.shour2 : undefined;
-               $scope.prog.smin2   = data.smin2  ? data.smin2  : undefined;
-               $scope.prog.ehour2  = data.ehour2 ? data.ehour2 : undefined;
-               $scope.prog.emin2   = data.emin2  ? data.emin22 : undefined;
-               $scope.prog.status  = data.status;
-               $scope.prog.layerno = data.layerno;
-               $scope.prog.staffid = data.staffid;
-               $scope.prog.roomid  = data.roomid;
-               $scope.prog.memo    = data.memo;
-               $scope.prog.progressprp = data.progressprp;
+               ProgDataCnv( data, $scope.prog );
             })
             .error(function(data) {
                 var modalinstance = $uibModal.open(

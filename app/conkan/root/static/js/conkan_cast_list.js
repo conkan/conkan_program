@@ -1,3 +1,4 @@
+// conkan_cast_list.js --- 出演者一覧用 JS ---
 var storage = sessionStorage;
 $(document).ready(function(){
   $(document).scrollTop( storage.getItem( 'sctop' ) );
@@ -57,9 +58,15 @@ ConkanAppModule.controller( 'castListController',
                     cellClass: 'ui-grid-vcenter',
                     enableHiding: false,
                 },
+                { name : '登録番号', field: 'regno',
+                    headerCellClass: 'gridheader',
+                    width: "8%",
+                    cellClass: 'ui-grid-vcenter',
+                    enableHiding: false,
+                },
                 { name : 'コンタクトステータス', field: 'status',
                     headerCellClass: 'gridheader',
-                    width: "24%",
+                    width: "20%",
                     cellClass: 'ui-grid-vcenter',
                     enableHiding: false,
                 },

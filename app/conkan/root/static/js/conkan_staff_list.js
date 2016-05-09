@@ -1,3 +1,4 @@
+// conkan_staff_list.js --- スタッフ一覧用 JS ---
 var storage = sessionStorage;
 $(document).ready(function(){
   $(document).scrollTop( storage.getItem( 'sctop' ) );

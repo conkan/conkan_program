@@ -1,8 +1,9 @@
+// conkan_loginlog.js --- ログイン履歴用 JS ---
 // conkanLoginLogモジュールの生成
 var ConkanAppModule = angular.module('conkanLoginLog',
         ['ui.grid', 'ui.grid.resizeColumns', 'ui.bootstrap'] );
 
-// スタッフリストコントローラ
+// ログイン履歴コントローラ
 ConkanAppModule.controller( 'loginLogController',
     [ '$scope', '$http', '$uibModal',
         function( $scope, $http, $uibModal ) {

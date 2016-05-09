@@ -77,7 +77,7 @@ END -%]
   $(document).ready(function() {
     $('#[%- rs.role | html -%]').prop('selected', true);
     $('#[%- state | html -%]').show();
-    if ( '[% cuRole -%]' != 'ROOT' && ![% addroot %]) {
+    if ( '[% cuRole -%]' == 'NORM' && ![% addroot %]) {
       $('#account').prop('readonly', 'readonly');
       $('#account').css('background-color', '#eee' );
       $('#role').prop('readonly', 'readonly');

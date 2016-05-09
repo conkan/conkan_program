@@ -1,3 +1,4 @@
+// conkan_room_list.js --- 部屋一覧用 JS ---
 var storage = sessionStorage;
 $(document).ready(function(){
   $(document).scrollTop( storage.getItem( 'sctop' ) );

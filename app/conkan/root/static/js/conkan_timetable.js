@@ -1,3 +1,4 @@
+// conkan_timetable.js --- タイムテーブル用 JS ---
 $(window).resize(function() {
   // リサイズによるタイムテーブル領域の調整
   var
@@ -53,25 +54,7 @@ ConkanAppModule.factory( 'currentprgService',
                     method  : 'GET',
                     url     : '/timetable/' + pgid
                 }).success(function(data) {
-                    // pgidの企画情報を取得し、currentvalに設定
-                    // subnoは前後に()付ける
-                    currentval.regpgid = data.regpgid;
-                    currentval.subno   = '(' + data.subno + ')';
-                    currentval.pgid    = data.pgid;
-                    currentval.sname   = data.sname;
-                    currentval.name    = data.name;
-                    currentval.status  = data.status;
-                    currentval.date1   = data.date1  ? data.date1  : undefined;
-                    currentval.shour1  = data.shour1 ? data.shour1 : undefined;
-                    currentval.smin1   = data.smin1  ? data.smin1  : undefined;
-                    currentval.ehour1  = data.ehour1 ? data.ehour1 : undefined;
-                    currentval.emin1   = data.emin1  ? data.emin1  : undefined;
-                    currentval.date2   = data.date2  ? data.date2  : undefined;
-                    currentval.shour2  = data.shour2 ? data.shour2 : undefined;
-                    currentval.smin2   = data.smin2  ? data.smin2  : undefined;
-                    currentval.ehour2  = data.ehour2 ? data.ehour2 : undefined;
-                    currentval.emin2   = data.emin2  ? data.emin22 : undefined;
-                    currentval.roomid  = data.roomid;
+                    ProgDataCnv( data, currentval );
                 });
             }
         };
@@ -191,10 +174,6 @@ ConkanAppModule.controller( 'timetableController',
                     sort: { priority: 1, direction: uiGridConstants.DSC },
                     cellTemplate: '<div ng-if="!row.groupHeader"><button class="btn primary prgcell" ng-click=grid.appScope.pgmclick(row.entity.prgname.pgid)>{{row.entity.prgname.name}}</button></div>'
                 },
-                { name : '部屋', field: 'room',
-                    headerCellClass: 'gridheader',
-                    cellTemplate: '<div ng-if="!row.groupHeader">{{COL_FIELD CUSTOM_FILTERS}}</div>'
-                },
                 { name : '期間',
                     headerCellTemplate: pglistValue.ganttConst.ganttHeader,
                     width: $scope.__getGanttWidth(),
@@ -231,25 +210,13 @@ ConkanAppModule.controller( 'timeformController',
         function( $scope, $http, $uibModal, currentprgService ) {
             $scope.$watch('current.date1', function( n, o, scope ) {
                 if ( n != o ) {
-                    scope.conf['hours1'] = GetHours(n, scope.conf);
-                    if (!n) {
-                        scope.current.shour1 = undefined;
-                        scope.current.smin1 = undefined;
-                        scope.current.ehour1 = undefined;
-                        scope.current.emin1 = undefined;
-                    }
+                    scope.conf['hours1'] = GetHours(n, scope.conf, scope.current, '1');
                 }
             });
 
             $scope.$watch('current.date2', function( n, o, scope ) {
                 if ( n != o ) {
-                    scope.conf['hours2'] = GetHours(n,scope.conf);
-                    if (!n) {
-                        scope.current.shour2 = undefined;
-                        scope.current.smin2  = undefined;
-                        scope.current.ehour2 = undefined;
-                        scope.current.emin2  = undefined;
-                    }
+                    scope.conf['hours2'] = GetHours(n, scope.conf, scope.current, '2');
                 }
             });
 
@@ -273,61 +240,15 @@ ConkanAppModule.controller( 'timeformController',
             $scope.current      = currentprgService.currentval;
 
             $scope.doApply = function() {
-                var ckarray, cnt, cur, scale, start, end;
                 var pgid = $scope.current.pgid;
                 // 二重クリック回避
                 $('#applybtn').attr('disabled', 'disabled');
-                // バリデーション ## 共通化対象
-                if (!(pgid)) {
+                // バリデーション
+                if ( ProgTimeValid( $scope.current, $scope.conf.scale_hash ) ) {
+                    $('#valerr').text('時刻設定に矛盾があります');
                     $('#applybtn').removeAttr('disabled');
                     return;
                 }
-                ckarray = [
-                    {
-                        dh    : 'dh1date',
-                        date  : $scope.current.date1,
-                        shour : $scope.current.shour1,
-                        smin  : $scope.current.smin1,
-                        ehour : $scope.current.ehour1,
-                        emin  : $scope.current.emin1
-                    },
-                    {
-                        dh    : 'dh2date',
-                        date  : $scope.current.date2,
-                        shour : $scope.current.shour2,
-                        smin  : $scope.current.smin2,
-                        ehour : $scope.current.ehour2,
-                        emin  : $scope.current.emin2
-                    }
-                ];
-                for ( cnt in ckarray ) {
-                    cur = ckarray[cnt];
-                    $('*[name=' + cur.dh + ']').each(function() {
-                        $(this).removeClass('ng-invalid');
-                        $(this).addClass('ng-valid');
-                        $(this).$invalid = false;
-                    });
-                }
-                for ( cnt in ckarray ) {
-                    if ( ckarray[cnt].date ) {
-                        cur = ckarray[cnt];
-                        scale = $scope.conf.scale_hash[cur.date];
-                        start = ( cur.shour * 60 ) + ( cur.smin * 1 );
-                        end   = ( cur.ehour * 60 ) + ( cur.emin * 1 );
-                        if (   ( start >= end )
-                            || ( start < scale[0] ) || ( scale[1] < end ) ) {
-                            $('#valerr').text('時刻設定に矛盾があります');
-                            $('*[name=' + cur.dh + ']').each(function() {
-                                $(this).addClass('ng-invalid');
-                                $(this).removeClass('ng-valid');
-                                $(this).$invalid = true;
-                            });
-                            $('#applybtn').removeAttr('disabled');
-                            return;
-                        }
-                    }
-                }
-                // バリデーション完了
                 $http( {
                     method : 'POST',
                     url : '/timetable/' + pgid,

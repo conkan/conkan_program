@@ -216,8 +216,8 @@ END -%]
     <table class="table table-bordered table-condensed"
      style="background-color:white;">
       <colgroup>
-        <col class="col-sm-1">
         <col class="col-sm-2">
+        <col class="col-sm-1">
         <col class="col-sm-2">
         <col class="col-sm-2">
         [%- IF editable %]
@@ -247,7 +247,7 @@ END -%]
             SET rmcol = '';
           END %]
           <tr>
-            <td style="[% rmcol %]">[% item.castid.name   | html %]</td>
+            <td style="[% rmcol %]">[% item.castid.regno %] [% item.castid.name   | html %]</td>
             <td style="[% rmcol %]">[% item.name          | html %]</td>
             <td style="[% rmcol %]">[% item.title         | html %]</td>
             <td style="[% rmcol %]">[% item.castid.status | html %]</td>
@@ -500,7 +500,7 @@ END -%]
                 <select class="col-sm-12" name="staffid"
                     ng-model="prog.staffid"
                     ng-options="i.id as i.val for i in conf.stafflist">
-                [%- IF urole != 'ROOT' && urole != 'PG' -%]
+                [%- IF urole == 'NORM' -%]
                   <option>ngReadonly</option>
                 [%- END -%]
                 </select>

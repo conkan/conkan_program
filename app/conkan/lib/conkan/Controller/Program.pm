@@ -451,6 +451,7 @@ sub program_listget : Private {
                 'name'          => $pgm->regpgid->name(),
                 'staff'         => +( $sid ? $sid->name() : '' ),
                 'status'        => $pgm->status(),
+                'contentpub'    => $pgm->regpgid->contentpub(),
                 'repdatetime'   => +( $lpdt ? $lpdt : '' ),
             };
         }
@@ -582,7 +583,7 @@ sub pgup_regprog : Chained('program_show') : PathPart('regprogram') : Args(0) {
                     regpgid name namef regma experience regno telno faxno celno
                     type place layout date classlen expmaxcnt
                     content contentpub realpub afterpub openpg restpg
-                    avoiddup experience comment
+                    avoiddup comment
                     / ];
     my $regpgid = $c->stash->{'regpgid'};
     $c->stash->{'M'} = $c->model('ConkanDB::PgRegProgram');
@@ -613,27 +614,6 @@ sub pgup_program : Chained('program_show') : PathPart('program') : Args(0) {
     try {
         $rowprof = $c->stash->{'M'}->find( $pgid,
                      { 'prefetch' => [ 'regpgid', 'staffid', 'roomid' ], } );
-        if ( $c->request->method eq 'GET' ) {
-            # staffid == 1 は adminなので排除
-            $c->stash->{'stafflist'} = [
-                { 'id' => '', 'val' => '' },
-                map +{ 'id' => $_->staffid(), 'val' => $_->tname() }, 
-                    $c->model('ConkanDB::PgStaff')->search(
-                        { staffid => { '!=' =>  1 } } )
-                ];
-            # 設定フォーム選択肢
-            my $conf = $c->forward('/program/_setSysConf' );
-            # select直記述時の特殊処理 (angular化したら不要)
-            unshift( @{$conf->{'dates'}}, { 'id' => '', 'val' => '' } );
-            unshift( @{$conf->{'s_hours'}}, { 'id' => '', 'val' => '' } );
-            unshift( @{$conf->{'s_mins'}}, { 'id' => '', 'val' => '' } );
-            unshift( @{$conf->{'e_hours'}}, { 'id' => '', 'val' => '' } );
-            unshift( @{$conf->{'e_mins'}}, { 'id' => '', 'val' => '' } );
-            unshift( @{$conf->{'status'}}, { 'id' => '', 'val' => '' } );
-            unshift( @{$conf->{'nos'}}, { 'id' => '', 'val' => '' } );
-            unshift( @{$conf->{'roomlist'}}, { 'id' => '', 'val' => '' } );
-            $c->stash->{'conf'}  = $conf;
-        }
     } catch {
         $c->detach( '_dberror', [ shift ] );
     };
@@ -649,6 +629,7 @@ sub pgup_equiptop : Chained('program_show') : PathPart('equip') : CaptureArgs(1)
     my ( $self, $c, $id ) = @_;
     $c->stash->{'id'} = $id;
     $c->stash->{'M'} = $c->model('ConkanDB::PgEquip');
+    $c->stash->{'target'} = 'equip';
 }
 
 =head2 program/*/equip/*/
@@ -677,10 +658,10 @@ sub pgup_equip : Chained('pgup_equiptop') : PathPart('') : Args(0) {
                 { 'id' => '', 'val' => '' },
                 map +{ 'id' => $_->equipid,
                        'val' => $_->name . '(' . $_->equipno . ')' }, 
-                    $c->model('ConkanDB::PgAllEquip')->all()
-                ];
-            $c->stash->{'nos'}     = [
-                map +{ 'id' => $_, 'val' => $_ }, qw/ 0 1 2 3 4 5 6 7 8 9/
+                    $c->model('ConkanDB::PgAllEquip')->search(
+                        { 'rmdate' => \'IS NULL' },
+                        { 'order_by' => { '-asc' => 'equipno' } }
+                    )
                 ];
         }
     } catch {
@@ -697,6 +678,10 @@ sub pgup_equip : Chained('pgup_equiptop') : PathPart('') : Args(0) {
 sub pgup_equipdel : Chained('pgup_equiptop') : PathPart('del') : Args(0) {
     my ( $self, $c ) = @_;
 
+    my $up_items = [ qw/
+                    equipid
+                    / ];
+
     my $pgid = $c->stash->{'pgid'};
     my $id   = $c->stash->{'id'};
 
@@ -704,23 +689,19 @@ sub pgup_equipdel : Chained('pgup_equiptop') : PathPart('del') : Args(0) {
     $c->detach( '/program/' . $pgid . '/equip/' . $id )
         if ( ( $c->request->method eq 'GET' ) || ( $id == 0 ) );
 
-    try {
-        my $rowprof = $c->stash->{'M'}->find( $id );
-        if ( $rowprof->updateflg eq 
-                +( $c->sessionid . $c->session->{'updtic'}) ) {
-            # 削除実施
-            $rowprof->delete(); 
-            $c->response->body('<FORM><H1>削除しました</H1></FORM>');
-        }
-        else {
-            $c->stash->{'rs'} = undef;
-            $c->response->body =
-                '<FORM><H1>削除できませんでした</H1><BR/>' .
-                '他スタッフが変更した可能性があります</FORM>';
-        }
-    } catch {
-        $c->detach( '_dberror', [ shift ] );
-    };
+    $c->detach( '_pgdelete', [ $up_items ] );
+}
+
+=head2 program/*/cast/*
+---------------------------------------------
+企画管理 pgup_casttop  : 決定出演者追加/更新/削除 起点
+
+=cut
+sub pgup_casttop : Chained('program_show') : PathPart('cast') : CaptureArgs(1) {
+    my ( $self, $c, $id ) = @_;
+    $c->stash->{'id'} = $id;
+    $c->stash->{'M'} = $c->model('ConkanDB::PgCast');
+    $c->stash->{'target'} = 'cast';
 }
 
 =head2 program/*/cast/*/
@@ -728,12 +709,13 @@ sub pgup_equipdel : Chained('pgup_equiptop') : PathPart('del') : Args(0) {
 企画管理 pgup_cast  : 決定出演者追加/更新
 
 =cut
-sub pgup_cast : Chained('program_show') : PathPart('cast') : Args(1) {
-    my ( $self, $c, $id ) = @_;
+sub pgup_cast : Chained('pgup_casttop') : PathPart('') : Args(0) {
+    my ( $self, $c ) = @_;
+
+    my $id = $c->stash->{'id'};
     my $up_items = [ qw/
                     castid status memo name namef title
                     / ];
-    $c->stash->{'M'} = $c->model('ConkanDB::PgCast');
     my $rowprof = undef;
     try {
         if ( $id == 0 ) {   # 追加
@@ -746,7 +728,7 @@ sub pgup_cast : Chained('program_show') : PathPart('cast') : Args(1) {
         if ( $c->request->method eq 'GET' ) {
             $c->stash->{'castlist'} = [ 
                 { 'id' => '', 'val' => '' },
-                map +{ 'id' => $_->castid, 'val' => $_->name }, 
+                map +{ 'id' => $_->castid, 'val' => $_->regno . ' ' . $_->name }, 
                     $c->model('ConkanDB::PgAllCast')->all()
                 ];
             my $M = $c->model('ConkanDB::PgSystemConf');
@@ -760,6 +742,27 @@ sub pgup_cast : Chained('program_show') : PathPart('cast') : Args(1) {
         $c->detach( '_dberror', [ shift ] );
     };
     $c->detach( '_pgupdate', [ $rowprof, $up_items ] );
+}
+
+=head2 program/*/cast/*/del
+
+企画管理 pgup_castdel  : 決定出演者削除
+
+=cut
+sub pgup_castdel : Chained('pgup_casttop') : PathPart('del') : Args(0) {
+    my ( $self, $c ) = @_;
+
+    my $up_items = [ qw/
+                    castid name
+                    / ];
+    my $pgid = $c->stash->{'pgid'};
+    my $id   = $c->stash->{'id'};
+
+    # あり得ないが念のため
+    $c->detach( '/program/' . $pgid . '/cast/' . $id )
+        if ( ( $c->request->method eq 'GET' ) || ( $id == 0 ) );
+
+    $c->detach( '_pgdelete', [ $up_items ] );
 }
 
 =head2 _pgupdate
@@ -818,9 +821,9 @@ $c->log->debug('>>>> regpgid: ' . $regpgid . ' -> ' . $newregpgid);
                 }
                 else {
                     $c->stash->{'rs'} = undef;
-                    $c->response->body =
+                    $c->response->body(
                         '<FORM><H1>更新できませんでした</H1><BR/>' .
-                        '他スタッフが変更した可能性があります</FORM>';
+                        '他スタッフが変更した可能性があります</FORM>');
                 }
             }
             else {
@@ -832,6 +835,40 @@ $c->log->debug('>>>> regpgid: ' . $regpgid . ' -> ' . $newregpgid);
             }
             $c->stash->{'rs'} = undef;
             $c->response->status(200);
+        }
+    } catch {
+        $c->detach( '_dberror', [ shift ] );
+    };
+}
+
+=head2 _pgdelete
+---------------------------------------------
+企画削除実施
+
+=cut
+
+sub _pgdelete :Private {
+    my ( $self, $c,
+         $up_items,     # 対象列名配列
+    ) = @_;
+
+    try {
+        my $rowprof = $c->stash->{'M'}->find( $c->stash->{'id'} );
+        my $regpgid = $c->stash->{'regpgid'};
+
+        if ( $rowprof->updateflg eq 
+                +( $c->sessionid . $c->session->{'updtic'}) ) {
+            # 削除実施
+            $c->forward('/program/_autoProgress',
+                                [ $regpgid, $up_items, $rowprof, undef ] );
+            $rowprof->delete(); 
+            $c->response->body('<FORM><H1>削除しました</H1></FORM>');
+        }
+        else {
+            $c->stash->{'rs'} = undef;
+            $c->response->body(
+                '<FORM><H1>削除できませんでした</H1><BR/>' .
+                '他スタッフが変更した可能性があります</FORM>');
         }
     } catch {
         $c->detach( '_dberror', [ shift ] );
@@ -954,28 +991,36 @@ sub _autoProgress :Private {
        ) = @_;
 
     try {
-        my $progstr = '';
-        if ( defined( $row ) ) { # 更新
-            for my $key (@{$itemkeys}) {
-                my $rowval = $row->get_column($key);
-                my $val = $value->{$key};
-                if ( defined( $rowval ) ) {
-                    if ( exists( $TimeArgTrn{$key} ) ) {
-                        my @times = split(':', $row->get_column($key));
-                        $rowval = sprintf( '%02d:%02d', @times );
+        my $progstr = '[Auto Progress] ';
+        if ( defined( $row ) ) {
+            if ( defined( $value ) ) { # 更新
+                for my $key (@{$itemkeys}) {
+                    my $rowval = $row->get_column($key);
+                    my $val = $value->{$key};
+                    if ( defined( $rowval ) ) {
+                        if ( exists( $TimeArgTrn{$key} ) ) {
+                            my @times = split(':', $row->get_column($key));
+                            $rowval = sprintf( '%02d:%02d', @times );
+                        }
+                        elsif ( exists( $DateArgTrn{$key} ) ) {
+                            $rowval =~ s[-][/]g;
+                        }
                     }
-                    elsif ( exists( $DateArgTrn{$key} ) ) {
-                        $rowval =~ s[-][/]g;
+                    if ( defined( $val ) && ($rowval ne $val ) ) {
+                        $c->log->debug('>>> _autoProgress key:' . $key . ' rowval:' . $rowval . ' val:' . $val );
+                        $progstr .= $key . ' change to ' . $val . ' ';
                     }
                 }
-                if ( defined( $val ) && ($rowval ne $val ) ) {
-                    $c->log->debug('>>> _autoProgress key:' . $key . ' rowval:' . $rowval . ' val:' . $val );
-                    $progstr .= $key . ' change to ' . $val . ' ';
+            }
+            else { # 削除
+                $progstr .= 'Delete ' . $c->stash->{'target'} . ' ';
+                for my $key (@{$itemkeys}) {
+                    $progstr .= $key . ':' . $row->get_column($key) . ' ';
                 }
             }
         }
         else { # 生成
-            $progstr = 'Create ';
+            $progstr .= 'Create ';
             for my $key (@{$itemkeys}) {
                 $progstr .= $key . ':' . $value->{$key} . ' ';
             }
@@ -1014,54 +1059,6 @@ sub _crProgress :Private {
             'report'        => $progstr,
         },
     );
-}
-
-=head2 _setSysConf
-
-企画情報選択肢設定
-
-=cut
-
-sub _setSysConf :Private {
-    my ( $self, $c, 
-       ) = @_;
-
-    my $conf  = {};
-    my $M = $c->model('ConkanDB::PgSystemConf');
-    my $time_origin = $c->config->{time_origin};
-    $conf->{'dates'}   = [
-        map +{ 'id' => $_, 'val' => $_ },
-            @{from_json( $M->find('dates')->pg_conf_value() )}
-        ];
-    $conf->{'s_hours'} = [
-          map +{ 'id' => sprintf('%02d', $_), 'val' => sprintf('%02d', $_) },
-                ( $time_origin .. $time_origin+23 )
-        ];
-    $conf->{'s_mins'} = [
-          map +{ 'id' => sprintf('%02d', $_*5), 'val' => sprintf('%02d', $_*5) },
-                ( 0 .. 11 )
-        ];
-    $conf->{'e_hours'} = [
-          map +{ 'id' => sprintf('%02d', $_), 'val' => sprintf('%02d', $_) },
-                ( $time_origin .. $time_origin+23 )
-        ];
-    $conf->{'e_mins'} = [
-          map +{ 'id' => sprintf('%02d', $_*5), 'val' => sprintf('%02d', $_*5) },
-                ( 0 .. 11 )
-        ];
-    $conf->{'status'}  = [
-        map +{ 'id' => $_, 'val' => $_ },
-            @{from_json( $M->find('pg_status_vals')->pg_conf_value() )}
-        ];
-    $conf->{'nos'}     = [
-          map +{ 'id' => $_, 'val' => $_ }, qw/ 0 1 2 3 4 /
-        ];
-    $conf->{'roomlist'}  = [
-          map +{ 'id'  => $_->roomid(),
-                 'val' => $_->roomno() . ' ' . $_->name() },
-                $c->model('ConkanDB::PgRoom')->all()
-        ];
-    return $conf;
 }
 
 =encoding utf8

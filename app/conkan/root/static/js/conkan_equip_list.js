@@ -1,3 +1,4 @@
+// conkan_equip_list.js --- 機材一覧用 JS ---
 var storage = sessionStorage;
 $(document).ready(function(){
   $(document).scrollTop( storage.getItem( 'sctop' ) );
