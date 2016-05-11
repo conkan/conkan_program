@@ -821,8 +821,8 @@ $c->log->debug('>>>> regpgid: ' . $regpgid . ' -> ' . $newregpgid);
                             '<FORM><H1>更新しました</H1></FORM>');
                 }
                 else {
-$c->log->info(localtime() . 'updateflg: db: ' . $rowprof->updateflg);
-$c->log->info(localtime() . 'updateflg: cu: ' . +( $c->sessionid . $c->session->{'updtic'}) );
+$c->log->info('updateflg: db: ' . $rowprof->updateflg);
+$c->log->info('updateflg: cu: ' . +( $c->sessionid . $c->session->{'updtic'}) );
                     $c->stash->{'rs'} = undef;
                     $c->response->body(
                         '<FORM><H1>更新できませんでした</H1><BR/>' .
@@ -1012,7 +1012,6 @@ sub _autoProgress :Private {
                         }
                     }
                     if ( defined( $val ) && ($rowval ne $val ) ) {
-                        $c->log->debug('>>> _autoProgress key:' . $key . ' rowval:' . $rowval . ' val:' . $val );
                         $progstr .= $key . ' change to ' . $val . ' ';
                     }
                 }

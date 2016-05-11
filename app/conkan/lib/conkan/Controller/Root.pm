@@ -42,12 +42,11 @@ sub auto :Private {
     my ( $self, $c ) = @_;
 
     $c->log->info(localtime()
-        . ' [' . $c->request->method . ']'
-        . ' [' . $c->action->reverse . ']'
-        . ' userid [' 
-        . +( $c->user_exists ?  $c->user->get('staffid') : 'notlogin' ) . ']'
-        . ' args ['
-        . join('][', @{$c->request->args} ) . ']'
+        . ' [' . $c->request->method . '] [' . $c->action->reverse . ']' . "\n"
+        . '         path [' . $c->request->path . ']' . "\n"
+        . '         userid [' 
+        . +( $c->user_exists ?  $c->user->get('staffid') : 'notlogin' ) . ']' . "\n"
+        . '         sessionid [' . $c->sessionid . ']'
     );
     # 初期化済判断
     unless (exists($c->config->{inited})) {

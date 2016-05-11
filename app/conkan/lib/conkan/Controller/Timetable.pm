@@ -331,8 +331,8 @@ sub timetable_get : Chained('timetable_base') :PathPart('') :Args(1) {
                 $c->stash->{'status'} = 'update';
             }
             else {
-$c->log->info(localtime() . 'updateflg: db: ' . $row->updateflg);
-$c->log->info(localtime() . 'updateflg: cu: ' . +( $c->sessionid . $c->session->{'updtic'}) );
+$c->log->info('updateflg: db: ' . $row->updateflg);
+$c->log->info('updateflg: cu: ' . +( $c->sessionid . $c->session->{'updtic'}) );
                 $c->stash->{'status'} = 'fail';
             }
         }
