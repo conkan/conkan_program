@@ -50,6 +50,7 @@ ConkanAppModule.factory( 'currentprgService',
             currentval: currentval,
             query:   function(pgid) {
                 $('#valerr').text('');
+                currentval.pgid = '';
                 $http({
                     method  : 'GET',
                     url     : '/timetable/' + pgid
@@ -221,9 +222,7 @@ ConkanAppModule.controller( 'timeformController',
             });
 
             $scope.$watch('current.pgid', function( n, o, scope ) {
-                if ( n != o ) {
-                    $('form[name=timetable_edit_form]').$pristine = true;
-                }
+                scope.timetable_edit_form.$setPristine()
             });
 
             $http.get('/config/confget')
