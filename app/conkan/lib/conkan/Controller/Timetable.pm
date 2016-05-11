@@ -331,11 +331,12 @@ sub timetable_get : Chained('timetable_base') :PathPart('') :Args(1) {
                 $c->stash->{'status'} = 'update';
             }
             else {
+$c->log->info(localtime() . 'updateflg: db: ' . $row->updateflg);
+$c->log->info(localtime() . 'updateflg: cu: ' . +( $c->sessionid . $c->session->{'updtic'}) );
                 $c->stash->{'status'} = 'fail';
             }
         }
         $c->component('View::JSON')->{expose_stash} = undef;
-$c->log->debug('>>> program_progressget expose_stash:' . Dumper($c->component('View::JSON')->{expose_stash}));
     } catch {
         my $e = shift;
         $c->log->error('timetable_get error ' . localtime() .

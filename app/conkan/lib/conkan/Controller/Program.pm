@@ -580,7 +580,8 @@ sub program_progressget : Chained('program_show') : PathPart('progress') : Args(
 sub pgup_regprog : Chained('program_show') : PathPart('regprogram') : Args(0) {
     my ( $self, $c ) = @_;
     my $up_items = [ qw/
-                    regpgid name namef regma experience regno telno faxno celno
+                    regpgid name namef
+                    regma regname experience regno telno faxno celno
                     type place layout date classlen expmaxcnt
                     content contentpub realpub afterpub openpg restpg
                     avoiddup comment
@@ -795,8 +796,6 @@ sub _pgupdate :Private {
             my $regpgid = $c->stash->{'regpgid'};
             if ( defined( $rowprof ) ) {
                 # 更新実施
-$c->log->debug('>>>> updateflg: db: ' . $rowprof->updateflg);
-$c->log->debug('>>>> updateflg: cu: ' . +( $c->sessionid . $c->session->{'updtic'}) );
                 if ( $rowprof->updateflg eq 
                         +( $c->sessionid . $c->session->{'updtic'}) ) {
                         my $newregpgid = $value->{'regpgid'};
@@ -822,6 +821,8 @@ $c->log->debug('>>>> regpgid: ' . $regpgid . ' -> ' . $newregpgid);
                             '<FORM><H1>更新しました</H1></FORM>');
                 }
                 else {
+$c->log->info(localtime() . 'updateflg: db: ' . $rowprof->updateflg);
+$c->log->info(localtime() . 'updateflg: cu: ' . +( $c->sessionid . $c->session->{'updtic'}) );
                     $c->stash->{'rs'} = undef;
                     $c->response->body(
                         '<FORM><H1>更新できませんでした</H1><BR/>' .

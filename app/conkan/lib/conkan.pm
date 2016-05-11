@@ -19,10 +19,13 @@ extends 'Catalyst';
 #                 directory
 #
 # starmanでのデバッグ時には
-#   -Debug -Log=debug
-# を追加すること
+#   -Debug
+# を追加し、
+#   -Log=debug
+# に変更すること
 
 use Catalyst qw/
+    -Log=info
     ConfigLoader
     Config::YAML
     Static::Simple

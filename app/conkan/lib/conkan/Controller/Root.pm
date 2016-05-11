@@ -42,10 +42,13 @@ sub auto :Private {
     my ( $self, $c ) = @_;
 
     $c->log->info(localtime()
-        . ' アクション内部パス:[' . $c->action->reverse . ']['
-        . $c->request->method . '] userid :' 
-        . +( $c->user_exists ?  $c->user->get('staffid') : 'notlogin' )
-        . ']' );
+        . ' [' . $c->request->method . ']'
+        . ' [' . $c->action->reverse . ']'
+        . ' userid [' 
+        . +( $c->user_exists ?  $c->user->get('staffid') : 'notlogin' ) . ']'
+        . ' args ['
+        . join('][', @{$c->request->args} ) . ']'
+    );
     # 初期化済判断
     unless (exists($c->config->{inited})) {
         $c->log->info(localtime() . ' 未初期化');
