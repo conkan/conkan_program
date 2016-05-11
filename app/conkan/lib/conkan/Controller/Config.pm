@@ -483,7 +483,7 @@ sub staffcsvdownload :Local {
             $row->telno(),                  # 電話番号,
             $row->regno(),                  # 大会登録番号
             $row->tname(),                  # 担当名
-            $row->tnamef(),                 # 担当名ふりがな
+            $row->tnamef(),                 # 担当名フリガナ
             $row->comment(),                # 備考
         ]);
     }

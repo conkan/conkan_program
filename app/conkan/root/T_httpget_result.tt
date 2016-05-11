@@ -19,7 +19,7 @@
   <div class="modal-body">
     <H3><strong>更新できませんでした</strong></H3>
     他スタッフが変更した可能性があります<br/>
-    設定値を確認してください
+    最新情報を確認の上、必要なら再度更新してください。
   </div>
   <div class="modal-footer">
     <button class="btn btn-danger" ng-click="$close()">閉じる</button>

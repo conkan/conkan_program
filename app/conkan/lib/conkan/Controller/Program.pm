@@ -795,6 +795,8 @@ sub _pgupdate :Private {
             my $regpgid = $c->stash->{'regpgid'};
             if ( defined( $rowprof ) ) {
                 # 更新実施
+$c->log->debug('>>>> updateflg: db: ' . $rowprof->updateflg);
+$c->log->debug('>>>> updateflg: cu: ' . +( $c->sessionid . $c->session->{'updtic'}) );
                 if ( $rowprof->updateflg eq 
                         +( $c->sessionid . $c->session->{'updtic'}) ) {
                         my $newregpgid = $value->{'regpgid'};
@@ -823,7 +825,9 @@ $c->log->debug('>>>> regpgid: ' . $regpgid . ' -> ' . $newregpgid);
                     $c->stash->{'rs'} = undef;
                     $c->response->body(
                         '<FORM><H1>更新できませんでした</H1><BR/>' .
-                        '他スタッフが変更した可能性があります</FORM>');
+                        '他スタッフが変更した可能性があります<BR/>' .
+                        '最新情報を確認の上、必要なら再度更新してください。' .
+                        '</FORM>');
                 }
             }
             else {

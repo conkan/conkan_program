@@ -68,7 +68,7 @@ END %]
   [% pgupinputtext( 'tname', rs.tname, 4 ) %]
 </div>
 <div class="form-group">
-  <label class="col-sm-3 text-right">担当名ふりがな</label>
+  <label class="col-sm-3 text-right">担当名フリガナ</label>
   [% pgupinputtext( 'tnamef', rs.tnamef, 4 ) %]
 </div>
 <div class="form-group">

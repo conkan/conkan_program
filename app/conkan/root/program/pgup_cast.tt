@@ -34,7 +34,7 @@
       <tr>
         <th>企画ネーム</th>
         <td>[% pgupinputtext( 'name', rs.name, 12 ) %]</td>
-        <th>ふりがな</th>
+        <th>フリガナ</th>
         <td colspan="2">[% pgupinputtext( 'namef', rs.namef, 12 ) %]</td>
       </tr>
       <tr>

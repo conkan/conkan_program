@@ -191,7 +191,7 @@ END -%]
       <thead>
         <tr>
           <th style="text-align:center;">氏名</th>
-          <th style="text-align:center;">ふりがな</th>
+          <th style="text-align:center;">フリガナ</th>
           <th style="text-align:center;">肩書</th>
           <th style="text-align:center;">出演交渉</th>
           <th style="text-align:center;">ゲスト申請</th>

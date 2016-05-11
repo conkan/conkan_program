@@ -15,7 +15,7 @@
       <tr>
         <th>氏名</th>
         <td>[% pgupinputtext( 'name', rs.name, 12 ) %]</td>
-        <th>ふりがな</th>
+        <th>フリガナ</th>
         <td>[% pgupinputtext( 'namef', rs.namef, 12 ) %]</td>
       </tr>
       <tr>
