@@ -201,6 +201,51 @@ $c->log->debug('>>> '. $value->{'name'} . '[' . $value->{'regno'} . '] is alread
     }
 }
 
+=head2 staff2allcast
+
+スタッフを出演者一覧に登録
+(隠し機能 URL直打)
+
+=cut
+
+sub staff2allcast :Local {
+    my ( $self, $c ) = @_;
+
+    my @rowstaff = $c->model('ConkanDB::PgStaff')->search(
+                    { 'staffid' => { '!=' =>  1 },
+                      'rmdate' => \'IS NULL' },
+                    { 'order_by' => { '-asc' => 'staffid' } }
+                );
+    foreach my $row ( @rowstaff ) {
+        my $acrow;
+        my $regno = $row->regno();
+        if ( $regno ) {
+            $acrow = $c->model('ConkanDB::PgAllCast')->search(
+                { 'regno' => $regno } )->count;
+        }
+        else {
+            $acrow = $c->model('ConkanDB::PgAllCast')->search(
+                { 'name'  => $row->name() } )->count;
+        }
+        unless ( $acrow ) {
+            my $allcastval = {
+                'name'      => $row->name(),
+                'memo'      => $row->ma(),
+                'restdate'  => $row->comment() . '[staff]',
+            };
+            if ( $regno ) {
+                $allcastval->{'regno'} = $regno;
+            }
+$c->log->debug( '>>> s2c: '
+    . +( $regno ? 'regno[' . $regno . '] ' : '' )
+    . 'name[' . $allcastval->{'name'} . '] '
+    . 'memo[' . $allcastval->{'memo'} . ']' );
+            $c->model('ConkanDB::PgAllCast')->create( $allcastval );
+        }
+    }
+    $c->response->redirect( '/mypage/list' );
+}
+
 =encoding utf8
 
 =head1 AUTHOR
