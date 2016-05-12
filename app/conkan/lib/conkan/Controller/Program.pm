@@ -218,18 +218,27 @@ sub AddCast {
         # 出演者受付登録
         $c->model('ConkanDB::PgRegCast')->create( $hval );
 
-        # 全出演者登録
-        my $acrow = $c->model('ConkanDB::PgAllCast')->find( $hval->{'name'},
-                { 'key'  => 'name_UNIQUE', },
-            );
+        # 全出演者登録(名前とふりがな か regno が一致するものがない場合
+        my $acrow;
+        if ( exists($hval->{'entrantregno'} ) && $hval->{'entrantregno'} ) {
+            $acrow = $c->model('ConkanDB::PgAllCast')->search(
+                { 'regno' => $hval->{'entrantregno'} } )->count;
+        }
+        else {
+            $acrow = $c->model('ConkanDB::PgAllCast')->search(
+                {
+                  'name'  => $hval->{'name'},
+                  'namef' => $hval->{'namef'},
+                }
+            )->count;
+        }
         unless ( $acrow ) {
             my $aval = {
                     'name'   => $hval->{'name'},
                     'namef'  => $hval->{'namef'},
                     'status' => '',
                     };
-            if ( exists($hval->{'entrantregno'}) &&
-                 ( $hval->{'entrantregno'} =~ /^\d+$/ ) ) {
+            if ( exists($hval->{'entrantregno'} ) && $hval->{'entrantregno'} ) {
                 $aval->{'regno'} = $hval->{'entrantregno'};
             }
             $acrow = $c->model('ConkanDB::PgAllCast')->create( $aval );

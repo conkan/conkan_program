@@ -82,6 +82,7 @@ sub profile :Local {
                     tname tnamef comment / {
         $value->{$item} = $c->flash->{$item} || $param->{$item};
         $value->{$item} =~ s/\s+$// if defined($value->{$item});
+        $value->{$item} = undef if ($value->{$item} eq '');
     }
     # flashかformからoainfoパラメータを取り出し、末尾の空白を除く
     my $oainfo = {};
@@ -170,6 +171,30 @@ sub profile :Local {
             $value->{'tname'} = $value->{'tname'} || $value->{'name'};
             $value->{'staffid'} = undef;
             $staffM->create( $value );
+            # 出演者一覧に登録(名前かregnoが一致するものがない場合)
+            my $acrow;
+            if ( exists($value->{'regno'}) && $value->{'regno'} ) {
+                $acrow = $c->model('ConkanDB::PgAllCast')->search(
+                    { 'regno' => $value->{'regno'} } )->count;
+            }
+            else {
+                $acrow = $c->model('ConkanDB::PgAllCast')->search(
+                    { 'name'  => $value->{'name'} } )->count;
+            }
+            unless ( $acrow ) {
+                my $allcastval = {
+                    'name'      => $value->{'name'},
+                    'memo'      => $value->{'ma'},
+                    'restdate'  => $value->{'comment'} . '[staff]',
+                };
+                if ( exists($value->{'regno'}) && $value->{'regno'} ) {
+                    $allcastval->{'regno'} = $value->{'regno'};
+                }
+                $c->model('ConkanDB::PgAllCast')->create( $allcastval );
+            }
+            else {
+$c->log->debug('>>> '. $value->{'name'} . '[' . $value->{'regno'} . '] is already in AllCast' );
+            }
             $c->stash->{'rs'} = undef;
             $c->stash->{'state'} = 'success';
         }

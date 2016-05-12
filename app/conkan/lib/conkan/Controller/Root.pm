@@ -45,8 +45,13 @@ sub auto :Private {
         . ' [' . $c->request->method . '] [' . $c->action->reverse . ']' . "\n"
         . '         path [' . $c->request->path . ']' . "\n"
         . '         userid [' 
-        . +( $c->user_exists ?  $c->user->get('staffid') : 'notlogin' ) . ']' . "\n"
-        . '         sessionid [' . $c->sessionid . ']'
+        . +( $c->user_exists
+                ?  +( $c->user->get('staffid')
+                        ? $c->user->get('staffid')
+                        : '' )
+                : 'notlogin' ) . ']' . "\n"
+        . '         sessionid ['
+        . +( $c->sessionid ? $c->sessionid : '' ) . ']'
     );
     # 初期化済判断
     unless (exists($c->config->{inited})) {
