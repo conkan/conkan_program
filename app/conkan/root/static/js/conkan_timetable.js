@@ -137,7 +137,7 @@ ConkanAppModule.controller( 'timetableController',
                 { name : '企画名', field: 'prgname',
                     headerCellClass: 'gridheader',
                     sort: { priority: 1, direction: uiGridConstants.DSC },
-                    cellTemplate: '<div ng-if="!row.groupHeader"><button class="btn primary prgcell" ng-click=grid.appScope.pgmclick(row.entity.prgname.pgid)>{{row.entity.prgname.name}}</button></div>'
+                    cellTemplate: '<div ng-if="!row.groupHeader"><div class="ui-grid-cell-contents ganttRow" title="{{row.entity.status}}"><button class="btn primary prgcell" ng-click=grid.appScope.pgmclick(row.entity.prgname.pgid)>{{row.entity.prgname.name}}</button></div></div>'
                 },
                 { name : '期間',
                     headerCellTemplate: pglistValue.ganttConst.ganttHeader,
@@ -173,7 +173,7 @@ ConkanAppModule.controller( 'timetableController',
                 { name : '企画名', field: 'prgname',
                     headerCellClass: 'gridheader',
                     sort: { priority: 1, direction: uiGridConstants.DSC },
-                    cellTemplate: '<div ng-if="!row.groupHeader"><button class="btn primary prgcell" ng-click=grid.appScope.pgmclick(row.entity.prgname.pgid)>{{row.entity.prgname.name}}</button></div>'
+                    cellTemplate: '<div ng-if="!row.groupHeader"><div class="ui-grid-cell-contents ganttRow" title="{{row.entity.status}}"><button class="btn primary prgcell" ng-click=grid.appScope.pgmclick(row.entity.prgname.pgid)>{{row.entity.prgname.name}}</button></div></div>'
                 },
                 { name : '期間',
                     headerCellTemplate: pglistValue.ganttConst.ganttHeader,

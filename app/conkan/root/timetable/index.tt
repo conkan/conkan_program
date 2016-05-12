@@ -21,9 +21,11 @@ END -%]
       <!-- Left: 場所/時刻 未設定企画一覧 -->
       <dl ng-controller="unsetlistController">
         <dt ng-repeat="prg in unsetprglist">
-          <button class="btn primary prgcell" ng-click="unsetclick(prg.pgid)">
-            <span ng-cloak>{{prg.regpgid}}({{prg.subno}}):{{prg.sname}}</span>
-          </button>
+          <div class="ganttRow" title="{{prg.status}}">
+            <button class="btn primary prgcell" ng-click="unsetclick(prg.pgid)">
+              <span ng-cloak>{{prg.regpgid}}({{prg.subno}}):{{prg.sname}}</span>
+            </button>
+          </div>
         </dt>
       </dl>
     </div>

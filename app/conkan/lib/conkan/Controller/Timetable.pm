@@ -61,6 +61,7 @@ sub index :Path :Args(0) {
             'pgid'          => $pgm->pgid(),
             'subno'         => $pgm->subno(),
             'sname'         => $pgm->sname() || $pgm->regpgid->name(),
+            'status'        => $pgm->status(),
         };
     }
     $c->stash->{'unsetProgram'} = \@unsetlist;

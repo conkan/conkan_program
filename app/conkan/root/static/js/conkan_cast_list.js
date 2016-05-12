@@ -1,5 +1,6 @@
 // conkan_cast_list.js --- 出演者一覧用 JS ---
 var storage = sessionStorage;
+var needreload = false;
 $(document).ready(function(){
   $(document).scrollTop( storage.getItem( 'sctop' ) );
   storage.clear();
@@ -8,6 +9,7 @@ $(document).ready(function(){
 $('#editCast').on('show.bs.modal', function (event) {
   var castid = $(event.relatedTarget).data('whatever');
   var content = $('#editCastContent');
+  needreload = false;
   $(content).load(castid + '/ FORM');
   if ( $(event.relatedTarget).data('rmcol') ) {
     $('#dobtn').hide();
@@ -21,7 +23,9 @@ $('#editCast').on('show.bs.modal', function (event) {
 // モーダルダイアログ非表示
 $('#editCast').on('hide.bs.modal', function (event) {
   storage.setItem( 'sctop', $(document).scrollTop() );
-  location.reload(true);
+  if ( needreload ) {
+    location.reload(true);
+  }
 } );
 // 更新
 $('#dobtn').click(function(event) {
@@ -35,6 +39,7 @@ $('#dobtn').click(function(event) {
   $('#dobtn').hide();
   $('#dodel').hide();
   $(content).load(castid + '/edit/ FORM', data );
+  needreload = true;
 } );
 // 削除
 $('#dodel').click(function(event) {
@@ -44,6 +49,7 @@ $('#dodel').click(function(event) {
   $('#dobtn').hide();
   $('#dodel').hide();
   $(content).load(castid + '/del/ FORM', data );
+  needreload = true;
 } );
 
 // conkanCastListモジュールの生成(グローバル変数)

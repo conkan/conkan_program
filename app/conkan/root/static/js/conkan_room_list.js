@@ -1,5 +1,6 @@
 // conkan_room_list.js --- 部屋一覧用 JS ---
 var storage = sessionStorage;
+var needreload = false;
 $(document).ready(function(){
   $(document).scrollTop( storage.getItem( 'sctop' ) );
   storage.clear();
@@ -8,6 +9,7 @@ $(document).ready(function(){
 $('#editRoom').on('show.bs.modal', function (event) {
   var roomid = $(event.relatedTarget).data('whatever');
   var content = $('#editRoomContent');
+  needreload = false;
   $(content).load(roomid + '/ FORM');
   if ( $(event.relatedTarget).data('rmcol') ) {
     $('#dobtn').hide();
@@ -21,7 +23,9 @@ $('#editRoom').on('show.bs.modal', function (event) {
 // モーダルダイアログ非表示
 $('#editRoom').on('hide.bs.modal', function (event) {
   storage.setItem( 'sctop', $(document).scrollTop() );
-  location.reload(true);
+  if ( needreload ) {
+    location.reload(true);
+  }
 } );
 // 更新
 $('#dobtn').click(function(event) {
@@ -43,6 +47,7 @@ $('#dobtn').click(function(event) {
   $('#dobtn').hide();
   $('#dodel').hide();
   $(content).load(roomid + '/edit/ FORM', data );
+  needreload = true;
 } );
 // 削除
 $('#dodel').click(function(event) {
@@ -52,6 +57,7 @@ $('#dodel').click(function(event) {
   $('#dobtn').hide();
   $('#dodel').hide();
   $(content).load(roomid + '/del/ FORM', data );
+  needreload = true;
 } );
 
 // conkanRoomListモジュールの生成(グローバル変数)

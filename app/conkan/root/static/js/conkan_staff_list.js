@@ -1,5 +1,6 @@
 // conkan_staff_list.js --- スタッフ一覧用 JS ---
 var storage = sessionStorage;
+var needreload = false;
 $(document).ready(function(){
   $(document).scrollTop( storage.getItem( 'sctop' ) );
   storage.clear();
@@ -9,6 +10,7 @@ $('#editStaff').on('show.bs.modal', function (event) {
   var staffid = $(event.relatedTarget).data('whatever');
   var role = $(event.relatedTarget).data('whatrole');
   var content = $('#editStaffContent');
+  needreload = false;
   $(content).load(staffid + '/ FORM', '', function() {
       $('#' + role).prop('selected', true);
     }
@@ -19,7 +21,9 @@ $('#editStaff').on('show.bs.modal', function (event) {
 
 $('#editStaff').on('hide.bs.modal', function (event) {
   storage.setItem( 'sctop', $(document).scrollTop() );
-  location.reload(true);
+  if ( needreload ) {
+    location.reload(true);
+  }
 } );
 
 $('#dobtn').click(function(event) {
@@ -39,6 +43,7 @@ $('#dobtn').click(function(event) {
   $('#dobtn').hide();
   $('#dodel').hide();
   $(content).load(staffid + '/edit/ FORM', data );
+  needreload = true;
 } );
 
 $('#dodel').click(function(event) {
@@ -48,6 +53,7 @@ $('#dodel').click(function(event) {
   $('#dobtn').hide();
   $('#dodel').hide();
   $(content).load(staffid + '/del/ FORM', data );
+  needreload = true;
 } );
 
 // conkanStaffListモジュールの生成(グローバル変数)

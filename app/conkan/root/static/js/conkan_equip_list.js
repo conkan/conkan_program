@@ -1,5 +1,6 @@
 // conkan_equip_list.js --- 機材一覧用 JS ---
 var storage = sessionStorage;
+var needreload = false;
 $(document).ready(function(){
   $(document).scrollTop( storage.getItem( 'sctop' ) );
   storage.clear();
@@ -8,6 +9,7 @@ $(document).ready(function(){
 $('#editEquip').on('show.bs.modal', function (event) {
   var equipid = $(event.relatedTarget).data('whatever');
   var content = $('#editEquipContent');
+  needreload = false;
   $(content).load(equipid + '/ FORM');
   if ( $(event.relatedTarget).data('rmcol') ) {
     $('#dobtn').hide();
@@ -21,7 +23,9 @@ $('#editEquip').on('show.bs.modal', function (event) {
 // モーダルダイアログ非表示
 $('#editEquip').on('hide.bs.modal', function (event) {
   storage.setItem( 'sctop', $(document).scrollTop() );
-  location.reload(true);
+  if ( needreload ) {
+    location.reload(true);
+  }
 } );
 // 更新
 $('#dobtn').click(function(event) {
@@ -39,6 +43,7 @@ $('#dobtn').click(function(event) {
   $('#dobtn').hide();
   $('#dodel').hide();
   $(content).load(equipid + '/edit/ FORM', data );
+  needreload = true;
 } );
 // 削除
 $('#dodel').click(function(event) {
@@ -48,6 +53,7 @@ $('#dodel').click(function(event) {
   $('#dobtn').hide();
   $('#dodel').hide();
   $(content).load(equipid + '/del/ FORM', data );
+  needreload = true;
 } );
 
 // conkanEquipListモジュールの生成(グローバル変数)

@@ -27,6 +27,7 @@ ConkanAppModule.value( 'pglistValue', {
                 subno   : '[% prg.subno | format('%01d') %]',
                 sname   : '[% prg.sname | xml %]',
                 pgid    : '[% prg.pgid %]',
+                status  : '[% prg.status %]',
             },
         [%- END %]
     ],
