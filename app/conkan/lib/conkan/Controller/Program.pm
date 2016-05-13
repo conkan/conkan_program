@@ -738,15 +738,17 @@ sub pgup_cast : Chained('pgup_casttop') : PathPart('') : Args(0) {
         if ( $c->request->method eq 'GET' ) {
             $c->stash->{'castlist'} = [ 
                 { 'id' => '', 'val' => '' },
-                map +{ 'id' => $_->castid, 'val' => $_->regno . ' ' . $_->name }, 
-                    $c->model('ConkanDB::PgAllCast')->all()
-                ];
+                map +{
+                    'id' => $_->castid,
+                    'val' => +( $_->regno ? $_->regno : '' ) . ' ' . $_->name
+                }, $c->model('ConkanDB::PgAllCast')->all()
+            ];
             my $M = $c->model('ConkanDB::PgSystemConf');
             $c->stash->{'statlist'}  = [
                 { 'id' => '', 'val' => '' },
                 map +{ 'id' => $_, 'val' => $_ },
                    @{from_json( $M->find('cast_status_vals')->pg_conf_value() )}
-                ];
+            ];
         }
     } catch {
         $c->detach( '_dberror', [ shift ] );
@@ -1020,6 +1022,9 @@ sub _autoProgress :Private {
                             $rowval =~ s[-][/]g;
                         }
                     }
+                    else {
+                        $rowval = '';
+                    }
                     if ( defined( $val ) && ($rowval ne $val ) ) {
                         $progstr .= $key . ' change to ' . $val . ' ';
                     }
@@ -1035,7 +1040,9 @@ sub _autoProgress :Private {
         else { # 生成
             $progstr .= 'Create ';
             for my $key (@{$itemkeys}) {
-                $progstr .= $key . ':' . $value->{$key} . ' ';
+                $progstr .= $key . ':'
+                            . +( exists($value->{$key}) ? $value->{$key} : '' )
+                            . ' ';
             }
         }
         if ( $progstr ne '' ) {

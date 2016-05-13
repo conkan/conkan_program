@@ -43,7 +43,8 @@ sub auto :Private {
 
     $c->log->info(localtime()
         . ' [' . $c->request->method . '] [' . $c->action->reverse . ']' . "\n"
-        . '         path [' . $c->request->path . ']' . "\n"
+        . '         path ['
+        . +( defined($c->request->path) ? $c->request->path : '' ) . ']' . "\n"
         . '         userid [' 
         . +( $c->user_exists
                 ?  +( $c->user->get('staffid')
@@ -51,7 +52,7 @@ sub auto :Private {
                         : '' )
                 : 'notlogin' ) . ']' . "\n"
         . '         sessionid ['
-        . +( $c->sessionid ? $c->sessionid : '' ) . ']'
+        . +( defined($c->sessionid) ? $c->sessionid : '' ) . ']'
     );
     # 初期化済判断
     unless (exists($c->config->{inited})) {
