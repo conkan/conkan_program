@@ -173,17 +173,31 @@ sub profile :Local {
             $staffM->create( $value );
             # 出演者一覧に登録(名前かregnoが一致するものがない場合)
             my $acrow;
+            # 出演者名の正規化
+            # 空白前後の文字がASCIIの時は、空白を挿入
+            # そうでない時は空白を詰める
+            my $castname = '';
+            my @names = split(/\s/, $value->{'name'});
+            my $maxcnt = scalar(@names);
+            for ( my $cnt=0; $cnt< $maxcnt; $cnt++ ) {
+                $castname .= $names[$cnt];
+                if (   ( substr($castname, -1, 1) =~ /^[\x20-\x7E]+$/ )
+                    && ( $cnt+1 < $maxcnt )
+                    && ( substr($names[$cnt+1], 0, 1) =~ /^[\x20-\x7E]+$/ ) ) {
+                        $castname .= ' '
+                }
+            }
             if ( exists($value->{'regno'}) && $value->{'regno'} ) {
                 $acrow = $c->model('ConkanDB::PgAllCast')->search(
                     { 'regno' => $value->{'regno'} } )->count;
             }
             else {
                 $acrow = $c->model('ConkanDB::PgAllCast')->search(
-                    { 'name'  => $value->{'name'} } )->count;
+                    { 'name'  => $castname } )->count;
             }
             unless ( $acrow ) {
                 my $allcastval = {
-                    'name'      => $value->{'name'},
+                    'name'      => $castname,
                     'memo'      => $value->{'ma'},
                     'restdate'  => $value->{'comment'} . '[staff]',
                 };
@@ -193,7 +207,7 @@ sub profile :Local {
                 $c->model('ConkanDB::PgAllCast')->create( $allcastval );
             }
             else {
-$c->log->debug('>>> '. $value->{'name'} . '[' . $value->{'regno'} . '] is already in AllCast' );
+$c->log->debug('>>> '. $castname . '[' . $value->{'regno'} . '] is already in AllCast' );
             }
             $c->stash->{'rs'} = undef;
             $c->stash->{'state'} = 'success';
@@ -204,9 +218,7 @@ $c->log->debug('>>> '. $value->{'name'} . '[' . $value->{'regno'} . '] is alread
 =head2 staff2allcast
 
 スタッフを出演者一覧に登録
-(隠し機能 URL直打)
-
-=cut
+(隠し機能 URL直打) 無効化
 
 sub staff2allcast :Local {
     my ( $self, $c ) = @_;
