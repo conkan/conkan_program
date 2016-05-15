@@ -198,9 +198,7 @@ sub login :Local {
             }
             if ( $c->user->get('passwd') && !$c->user->get('rmdate') ) {
                 __PACKAGE__->LoginLogging( $c );
-                if ( $c->action->reverse eq 'login' ) {
-                    $c->response->redirect( '/mypage' );
-                }
+                $c->response->redirect( '/mypage' );
                 return;
             }
         }

@@ -6,6 +6,7 @@ use String::Random qw/ random_string /;
 use XML::Feed;
 use namespace::autoclean;
 use Data::Dumper;
+use utf8;
 
 BEGIN { extends 'Catalyst::Controller'; }
 
@@ -84,13 +85,14 @@ sub cybozu :Local {
 
         my $ua = LWP::UserAgent->new;
         my $ua_response = $ua->request( GET $request->to_url );
-        Catalyst::Exception->throw( $ua_response->status_line.' '. $ua_response->content )
-            unless $ua_response->is_success;
+        $c->detach( '_autherror',
+            [ $ua_response->status_line.' '. $ua_response->content ] )
+                unless $ua_response->is_success;
 
         # グループ情報解析
         local $XML::Atom::ForceUnicode = 1;
         my $grfeed = XML::Atom::Feed->new(\$ua_response->content);
-        Catalyst::Exception->throw( XML::Feed->errstr )
+        $c->detach( '_autherror', [ XML::Feed->errstr ] )
             unless $grfeed;
 
         # グループに属していることを確認
@@ -102,8 +104,10 @@ sub cybozu :Local {
                 last;
             }
         }
-        Catalyst::Exception->throw( "412 Precondition Failed\nグループに参加していません" )
-            unless $groupid;
+        $c->detach( '_autherror',
+            [ "スタッフ登録するには、Cybozuの" . $grtitle
+              . "に属していなければなりません" ] )
+                unless $groupid;
 
         # ユーザ情報を元に、プロファイル設定画面へリダイレクト
         $c->flash->{'name'}    = $grfeed->author->name;
@@ -161,6 +165,23 @@ sub getprm :Private {
 
     return $retprm;
 }
+
+=head2 _autherror
+
+認証エラー表示
+
+=cut
+
+sub _autherror :Private {
+    my ( $self, $c, $errstr) = @_; 
+    $c->logout;
+    $c->delete_session('autherror');
+    $c->log->error('>>> ' . localtime() . ' ' . $errstr );
+    $c->stash->{errmsg} = '認証失敗 ' . $errstr;
+    $c->stash->{'canaddstaff'} = 1;
+    $c->stash->{template} = 'login.tt';
+}
+
 =encoding utf8
 
 =head1 AUTHOR

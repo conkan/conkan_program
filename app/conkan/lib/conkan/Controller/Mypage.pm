@@ -82,7 +82,8 @@ sub profile :Local {
                     tname tnamef comment / {
         $value->{$item} = $c->flash->{$item} || $param->{$item};
         $value->{$item} =~ s/\s+$// if defined($value->{$item});
-        $value->{$item} = undef if ($value->{$item} eq '');
+        $value->{$item} = undef
+            if (defined($value->{$item}) && ($value->{$item} eq '') );
     }
     # flashかformからoainfoパラメータを取り出し、末尾の空白を除く
     my $oainfo = {};
