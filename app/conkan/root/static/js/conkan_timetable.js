@@ -82,6 +82,19 @@ ConkanAppModule.controller( 'timetableController',
                 var colmnum = pglistValue.ganttConst.maxcolmnum + 1;
                 return pglistValue.ganttConst.cell_width * colmnum;
             };
+            $scope.__crPgBtn = function( name, status ) {
+                var retval, wkstr;
+                var color_hash = pglistValue.ganttConst.color_hash;
+                if ( !name ) { // GroupHeaderの時呼ばれる
+                    return '';
+                }
+                retval = '<span style="background-color:'
+                    + color_hash[status] + ';">&nbsp;</span>'
+                    + name;
+                wkstr = $sce.trustAsHtml( retval );
+                return wkstr;
+            };
+
             $scope.__crGanttCell = function( doperiod, status ) {
                 var retval = pglistValue.ganttConst.ganttBackGrid;
                 var scale_hash = pglistValue.ganttConst.scale_hash;
@@ -137,7 +150,8 @@ ConkanAppModule.controller( 'timetableController',
                 { name : '企画名', field: 'prgname',
                     headerCellClass: 'gridheader',
                     sort: { priority: 1, direction: uiGridConstants.DSC },
-                    cellTemplate: '<div ng-if="!row.groupHeader"><div class="ui-grid-cell-contents ganttRow" title="{{row.entity.status}}"><button class="btn primary prgcell" ng-click=grid.appScope.pgmclick(row.entity.prgname.pgid)>{{row.entity.prgname.name}}</button></div></div>'
+                    cellTooltip: true,
+                    cellTemplate: '<div ng-if="!row.groupHeader"><div class="ganttRow ui-grid-cell-contents" title="{{row.entity.status}}"><button class="btn primary prgcell" ng-click="grid.appScope.pgmclick(row.entity.prgname.pgid)"><div ng-bind-html="grid.appScope.__crPgBtn(row.entity.prgname.name, row.entity.status)"></div></button></div></div>'
                 },
                 { name : '期間',
                     headerCellTemplate: pglistValue.ganttConst.ganttHeader,
@@ -173,7 +187,8 @@ ConkanAppModule.controller( 'timetableController',
                 { name : '企画名', field: 'prgname',
                     headerCellClass: 'gridheader',
                     sort: { priority: 1, direction: uiGridConstants.DSC },
-                    cellTemplate: '<div ng-if="!row.groupHeader"><div class="ui-grid-cell-contents ganttRow" title="{{row.entity.status}}"><button class="btn primary prgcell" ng-click=grid.appScope.pgmclick(row.entity.prgname.pgid)>{{row.entity.prgname.name}}</button></div></div>'
+                    cellTooltip: true,
+                    cellTemplate: '<div ng-if="!row.groupHeader"><div class="ganttRow ui-grid-cell-contents" title="{{row.entity.status}}"><button class="btn primary prgcell" ng-click="grid.appScope.pgmclick(row.entity.prgname.pgid)"><div ng-bind-html="grid.appScope.__crPgBtn(row.entity.prgname.name, row.entity.status)"></div></button></div></div>'
                 },
                 { name : '期間',
                     headerCellTemplate: pglistValue.ganttConst.ganttHeader,
