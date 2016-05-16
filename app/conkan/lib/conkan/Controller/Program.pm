@@ -221,18 +221,23 @@ sub AddCast {
         # 全出演者登録(名前とふりがな か regno が一致するものがない場合
         my $acrow;
         if ( exists($hval->{'entrantregno'} ) && $hval->{'entrantregno'} ) {
-            $acrow = $c->model('ConkanDB::PgAllCast')->search(
-                { 'regno' => $hval->{'entrantregno'} } );
+            $acrow = ( $c->model('ConkanDB::PgAllCast')->search(
+                { 
+                  'rmdate' => \'IS NULL',
+                  'regno' => $hval->{'entrantregno'}
+                }
+            ))[0];
         }
         else {
-            $acrow = $c->model('ConkanDB::PgAllCast')->search(
+            $acrow = ( $c->model('ConkanDB::PgAllCast')->search(
                 {
+                  'rmdate' => \'IS NULL',
                   'name'  => $hval->{'name'},
                   'namef' => $hval->{'namef'},
                 }
-            );
+            ))[0];
         }
-        unless ( $acrow->count ) {
+        unless ( $acrow ) {
             my $aval = {
                     'name'   => $hval->{'name'},
                     'namef'  => $hval->{'namef'},
