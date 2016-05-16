@@ -66,7 +66,11 @@ ConkanAppModule.factory( 'currentprgService',
 ConkanAppModule.controller( 'unsetlistController',
     [ '$scope', 'currentprgService', 'pglistValue',
         function( $scope, currentprgService, pglistValue ) {
-            $scope.unsetprglist = pglistValue.unsetprglist;
+            var color_hash = pglistValue.ganttConst.color_hash;
+            $scope.unsetprglist = pglistValue.unsetprglist.map(function(p) {
+                p.color = color_hash[p.status];
+                return p;
+            });
             $scope.unsetclick = function( pgid ) {
                 currentprgService.query( pgid );
             };

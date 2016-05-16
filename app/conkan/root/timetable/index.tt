@@ -23,7 +23,10 @@ END -%]
         <dt ng-repeat="prg in unsetprglist">
           <div class="ganttRow" title="{{prg.status}}">
             <button class="btn primary prgcell" ng-click="unsetclick(prg.pgid)">
-              <span ng-cloak>{{prg.regpgid}}({{prg.subno}}):{{prg.sname}}</span>
+              <span ng-cloak>
+                <span style="background-color:{{prg.color}};">&nbsp;</span>
+                {{prg.regpgid}}({{prg.subno}}):{{prg.sname}}
+              </span>
             </button>
           </div>
         </dt>
