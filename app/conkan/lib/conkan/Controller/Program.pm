@@ -222,7 +222,7 @@ sub AddCast {
         my $acrow;
         if ( exists($hval->{'entrantregno'} ) && $hval->{'entrantregno'} ) {
             $acrow = $c->model('ConkanDB::PgAllCast')->search(
-                { 'regno' => $hval->{'entrantregno'} } )->count;
+                { 'regno' => $hval->{'entrantregno'} } );
         }
         else {
             $acrow = $c->model('ConkanDB::PgAllCast')->search(
@@ -230,9 +230,9 @@ sub AddCast {
                   'name'  => $hval->{'name'},
                   'namef' => $hval->{'namef'},
                 }
-            )->count;
+            );
         }
-        unless ( $acrow ) {
+        unless ( $acrow->count ) {
             my $aval = {
                     'name'   => $hval->{'name'},
                     'namef'  => $hval->{'namef'},
