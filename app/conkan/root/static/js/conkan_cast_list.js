@@ -102,7 +102,14 @@
             },
             { name : 'コンタクトステータス', field: 'status',
                 headerCellClass: 'gridheader',
-                width: "20%",
+                width: "12%",
+                cellClass: function(grid, row)
+                    { return uiGetCellCls(row.entity.rmdate); },
+                enableHiding: false,
+            },
+            { name : '出演企画数', field: 'pgcnt',
+                headerCellClass: 'gridheader',
+                width: "8%",
                 cellClass: function(grid, row)
                     { return uiGetCellCls(row.entity.rmdate); },
                 enableHiding: false,

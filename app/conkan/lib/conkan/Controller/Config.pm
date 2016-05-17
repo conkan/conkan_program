@@ -309,11 +309,18 @@ sub staff_listget : Chained('staff_base') : PathPart('listget') : Args(0) {
 
     try {
         my @data;
-        my $rows = [ $c->model('ConkanDB::PgStaff')->search(
-                        { 'account'  => { '!=' => 'admin' } },
-                        { 'order_by' => { '-asc' => 'staffid' } }
-                    )
-                ];
+        my $rows = [
+            $c->model('ConkanDB::PgStaff')->search(
+                { 'account'  => { '!=' => 'admin' } },
+                {
+                  'join'     => { 'pg_programs' },
+                  'distinct' => 1,
+                  '+select'  => [ { count => 'pg_programs.staffid' } ],
+                  '+as'      => [qw/pgcnt/],
+                  'order_by' => { '-asc' => 'staffid' },
+                },
+            )
+        ];
         for my $row (@$rows) {
             my $ll  = $row->lastlogin();
             my $rm  = $row->rmdate();
@@ -324,6 +331,7 @@ sub staff_listget : Chained('staff_base') : PathPart('listget') : Args(0) {
                 'tname'    => $row->tname(),
                 'llogin'   => +( defined( $ll ) ? $ll->strftime('%F %T') : '' ),
                 'staffid'  => $row->staffid(),
+                'pgcnt'    => $row->get_column('pgcnt'),
             } );
         }
         $c->stash->{'json'} = \@data;
@@ -719,11 +727,18 @@ sub cast_listget : Chained('cast_base') : PathPart('listget') : Args(0) {
 
     try {
         my @data;
-        my $rows = [ $c->model('ConkanDB::PgAllCast')->search(
-                        { },
-                        { 'order_by' => { '-asc' => 'castid' } }
-                    )
-                ];
+        my $rows = [
+            $c->model('ConkanDB::PgAllCast')->search(
+                { },
+                {
+                  'join'     => { 'pg_casts' },
+                  'distinct' => 1,
+                  '+select'  => [ { count => 'pg_casts.castid' } ],
+                  '+as'      => [qw/pgcnt/],
+                  'order_by' => { '-asc' => 'castid' }
+                }
+            )
+        ];
         for my $row (@$rows) {
             my $rm  = $row->rmdate();
             push ( @data, {
@@ -735,6 +750,7 @@ sub cast_listget : Chained('cast_base') : PathPart('listget') : Args(0) {
                 'restdate' => $row->restdate(),
                 'castid'   => $row->castid(),
                 'rmdate'   => +( defined( $rm ) ? $rm->strftime('%F %T') : '' ),
+                'pgcnt'    => $row->get_column('pgcnt'),
             } );
         }
         $c->stash->{'json'} = \@data;

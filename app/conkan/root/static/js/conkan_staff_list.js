@@ -124,9 +124,17 @@
             },
             enableHiding: false,
           },
+          { name : '担当企画数', field: 'pgcnt',
+            headerCellClass: 'gridheader',
+            width: "8%",
+            cellClass: function(grid, row) {
+              return uiGetCellCls(row.entity.rmdate);
+            },
+            enableHiding: false,
+          },
           { name : '最終ログイン日時', field: 'llogin',
             headerCellClass: 'gridheader',
-            width: "23%",
+            width: "15%",
             cellClass: function(grid, row) {
               return uiGetCellCls(row.entity.rmdate);
             },
