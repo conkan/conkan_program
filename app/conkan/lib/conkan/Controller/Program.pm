@@ -106,7 +106,7 @@ $c->log->debug('>>>> add reg_program:regpgid [' . $row->regpgid . ']');
                         $hval = __PACKAGE__->ParseRegist(
                                         $pginfo, $item, undef, $cnt );
                         if ( ref($hval) eq 'HASH' ) {
-                            __PACKAGE__->AddCast( $c, $hval, $pgid );
+                            __PACKAGE__->_addCast( $c, $hval, $pgid );
                         }
                         elsif ( $hval ) {
                             die 'input Format Error /or/ regist.yml Format Error';
@@ -116,7 +116,7 @@ $c->log->debug('>>>> add reg_program:regpgid [' . $row->regpgid . ']');
                 else {
                     $hval = __PACKAGE__->ParseRegist( $pginfo, $item, undef, '');
                     if ( ref($hval) eq 'HASH' ) {
-                        __PACKAGE__->AddCast( $c, $hval, $pgid );
+                        __PACKAGE__->_addCast( $c, $hval, $pgid );
                     }
                     elsif ( $hval ) {
                         die 'input Format Error /or/ regist.yml Format Error';
@@ -151,6 +151,33 @@ $c->log->debug('>>>> add reg_program:regpgid [' . $row->regpgid . ']');
     $c->response->redirect( '/program/' . $nextURLtail );
 }
 
+=head2 regcastadd
+
+企画管理 regcastadd  : 要望出演者追加 (Chain外)
+
+=cut
+
+sub regcastadd :Local {
+    my ( $self, $c ) = @_;
+    my $ckt = [ qw/ regpgid pgid / ];
+    my $items = [ qw/ name namef title regno needreq needguest / ];
+    my $hval = $c->forward('/program/_trnReq2Hash', [ [ @$ckt, @$items ] ], );
+
+    $c->component('View::JSON')->{expose_stash} = undef;
+    try{
+        __PACKAGE__->_addCast( $c, $hval, $hval->{'pgid'} );
+        $c->forward('/program/_autoProgress',
+            [ $hval->{'regpgid'}, $items, undef, $hval ] );
+        $c->stash->{'status'} = 'update';
+    } catch {
+        my $e = shift;
+        $c->stash->{'status'} = 'dbfail';
+        $c->log->error('regcastadd error ' . localtime() .
+            ' dbexp : ' . Dumper($e) );
+    };
+    $c->forward('conkan::View::JSON');
+};
+
 =head2 ParseRegist
 
 Regist情報に基づく申込情報(pginfo)パース
@@ -159,7 +186,7 @@ Regist情報に基づく申込情報(pginfo)パース
 
 =cut
 
-sub ParseRegist {
+sub ParseRegist :Private {
     my ( $self,
          $pginfo,       # 入力申込情報ハッシュ
                         #   key: hashkeyの値
@@ -199,72 +226,82 @@ sub ParseRegist {
     return $hval;
 }
 
-=head2 AddCast
+=head2 _addCast
 
-出演者登録
+出演者登録実行
 
 出演者受付に加え、全出演者、出演者管理 にも登録
+DBエラー発生時は、例外発生するので呼び出し側で処理すること
 
 =cut
 
-sub AddCast {
+sub _addCast :Private {
     my ( $self,
          $c,            # コンテキスト
          $hval,         # 登録する情報
          $pgid,         # 企画内部ID
        ) = @_;
                     
-    try {
-        # 出演者受付登録
-        $c->model('ConkanDB::PgRegCast')->create( $hval );
-
-        # 全出演者登録(名前とふりがな か regno が一致するものがない場合
-        my $acrow;
-        if ( exists($hval->{'entrantregno'} ) && $hval->{'entrantregno'} ) {
-            $acrow = ( $c->model('ConkanDB::PgAllCast')->search(
-                { 
-                  'rmdate' => \'IS NULL',
-                  'regno' => $hval->{'entrantregno'}
-                }
-            ))[0];
-        }
-        else {
-            $acrow = ( $c->model('ConkanDB::PgAllCast')->search(
-                {
-                  'rmdate' => \'IS NULL',
-                  'name'  => $hval->{'name'},
-                  'namef' => $hval->{'namef'},
-                }
-            ))[0];
-        }
-        unless ( $acrow ) {
-            my $aval = {
-                    'name'   => $hval->{'name'},
-                    'namef'  => $hval->{'namef'},
-                    'status' => '',
-                    };
-            if ( exists($hval->{'entrantregno'} ) && $hval->{'entrantregno'} ) {
-                $aval->{'regno'} = $hval->{'entrantregno'};
-            }
-            $acrow = $c->model('ConkanDB::PgAllCast')->create( $aval );
-        }
-        my $castid = $acrow->castid();
-
-        # 出演者管理登録
-        $c->model('ConkanDB::PgCast')->create(
-            {
-            'pgid'   => $pgid,
-            'castid' => $castid,
-            'name'   => $hval->{'name'},
-            'namef'  => $hval->{'namef'},
-            'title'  => $hval->{'title'},
-            'status' => ( $hval->{'entrantregno'} ) ? '申込者'
-                                                    : $hval->{'needreq'},
-            },
-        );
-    } catch {
-        $c->detach( '_dberror', [ shift ] );
+    # 出演者受付登録
+    my $val = {
+        'regpgid'   => $hval->{'regpgid'},
+        'name'      => $hval->{'name'},
+        'namef'     => $hval->{'namef'},
+        'title'     => $hval->{'title'},
+        'needreq'   => $hval->{'needreq'},
+        'needguest' => $hval->{'needguest'},
     };
+    $c->model('ConkanDB::PgRegCast')->create( $val );
+
+    # 全出演者登録(名前とふりがな か regno が一致するものがない場合
+    my $acrow;
+    if (  ( exists($hval->{'entrantregno'} ) && $hval->{'entrantregno'} )
+        ||( exists($hval->{'regno'}        ) && $hval->{'regno'}        ) ) {
+        $acrow = ( $c->model('ConkanDB::PgAllCast')->search(
+            { 
+                'rmdate'  => \'IS NULL',
+                -nest     => [
+                    'regno' => $hval->{'entrantregno'},
+                    'regno' => $hval->{'regno'},
+                ],
+            }
+        ))[0];
+    }
+    else {
+        $acrow = ( $c->model('ConkanDB::PgAllCast')->search(
+            {
+              'rmdate' => \'IS NULL',
+              'name'  => $hval->{'name'},
+              'namef' => $hval->{'namef'},
+            }
+        ))[0];
+    }
+    unless ( $acrow ) {
+        my $aval = {
+                'name'   => $hval->{'name'},
+                'namef'  => $hval->{'namef'},
+                'status' => '',
+                'regno'  => $hval->{'regno'},
+                };
+        if ( exists($hval->{'entrantregno'} ) && $hval->{'entrantregno'} ) {
+            $aval->{'regno'} = $hval->{'entrantregno'};
+        }
+        $acrow = $c->model('ConkanDB::PgAllCast')->create( $aval );
+    }
+    my $castid = $acrow->castid();
+
+    # 出演者管理登録
+    $c->model('ConkanDB::PgCast')->create(
+        {
+        'pgid'   => $pgid,
+        'castid' => $castid,
+        'name'   => $hval->{'name'},
+        'namef'  => $hval->{'namef'},
+        'title'  => $hval->{'title'},
+        'status' => ( $hval->{'entrantregno'} ) ? '申込者'
+                                                : $hval->{'needreq'},
+        },
+    );
 }
 
 =head2 progress

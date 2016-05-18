@@ -101,6 +101,8 @@ var ConfDataCnv = function( data ) {
   wkcnf.stafflist   = angular.fromJson(data.json.stafflist);
   wkcnf.nos         = [ '0', '1', '2', '3', '4' ];
   wkcnf.status      = angular.fromJson(data.json.pg_status_vals);
+  wkcnf.cast_status = angular.fromJson(data.json.cast_status_vals);
+  wkcnf.yesno       = [ 'する', 'しない' ];
   wkcnf.dates.unshift(''); // 日付初期化用
 
   return wkcnf;
@@ -195,4 +197,17 @@ var ProgTimeValid = function( prog, scale_hash ) {
   }
   return retval;
 };
+
+// JSON POST後のstatusからtemplate名を得る
+var getTemplate = function( stat ) {
+    var templateTbl = {
+        'update' : 'T_result_update',
+        'fail'   : 'T_result_fail',
+        'dbfail' : 'T_result_dberr',
+        ''       : 'T_httpget_fail',
+    };
+    var retval = templateTbl[stat] || 'T_httpget_fail'; // デフォルト値
+    return retval;
+};
+    
 // EOF --

@@ -1,4 +1,4 @@
-// conkan_timetable.js --- 企画詳細表示用 JS ---
+// conkan_prog_detail.js --- 企画詳細表示用 JS ---
 /*esLint-env jquery, prototypejs */
 (function() {
   var storage = sessionStorage;
@@ -9,7 +9,7 @@
   // スクロール制御
   angular.element('.subtag a').click(function(){
     var pd, tp;
-    pd = parseInt(angular.element(document).body.css('padding-top'));
+    pd = parseInt(angular.element(document.body).css('padding-top'));
     tp = angular.element(this.hash).position().top;
     angular.element(document).scrollTop(tp-pd);
     return false;
@@ -123,6 +123,24 @@
             size        : 'lg',
           });
         };
+
+        // 要望出演者追加フォーム
+        $scope.openRegCastForm = function( regpgid, subno, pgid, name ) {
+          $scope.prog = {
+            regpgid : regpgid,
+            subno   : subno,
+            pgid    : pgid,
+            name    : name,
+          };
+          $uibModal.open({
+            templateUrl : "T_pgup_regcast",
+            controller  : 'regcastFormController',
+            backdrop    : "static",
+            scope       : $scope,
+            size        : 'lg',
+          });
+        };
+
       }
     ]
   );
@@ -131,6 +149,34 @@
   ConkanAppModule.controller( 'progFormController',
     [ '$scope', '$http', '$uibModal', '$uibModalInstance',
       function( $scope, $http, $uibModal, $uibModalInstance ) {
+        // 初期値設定
+        angular.element('#valerr').text('');
+        $http({
+          method  : 'GET',
+          url     : '/timetable/' + $scope.pgid
+        })
+        .success(function(data) {
+          $scope.prog = {};
+          ProgDataCnv( data, $scope.prog );
+        })
+        .error(function(data) {
+          var modalinstance = $uibModal.open(
+              { templateUrl : getTemplate( '' ), }
+          );
+          modalinstance.result.then( function() {} );
+        });
+        // 選択肢取得
+        $http.get('/config/confget')
+        .success(function(data) {
+          $scope.conf = ConfDataCnv( data, $scope.conf );
+        })
+        .error(function(data) {
+          var modalinstance = $uibModal.open(
+              { templateUrl : getTemplate( '' ), }
+          );
+          modalinstance.result.then( function() {} );
+        });
+        // 監視設定
         $scope.$watch('prog.date1', function( n, o, scope ) {
           if ( n != o ) {
             scope.conf['hours1'] = GetHours(n, scope.conf, scope.prog, '1' );
@@ -141,7 +187,7 @@
             scope.conf['hours2'] = GetHours(n, scope.conf, scope.prog, '2');
           }
         });
-
+        // 更新実施
         $scope.prgdoApply = function() {
           // 二重クリック回避
           var pgid = $scope.prog.pgid;
@@ -160,17 +206,11 @@
           })
           .success(function(data) {
             // templateを一つにまとめたいところ
-            var modalinstance, templateval;
+            var modalinstance;
             $uibModalInstance.close('done');
-            if (data.status == 'update') {
-              templateval = 'T_result_update';
-            }
-            else {
-              templateval = 'T_result_fail';
-            }
             modalinstance = $uibModal.open(
               {
-                templateUrl : templateval,
+                templateUrl : getTemplate( data.status ),
                 backdrop    : 'static'
               }
             );
@@ -182,7 +222,7 @@
             $uibModalInstance.close('done');
             var modalinstance = $uibModal.open(
               {
-                templateUrl : 'T_result_dberr',
+                templateUrl : getTemplate( '' ),
                 backdrop    : 'static'
               }
             );
@@ -191,7 +231,22 @@
             });
           });
         };
+      }
+    ]
+  );
 
+  // 要望出演者追加フォームコントローラ
+  ConkanAppModule.controller( 'regcastFormController',
+    [ '$scope', '$http', '$uibModal', '$uibModalInstance',
+      function( $scope, $http, $uibModal, $uibModalInstance ) {
+        // 初期値設定
+        angular.element('#valerr').text('');
+        $scope.regcast = {
+          regpgid : $scope.prog.regpgid,
+          pgid : $scope.prog.pgid,
+          name : '', namef : '', regno : '',
+          title : '', needreq : '', needguest : '',
+        };
         // 選択肢取得
         $http.get('/config/confget')
         .success(function(data) {
@@ -199,26 +254,47 @@
         })
         .error(function(data) {
           var modalinstance = $uibModal.open(
-            { templateUrl : 'T_httpget_fail' }
+            { templateUrl : getTemplate( '' ), }
           );
           modalinstance.result.then( function() {} );
         });
-
-        angular.element('#valerr').text('');
-        $http({
-          method  : 'GET',
-          url     : '/timetable/' + $scope.pgid
-        })
-        .success(function(data) {
-          $scope.prog = {};
-          ProgDataCnv( data, $scope.prog );
-        })
-        .error(function(data) {
-          var modalinstance = $uibModal.open(
-            { templateUrl : 'T_httpget_fail' }
-          );
-          modalinstance.result.then( function() {} );
-        });
+        // 登録実施
+        $scope.regcastdoApply = function() {
+          // 二重クリック回避
+          angular.element('#regcastapplybtn').attr('disabled', 'disabled');
+          $http( {
+            method : 'POST',
+            url : '/program/regcastadd',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+            data: $.param($scope.regcast)
+          })
+          .success(function(data) {
+            // templateを一つにまとめたいところ
+            var modalinstance;
+            $uibModalInstance.close('done');
+            modalinstance = $uibModal.open(
+              {
+                templateUrl : getTemplate( data.status ),
+                backdrop    : 'static'
+              }
+            );
+            modalinstance.result.then( function() {
+              location.reload();
+            });
+          })
+          .error(function(data) {
+            $uibModalInstance.close('done');
+            var modalinstance = $uibModal.open(
+              {
+                templateUrl : getTemplate( '' ),
+                backdrop    : 'static'
+              }
+            );
+            modalinstance.result.then( function() {
+              location.reload();
+            });
+          });
+        };
       }
     ]
   );
@@ -277,7 +353,7 @@
           })
           .error(function(data) {
             var modalinstance = $uibModal.open(
-              { templateUrl : 'T_httpget_fail' }
+              { templateUrl : getTemplate( '' ), }
             );
             modalinstance.result.then( function() {} );
           });

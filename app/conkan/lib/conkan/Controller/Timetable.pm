@@ -319,6 +319,7 @@ sub timetable_get : Chained('timetable_base') :PathPart('') :Args(1) {
         }
         else {
             # 更新実施
+            $c->component('View::JSON')->{expose_stash} = undef;
             if ( $row->updateflg eq 
                     +( $c->sessionid . $c->session->{'updtic'}) ) {
                 my $items = [ qw/
@@ -337,11 +338,11 @@ $c->log->info('updateflg: cu: ' . +( $c->sessionid . $c->session->{'updtic'}) );
                 $c->stash->{'status'} = 'fail';
             }
         }
-        $c->component('View::JSON')->{expose_stash} = undef;
     } catch {
         my $e = shift;
         $c->log->error('timetable_get error ' . localtime() .
             ' dbexp : ' . Dumper($e) );
+        $c->stash->{'status'} = 'dbfail';
     };
     $c->forward('conkan::View::JSON');
 }
