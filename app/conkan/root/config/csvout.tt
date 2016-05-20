@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="conkan CSV Export">
+<meta name="author" content="Studio REM">
+<title>Conkan CSV Export</title>
+[%- SET self_li_id = 'config_csv' -%]
+[%- SET useUiGrid  = 1 -%]
+[%- PROCESS 'tthead.tt' -%]
+<div class="container">
+  <div class="well" id="csvwrap">
+    <table class="table table-bordered table-condensed"
+     style="background-color:white;">
+      <colgroup>
+        <col class="col-sm-2">
+        <col class="col-sm-10">
+      </colgroup>
+      <tbody>
+        <tr> <!-- 企画情報ダウンロード -->
+          <FORM method="POST" action="/program/csvdownload">
+            <td class="text-center">
+              <button type="submit" id="prgcsvbtn" class="btn fitbtn">
+                企画情報CSVダウンロード
+              </button>
+            </td>
+            <td>
+              下記で指定したステータスの企画情報をダウンロードする<br/>
+              出力内容は
+              <div class="well csvwell">
+                企画ID, サブNO, 企画名称, 企画名フリガナ, 内容,
+                内容事前公開可否, 一般公開可否, 未成年参加可否, 備考,
+                実行ステータス, 実行ステータス補足, 実施日時1, 実施日時2,
+                部屋番号, 実施場所, 企画紹介文,
+                決定出演者(企画ネーム, 肩書, 出演ステータス)...
+              </div>
+              <div class="well">
+                ダウンロード対象ステータス<br/>
+                [%- FOREACH stat = conf.pg_status %]
+                  <input type="checkbox" name="pg_status" value="[% stat %]"
+                  [%- SWITCH stat -%]
+                  [%- CASE conf.act_status -%]
+                    checked="checked"
+                  [%- END -%]
+                  >
+                    [% stat %]
+                  </input>
+                [%- END %]
+                <input type="checkbox" name="pg_null_stat" value="add">
+                  未設定
+                </input>
+              </div>
+            </td>
+          </FORM>
+        </tr>
+        <tr> <!-- TimeTableダウンロード -->
+          <td class="text-center">
+            <a href="/timetable/csvdownload">
+              <button name="timetablebtn" class="btn fitbtn" id="timetablebtn">
+                タイムテーブル用CSVダウンロード
+              </button>
+            </a>
+          </td>
+          <td class="vcenter">
+            タイムテーブル作成用に、日時/場所設定済でステータスが
+            [% conf.act_status_str %]
+            の企画情報をダウンロードする<br/>
+            出力内容は
+            <div class="well csvwell">
+              企画ID, 企画名称, 実行ステータス, 実行ステータス補足,
+              場所番号, 実施場所,
+              実施日付1, 開始時刻1, 終了時刻1,
+              実施日付2, 開始時刻2, 終了時刻2
+            </div>
+          </td>
+        </tr>
+        <tr> <!-- スタッフ一覧ダウンロード -->
+          <td class="text-center">
+            <a href="/config/staffcsvdownload">
+              <button name="staffdlbtn" class="btn fitbtn" id="staffdlbtn">
+                スタッフ一覧CSVダウンロード
+              </button>
+            </a>
+          </td>
+          <td class="vcenter">
+            無効でないスタッフの情報をダウンロードする
+            出力内容は
+            <div class="well csvwell">
+              名前, アカウント, 役割, メールアドレス, 電話番号,
+              大会登録番号, 担当名, 担当名フリガナ、備考
+            </div>
+          </td>
+        </tr>
+        <tr> <!-- 出演者一覧ダウンロード -->
+          <td class="text-center">
+            <a href="/config/castcsvdownload">
+              <button name="castdlbtn" class="btn fitbtn" id="castdlbtn">
+                出演者一覧CSVダウンロード
+              </button>
+            </a>
+          </td>
+          <td class="vcenter">
+            無効でない出演者の情報をダウンロードする
+            出力内容は
+            <div class="well csvwell">
+              大会登録番号, 氏名, フリガナ, コンタクトステータス,
+              補足(連絡先), 補足(制限事項)
+            </div>
+          </td>
+        </tr>
+        <tr> <!-- 部屋一覧ダウンロード -->
+          <td class="text-center">
+            <a href="/config/roomcsvdownload">
+              <button name="roomdlbtn" class="btn fitbtn" id="roomdlbtn">
+                部屋一覧CSVダウンロード
+              </button>
+            </a>
+          </td>
+          <td class="vcenter">
+            無効でない部屋の情報をダウンロードする
+            出力内容は
+            <div class="well csvwell">
+              部屋番号, 部屋名, 定員, 形式, 面積, 利用可能時間,
+              机数, 椅子数, 附属設備, インタネット回線, 備考
+            </div>
+          </td>
+        </tr>
+        <tr> <!-- 機材一覧ダウンロード -->
+          <td class="text-center">
+            <a href="/config/equipcsvdownload">
+              <button name="equipdlbtn" class="btn fitbtn" id="equipdlbtn">
+                機材一覧CSVダウンロード
+              </button>
+            </a>
+          </td>
+          <td class="vcenter">
+            無効でない機材の情報をダウンロードする
+            出力内容は
+            <div class="well csvwell">
+              機材番号, 名称, 仕様, 補足
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div>差しこみデータダウンロード</div>
+    <table class="table table-bordered table-condensed"
+     style="background-color:white;">
+      <colgroup>
+        <col class="col-sm-2">
+        <col class="col-sm-10">
+      </colgroup>
+      <tbody>
+        <tr> <!-- 出演者への企画案内書用差しこみデータダウンロード -->
+          <td class="text-center">
+            <a href="/config/csvdownload/invitate">
+              <button name="invitatebtn" class="btn fitbtn" id="invitatebtn">
+                出演者への企画案内書用差しこみ用CSVダウンロード
+              </button>
+            </a>
+          </td>
+          <td class="vcenter">
+          </td>
+        </tr>
+        <tr> <!--企画部屋紙用差しこみデータダウンロード -->
+          <td class="text-center">
+            <a href="/config/csvdownload/forroom">
+              <button name="forroombtn" class="btn fitbtn" id="forroombtn">
+                企画部屋紙用差しこみデータ用CSVダウンロード
+              </button>
+            </a>
+          </td>
+          <td class="vcenter">
+          </td>
+        </tr>
+        <tr> <!-- 出演者前垂用差しこみデータダウンロード -->
+          <td class="text-center">
+            <a href="/config/csvdownload/forcast">
+              <button name="forcastbtn" class="btn fitbtn" id="forcastbtn">
+                出演者前垂用差しこみデータ用CSVダウンロード
+              </button>
+            </a>
+          </td>
+          <td class="vcenter">
+          </td>
+        </tr>
+        <tr> <!-- 企画別人数用差しこみデータダウンロード -->
+          <td class="text-center">
+            <a href="/config/csvdownload/memcnt">
+              <button name="memcntbtn" class="btn fitbtn" id="memcntbtn">
+                企画別人数用差しこみデータ用CSVダウンロード
+              </button>
+            </a>
+          </td>
+          <td class="vcenter">
+          </td>
+        </tr>
+        <tr> <!-- 企画別出演者用差しこみデータダウンロード -->
+          <td class="text-center">
+            <a href="/config/csvdownload/castbyprg">
+              <button name="castbyprgbtn" class="btn fitbtn" id="castbyprgbtn">
+                企画別出演者用差しこみデータ用CSVダウンロード
+              </button>
+            </a>
+          </td>
+          <td class="vcenter">
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div> <!-- End of well csvwrap -->
+  <div id="pgAddDiv">
+  </div>
+</div> <!-- End of container ng-app "conkanCsvExport" -->
+[%- PROCESS 'tttail.tt' -%]
+<!--
+<script type="text/javascript">var allprg=true;</script>
+<script type="text/javascript" src="/static/js/conkan_csvexport.js"></script>
+-->
+</body>
+</html>
