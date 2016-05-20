@@ -19,11 +19,6 @@
     <a href="/config/loginlog" type="button" class="btn btn-primary">
       ログイン履歴
     </a>
-    <a href="/config/staffcsvdownload">
-      <button name="csvdlbtn" class="btn" id="csvdlbtn">
-        スタッフCSVダウンロード
-      </button>
-    </a>
   </div>
   [%- PROCESS 'T_httpget_result.tt' -%]
 </div> <!-- End of container ng-app "conkanStaffList" -->

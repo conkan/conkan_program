@@ -17,6 +17,24 @@
     color: Red;
 }
 
+.vcenter {
+   vertical-align: middle !important;
+}
+
+.fitbtn {
+    width: 100% !important;
+    color: #337ab7 !important;
+}
+
+.csvwell {
+    padding: 0px;
+    padding-left: 19px;
+    margin: 0px;
+    border: none;
+    background-color: inherit;
+    font-style: italic;
+}
+
 .form-group {
     margin-bottom: 10px;
 }

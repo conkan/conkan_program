@@ -1178,6 +1178,88 @@ sub loginlogget :Local {
     $c->forward('conkan::View::JSON');
 }
 
+=head2 csvout
+-----------------------------------------------------------------------------
+CSV出力ラウンチページ
+
+=cut
+
+sub csvout :Local {
+    my ( $self, $c ) = @_;
+
+    my $M = $c->model('ConkanDB::PgSystemConf');
+    my $conf = {};
+    $conf->{'act_status_str'} = $M->find('pg_active_status')->pg_conf_value();
+    $conf->{'act_status'} = from_json($conf->{'act_status_str'});
+    $conf->{'pg_status'} = from_json($M->find('pg_status_vals')->pg_conf_value());
+    $c->stash->{'conf'} = $conf;
+}
+
+=head2 csvdownload
+-----------------------------------------------------------------------------
+差しこみデータダウンロード csvdl_base  : Chainの起点
+
+=cut
+
+sub csvdl_base : Chained('') : PathPart('config/csvdownload') : CaptureArgs(0) {
+    my ( $self, $c ) = @_;
+}
+
+=head2 csvdownload/invitate
+
+差しこみデータダウンロード invitate  : 企画案内書用
+
+=cut
+
+sub invitate : Chained('cvsdl_base') : PathPart('invitate') : Args(0) {
+    my ( $self, $c ) = @_;
+    $c->stash->{template} = 'underconstract.tt';
+}
+
+=head2 csvdownload/forroom
+
+差しこみデータダウンロード forroom  : 企画部屋紙用
+
+=cut
+
+sub forroom : Chained('cvsdl_base') : PathPart('forroom') : Args(0) {
+    my ( $self, $c ) = @_;
+    $c->stash->{template} = 'underconstract.tt';
+}
+
+=head2 csvdownload/forcast
+
+差しこみデータダウンロード forcast  : 出演者前垂用
+
+=cut
+
+sub forcast : Chained('cvsdl_base') : PathPart('forcast') : Args(0) {
+    my ( $self, $c ) = @_;
+    $c->stash->{template} = 'underconstract.tt';
+}
+
+=head2 csvdownload/memcnt
+
+差しこみデータダウンロード memcnt  : 企画別人数用
+
+=cut
+
+sub memcnt : Chained('cvsdl_base') : PathPart('memcnt') : Args(0) {
+    my ( $self, $c ) = @_;
+    $c->stash->{template} = 'underconstract.tt';
+}
+
+=head2 csvdownload/castbyprg
+
+差しこみデータダウンロード castbyprg  : 企画別出演者用
+
+=cut
+
+sub castbyprg : Chained('cvsdl_base') : PathPart('castbyprg') : Args(0) {
+    my ( $self, $c ) = @_;
+    $c->stash->{template} = 'underconstract.tt';
+}
+
 =head2 _dberror
 
 DBエラー表示

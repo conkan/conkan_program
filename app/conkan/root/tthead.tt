@@ -72,6 +72,7 @@
             <li id="config_cast"><a href="/config/cast/list">出演者管理</a></li>
             <li id="config_room"><a href="/config/room/list">部屋管理</a></li>
             <li id="config_equip"><a href="/config/equip/list">機材管理</a></li>
+            <li id="config_csv"><a href="/config/csvout">CSV出力</a></li>
           [%- END -%]
           [%- IF cuRole == 'ROOT' %]
             <li id="config_conf"><a href="/config/setting">設定</a></li>

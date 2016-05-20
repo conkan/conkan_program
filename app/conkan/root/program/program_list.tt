@@ -23,11 +23,6 @@
       追加
     </button>
   [% END -%]
-    <a href="/timetable/csvdownload">
-      <button name="csvdlbtn" class="btn" id="csvdlbtn">
-        CSVダウンロード
-      </button>
-    </a>
   </div>
 </div> <!-- End of container ng-app "conkanProgList" -->
 <!-- 企画追加モーダル -->

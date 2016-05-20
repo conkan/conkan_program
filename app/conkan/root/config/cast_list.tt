@@ -21,11 +21,6 @@
             data-whatever="0" data-rmcol="">
       追加
     </button>
-    <a href="/config/castcsvdownload">
-      <button name="csvdlbtn" class="btn" id="csvdlbtn">
-        出演者CSVダウンロード
-      </button>
-    </a>
   </div>
   [%- PROCESS 'T_httpget_result.tt' -%]
 </div> <!-- End of container ng-app "conkanCastList -->

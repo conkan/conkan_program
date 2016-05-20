@@ -185,31 +185,14 @@ $c->log->debug('>>> ' . 'csvdownload' );
             },
             {
                 'prefetch' => [ 'regpgid', 'roomid' ],
-                'order_by' => { '-asc' => [ 'me.regpgid' ] },
+                'order_by' => { '-asc' => [ 'me.regpgid', 'me.subno' ] },
             } )
         ];
 
     my @data;
     foreach my $row ( @$rows ) {
         # 実施日付は YYYY/MM/DD、開始終了時刻は HH:MM (いずれも0サフィックス)
-        my @dates  = undef;
-        my @stms = undef;
-        my @etms = undef;
-        my @date  = split('T', $row->date1());
-        $date[0] =~ s[-][/]g;
-        @date = split('/', $date[0]);
-        $c->forward('/program/_trnSEtime', [ $row, ], );
-        $dates[0] = sprintf('%04d/%02d/%02d', @date);
-        $stms[0] = sprintf('%02d:%02d', $row->{'shour1'}, $row->{'smin1'});
-        $etms[0] = sprintf('%02d:%02d', $row->{'ehour1'}, $row->{'emin1'});
-        if ( $row->date2() ) {
-            @date  = split('T', $row->date2());
-            $date[0] =~ s[-][/]g;
-            @date = split('/', $date[0]);
-            $dates[1] = sprintf('%04d/%02d/%02d', @date);
-            $stms[1] = sprintf('%02d:%02d', $row->{'shour2'}, $row->{'smin2'});
-            $etms[1] = sprintf('%02d:%02d', $row->{'ehour2'}, $row->{'emin2'});
-        }
+        my $datmHash =  $c->forward('/program/_trnDateTime4csv', [ $row, ], );
         push ( @data, [
             $row->regpgid->regpgid(),       # 企画ID,
             $row->regpgid->name(),          # 企画名称,
@@ -217,8 +200,12 @@ $c->log->debug('>>> ' . 'csvdownload' );
             $row->memo(),                   # 実行ステータス補足,
             $row->roomid->roomno(),         # 部屋番号,
             $row->roomid->name(),           # 実施場所,
-            $dates[0], $stms[0], $etms[0],  # 実施日付1,開始時刻1,終了時刻1,
-            $dates[1], $stms[1], $etms[1],  # 実施日付2,開始時刻2,終了時刻2,
+            $datmHash->{'dates'}->[0],      # 実施日付1
+            $datmHash->{'stms'}->[0],       # 開始時刻1,
+            $datmHash->{'etms'}->[0],       # 終了時刻1,
+            $datmHash->{'dates'}->[1],      # 実施日付2
+            $datmHash->{'stms'}->[1],       # 開始時刻2
+            $datmHash->{'etms'}->[1],       # 終了時刻2,
         ]);
     }
 

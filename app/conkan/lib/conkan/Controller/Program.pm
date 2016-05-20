@@ -9,6 +9,7 @@ use namespace::autoclean;
 use Data::Dumper;
 use YAML;
 use DateTime;
+use POSIX qw/ strftime /;
 
 BEGIN { extends 'Catalyst::Controller'; }
 
@@ -420,6 +421,93 @@ $c->log->debug('>>>> maxsubno:[' . $row->get_column('maxsubno') . ']');
         $c->detach( '_dberror', [ shift ] );
     };
     $c->response->redirect('/program/' .  $pgid );
+}
+
+=head2 csvdownload
+-----------------------------------------------------------------------------
+企画管理 csvdownload  : 企画情報CSVダウンロード (Chain外)
+
+=cut
+
+sub csvdownload :Local {
+    my ( $self, $c ) = @_;
+    my $get_status = [
+        map +{ 'status' => $_ }, @{$c->request->body_params->{'pg_status'}}
+    ];
+    push @$get_status, { 'status' => \'IS NULL' };
+    # 実行ステータスが有効
+    my $rows =
+        [ $c->model('ConkanDB::PgProgram')->search(
+            $get_status,
+            {
+                'prefetch' => [ 'regpgid', 'roomid' ],
+                'order_by' => { '-asc' => [ 'me.regpgid', 'me.subno' ] },
+            } )
+        ];
+$c->log->debug('>>> ' . 'program cnt : ' . scalar(@$rows) );
+    my @data = ();
+    foreach my $row ( @$rows ) {
+        # 実施日付は YYYY/MM/DD、開始終了時刻は HH:MM (いずれも0サフィックス)
+        my $datmHash = $c->forward('/program/_trnDateTime4csv', [ $row, ], );
+        my @pfmdatetime  = undef;
+        if ( $datmHash->{'dates'} ) {
+            for ( my $idx=0; $idx<scalar(@{$datmHash->{'dates'}}); $idx++ ) {
+                $pfmdatetime[$idx] = $datmHash->{'dates'}->[$idx] . ' '
+                                   . $datmHash->{'stms'}->[$idx] . '-'
+                                   . $datmHash->{'etms'}->[$idx];
+            }
+        }
+        # 決定出演者取得
+        my $castrows =
+            [ $c->model('ConkanDB::PgCast')->search(
+                        { pgid => $row->pgid() },
+                        {
+                            'prefetch' => [ 'castid' ],
+                            'order_by' => { '-asc' => 'id' },
+                        }
+                    ) ];
+        my @casts = ();
+        foreach my $castrow ( @$castrows ) {
+            my $pname = $castrow->name() || $castrow->castid->name();
+            push ( @casts, $pname );            # 企画ネーム
+            push ( @casts, $castrow->title() ); # 肩書
+            push ( @casts, $castrow->status()); # 出演ステータス
+        }
+        # 実施場所情報
+        my $roomno = undef;
+        my $roomname = undef;
+        if ( $row->roomid() ) {
+            $roomno = $row->roomid->roomno();
+            $roomname = $row->roomid->name();
+        }
+
+        push ( @data, [
+            $row->regpgid->regpgid(),       # 企画ID,
+            $row->subno(),                  # サブNO
+            $row->regpgid->name(),          # 企画名称,
+            $row->regpgid->namef(),         # 企画名フリガナ
+            $row->regpgid->content(),       # 内容
+            $row->regpgid->contentpub(),    # 内容事前公開可否
+            $row->regpgid->openpg(),        # 一般公開可否
+            $row->regpgid->restpg(),        # 未成年参加可否
+            $row->regpgid->comment(),       # 備考
+            $row->status(),                 # 実行ステータス,
+            $row->memo(),                   # 実行ステータス補足,
+            $pfmdatetime[0],                # 実施日時1
+            $pfmdatetime[1],                # 実施日時2
+            $roomno,                        # 部屋番号,
+            $roomname,                      # 実施場所,
+            $row->progressprp(),            # 企画紹介文
+            @casts,                         # 決定出演者
+        ]);
+    }
+
+    $c->stash->{'csv'} = \@data;
+    $c->response->header( 'Content-Disposition' =>
+        'attachment; filename=' .
+            strftime("%Y%m%d%H%M%S", localtime()) . '_program.csv' );
+
+    $c->forward('conkan::View::Download::CSV');
 }
 
 =head2 program
@@ -946,6 +1034,47 @@ sub _dberror :Private {
     my $body = $c->response->body() || Dumper( $e );
     $c->response->body('<FORM>更新失敗<br/><pre>' . $body . '</pre></FORM>');
     $c->response->status(200);
+}
+
+=head2 _trnDateTime4csv
+
+CSV出力用企画開始/終了時刻変換
+
+戻り値 : $dates: 日付配列参照
+       : $stms : 開始時刻配列参照
+       : $etms : 終了時刻配列参照
+=cut
+
+sub _trnDateTime4csv :Private {
+    my ( $self, $c, 
+         $trg,      # 変換対象ハッシュ
+       ) = @_;
+    my $dates = undef;
+    my $stms  = undef;
+    my $etms  = undef;
+    if ( $trg->date1() ) {
+        my @date  = split('T', $trg->date1());
+        $date[0] =~ s[-][/]g;
+        @date = split('/', $date[0]);
+        $c->forward('/program/_trnSEtime', [ $trg, ], );
+        $dates->[0] = sprintf('%04d/%02d/%02d', @date);
+        $stms->[0]  = sprintf('%02d:%02d', $trg->{'shour1'}, $trg->{'smin1'});
+        $etms->[0]  = sprintf('%02d:%02d', $trg->{'ehour1'}, $trg->{'emin1'});
+    }
+    if ( $trg->date2() ) {
+        my @date  = split('T', $trg->date2());
+        $date[0] =~ s[-][/]g;
+        @date = split('/', $date[0]);
+        $dates->[1] = sprintf('%04d/%02d/%02d', @date);
+        $stms->[1]  = sprintf('%02d:%02d', $trg->{'shour2'}, $trg->{'smin2'});
+        $etms->[1]  = sprintf('%02d:%02d', $trg->{'ehour2'}, $trg->{'emin2'});
+    }
+    my $result = {
+        'dates' => $dates,
+        'stms'  => $stms,
+        'etms'  => $etms,
+    };
+    return $result;
 }
 
 =head2 TimeArgTrn

@@ -21,11 +21,6 @@
             data-whatever="0" data-rmcol="">
       追加
     </button>
-    <a href="/config/roomcsvdownload">
-      <button name="csvdlbtn" class="btn" id="csvdlbtn">
-        部屋CSVダウンロード
-      </button>
-    </a>
   </div>
   [%- PROCESS 'T_httpget_result.tt' -%]
 </div> <!-- End of container ng-app "conkanRoomList -->
