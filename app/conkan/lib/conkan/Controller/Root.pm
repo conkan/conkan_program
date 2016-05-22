@@ -143,10 +143,7 @@ sub default :Path {
     my ( $self, $c ) = @_;
 
     my $action = $c->request->path();
-    my $liid =  ($action eq 'timetable')      ? 'timetable'
-              : ($action eq 'config/cast/list')       ? 'config_cast'
-              : ($action eq 'config/equip/list')      ? 'config_equip'
-              : 'mypage';
+    my $liid = 'mypage';
     $c->log->debug('>>> ' . localtime() . ' action : [' . $action . ']');
     $c->log->debug('>>> ' . localtime() . ' liid   : [' . $liid   . ']');
     $c->response->status(404);

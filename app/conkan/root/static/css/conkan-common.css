@@ -33,6 +33,13 @@
     border: none;
     background-color: inherit;
     font-style: italic;
+    display: inline-block;
+}
+
+.csvform {
+    padding-top: 0px;
+    padding-bottom: 5px;
+    margin: 0px;
 }
 
 .form-group {

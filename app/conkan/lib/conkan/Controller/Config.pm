@@ -761,6 +761,7 @@ sub cast_listget : Chained('cast_base') : PathPart('listget') : Args(0) {
     };
     $c->forward('conkan::View::JSON');
 }
+
 =head2 cast/*
 
 出演者管理 cast_show  : 出演者情報更新のための表示起点
@@ -1211,9 +1212,79 @@ sub csvdl_base : Chained('') : PathPart('config/csvdownload') : CaptureArgs(0) {
 
 =cut
 
-sub invitate : Chained('cvsdl_base') : PathPart('invitate') : Args(0) {
+sub invitate : Chained('csvdl_base') : PathPart('invitate') : Args(0) {
     my ( $self, $c ) = @_;
-    $c->stash->{template} = 'underconstract.tt';
+              
+    # 氏名, 企画案内(企画名称, 実施日時と場所)...
+    my @data;
+    my $rows = [
+        $c->model('ConkanDB::PgAllCast')->search(
+            { 'me.status' => { 'LIKE' => 'ゲスト参加%' } },
+            {
+              'join'     => { 'pg_casts' },
+              'distinct' => 1,
+              '+select'  => [ { count => 'pg_casts.castid' } ],
+              '+as'      => [qw/pgcnt/],
+              'order_by' => { '-asc' => 'castid' }
+            }
+        )
+    ];
+
+    for my $row (@$rows) {
+       next unless  $row->get_column('pgcnt'),
+
+       my $castname = $row->name();
+       my @onedata = ( $castname );
+       my $castid   = $row->castid();
+       my $castrows = [
+           $c->model('ConkanDB::PgCast')->search(
+               { 'me.castid' => $castid },
+               {
+                 'prefetch'     => [ { 'pgid' => 'roomid' },
+                                     { 'pgid' => 'regpgid' },],
+                 'order_by' => { '-asc' => 'pgid.regpgid' }
+               }
+           )
+        ];
+        for my $castrow (@$castrows) {
+            my $pgname = '【企画名称】'
+                        . $castrow->pgid->regpgid->regpgid() . ' '
+                        . $castrow->pgid->regpgid->name();
+            my $pgdata = '<企画時間>';
+            my $dtmHash = $c->forward('/program/_trnDateTime4csv',
+                    [ $castrow->pgid, ], );
+            if ( $dtmHash->{'dates'} ) {
+                for ( my $idx=0; $idx<scalar(@{$dtmHash->{'dates'}}); $idx++ ) {
+                    $pgdata .= ' '
+                            .  $dtmHash->{'dates'}->[$idx] . ' '
+                            . $dtmHash->{'stms'}->[$idx] . '-'
+                            . $dtmHash->{'etms'}->[$idx];
+                }
+            }
+            else {
+                $pgdata .= '____未設定____';
+            }
+            $pgdata .= ' <企画場所>';
+            $pgdata .= $castrow->pgid->roomid
+                        ? $castrow->pgid->roomid->name()
+                        : '____未設定____';
+            $pgdata .= ' <出演名>' . $castrow->name()
+                if ( $castrow->name()
+                    && ( $castrow->name() ne $castname ) );
+            $pgdata .= '(' . $castrow->status() . ')'
+                if ( $castrow->status()
+                    && ( $castrow->status() ne '出演了承済' ) );
+            push ( @onedata, $pgname, $pgdata );
+        }
+       push ( @data, \@onedata );
+    }
+ 
+    $c->stash->{'csv'} = \@data;
+    $c->response->header( 'Content-Disposition' =>
+        'attachment; filename=' .
+            strftime("%Y%m%d%H%M%S", localtime()) . '_invitate.csv' );
+
+    $c->forward('conkan::View::Download::CSV');
 }
 
 =head2 csvdownload/forroom
@@ -1222,8 +1293,10 @@ sub invitate : Chained('cvsdl_base') : PathPart('invitate') : Args(0) {
 
 =cut
 
-sub forroom : Chained('cvsdl_base') : PathPart('forroom') : Args(0) {
+sub forroom : Chained('csvdl_base') : PathPart('forroom') : Args(0) {
     my ( $self, $c ) = @_;
+    # 企画名, 企画番号, 実施日, 開始時刻, 場所名
+    $c->stash->{self_li_id} = 'config_csv';
     $c->stash->{template} = 'underconstract.tt';
 }
 
@@ -1233,8 +1306,10 @@ sub forroom : Chained('cvsdl_base') : PathPart('forroom') : Args(0) {
 
 =cut
 
-sub forcast : Chained('cvsdl_base') : PathPart('forcast') : Args(0) {
+sub forcast : Chained('csvdl_base') : PathPart('forcast') : Args(0) {
     my ( $self, $c ) = @_;
+    # 氏名, 企画名, 部屋名, 企画番号, 実施日, 開始時刻
+    $c->stash->{self_li_id} = 'config_csv';
     $c->stash->{template} = 'underconstract.tt';
 }
 
@@ -1244,8 +1319,10 @@ sub forcast : Chained('cvsdl_base') : PathPart('forcast') : Args(0) {
 
 =cut
 
-sub memcnt : Chained('cvsdl_base') : PathPart('memcnt') : Args(0) {
+sub memcnt : Chained('csvdl_base') : PathPart('memcnt') : Args(0) {
     my ( $self, $c ) = @_;
+    # 企画名 企画番号, 実施日, 開始時刻, 部屋名, 内線番号, 出演人数, 裏方人数, 客席人数, 通訳人数
+    $c->stash->{self_li_id} = 'config_csv';
     $c->stash->{template} = 'underconstract.tt';
 }
 
@@ -1255,8 +1332,10 @@ sub memcnt : Chained('cvsdl_base') : PathPart('memcnt') : Args(0) {
 
 =cut
 
-sub castbyprg : Chained('cvsdl_base') : PathPart('castbyprg') : Args(0) {
+sub castbyprg : Chained('csvdl_base') : PathPart('castbyprg') : Args(0) {
     my ( $self, $c ) = @_;
+    # 企画名, 企画番号, 実施日, 開始時刻, 部屋名, 内線番号, 出演者<ステータス>
+    $c->stash->{self_li_id} = 'config_csv';
     $c->stash->{template} = 'underconstract.tt';
 }
 
@@ -1294,8 +1373,6 @@ sub _dberror :Private {
         $c->response->status(200);
     }
 }
-
-=encoding utf8
 
 =head1 AUTHOR
 

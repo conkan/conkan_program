@@ -168,7 +168,7 @@ sub regcastadd :Local {
     try{
         __PACKAGE__->_addCast( $c, $hval, $hval->{'pgid'} );
         $c->forward('/program/_autoProgress',
-            [ $hval->{'regpgid'}, $items, undef, $hval ] );
+            [ $hval->{'regpgid'}, 'regcast', $items, undef, $hval ] );
         $c->stash->{'status'} = 'update';
     } catch {
         my $e = shift;
@@ -383,6 +383,8 @@ sub cpysep :Local {
             try {
                 my $prstr = 'copy to ' . $regpgid;
                 $c->forward('/program/_crProgress', [ $svregpgid, $prstr, ], );
+                $prstr = 'copy from ' . $svregpgid;
+                $c->forward('/program/_crProgress', [ $regpgid, $prstr, ], );
             } catch {
                 # 自動進捗登録時の失敗は、エラーログのみ残す
                 $c->response->status(200);
@@ -733,7 +735,7 @@ sub pgup_regprog : Chained('program_show') : PathPart('regprogram') : Args(0) {
     } catch {
         $c->detach( '_dberror', [ shift ] );
     };
-    $c->detach( '_pgupdate', [ $rowprof, $up_items ] );
+    $c->detach( '_pgupdate', [ 'regprogram', $rowprof, $up_items ] );
 }
 
 =head2 program/*/program
@@ -757,7 +759,7 @@ sub pgup_program : Chained('program_show') : PathPart('program') : Args(0) {
     } catch {
         $c->detach( '_dberror', [ shift ] );
     };
-    $c->detach( '_pgupdate', [ $rowprof, $up_items ] );
+    $c->detach( '_pgupdate', [ 'program', $rowprof, $up_items ] );
 }
 
 =head2 program/*/equip/*
@@ -807,7 +809,7 @@ sub pgup_equip : Chained('pgup_equiptop') : PathPart('') : Args(0) {
     } catch {
         $c->detach( '_dberror', [ shift ] );
     };
-    $c->detach( '_pgupdate', [ $rowprof, $up_items ] );
+    $c->detach( '_pgupdate', [ 'equip', $rowprof, $up_items ] );
 }
 
 =head2 program/*/equip/*/del
@@ -829,7 +831,7 @@ sub pgup_equipdel : Chained('pgup_equiptop') : PathPart('del') : Args(0) {
     $c->detach( '/program/' . $pgid . '/equip/' . $id )
         if ( ( $c->request->method eq 'GET' ) || ( $id == 0 ) );
 
-    $c->detach( '_pgdelete', [ $up_items ] );
+    $c->detach( '_pgdelete', [ 'equip', $up_items ] );
 }
 
 =head2 program/*/cast/*
@@ -883,7 +885,7 @@ sub pgup_cast : Chained('pgup_casttop') : PathPart('') : Args(0) {
     } catch {
         $c->detach( '_dberror', [ shift ] );
     };
-    $c->detach( '_pgupdate', [ $rowprof, $up_items ] );
+    $c->detach( '_pgupdate', [ 'cast', $rowprof, $up_items ] );
 }
 
 =head2 program/*/cast/*/del
@@ -904,7 +906,7 @@ sub pgup_castdel : Chained('pgup_casttop') : PathPart('del') : Args(0) {
     $c->detach( '/program/' . $pgid . '/cast/' . $id )
         if ( ( $c->request->method eq 'GET' ) || ( $id == 0 ) );
 
-    $c->detach( '_pgdelete', [ $up_items ] );
+    $c->detach( '_pgdelete', [ 'cast', $up_items ] );
 }
 
 =head2 _pgupdate
@@ -915,6 +917,7 @@ sub pgup_castdel : Chained('pgup_casttop') : PathPart('del') : Args(0) {
 
 sub _pgupdate :Private {
     my ( $self, $c, 
+         $target,       # 更新対象
          $rowprof,      # 対象データベース行
          $up_items,     # 対象列名配列
        ) = @_;
@@ -956,7 +959,7 @@ $c->log->debug('>>>> regpgid: ' . $regpgid . ' -> ' . $newregpgid);
                             }
                         }
                         $c->forward('/program/_autoProgress',
-                                [ $regpgid, $up_items, $rowprof, $value ] );
+                                [ $regpgid, $target, $up_items, $rowprof, $value ] );
                         $rowprof->update( $value ); 
                         $c->response->body(
                             '<FORM><H1>更新しました</H1></FORM>');
@@ -975,7 +978,7 @@ $c->log->info('updateflg: cu: ' . +( $c->sessionid . $c->session->{'updtic'}) );
             else {
                 # 追加
                 $c->forward('/program/_autoProgress',
-                                [ $regpgid, $up_items, undef, $value ] );
+                                [ $regpgid, $target, $up_items, undef, $value ] );
                 $c->stash->{'M'}->create( $value ); 
                 $c->response->body('<FORM><H1>追加しました</H1></FORM>');
             }
@@ -995,6 +998,7 @@ $c->log->info('updateflg: cu: ' . +( $c->sessionid . $c->session->{'updtic'}) );
 
 sub _pgdelete :Private {
     my ( $self, $c,
+         $target,       # 削除対象
          $up_items,     # 対象列名配列
     ) = @_;
 
@@ -1006,7 +1010,7 @@ sub _pgdelete :Private {
                 +( $c->sessionid . $c->session->{'updtic'}) ) {
             # 削除実施
             $c->forward('/program/_autoProgress',
-                                [ $regpgid, $up_items, $rowprof, undef ] );
+                                [ $regpgid, $target, $up_items, $rowprof, undef ] );
             $rowprof->delete(); 
             $c->response->body('<FORM><H1>削除しました</H1></FORM>');
         }
@@ -1172,13 +1176,14 @@ sub _trnReq2Hash :Private {
 sub _autoProgress :Private {
     my ( $self, $c, 
          $regpgid,  # 対象企画番号
+         $target,   # 更新対象
          $itemkeys, # 項目名配列
          $row,      # 対象レコード(更新前)
          $value,    # 更新用ハッシュ
        ) = @_;
 
     try {
-        my $progstr = '[Auto Progress] ';
+        my $progstr = '';
         if ( defined( $row ) ) {
             if ( defined( $value ) ) { # 更新
                 for my $key (@{$itemkeys}) {
@@ -1197,6 +1202,8 @@ sub _autoProgress :Private {
                         $rowval = '';
                     }
                     if ( defined( $val ) && ($rowval ne $val ) ) {
+
+                        $progstr = 'Update ' if ( $progstr eq '' );
                         $progstr .= $key . ' change to ' . $val . ' ';
                     }
                 }
@@ -1219,7 +1226,8 @@ sub _autoProgress :Private {
         if ( $progstr ne '' ) {
             $c->log->info( localtime()  . ' _autoProgress regpgid:' .$regpgid
                                         . ' progstr:' . $progstr );
-            $c->forward('/program/_crProgress', [ $regpgid, $progstr, ], );
+            my $repstr = '[Auto Progress] ' . $target . ' ' . $progstr;
+            $c->forward('/program/_crProgress', [ $regpgid, $repstr, ], );
         }
     } catch {
         # 自動進捗登録時の失敗は、エラーログのみ残す

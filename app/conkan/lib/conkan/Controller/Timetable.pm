@@ -315,7 +315,7 @@ sub timetable_get : Chained('timetable_base') :PathPart('') :Args(1) {
                                 roomid layerno progressprp
                             / ];
                 my $value = $c->forward('/program/_trnReq2Hash', [ $items ] );
-                $c->forward('/program/_autoProgress', [ $regpgid, $items, $row, $value ] );
+                $c->forward('/program/_autoProgress', [ $regpgid, 'program', $items, $row, $value ] );
                 $row->update( $value ); 
                 $c->stash->{'status'} = 'update';
             }

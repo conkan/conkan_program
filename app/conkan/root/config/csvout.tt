@@ -36,8 +36,8 @@
                 部屋番号, 実施場所, 企画紹介文,
                 決定出演者(企画ネーム, 肩書, 出演ステータス)...
               </div>
-              <div class="well">
-                ダウンロード対象ステータス<br/>
+              <div class="well csvform">
+                <H4>ダウンロード対象ステータス</H4>
                 [%- FOREACH stat = conf.pg_status %]
                   <input type="checkbox" name="pg_status" value="[% stat %]"
                   [%- SWITCH stat -%]
@@ -85,7 +85,7 @@
             </a>
           </td>
           <td class="vcenter">
-            無効でないスタッフの情報をダウンロードする
+            無効でないスタッフの情報をダウンロードする<br/>
             出力内容は
             <div class="well csvwell">
               名前, アカウント, 役割, メールアドレス, 電話番号,
@@ -102,11 +102,11 @@
             </a>
           </td>
           <td class="vcenter">
-            無効でない出演者の情報をダウンロードする
+            無効でない出演者の情報をダウンロードする<br/>
             出力内容は
             <div class="well csvwell">
               大会登録番号, 氏名, フリガナ, コンタクトステータス,
-              補足(連絡先), 補足(制限事項)
+              補足連絡先, 補足制限事項
             </div>
           </td>
         </tr>
@@ -119,7 +119,7 @@
             </a>
           </td>
           <td class="vcenter">
-            無効でない部屋の情報をダウンロードする
+            無効でない部屋の情報をダウンロードする<br/>
             出力内容は
             <div class="well csvwell">
               部屋番号, 部屋名, 定員, 形式, 面積, 利用可能時間,
@@ -136,7 +136,7 @@
             </a>
           </td>
           <td class="vcenter">
-            無効でない機材の情報をダウンロードする
+            無効でない機材の情報をダウンロードする<br/>
             出力内容は
             <div class="well csvwell">
               機材番号, 名称, 仕様, 補足
@@ -145,7 +145,13 @@
         </tr>
       </tbody>
     </table>
-    <div>差しこみデータダウンロード</div>
+    <div>
+      <H3>差しこみデータダウンロード</H3>
+      印刷用ソフトでの差し込み印刷に使用するデータをダウンロードする。
+      説明欄の xxx.lcx は、無料ソフト
+      <a href="http://www.labelyasan.com/" target="_blank">ラベル屋さん</a>
+      の印刷フォーマットデータである。
+    </div>
     <table class="table table-bordered table-condensed"
      style="background-color:white;">
       <colgroup>
@@ -162,6 +168,11 @@
             </a>
           </td>
           <td class="vcenter">
+            <a href="/static/lcx/invitate.lcx">企画時間案内.lcx</a><br/>
+            出力内容は
+            <div class="well csvwell">
+              氏名, 企画案内(企画名称, 実施日時と場所)...
+            </div>
           </td>
         </tr>
         <tr> <!--企画部屋紙用差しこみデータダウンロード -->
@@ -173,6 +184,12 @@
             </a>
           </td>
           <td class="vcenter">
+            <a href="/static/lcx/forroomv.lcx">企画部屋紙縦.lcx</a>
+            <a href="/static/lcx/forroomh.lcx">企画部屋紙横.lcx</a><br/>
+            出力内容は
+            <div class="well csvwell">
+              企画名, 企画番号, 実施日, 開始時刻, 場所名
+            </div>
           </td>
         </tr>
         <tr> <!-- 出演者前垂用差しこみデータダウンロード -->
@@ -184,6 +201,11 @@
             </a>
           </td>
           <td class="vcenter">
+            <a href="/static/lcx/forcast.lcx">出演者前垂.lcx</a><br/>
+            出力内容は
+            <div class="well csvwell">
+              氏名, 企画名, 部屋名, 企画番号, 実施日, 開始時刻
+            </div>
           </td>
         </tr>
         <tr> <!-- 企画別人数用差しこみデータダウンロード -->
@@ -195,6 +217,11 @@
             </a>
           </td>
           <td class="vcenter">
+            <a href="/static/lcx/memcnt.lcx">企画別人数.lcx</a><br/>
+            出力内容は
+            <div class="well csvwell">
+              企画名 企画番号, 実施日, 開始時刻, 部屋名, 内線番号, 出演人数, 裏方人数, 客席人数, 通訳人数
+            </div>
           </td>
         </tr>
         <tr> <!-- 企画別出演者用差しこみデータダウンロード -->
@@ -206,6 +233,11 @@
             </a>
           </td>
           <td class="vcenter">
+            <a href="/static/lcx/castbyprg.lcx">企画別出演.lcx</a><br/>
+            出力内容は
+            <div class="well csvwell">
+              企画名, 企画番号, 実施日, 開始時刻, 部屋名, 内線番号, 出演者とステータス
+            </div>
           </td>
         </tr>
       </tbody>
