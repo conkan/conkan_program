@@ -167,12 +167,7 @@ sub createPeriod :Private {
 sub csvdownload :Local {
     my ( $self, $c ) = @_;
 
-$c->log->debug('>>> ' . 'csvdownload' );
-
     my $rowconf = $c->model('ConkanDB::PgSystemConf')->find('pg_active_status');
-    my $pact_status = [
-        map +{ 'status' => $_ }, @{from_json( $rowconf->pg_conf_value() )}
-    ];
     # 実施日時、開始時刻、終了時刻、実施場所が設定済
     # 実行ステータスが有効
     my $rows =
@@ -181,7 +176,7 @@ $c->log->debug('>>> ' . 'csvdownload' );
               'date1'  => \'IS NOT NULL', 
               'stime1' => \'IS NOT NULL', 
               'etime1' => \'IS NOT NULL',
-              -nest    => $pact_status,
+              'status' => from_json( $rowconf->pg_conf_value() ),
             },
             {
                 'prefetch' => [ 'regpgid', 'roomid' ],
@@ -208,8 +203,6 @@ $c->log->debug('>>> ' . 'csvdownload' );
             $datmHash->{'etms'}->[1],       # 終了時刻2,
         ]);
     }
-
-$c->log->debug('>>> ' . 'rowdata : ' . Dumper( \@data ) );
 
     $c->stash->{'csv'} = \@data;
     $c->response->header( 'Content-Disposition' =>

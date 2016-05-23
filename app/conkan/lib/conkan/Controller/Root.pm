@@ -38,6 +38,7 @@ login処理と初期設定のみ組み込み。それ以外は別のコントロ
 
 =cut
 
+
 sub auto :Private {
     my ( $self, $c ) = @_;
 
@@ -466,8 +467,9 @@ Attempt to render a view, if needed.
 
 sub end : ActionClass('RenderView') {
     my ( $self, $c ) = @_;
-    # エラー発生時のみ実施
+
     if ( scalar @{ $c->error } ) {
+        # エラー発生時のみ実施
         $c->response->status(500);
         $c->stash->{errors}   = $c->error;
         $c->stash->{template} = 'error.tt';

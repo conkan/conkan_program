@@ -57,7 +57,7 @@
         </tr>
         <tr> <!-- TimeTableダウンロード -->
           <td class="text-center">
-            <a href="/timetable/csvdownload">
+            <a href="/timetable/csvdownload" target="_blank">
               <button name="timetablebtn" class="btn fitbtn" id="timetablebtn">
                 タイムテーブル用CSVダウンロード
               </button>
@@ -78,7 +78,7 @@
         </tr>
         <tr> <!-- スタッフ一覧ダウンロード -->
           <td class="text-center">
-            <a href="/config/staffcsvdownload">
+            <a href="/config/staffcsvdownload" target="_blank">
               <button name="staffdlbtn" class="btn fitbtn" id="staffdlbtn">
                 スタッフ一覧CSVダウンロード
               </button>
@@ -95,7 +95,7 @@
         </tr>
         <tr> <!-- 出演者一覧ダウンロード -->
           <td class="text-center">
-            <a href="/config/castcsvdownload">
+            <a href="/config/castcsvdownload" target="_blank">
               <button name="castdlbtn" class="btn fitbtn" id="castdlbtn">
                 出演者一覧CSVダウンロード
               </button>
@@ -112,7 +112,7 @@
         </tr>
         <tr> <!-- 部屋一覧ダウンロード -->
           <td class="text-center">
-            <a href="/config/roomcsvdownload">
+            <a href="/config/roomcsvdownload" target="_blank">
               <button name="roomdlbtn" class="btn fitbtn" id="roomdlbtn">
                 部屋一覧CSVダウンロード
               </button>
@@ -129,7 +129,7 @@
         </tr>
         <tr> <!-- 機材一覧ダウンロード -->
           <td class="text-center">
-            <a href="/config/equipcsvdownload">
+            <a href="/config/equipcsvdownload" target="_blank">
               <button name="equipdlbtn" class="btn fitbtn" id="equipdlbtn">
                 機材一覧CSVダウンロード
               </button>
@@ -161,14 +161,14 @@
       <tbody>
         <tr> <!-- 出演者への企画案内書用差しこみデータダウンロード -->
           <td class="text-center">
-            <a href="/config/csvdownload/invitate">
+            <a href="/config/csvdownload/invitate" target="_blank">
               <button name="invitatebtn" class="btn fitbtn" id="invitatebtn">
                 出演者への企画案内書用差しこみ用CSVダウンロード
               </button>
             </a>
           </td>
           <td class="vcenter">
-            <a href="/static/lcx/invitate.lcx">企画時間案内.lcx</a><br/>
+            <a href="/static/lcx/invitate.lcx" target="_blank">企画時間案内.lcx</a><br/>
             出力内容は
             <div class="well csvwell">
               氏名, 企画案内(企画名称, 実施日時と場所)...
@@ -177,15 +177,15 @@
         </tr>
         <tr> <!--企画部屋紙用差しこみデータダウンロード -->
           <td class="text-center">
-            <a href="/config/csvdownload/forroom">
+            <a href="/config/csvdownload/forroom" target="_blank">
               <button name="forroombtn" class="btn fitbtn" id="forroombtn">
                 企画部屋紙用差しこみデータ用CSVダウンロード
               </button>
             </a>
           </td>
           <td class="vcenter">
-            <a href="/static/lcx/forroomv.lcx">企画部屋紙縦.lcx</a>
-            <a href="/static/lcx/forroomh.lcx">企画部屋紙横.lcx</a><br/>
+            <a href="/static/lcx/forroomv.lcx" target="_blank">企画部屋紙縦.lcx</a>
+            <a href="/static/lcx/forroomh.lcx" target="_blank">企画部屋紙横.lcx</a><br/>
             出力内容は
             <div class="well csvwell">
               企画名, 企画番号, 実施日, 開始時刻, 場所名
@@ -194,14 +194,14 @@
         </tr>
         <tr> <!-- 出演者前垂用差しこみデータダウンロード -->
           <td class="text-center">
-            <a href="/config/csvdownload/forcast">
+            <a href="/config/csvdownload/forcast" target="_blank">
               <button name="forcastbtn" class="btn fitbtn" id="forcastbtn">
                 出演者前垂用差しこみデータ用CSVダウンロード
               </button>
             </a>
           </td>
           <td class="vcenter">
-            <a href="/static/lcx/forcast.lcx">出演者前垂.lcx</a><br/>
+            <a href="/static/lcx/forcast.lcx" target="_blank">出演者前垂.lcx</a><br/>
             出力内容は
             <div class="well csvwell">
               氏名, 企画名, 部屋名, 企画番号, 実施日, 開始時刻
@@ -210,14 +210,14 @@
         </tr>
         <tr> <!-- 企画別人数用差しこみデータダウンロード -->
           <td class="text-center">
-            <a href="/config/csvdownload/memcnt">
+            <a href="/config/csvdownload/memcnt" target="_blank">
               <button name="memcntbtn" class="btn fitbtn" id="memcntbtn">
                 企画別人数用差しこみデータ用CSVダウンロード
               </button>
             </a>
           </td>
           <td class="vcenter">
-            <a href="/static/lcx/memcnt.lcx">企画別人数.lcx</a><br/>
+            <a href="/static/lcx/memcnt.lcx" target="_blank">企画別人数.lcx</a><br/>
             出力内容は
             <div class="well csvwell">
               企画名 企画番号, 実施日, 開始時刻, 部屋名, 内線番号, 出演人数, 裏方人数, 客席人数, 通訳人数
@@ -226,14 +226,14 @@
         </tr>
         <tr> <!-- 企画別出演者用差しこみデータダウンロード -->
           <td class="text-center">
-            <a href="/config/csvdownload/castbyprg">
+            <a href="/config/csvdownload/castbyprg" target="_blank">
               <button name="castbyprgbtn" class="btn fitbtn" id="castbyprgbtn">
                 企画別出演者用差しこみデータ用CSVダウンロード
               </button>
             </a>
           </td>
           <td class="vcenter">
-            <a href="/static/lcx/castbyprg.lcx">企画別出演.lcx</a><br/>
+            <a href="/static/lcx/castbyprg.lcx" target="_blank">企画別出演.lcx</a><br/>
             出力内容は
             <div class="well csvwell">
               企画名, 企画番号, 実施日, 開始時刻, 部屋名, 内線番号, 出演者とステータス

@@ -313,7 +313,7 @@ sub staff_listget : Chained('staff_base') : PathPart('listget') : Args(0) {
             $c->model('ConkanDB::PgStaff')->search(
                 { 'account'  => { '!=' => 'admin' } },
                 {
-                  'join'     => { 'pg_programs' },
+                  'join'     => 'pg_programs',
                   'distinct' => 1,
                   '+select'  => [ { count => 'pg_programs.staffid' } ],
                   '+as'      => [qw/pgcnt/],
@@ -731,7 +731,7 @@ sub cast_listget : Chained('cast_base') : PathPart('listget') : Args(0) {
             $c->model('ConkanDB::PgAllCast')->search(
                 { },
                 {
-                  'join'     => { 'pg_casts' },
+                  'join'     => 'pg_casts',
                   'distinct' => 1,
                   '+select'  => [ { count => 'pg_casts.castid' } ],
                   '+as'      => [qw/pgcnt/],
@@ -1221,7 +1221,7 @@ sub invitate : Chained('csvdl_base') : PathPart('invitate') : Args(0) {
         $c->model('ConkanDB::PgAllCast')->search(
             { 'me.status' => { 'LIKE' => 'ゲスト参加%' } },
             {
-              'join'     => { 'pg_casts' },
+              'join'     => 'pg_casts',
               'distinct' => 1,
               '+select'  => [ { count => 'pg_casts.castid' } ],
               '+as'      => [qw/pgcnt/],
@@ -1284,6 +1284,9 @@ sub invitate : Chained('csvdl_base') : PathPart('invitate') : Args(0) {
         'attachment; filename=' .
             strftime("%Y%m%d%H%M%S", localtime()) . '_invitate.csv' );
 
+    ## 下の1行でcp932で出力するが、
+    ## その後企画情報CSVダウンロードのIN/OUTもcp932だとして動作してしまう
+    # $c->encoding(Encode::find_encoding('cp932'));
     $c->forward('conkan::View::Download::CSV');
 }
 

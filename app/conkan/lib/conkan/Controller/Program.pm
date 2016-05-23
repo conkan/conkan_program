@@ -433,14 +433,15 @@ $c->log->debug('>>>> maxsubno:[' . $row->get_column('maxsubno') . ']');
 
 sub csvdownload :Local {
     my ( $self, $c ) = @_;
-    my $get_status = [
-        map +{ 'status' => $_ }, @{$c->request->body_params->{'pg_status'}}
-    ];
-    push @$get_status, { 'status' => \'IS NULL' };
+    my $get_status = $c->request->body_params->{'pg_status'};
+    push ( @$get_status, \'IS NULL' )
+        if exists( $c->request->body_params->{'pg_null_stat'} );
     # 実行ステータスが有効
     my $rows =
         [ $c->model('ConkanDB::PgProgram')->search(
-            $get_status,
+            {
+                'status'   => $get_status,
+            },
             {
                 'prefetch' => [ 'regpgid', 'roomid' ],
                 'order_by' => { '-asc' => [ 'me.regpgid', 'me.subno' ] },
