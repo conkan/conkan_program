@@ -1,6 +1,7 @@
 package conkan::View::Download::CSV;
 use Moose;
 use namespace::autoclean;
+use Encode;
 
 extends 'Catalyst::View::Download::CSV';
 
@@ -15,6 +16,26 @@ conkan::View::Download::CSV - Download View for conkan
 =head1 DESCRIPTION
 
 Download View for conkan.
+
+=head1 METHOD
+
+=head2 render
+
+encoding追加
+
+=cut
+
+sub render {
+    my ( $self,
+         $c, $template, $args ) = @_;
+
+    my $content = $self->SUPER::render( $c, $template, $args );
+    if ( $c->stash->{'csvenc'} ) {
+        $c->response->content_type('application/octet-stream');
+        $content = encode( $c->stash->{'csvenc'}, $content );
+    }
+    return $content;
+}
 
 =head1 SEE ALSO
 

@@ -1280,13 +1280,10 @@ sub invitate : Chained('csvdl_base') : PathPart('invitate') : Args(0) {
     }
  
     $c->stash->{'csv'} = \@data;
+    $c->stash->{'csvenc'} = 'cp932';
     $c->response->header( 'Content-Disposition' =>
         'attachment; filename=' .
             strftime("%Y%m%d%H%M%S", localtime()) . '_invitate.csv' );
-
-    ## 下の1行でcp932で出力するが、
-    ## その後企画情報CSVダウンロードのIN/OUTもcp932だとして動作してしまう
-    # $c->encoding(Encode::find_encoding('cp932'));
     $c->forward('conkan::View::Download::CSV');
 }
 
