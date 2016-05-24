@@ -1185,6 +1185,8 @@ CSV出力ラウンチページ
 
 =cut
 
+my $NOTSETSTR = '____未設定____';
+
 sub csvout :Local {
     my ( $self, $c ) = @_;
 
@@ -1193,6 +1195,8 @@ sub csvout :Local {
     $conf->{'act_status_str'} = $M->find('pg_active_status')->pg_conf_value();
     $conf->{'act_status'} = from_json($conf->{'act_status_str'});
     $conf->{'pg_status'} = from_json($M->find('pg_status_vals')->pg_conf_value());
+    $conf->{'ct_status'} = from_json($M->find('contact_status_vals')->pg_conf_value());
+    $conf->{'cast_status'} = from_json($M->find('cast_status_vals')->pg_conf_value());
     $c->stash->{'conf'} = $conf;
 }
 
@@ -1210,16 +1214,21 @@ sub csvdl_base : Chained('') : PathPart('config/csvdownload') : CaptureArgs(0) {
 
 差しこみデータダウンロード invitate  : 企画案内書用
 
+CSV: 氏名, 企画案内(企画名称, 実施日時と場所)...
+
 =cut
 
 sub invitate : Chained('csvdl_base') : PathPart('invitate') : Args(0) {
     my ( $self, $c ) = @_;
               
-    # 氏名, 企画案内(企画名称, 実施日時と場所)...
-    my @data;
+    my $condval = $c->request->body_params->{'ct_status'};
+    my $get_status = ( ref($condval) eq 'ARRAY' ) ? $condval : [ $condval ];
+    push ( @$get_status, \'IS NULL' )
+        if exists( $c->request->body_params->{'ct_null_stat'} );
+    # 指定のコンタクトステータスで抽出
     my $rows = [
         $c->model('ConkanDB::PgAllCast')->search(
-            { 'me.status' => { 'LIKE' => 'ゲスト参加%' } },
+            { 'me.status' => $get_status },
             {
               'join'     => 'pg_casts',
               'distinct' => 1,
@@ -1229,23 +1238,36 @@ sub invitate : Chained('csvdl_base') : PathPart('invitate') : Args(0) {
             }
         )
     ];
+$c->log->debug('>>> ' . 'cast cnt : ' . scalar(@$rows) );
 
+    my @data = ();
+    # 企画絞込用(有効な実行ステータス)
+    my $actpgsts = from_json(
+        $c->model('ConkanDB::PgSystemConf')->find('pg_active_status')
+            ->pg_conf_value()
+    );
     for my $row (@$rows) {
        next unless  $row->get_column('pgcnt'),
 
        my $castname = $row->name();
-       my @onedata = ( $castname );
        my $castid   = $row->castid();
+       # 出演する有効な企画のみ抽出
        my $castrows = [
            $c->model('ConkanDB::PgCast')->search(
-               { 'me.castid' => $castid },
+               {
+                 'me.castid'    => $castid,
+                 'pgid.status'  => $actpgsts,
+               },
                {
                  'prefetch'     => [ { 'pgid' => 'roomid' },
                                      { 'pgid' => 'regpgid' },],
-                 'order_by' => { '-asc' => 'pgid.regpgid' }
+                 'order_by'     => { '-asc' => 'pgid.regpgid' }
                }
            )
         ];
+        next unless scalar(@$castrows);
+
+        my @onedata = ( $castname );
         for my $castrow (@$castrows) {
             my $pgname = '【企画名称】'
                         . $castrow->pgid->regpgid->regpgid() . ' '
@@ -1262,12 +1284,12 @@ sub invitate : Chained('csvdl_base') : PathPart('invitate') : Args(0) {
                 }
             }
             else {
-                $pgdata .= '____未設定____';
+                $pgdata .= $NOTSETSTR;
             }
             $pgdata .= ' <企画場所>';
             $pgdata .= $castrow->pgid->roomid
                         ? $castrow->pgid->roomid->name()
-                        : '____未設定____';
+                        : $NOTSETSTR;
             $pgdata .= ' <出演名>' . $castrow->name()
                 if ( $castrow->name()
                     && ( $castrow->name() ne $castname ) );
@@ -1291,26 +1313,148 @@ sub invitate : Chained('csvdl_base') : PathPart('invitate') : Args(0) {
 
 差しこみデータダウンロード forroom  : 企画部屋紙用
 
+CSV: 企画名, 企画番号, 実施日, 開始時刻, 場所名
+
 =cut
 
 sub forroom : Chained('csvdl_base') : PathPart('forroom') : Args(0) {
     my ( $self, $c ) = @_;
-    # 企画名, 企画番号, 実施日, 開始時刻, 場所名
-    $c->stash->{self_li_id} = 'config_csv';
-    $c->stash->{template} = 'underconstract.tt';
+
+    my $rowconf = $c->model('ConkanDB::PgSystemConf')->find('pg_active_status');
+    # 有効な実行ステータスで抽出
+    my $rows = [
+        $c->model('ConkanDB::PgProgram')->search(
+            { 
+              'me.status' => from_json( $rowconf->pg_conf_value() ),
+            },
+            {
+              'prefetch' => [ 'regpgid', 'roomid' ],
+              'order_by' => { '-asc' => [ 'me.regpgid', 'me.subno' ] },
+            }
+        )
+    ];
+$c->log->debug('>>> ' . 'program cnt : ' . scalar(@$rows) );
+
+    my @data = ();
+    for my $row (@$rows) {
+        # 実施日付は YYYY/MM/DD、開始終了時刻は HH:MM (いずれも0サフィックス)
+        my $dtmHash =  $c->forward('/program/_trnDateTime4csv', [ $row, ], );
+        my $roomname =  $row->roomid ? $row->roomid->name() : $NOTSETSTR;
+        if ( $dtmHash->{'dates'} ) {
+            for ( my $idx=0; $idx<scalar(@{$dtmHash->{'dates'}}); $idx++ ) {
+                push ( @data, [
+                    $row->regpgid->name(),          # 企画名,
+                    $row->regpgid->regpgid(),       # 企画番号,
+                    $dtmHash->{'dates'}->[$idx],    # 実施日
+                    $dtmHash->{'stms'}->[$idx],     # 開始時刻,
+                    $roomname,                      # 場所名,
+                ]);
+            }
+        }
+        else {
+            push ( @data, [
+                $row->regpgid->name(),          # 企画名,
+                $row->regpgid->regpgid(),       # 企画番号,
+                $NOTSETSTR,                     # 実施日
+                $NOTSETSTR,                     # 開始時刻,
+                $roomname,                      # 場所名,
+            ]);
+        }
+    }
+
+    $c->stash->{'csv'} = \@data;
+    $c->stash->{'csvenc'} = 'cp932';
+    $c->response->header( 'Content-Disposition' =>
+        'attachment; filename=' .
+            strftime("%Y%m%d%H%M%S", localtime()) . '_forroom.csv' );
+    $c->forward('conkan::View::Download::CSV');
 }
 
 =head2 csvdownload/forcast
 
 差しこみデータダウンロード forcast  : 出演者前垂用
 
+CSV: 氏名, 企画名, 部屋名, 企画番号, 実施日, 開始時刻
 =cut
 
 sub forcast : Chained('csvdl_base') : PathPart('forcast') : Args(0) {
     my ( $self, $c ) = @_;
-    # 氏名, 企画名, 部屋名, 企画番号, 実施日, 開始時刻
-    $c->stash->{self_li_id} = 'config_csv';
-    $c->stash->{template} = 'underconstract.tt';
+    my $rowconf = $c->model('ConkanDB::PgSystemConf')->find('pg_active_status');
+    # 有効な実行ステータスで抽出
+    my $rows = [
+        $c->model('ConkanDB::PgProgram')->search(
+            { 
+              'me.status' => from_json( $rowconf->pg_conf_value() ),
+            },
+            {
+              'prefetch' => [ 'regpgid', 'roomid' ],
+              'order_by' => { '-asc' => [ 'me.regpgid', 'me.subno' ] },
+            }
+        )
+    ];
+$c->log->debug('>>> ' . 'program cnt : ' . scalar(@$rows) );
+
+    my @data = ();
+    for my $row (@$rows) {
+        # 実施日付は YYYY/MM/DD、開始終了時刻は HH:MM (いずれも0サフィックス)
+        my $dtmHash =  $c->forward('/program/_trnDateTime4csv', [ $row, ], );
+        my $roomname =  $row->roomid ? $row->roomid->name() : $NOTSETSTR;
+        my $pgname = $row->regpgid->name();
+        my $regpgid = $row->regpgid->regpgid();
+
+        my $condval = $c->request->body_params->{'cast_status'};
+        my $get_status = ( ref($condval) eq 'ARRAY' ) ? $condval : [ $condval ];
+        push ( @$get_status, \'IS NULL' )
+            if exists( $c->request->body_params->{'cast_null_stat'} );
+        # 指定の出演ステータスで抽出
+        my $castrows = [
+            $c->model('ConkanDB::PgCast')->search(
+               {
+                 'me.pgid'    => $row->pgid(),
+                 'me.status'  => $get_status,
+               },
+               {
+                 'prefetch'     => 'castid',
+                 'order_by'     => { '-asc' => 'me.id' }
+               }
+           )
+        ];
+        next unless ( scalar(@$castrows) );
+
+$c->log->debug('>>> ' . 'cast cnt : ' . scalar(@$castrows) );
+        for my $castrow (@$castrows) {
+            my $cname =  $castrow->name() || $castrow->castid->name();
+            if ( $dtmHash->{'dates'} ) {
+                for ( my $idx=0; $idx<scalar(@{$dtmHash->{'dates'}}); $idx++ ) {
+                    push ( @data, [
+                        $cname,                         # 氏名
+                        $pgname,                        # 企画名,
+                        $roomname,                      # 場所名,
+                        $regpgid,                       # 企画番号,
+                        $dtmHash->{'dates'}->[$idx],    # 実施日
+                        $dtmHash->{'stms'}->[$idx],     # 開始時刻,
+                    ]);
+                }
+            }
+            else {
+                push ( @data, [
+                    $cname,                         # 氏名
+                    $pgname,                        # 企画名,
+                    $roomname,                      # 場所名,
+                    $regpgid,                       # 企画番号,
+                    $NOTSETSTR,                     # 実施日
+                    $NOTSETSTR,                     # 開始時刻,
+                ]);
+            }
+        }
+    }
+
+    $c->stash->{'csv'} = \@data;
+    $c->stash->{'csvenc'} = 'cp932';
+    $c->response->header( 'Content-Disposition' =>
+        'attachment; filename=' .
+            strftime("%Y%m%d%H%M%S", localtime()) . '_forcast.csv' );
+    $c->forward('conkan::View::Download::CSV');
 }
 
 =head2 csvdownload/memcnt

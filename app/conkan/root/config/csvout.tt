@@ -12,6 +12,10 @@
 [%- PROCESS 'tthead.tt' -%]
 <div class="container">
   <div class="well" id="csvwrap">
+    <div>
+      <H3 style="margin-top:0px;">CSVダウンロード</H3>
+      各データをCSV形式でダウンロードする。(文字コードは国際標準のutf-8)
+    </div>
     <table class="table table-bordered table-condensed"
      style="background-color:white;">
       <colgroup>
@@ -27,7 +31,7 @@
               </button>
             </td>
             <td>
-              下記で指定したステータスの企画情報をダウンロードする<br/>
+              下記で指定した実行ステータスの企画情報をダウンロードする<br/>
               出力内容は
               <div class="well csvwell">
                 企画ID, サブNO, 企画名称, 企画名フリガナ, 内容,
@@ -37,7 +41,7 @@
                 決定出演者(企画ネーム, 肩書, 出演ステータス)...
               </div>
               <div class="well csvform">
-                <H4>ダウンロード対象ステータス</H4>
+                <H4>ダウンロード対象実行ステータス</H4>
                 [%- FOREACH stat = conf.pg_status %]
                   <input type="checkbox" name="pg_status" value="[% stat %]"
                   [%- SWITCH stat -%]
@@ -64,7 +68,7 @@
             </a>
           </td>
           <td class="vcenter">
-            タイムテーブル作成用に、日時/場所設定済でステータスが
+            タイムテーブル作成用に、日時/場所設定済で実行ステータスが
             [% conf.act_status_str %]
             の企画情報をダウンロードする<br/>
             出力内容は
@@ -151,6 +155,7 @@
       説明欄の xxx.lcx は、無料ソフト
       <a href="http://www.labelyasan.com/" target="_blank">ラベル屋さん</a>
       の印刷フォーマットデータである。
+      (ラベル屋さん用なので文字コードはcp932(Shift-JIS))
     </div>
     <table class="table table-bordered table-condensed"
      style="background-color:white;">
@@ -160,20 +165,37 @@
       </colgroup>
       <tbody>
         <tr> <!-- 出演者への企画案内書用差しこみデータダウンロード -->
-          <td class="text-center">
-            <a href="/config/csvdownload/invitate" target="_blank">
+          <FORM method="POST" action="/config/csvdownload/invitate">
+            <td class="text-center">
               <button name="invitatebtn" class="btn fitbtn" id="invitatebtn">
                 出演者への企画案内書用差しこみ用CSVダウンロード
               </button>
-            </a>
-          </td>
-          <td class="vcenter">
-            <a href="/static/lcx/invitate.lcx" target="_blank">企画時間案内.lcx</a><br/>
-            出力内容は
-            <div class="well csvwell">
-              氏名, 企画案内(企画名称, 実施日時と場所)...
-            </div>
-          </td>
+            </td>
+            <td>
+              下記で指定したコンタクトステータスの出演者への、実行ステータスが
+              [% conf.act_status_str %]
+              である企画案内用データをダウンロードする。<br/>
+              ラベル屋さんフォーマットは
+              <a href="/static/lcx/invitate.lcx" target="_blank">
+                企画時間案内.lcx
+              </a><br/>
+              出力内容は
+              <div class="well csvwell">
+                氏名, 企画案内(企画名称, 実施日時と場所)...
+              </div>
+              <div class="well csvform">
+                <H4>ダウンロード対象 コンタクトステータス</H4>
+                [%- FOREACH stat = conf.ct_status %]
+                  <input type="checkbox" name="ct_status" value="[% stat %]">
+                    [% stat %]
+                  </input>
+                [%- END %]
+                <input type="checkbox" name="ct_null_stat" value="add">
+                  未設定
+                </input>
+              </div>
+            </td>
+          </form>
         </tr>
         <tr> <!--企画部屋紙用差しこみデータダウンロード -->
           <td class="text-center">
@@ -184,7 +206,11 @@
             </a>
           </td>
           <td class="vcenter">
+            実行ステータスが[% conf.act_status_str %]である企画の、
+            部屋案内用データをダウンロードする。<br/>
+            ラベル屋さんフォーマットは
             <a href="/static/lcx/forroomv.lcx" target="_blank">企画部屋紙縦.lcx</a>
+            または
             <a href="/static/lcx/forroomh.lcx" target="_blank">企画部屋紙横.lcx</a><br/>
             出力内容は
             <div class="well csvwell">
@@ -193,19 +219,35 @@
           </td>
         </tr>
         <tr> <!-- 出演者前垂用差しこみデータダウンロード -->
-          <td class="text-center">
-            <a href="/config/csvdownload/forcast" target="_blank">
+          <FORM method="POST" action="/config/csvdownload/forcast">
+            <td class="text-center">
               <button name="forcastbtn" class="btn fitbtn" id="forcastbtn">
                 出演者前垂用差しこみデータ用CSVダウンロード
               </button>
-            </a>
-          </td>
-          <td class="vcenter">
-            <a href="/static/lcx/forcast.lcx" target="_blank">出演者前垂.lcx</a><br/>
-            出力内容は
-            <div class="well csvwell">
-              氏名, 企画名, 部屋名, 企画番号, 実施日, 開始時刻
-            </div>
+            </td>
+            <td class="vcenter">
+              下記で指定した出演ステータスの出演者への、実行ステータスが
+              [% conf.act_status_str %]
+              である企画の前垂れ用データをダウンロードする。<br/>
+              ラベル屋さんフォーマットは
+              <a href="/static/lcx/forcast.lcx" target="_blank">
+                出演者前垂.lcx</a><br/>
+              出力内容は
+              <div class="well csvwell">
+                氏名, 企画名, 部屋名, 企画番号, 実施日, 開始時刻
+              </div>
+              <div class="well csvform">
+                <H4>ダウンロード対象 出演ステータス</H4>
+                [%- FOREACH stat = conf.cast_status %]
+                  <input type="checkbox" name="cast_status" value="[% stat %]">
+                    [% stat %]
+                  </input>
+                [%- END %]
+                <input type="checkbox" name="cast_null_stat" value="add">
+                  未設定
+                </input>
+              </div>
+            </form>
           </td>
         </tr>
         <tr> <!-- 企画別人数用差しこみデータダウンロード -->
@@ -236,7 +278,7 @@
             <a href="/static/lcx/castbyprg.lcx" target="_blank">企画別出演.lcx</a><br/>
             出力内容は
             <div class="well csvwell">
-              企画名, 企画番号, 実施日, 開始時刻, 部屋名, 内線番号, 出演者とステータス
+              企画名, 企画番号, 実施日, 開始時刻, 部屋名, 内線番号, 出演者と出演ステータス
             </div>
           </td>
         </tr>

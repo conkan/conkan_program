@@ -169,7 +169,7 @@ sub csvdownload :Local {
 
     my $rowconf = $c->model('ConkanDB::PgSystemConf')->find('pg_active_status');
     # 実施日時、開始時刻、終了時刻、実施場所が設定済
-    # 実行ステータスが有効
+    # & 有効な実行ステータスで抽出
     my $rows =
         [ $c->model('ConkanDB::PgProgram')->search(
             { 'me.roomid' => \'IS NOT NULL',
