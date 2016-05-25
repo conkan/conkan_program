@@ -1181,11 +1181,28 @@ sub loginlogget :Local {
 
 =head2 csvout
 -----------------------------------------------------------------------------
+CSV出力用定数設定
+
+=cut
+
+my $__NOTSETSTR__ = '____未設定____';
+my $__DEARSTR__   = ' 様';
+my $__PGNAMESTR__ = '【企画名称】';
+my $__PGDTMSTR__  = ' <企画時間>';
+my $__ROOMSTR__   = ' <企画場所>';
+my $__CNAMESTR__  = ' <出演名>';
+my $QR_GUEST   = qr/^ゲスト参加.*/;
+my $QR_SYUTUEN = qr/^出演.*/;
+my $QR_URAKATA = qr/^裏方.*/;
+my $QR_KYAKSKI = qr/^客席.*/;
+my $QR_TRANCE  = qr/^通訳.*/;
+
+=head2 csvout
+
 CSV出力ラウンチページ
 
 =cut
 
-my $NOTSETSTR = '____未設定____';
 
 sub csvout :Local {
     my ( $self, $c ) = @_;
@@ -1197,6 +1214,13 @@ sub csvout :Local {
     $conf->{'pg_status'} = from_json($M->find('pg_status_vals')->pg_conf_value());
     $conf->{'ct_status'} = from_json($M->find('contact_status_vals')->pg_conf_value());
     $conf->{'cast_status'} = from_json($M->find('cast_status_vals')->pg_conf_value());
+    $conf->{'func_is_guest'} = sub { return $_[0] =~ $QR_GUEST };
+    $conf->{'func_need_plate'} = sub { return (
+                $_[0] =~ $QR_SYUTUEN
+             || $_[0] =~ $QR_URAKATA
+             || $_[0] =~ $QR_KYAKSKI
+             || $_[0] =~ $QR_TRANCE
+         )};
     $c->stash->{'conf'} = $conf;
 }
 
@@ -1267,12 +1291,12 @@ $c->log->debug('>>> ' . 'cast cnt : ' . scalar(@$rows) );
         ];
         next unless scalar(@$castrows);
 
-        my @onedata = ( $castname );
+        my @onedata = ( $castname . $__DEARSTR__ );
         for my $castrow (@$castrows) {
-            my $pgname = '【企画名称】'
+            my $pgname = $__PGNAMESTR__
                         . $castrow->pgid->regpgid->regpgid() . ' '
                         . $castrow->pgid->regpgid->name();
-            my $pgdata = '<企画時間>';
+            my $pgdata = $__PGDTMSTR__;
             my $dtmHash = $c->forward('/program/_trnDateTime4csv',
                     [ $castrow->pgid, ], );
             if ( $dtmHash->{'dates'} ) {
@@ -1284,18 +1308,18 @@ $c->log->debug('>>> ' . 'cast cnt : ' . scalar(@$rows) );
                 }
             }
             else {
-                $pgdata .= $NOTSETSTR;
+                $pgdata .= $__NOTSETSTR__;
             }
-            $pgdata .= ' <企画場所>';
+            $pgdata .= $__ROOMSTR__;
             $pgdata .= $castrow->pgid->roomid
                         ? $castrow->pgid->roomid->name()
-                        : $NOTSETSTR;
-            $pgdata .= ' <出演名>' . $castrow->name()
+                        : $__NOTSETSTR__;
+            $pgdata .= $__CNAMESTR__ . $castrow->name()
                 if ( $castrow->name()
                     && ( $castrow->name() ne $castname ) );
+            my $cast_stat = $castrow->status();
             $pgdata .= '(' . $castrow->status() . ')'
-                if ( $castrow->status()
-                    && ( $castrow->status() ne '出演了承済' ) );
+                if ( $cast_stat && !( $cast_stat =~ $QR_SYUTUEN ) );
             push ( @onedata, $pgname, $pgdata );
         }
        push ( @data, \@onedata );
@@ -1337,9 +1361,8 @@ $c->log->debug('>>> ' . 'program cnt : ' . scalar(@$rows) );
 
     my @data = ();
     for my $row (@$rows) {
-        # 実施日付は YYYY/MM/DD、開始終了時刻は HH:MM (いずれも0サフィックス)
         my $dtmHash =  $c->forward('/program/_trnDateTime4csv', [ $row, ], );
-        my $roomname =  $row->roomid ? $row->roomid->name() : $NOTSETSTR;
+        my $roomname =  $row->roomid ? $row->roomid->name() : $__NOTSETSTR__;
         if ( $dtmHash->{'dates'} ) {
             for ( my $idx=0; $idx<scalar(@{$dtmHash->{'dates'}}); $idx++ ) {
                 push ( @data, [
@@ -1355,8 +1378,8 @@ $c->log->debug('>>> ' . 'program cnt : ' . scalar(@$rows) );
             push ( @data, [
                 $row->regpgid->name(),          # 企画名,
                 $row->regpgid->regpgid(),       # 企画番号,
-                $NOTSETSTR,                     # 実施日
-                $NOTSETSTR,                     # 開始時刻,
+                $__NOTSETSTR__,                 # 実施日
+                $__NOTSETSTR__,                 # 開始時刻,
                 $roomname,                      # 場所名,
             ]);
         }
@@ -1396,11 +1419,10 @@ $c->log->debug('>>> ' . 'program cnt : ' . scalar(@$rows) );
 
     my @data = ();
     for my $row (@$rows) {
-        # 実施日付は YYYY/MM/DD、開始終了時刻は HH:MM (いずれも0サフィックス)
-        my $dtmHash =  $c->forward('/program/_trnDateTime4csv', [ $row, ], );
-        my $roomname =  $row->roomid ? $row->roomid->name() : $NOTSETSTR;
         my $pgname = $row->regpgid->name();
+        my $roomname =  $row->roomid ? $row->roomid->name() : $__NOTSETSTR__;
         my $regpgid = $row->regpgid->regpgid();
+        my $dtmHash =  $c->forward('/program/_trnDateTime4csv', [ $row, ], );
 
         my $condval = $c->request->body_params->{'cast_status'};
         my $get_status = ( ref($condval) eq 'ARRAY' ) ? $condval : [ $condval ];
@@ -1442,8 +1464,8 @@ $c->log->debug('>>> ' . 'cast cnt : ' . scalar(@$castrows) );
                     $pgname,                        # 企画名,
                     $roomname,                      # 場所名,
                     $regpgid,                       # 企画番号,
-                    $NOTSETSTR,                     # 実施日
-                    $NOTSETSTR,                     # 開始時刻,
+                    $__NOTSETSTR__,                 # 実施日
+                    $__NOTSETSTR__,                 # 開始時刻,
                 ]);
             }
         }
@@ -1460,27 +1482,202 @@ $c->log->debug('>>> ' . 'cast cnt : ' . scalar(@$castrows) );
 =head2 csvdownload/memcnt
 
 差しこみデータダウンロード memcnt  : 企画別人数用
+    
+CSV:  企画名 企画番号, 実施日, 開始時刻, 部屋名, 内線番号, 出演人数, 裏方人数, 客席人数, 通訳人数
 
 =cut
 
 sub memcnt : Chained('csvdl_base') : PathPart('memcnt') : Args(0) {
     my ( $self, $c ) = @_;
-    # 企画名 企画番号, 実施日, 開始時刻, 部屋名, 内線番号, 出演人数, 裏方人数, 客席人数, 通訳人数
-    $c->stash->{self_li_id} = 'config_csv';
-    $c->stash->{template} = 'underconstract.tt';
+    my $rowconf = $c->model('ConkanDB::PgSystemConf')->find('pg_active_status');
+    # 有効な実行ステータスで抽出
+    my $rows = [
+        $c->model('ConkanDB::PgProgram')->search(
+            { 
+              'me.status' => from_json( $rowconf->pg_conf_value() ),
+            },
+            {
+              'prefetch' => [ 'regpgid', 'roomid' ],
+              'order_by' => { '-asc' => [ 'me.regpgid', 'me.subno' ] },
+            }
+        )
+    ];
+$c->log->debug('>>> ' . 'program cnt : ' . scalar(@$rows) );
+
+    my @data = ();
+    for my $row (@$rows) {
+        my $pgname = $row->regpgid->name();
+        my $regpgid = $row->regpgid->regpgid();
+        my $dtmHash =  $c->forward('/program/_trnDateTime4csv', [ $row, ], );
+        my $roomname =  $row->roomid ? $row->roomid->name() : $__NOTSETSTR__;
+
+        # 指定の企画内部IDで抽出
+        my $castrows = [
+            $c->model('ConkanDB::PgCast')->search(
+               {
+                 'pgid'    => $row->pgid(),
+               },
+               {
+                 '+select'  => [ { count => 'status' } ],
+                 '+as'      => [qw/stcnt/],
+                 'group_by' => 'status',
+               }
+           )
+        ];
+        my $syutuen_cnt=0;
+        my $ura_cnt=0;
+        my $kyaku_cnt=0;
+        my $trn_cnt=0;
+        for my $castrow (@$castrows) {
+            my $cast_stat = $castrow->status();
+            next unless ( $cast_stat );
+            if ( $cast_stat =~ $QR_SYUTUEN ) {
+                $syutuen_cnt += $castrow->get_column('stcnt');
+            }
+            elsif ( $cast_stat =~ $QR_URAKATA ) {
+                $ura_cnt += $castrow->get_column('stcnt');
+            }
+            elsif ( $cast_stat =~ $QR_KYAKSKI ) {
+                $kyaku_cnt += $castrow->get_column('stcnt');
+            }
+            elsif ( $cast_stat =~ $QR_TRANCE ) {
+                $trn_cnt += $castrow->get_column('stcnt');
+            }
+        }
+        my $sum_cnt = $syutuen_cnt + $ura_cnt + $kyaku_cnt + $trn_cnt;
+        next unless ( $sum_cnt );
+
+$c->log->debug('>>> ' . 'sum cnt : ' . $sum_cnt );
+        if ( $dtmHash->{'dates'} ) {
+            for ( my $idx=0; $idx<scalar(@{$dtmHash->{'dates'}}); $idx++ ) {
+                push ( @data, [
+                    $pgname,                        # 企画名,
+                    $regpgid,                       # 企画番号,
+                    $dtmHash->{'dates'}->[$idx],    # 実施日
+                    $dtmHash->{'stms'}->[$idx],     # 開始時刻,
+                    $roomname,                      # 場所名,
+                    '',                             # 内線番号
+                    $syutuen_cnt,                   # 出演人数
+                    $ura_cnt,                       # 裏方人数
+                    $kyaku_cnt,                     # 客席人数
+                    $trn_cnt,                       # 通訳人数
+                ]);
+            }
+        }
+        else {
+            push ( @data, [
+                $pgname,                        # 企画名,
+                $regpgid,                       # 企画番号,
+                $__NOTSETSTR__,                 # 実施日
+                $__NOTSETSTR__,                 # 開始時刻,
+                $roomname,                      # 場所名,
+                '',                             # 内線番号
+                $syutuen_cnt,                   # 出演人数
+                $ura_cnt,                       # 裏方人数
+                $kyaku_cnt,                     # 客席人数
+                $trn_cnt,                       # 通訳人数
+            ]);
+        }
+    }
+
+    $c->stash->{'csv'} = \@data;
+    $c->stash->{'csvenc'} = 'cp932';
+    $c->response->header( 'Content-Disposition' =>
+        'attachment; filename=' .
+            strftime("%Y%m%d%H%M%S", localtime()) . '_memcnt.csv' );
+    $c->forward('conkan::View::Download::CSV');
 }
 
 =head2 csvdownload/castbyprg
 
 差しこみデータダウンロード castbyprg  : 企画別出演者用
 
+CSV: 企画名, 企画番号, 実施日, 開始時刻, 部屋名, 内線番号, 出演者<ステータス>
+
 =cut
 
 sub castbyprg : Chained('csvdl_base') : PathPart('castbyprg') : Args(0) {
     my ( $self, $c ) = @_;
-    # 企画名, 企画番号, 実施日, 開始時刻, 部屋名, 内線番号, 出演者<ステータス>
-    $c->stash->{self_li_id} = 'config_csv';
-    $c->stash->{template} = 'underconstract.tt';
+    my $rowconf = $c->model('ConkanDB::PgSystemConf')->find('pg_active_status');
+    # 有効な実行ステータスで抽出
+    my $rows = [
+        $c->model('ConkanDB::PgProgram')->search(
+            { 
+              'me.status' => from_json( $rowconf->pg_conf_value() ),
+            },
+            {
+              'prefetch' => [ 'regpgid', 'roomid' ],
+              'order_by' => { '-asc' => [ 'me.regpgid', 'me.subno' ] },
+            }
+        )
+    ];
+$c->log->debug('>>> ' . 'program cnt : ' . scalar(@$rows) );
+
+    my @data = ();
+    for my $row (@$rows) {
+        my $pgname = $row->regpgid->name();
+        my $regpgid = $row->regpgid->regpgid();
+        my $dtmHash =  $c->forward('/program/_trnDateTime4csv', [ $row, ], );
+        my $roomname =  $row->roomid ? $row->roomid->name() : $__NOTSETSTR__;
+
+        # 指定の企画内部IDで抽出
+        my $castrows = [
+            $c->model('ConkanDB::PgCast')->search(
+               {
+                 'pgid'    => $row->pgid(),
+               },
+               {
+                 'prefetch'     => 'castid',
+                 'order_by'     => { '-asc' => 'me.id' }
+               }
+           )
+        ];
+        my $castdata = '';
+        for my $castrow (@$castrows) {
+            my $cast_name = $castrow->name() || $castrow->castid->name();
+            my $cast_stat = $castrow->status();
+            next unless ( $cast_stat );
+            if (    $cast_stat =~ $QR_SYUTUEN
+                ||  $cast_stat =~ $QR_URAKATA
+                ||  $cast_stat =~ $QR_KYAKSKI
+                ||  $cast_stat =~ $QR_TRANCE ) {
+                $castdata .= "\r\n" if ( $castdata );
+                $castdata .= $cast_name . '<' . $cast_stat . '>';
+            }
+        }
+
+        if ( $dtmHash->{'dates'} ) {
+            for ( my $idx=0; $idx<scalar(@{$dtmHash->{'dates'}}); $idx++ ) {
+                push ( @data, [
+                    $pgname,                        # 企画名,
+                    $regpgid,                       # 企画番号,
+                    $dtmHash->{'dates'}->[$idx],    # 実施日
+                    $dtmHash->{'stms'}->[$idx],     # 開始時刻,
+                    $roomname,                      # 場所名,
+                    '',                             # 内線番号
+                    $castdata,                      # 出演者<ステータス>
+                ]);
+            }
+        }
+        else {
+            push ( @data, [
+                $pgname,                        # 企画名,
+                $regpgid,                       # 企画番号,
+                $__NOTSETSTR__,                 # 実施日
+                $__NOTSETSTR__,                 # 開始時刻,
+                $roomname,                      # 場所名,
+                '',                             # 内線番号
+                $castdata,                      # 出演者<ステータス>
+            ]);
+        }
+    }
+
+    $c->stash->{'csv'} = \@data;
+    $c->stash->{'csvenc'} = 'cp932';
+    $c->response->header( 'Content-Disposition' =>
+        'attachment; filename=' .
+            strftime("%Y%m%d%H%M%S", localtime()) . '_castbyprg.csv' );
+    $c->forward('conkan::View::Download::CSV');
 }
 
 =head2 _dberror

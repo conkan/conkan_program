@@ -1064,16 +1064,24 @@ sub _trnDateTime4csv :Private {
         @date = split('/', $date[0]);
         $c->forward('/program/_trnSEtime', [ $trg, ], );
         $dates->[0] = sprintf('%04d/%02d/%02d', @date);
-        $stms->[0]  = sprintf('%02d:%02d', $trg->{'shour1'}, $trg->{'smin1'});
-        $etms->[0]  = sprintf('%02d:%02d', $trg->{'ehour1'}, $trg->{'emin1'});
+        $stms->[0]  = ( exists($trg->{'shour1'}) && exists($trg->{'smin1'}) )
+                ? sprintf('%02d:%02d', $trg->{'shour1'}, $trg->{'smin1'})
+                : '';
+        $etms->[0]  = ( exists($trg->{'ehour1'}) && exists($trg->{'emin1'}) )
+                ? sprintf('%02d:%02d', $trg->{'ehour1'}, $trg->{'emin1'})
+                : '';
     }
     if ( $trg->date2() ) {
         my @date  = split('T', $trg->date2());
         $date[0] =~ s[-][/]g;
         @date = split('/', $date[0]);
         $dates->[1] = sprintf('%04d/%02d/%02d', @date);
-        $stms->[1]  = sprintf('%02d:%02d', $trg->{'shour2'}, $trg->{'smin2'});
-        $etms->[1]  = sprintf('%02d:%02d', $trg->{'ehour2'}, $trg->{'emin2'});
+        $stms->[1]  = ( exists($trg->{'shour2'}) && exists($trg->{'smin2'}) )
+                ? sprintf('%02d:%02d', $trg->{'shour2'}, $trg->{'smin2'})
+                : '';
+        $etms->[1]  = ( exists($trg->{'ehour2'}) && exists($trg->{'emin2'}) )
+                ? sprintf('%02d:%02d', $trg->{'ehour2'}, $trg->{'emin2'})
+                : '';
     }
     my $result = {
         'dates' => $dates,

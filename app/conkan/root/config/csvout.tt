@@ -186,7 +186,11 @@
               <div class="well csvform">
                 <H4>ダウンロード対象 コンタクトステータス</H4>
                 [%- FOREACH stat = conf.ct_status %]
-                  <input type="checkbox" name="ct_status" value="[% stat %]">
+                  <input type="checkbox" name="ct_status" value="[% stat %]"
+                  [%- IF conf.func_is_guest(stat) -%]
+                    checked="checked"
+                  [%- END -%]
+                  >
                     [% stat %]
                   </input>
                 [%- END %]
@@ -239,7 +243,11 @@
               <div class="well csvform">
                 <H4>ダウンロード対象 出演ステータス</H4>
                 [%- FOREACH stat = conf.cast_status %]
-                  <input type="checkbox" name="cast_status" value="[% stat %]">
+                  <input type="checkbox" name="cast_status" value="[% stat %]"
+                  [%- IF conf.func_need_plate(stat) -%]
+                    checked="checked"
+                  [%- END -%]
+                  >
                     [% stat %]
                   </input>
                 [%- END %]
@@ -259,10 +267,13 @@
             </a>
           </td>
           <td class="vcenter">
+            実行ステータスが[% conf.act_status_str %]である企画の、
+            企画別人数用データをダウンロードする。<br/>
+            ラベル屋さんフォーマットは
             <a href="/static/lcx/memcnt.lcx" target="_blank">企画別人数.lcx</a><br/>
             出力内容は
             <div class="well csvwell">
-              企画名 企画番号, 実施日, 開始時刻, 部屋名, 内線番号, 出演人数, 裏方人数, 客席人数, 通訳人数
+              企画名 企画番号, 実施日, 開始時刻, 部屋名, 内線番号, 出演人数, 裏方人数, 客席人数, 通訳人数 (ただし、内線番号は空白)
             </div>
           </td>
         </tr>
@@ -275,10 +286,13 @@
             </a>
           </td>
           <td class="vcenter">
+            実行ステータスが[% conf.act_status_str %]である企画の、
+            企画別出演者用データをダウンロードする。<br/>
+            ラベル屋さんフォーマットは
             <a href="/static/lcx/castbyprg.lcx" target="_blank">企画別出演.lcx</a><br/>
             出力内容は
             <div class="well csvwell">
-              企画名, 企画番号, 実施日, 開始時刻, 部屋名, 内線番号, 出演者と出演ステータス
+              企画名, 企画番号, 実施日, 開始時刻, 部屋名, 内線番号, 複数の出演者と出演ステータス (ただし、内線番号は空白)
             </div>
           </td>
         </tr>
