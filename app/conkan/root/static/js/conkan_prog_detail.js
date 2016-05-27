@@ -141,6 +141,25 @@
           });
         };
 
+        // 決定機材更新追加フォーム
+        $scope.openEquipForm = function( regpgid, subno, pgid, name, equipid ) {
+          $scope.prog = {
+            regpgid : regpgid,
+            subno   : subno,
+            pgid    : pgid,
+            name    : name,
+            id      : equipid,
+          };
+          $scope.applyBtnLbl = ( equipid === 0 ) ? '追加' : '更新';
+          $uibModal.open({
+            templateUrl : "T_pgup_equip",
+            controller  : 'equipFormController',
+            backdrop    : "static",
+            scope       : $scope,
+            size        : 'lg',
+          });
+        };
+
       }
     ]
   );
@@ -267,6 +286,132 @@
             url : '/program/regcastadd',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
             data: $.param($scope.regcast)
+          })
+          .success(function(data) {
+            // templateを一つにまとめたいところ
+            var modalinstance;
+            $uibModalInstance.close('done');
+            modalinstance = $uibModal.open(
+              {
+                templateUrl : getTemplate( data.status ),
+                backdrop    : 'static'
+              }
+            );
+            modalinstance.result.then( function() {
+              location.reload();
+            });
+          })
+          .error(function(data) {
+            $uibModalInstance.close('done');
+            var modalinstance = $uibModal.open(
+              {
+                templateUrl : getTemplate( '' ),
+                backdrop    : 'static'
+              }
+            );
+            modalinstance.result.then( function() {
+              location.reload();
+            });
+          });
+        };
+      }
+    ]
+  );
+
+  // 決定機材更新追加フォームコントローラ
+  ConkanAppModule.controller( 'equipFormController',
+    [ '$scope', '$http', '$uibModal', '$uibModalInstance',
+      function( $scope, $http, $uibModal, $uibModalInstance ) {
+        // 初期値設定
+        angular.element('#valerr').text('');
+        $http({
+          method  : 'GET',
+          url     : '/program/' + $scope.prog.pgid + '/equip/' + $scope.prog.id
+        })
+        .success(function(data) {
+          $scope.equip = {
+            pgid    : data.json.pgid,
+            equipid : data.json.equipid,
+            spec    : '',
+            comment : '',
+          };
+          $scope.maxequipid = data.json.maxequipid;
+          $scope.equiplist = data.json.equiplist;
+          $scope.equipdata = data.json.equipdata;
+        })
+        .error(function(data) {
+          var modalinstance = $uibModal.open(
+              { templateUrl : getTemplate( '' ), }
+          );
+          modalinstance.result.then( function() {} );
+        });
+        // 監視設定
+        $scope.$watch('equip.equipid', function( n, o, scope ) {
+          if ( n < scope.maxequipid ) {
+            scope.served = true;
+            scope.equip.spec    = scope.equipdata[n].spec;
+            scope.equip.comment = scope.equipdata[n].comment;
+          }
+          else {
+            scope.served = false;
+          }
+        });
+        // 更新実施
+        $scope.equipDoApply = function() {
+          var pgid = $scope.prog.pgid;
+          var itemid = $scope.prog.id;
+          // 二重クリック回避
+          angular.element('#equipapplybtn').attr('disabled', 'disabled');
+          // バリデーション
+          //    現在なし
+          // 新規追加時、equipidはNULL
+          if ( $scope.equip.equipid > $scope.maxequipid ) {
+            $scope.equip.equipid = null;
+          }
+          // 実行
+          $http( {
+            method : 'POST',
+            url : '/program/' + pgid + '/equip/' + itemid,
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+            data: $.param($scope.equip)
+          })
+          .success(function(data) {
+            // templateを一つにまとめたいところ
+            var modalinstance;
+            $uibModalInstance.close('done');
+            modalinstance = $uibModal.open(
+              {
+                templateUrl : getTemplate( data.status ),
+                backdrop    : 'static'
+              }
+            );
+            modalinstance.result.then( function() {
+              location.reload();
+            });
+          })
+          .error(function(data) {
+            $uibModalInstance.close('done');
+            var modalinstance = $uibModal.open(
+              {
+                templateUrl : getTemplate( '' ),
+                backdrop    : 'static'
+              }
+            );
+            modalinstance.result.then( function() {
+              location.reload();
+            });
+          });
+        };
+        // 削除実施
+        $scope.equipDoDel = function() {
+          var pgid = $scope.prog.pgid;
+          var itemid = $scope.prog.id;
+          // 二重クリック回避
+          angular.element('#equipapplybtn').attr('disabled', 'disabled');
+          $http( {
+            method : 'POST',
+            url : '/program/' + pgid + '/equip/' + itemid + '/del/',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
           })
           .success(function(data) {
             // templateを一つにまとめたいところ

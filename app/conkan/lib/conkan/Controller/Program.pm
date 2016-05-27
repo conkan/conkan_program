@@ -798,20 +798,60 @@ sub pgup_equip : Chained('pgup_equiptop') : PathPart('') : Args(0) {
                 { 'prefetch' => [ 'pgid', 'equipid' ], } );
         }
         if ( $c->request->method eq 'GET' ) {
-            $c->stash->{'equiplist'} = [ 
-                { 'id' => '', 'val' => '' },
-                map +{ 'id' => $_->equipid,
-                       'val' => $_->name . '(' . $_->equipno . ')' }, 
-                    $c->model('ConkanDB::PgAllEquip')->search(
+            $c->stash->{'json'} = {};
+            $c->stash->{'json'}->{'pgid'} = $c->stash->{'pgid'};
+            $c->stash->{'json'}->{'equipid'} =
+                $rowprof ? $rowprof->equipid->equipid() : undef;
+            my $equips = [ $c->model('ConkanDB::PgAllEquip')->search(
                         { 'rmdate' => \'IS NULL' },
                         { 'order_by' => { '-asc' => 'equipno' } }
-                    )
-                ];
+                    ) ];
+            my @equiplist;
+            my %equipdata;
+            my $equipcnt;
+            for my $equip (@$equips) {
+                push (@equiplist, {
+                        'id'  => $equip->equipid(),
+                        'val' => $equip->name() . '(' . $equip->equipno() . ')',
+                    }
+                );
+                $equipdata{$equip->equipid} = {
+                    'spec'      => $equip->spec(),
+                    'comment'   => $equip->comment(),
+                };
+                $equipcnt++;
+            }
+            $equipcnt = 10 ** (int(log($equipcnt)/log(10))+1); # 絶対超えない値
+            $c->stash->{'json'}->{'maxequipid'} = $equipcnt;
+            # 持ち込み機器選択肢追加
+=head3
+
+これは後ほど有効化
+
+            push ( @equiplist, (
+                    {
+                        'id'  => $equipcnt + 1,
+                        'val' => '持ち込み映像機器',
+                    },
+                    {
+                        'id'  => $equipcnt + 2,
+                        'val' => '持ち込みPC',
+                    },
+                ));
+
+=cut
+            $c->stash->{'json'}->{'equiplist'} = \@equiplist;
+            $c->stash->{'json'}->{'equipdata'} = \%equipdata;
+            $c->component('View::JSON')->{expose_stash} = [ 'json' ];
         }
+        else {
+            $c->component('View::JSON')->{expose_stash} = [ 'status' ];
+        }
+        $c->forward( '_pgupdate', [ 'equip', $rowprof, $up_items ] );
+        $c->forward('conkan::View::JSON');
     } catch {
         $c->detach( '_dberror', [ shift ] );
     };
-    $c->detach( '_pgupdate', [ 'equip', $rowprof, $up_items ] );
 }
 
 =head2 program/*/equip/*/del
@@ -833,7 +873,9 @@ sub pgup_equipdel : Chained('pgup_equiptop') : PathPart('del') : Args(0) {
     $c->detach( '/program/' . $pgid . '/equip/' . $id )
         if ( ( $c->request->method eq 'GET' ) || ( $id == 0 ) );
 
-    $c->detach( '_pgdelete', [ 'equip', $up_items ] );
+    $c->component('View::JSON')->{expose_stash} = [ 'status' ];
+    $c->forward( '_pgdelete', [ 'equip', $up_items ] );
+    $c->forward('conkan::View::JSON');
 }
 
 =head2 program/*/cast/*
@@ -957,6 +999,7 @@ $c->log->debug('>>>> regpgid: ' . $regpgid . ' -> ' . $newregpgid);
                                     '<FORM><H1>更新できませんでした</H1><BR/>' .
                                     '<H2>企画番号が重複しています</H2><BR/>' .
                                     '再度やり直してください</FORM>');
+                                $c->stash->{'status'} = 'fail';
                                 return;
                             }
                         }
@@ -965,6 +1008,7 @@ $c->log->debug('>>>> regpgid: ' . $regpgid . ' -> ' . $newregpgid);
                         $rowprof->update( $value ); 
                         $c->response->body(
                             '<FORM><H1>更新しました</H1></FORM>');
+                        $c->stash->{'status'} = 'update';
                 }
                 else {
 $c->log->info('updateflg: db: ' . $rowprof->updateflg);
@@ -975,6 +1019,7 @@ $c->log->info('updateflg: cu: ' . +( $c->sessionid . $c->session->{'updtic'}) );
                         '他スタッフが変更した可能性があります<BR/>' .
                         '最新情報を確認の上、必要なら再度更新してください。' .
                         '</FORM>');
+                    $c->stash->{'status'} = 'fail';
                 }
             }
             else {
@@ -983,11 +1028,13 @@ $c->log->info('updateflg: cu: ' . +( $c->sessionid . $c->session->{'updtic'}) );
                                 [ $regpgid, $target, $up_items, undef, $value ] );
                 $c->stash->{'M'}->create( $value ); 
                 $c->response->body('<FORM><H1>追加しました</H1></FORM>');
+                $c->stash->{'status'} = 'update';
             }
             $c->stash->{'rs'} = undef;
             $c->response->status(200);
         }
     } catch {
+        $c->stash->{'status'} = 'dbfail';
         $c->detach( '_dberror', [ shift ] );
     };
 }
@@ -1015,14 +1062,17 @@ sub _pgdelete :Private {
                                 [ $regpgid, $target, $up_items, $rowprof, undef ] );
             $rowprof->delete(); 
             $c->response->body('<FORM><H1>削除しました</H1></FORM>');
+            $c->stash->{'status'} = 'update';
         }
         else {
             $c->stash->{'rs'} = undef;
             $c->response->body(
                 '<FORM><H1>削除できませんでした</H1><BR/>' .
                 '他スタッフが変更した可能性があります</FORM>');
+            $c->stash->{'status'} = 'fail';
         }
     } catch {
+        $c->stash->{'status'} = 'dbfail';
         $c->detach( '_dberror', [ shift ] );
     };
 }
@@ -1035,7 +1085,7 @@ DBエラー表示
 
 sub _dberror :Private {
     my ( $self, $c, $e) = @_; 
-    $c->log->error('>>> ' . localtime() . ' dbexp : ' . Dumper($e) );
+    $c->log->error('>>> ' . localtime() . ' Program:dbexp : ' . Dumper($e) );
     $c->clear_errors();
     my $body = $c->response->body() || Dumper( $e );
     $c->response->body('<FORM>更新失敗<br/><pre>' . $body . '</pre></FORM>');

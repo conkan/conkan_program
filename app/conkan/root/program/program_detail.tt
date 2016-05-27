@@ -286,6 +286,12 @@ END -%]
         [%- IF editable %]
           <tr>
             <td align="center">
+              [% IF 0 %]
+              <button type="button" class="btn btn-warning btn-xs"
+                ng-click="openCastEditForm([% Program.pgid %], 0)">
+                追加
+              </button>
+              [% END %]
               <button type="button" class="btn btn-primary btn-xs"
                 data-toggle="modal"
                 data-target="#PgEdit"
@@ -367,12 +373,10 @@ END -%]
             <td align="center">
               [%- IF editable %]
                 <button type="button" class="btn btn-warning btn-xs"
-                  data-toggle="modal"
-                  data-target="#PgEdit"
-                  data-whatpgid="[% Program.pgid | html %]"
-                  data-whatitem="[% item.id | html %]"
-                  data-whattarget="equip"
-                >
+                  ng-click="openEquipForm(
+                    [%- RegProgram.regpgid %], [%- Program.subno %],
+                    [%- Program.pgid %], '[%- RegProgram.name %]',
+                    [% item.id %])">
                   編集
                 </button>
               [% END %]
@@ -382,13 +386,11 @@ END -%]
         [%- IF editable %]
           <tr>
             <td align="center">
-              <button type="button" class="btn btn-primary btn-xs"
-                data-toggle="modal"
-                data-target="#PgEdit"
-                data-whatpgid="[% Program.pgid | html %]"
-                data-whatitem="0"
-                data-whattarget="equip"
-              >
+              <button type="button" class="btn btn-warning btn-xs"
+                ng-click="openEquipForm(
+                    [%- RegProgram.regpgid %], [%- Program.subno %],
+                    [%- Program.pgid %], '[%- RegProgram.name %]',
+                    0)">
                 追加
               </button>
             </td>
@@ -588,7 +590,7 @@ END -%]
       </FORM>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-danger" ng-click="$close()">閉じる</button>
+      <button class="btn btn-default" ng-click="$close()">閉じる</button>
       <button class="btn btn-primary" id="prgapplybtn"
         ng-disabled="progform.$invalid || progform.$pristine"
         ng-click="prgdoApply()">
@@ -666,14 +668,86 @@ END -%]
       </FORM>
     </div>
     <div class="modal-footer">
-      <button class="btn btn-danger" ng-click="$close()">閉じる</button>
+      <button class="btn btn-default" ng-click="$close()">閉じる</button>
       <button class="btn btn-primary" id="regcastapplybtn"
         ng-disabled="regcastform.$invalid || regcastform.$pristine"
         ng-click="regcastdoApply()">
         追加
       </button>
     </div>
-  </div>
+  </script>
+  <!-- 決定機材編集追加ダイアログ -->
+  <script type="text/ng-template" id="T_pgup_equip">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
+    </div>
+    <div class="modal-body">
+      <FORM method="POST" name="equipform" class="form-horizontal" role="form" id="equipform" novalidate>
+        <div style="COLOR:Red;" id="valerr"></div>
+        <div class="form-group">
+          <input type="hidden" name="regpgid" id="regpgid" ng-model="prog.regpgid">
+          <input type="hidden" name="pgid" id="pgid"   ng-model="equip.pgid">
+          <input type="hidden" name="id" id="id"   ng-model="prog.id">
+        </div>
+        <table class="table table-bordered table-condensed">
+          <colgroup>
+            <col class="col-sm-2">
+            <col class="col-sm-8">
+          </colgroup>
+          <tbody>
+            <tr>
+              <th style="background-color:#FFcc66">
+                企画ID: <span ng-cloak>{{prog.regpgid}}({{prog.subno}})</span>
+              </th>
+              <th style="background-color:#FFcc66" colspan="3">
+                <span ng-cloak>{{prog.name}}</span>
+              </th>
+            </tr>
+            <tr>
+              <th>機材名</th>
+              <td>
+                <select name="equipid" ng-model="equip.equipid"
+                  ng-options="i.id as i.val for i in equiplist"></select>
+              </td> 
+            </tr>
+          </tbody>
+        </table>
+        <div ng-if="served">
+          <table class="table table-bordered table-condensed">
+            <colgroup>
+              <col class="col-sm-2">
+              <col class="col-sm-8">
+            </colgroup>
+            <tbody>
+              <tr>
+                <th>仕様</th>
+                <td>
+                  <span ng-bind="equip.spec"></span>
+                </td> 
+              </tr>
+                <th>補足</th>
+                <td>
+                  <span ng-bind="equip.comment"></span>
+                </td> 
+              <tr>
+            </tbody>
+          </table>
+        </div>
+      </FORM>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-default" ng-click="$close()">閉じる</button>
+      <button ng-if="prog.id" class="btn " id="equipdelbtn"
+        ng-disabled="!equipform.$pristine"
+        ng-click="equipDoDel()">
+        削除
+      </button>
+      <button class="btn btn-primary" id="equipapplybtn"
+        ng-disabled="equipform.$invalid || equipform.$pristine"
+        ng-click="equipDoApply()">
+        {{applyBtnLbl}}
+      </button>
+    </div>
   </script>
   [%- PROCESS 'T_httpget_result.tt' -%]
 </div> <!-- End of container  ng-controller progDetailController -->
