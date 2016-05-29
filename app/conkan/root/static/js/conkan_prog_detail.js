@@ -112,6 +112,35 @@
   ConkanAppModule.controller( 'progDetailController',
     [ '$scope', '$http', '$uibModal',
       function( $scope, $http, $uibModal ) {
+        // 初期値設定
+        var pgid = angular.element('#equip_pgid').val();
+        $http({
+          method  : 'GET',
+          url     : '/program/' + pgid + '/equiplist'
+        })
+        .success(function(data) {
+          $scope.equiplist = data.json;
+          $scope.pginfo    = data.pginfo;
+          for ( var i=0; i<$scope.equiplist.length; i++ ) {
+            var equip = $scope.equiplist[i];
+            if (   ( equip.equipno == 'bring-AV' )
+                || ( equip.equipno == 'bring-PC' ) ) {
+              $scope.equiplist[i].spec = '映像:' + equip.vif
+                                       + ' 音声:' + equip.aif;
+              if ( equip.equipno == 'bring-PC' ) {
+                $scope.equiplist[i].spec += ' LAN:' + equip.eif
+                                         + ' LAN利用目的:' + equip.intende;
+              }
+            }
+          }
+        })
+        .error(function(data) {
+          var modalinstance = $uibModal.open(
+              { templateUrl : getTemplate( '' ), }
+          );
+          modalinstance.result.then( function() {} );
+        });
+
         // 企画更新フォーム
         $scope.openPgEditForm = function( pgid ) {
           $scope.pgid = pgid;
@@ -318,6 +347,24 @@
     ]
   );
 
+  var a2h = function(a,h) {
+    for ( var i=0; i<a.length; i++ ) {
+      h[a[i]] = 1;
+    };
+  };
+  var IfOptions = {
+    'avvif' : [ 'HDMI', 'S-Video', 'RCAコンポジット(黄)', 'その他', '未定' ],
+    'pcvif' : [ '接続しない', 'HDMI', 'D-Sub15(VGA)', 'その他', '未定' ],
+    'aif'   : [ '不要', 'ステレオミニ(3.5mmTSR)', 'RCAコンポジット(赤白)', 'その他', '未定' ],
+    'eif'   : [ '接続しない', '有線(RJ-45)', '無線', 'その他', '未定' ],
+    'vifH'  : {},
+    'aifH'  : {},
+    'eifH'  : {}
+  };
+  a2h( IfOptions.avvif.concat(IfOptions.pcvif).concat([undefined]), IfOptions.vifH );
+  a2h( IfOptions.aif.concat([undefined]), IfOptions.aifH );
+  a2h( IfOptions.eif.concat([undefined]), IfOptions.eifH );
+
   // 決定機材更新追加フォームコントローラ
   ConkanAppModule.controller( 'equipFormController',
     [ '$scope', '$http', '$uibModal', '$uibModalInstance',
@@ -332,12 +379,38 @@
           $scope.equip = {
             pgid    : data.json.pgid,
             equipid : data.json.equipid,
+            intende : data.json.intende,
             spec    : '',
             comment : '',
           };
-          $scope.maxequipid = data.json.maxequipid;
+          if ( data.json.vif in IfOptions.vifH ) {
+            $scope.equip.vif = data.json.vif;
+          }
+          else {
+            $scope.equip.vif = 'その他';
+            $scope.equip.ovif = data.json.vif;
+          }
+          if ( data.json.aif in IfOptions.aifH ) {
+            $scope.equip.aif = data.json.aif;
+          }
+          else {
+            $scope.equip.aif = 'その他';
+            $scope.equip.oaif = data.json.aif;
+          }
+          if ( data.json.eif in IfOptions.eifH ) {
+            $scope.equip.eif = data.json.eif;
+          }
+          else {
+            $scope.equip.eif = 'その他';
+            $scope.equip.oeif = data.json.eif;
+          }
           $scope.equiplist = data.json.equiplist;
           $scope.equipdata = data.json.equipdata;
+          $scope.bringid   = data.json.bringid;
+          $scope.avviflist = IfOptions.avvif;
+          $scope.pcviflist = IfOptions.pcvif;
+          $scope.aiflist   = IfOptions.aif;
+          $scope.eiflist   = IfOptions.eif;
         })
         .error(function(data) {
           var modalinstance = $uibModal.open(
@@ -347,13 +420,15 @@
         });
         // 監視設定
         $scope.$watch('equip.equipid', function( n, o, scope ) {
-          if ( n < scope.maxequipid ) {
-            scope.served = true;
-            scope.equip.spec    = scope.equipdata[n].spec;
-            scope.equip.comment = scope.equipdata[n].comment;
-          }
-          else {
-            scope.served = false;
+          if ( angular.isDefined(n) ) {
+            if ( scope.bringid[n] ) {
+              scope.eqtype = scope.bringid[n];
+            }
+            else {
+              scope.eqtype = 'served';
+              scope.equip.spec    = scope.equipdata[n].spec;
+              scope.equip.comment = scope.equipdata[n].comment;
+            }
           }
         });
         // 更新実施
@@ -367,6 +442,16 @@
           // 新規追加時、equipidはNULL
           if ( $scope.equip.equipid > $scope.maxequipid ) {
             $scope.equip.equipid = null;
+          }
+          // その他 の内容置き換え
+          if ( $scope.equip.vif == 'その他' ) {
+            $scope.equip.vif = $scope.equip.ovif;
+          }
+          if ( $scope.equip.aif == 'その他' ) {
+            $scope.equip.aif = $scope.equip.oaif;
+          }
+          if ( $scope.equip.eif == 'その他' ) {
+            $scope.equip.eif = $scope.equip.oeif;
           }
           // 実行
           $http( {

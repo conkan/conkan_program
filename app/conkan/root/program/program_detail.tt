@@ -348,6 +348,7 @@ END -%]
   <!-- 決定機材 -->
   <div class="well" id="equip">
     [% subtag( { 'equip' => 'bg-info' } ) %]
+    <input type="hidden" name="pgid" id="equip_pgid" value="[% Program.pgid %]"/>
     <table class="table table-bordered table-condensed"
      style="background-color:white;">
       <colgroup>
@@ -365,24 +366,22 @@ END -%]
         </tr>
       </thead>
       <tbody>
-        [% FOREACH item = Equips %]
-          <tr>
-            <td>[% item.equipid.name    | html %]</td>
-            <td>[% item.equipid.equipno | html %]</td>
-            <td>[% item.equipid.spec    | html %]</td>
-            <td align="center">
-              [%- IF editable %]
-                <button type="button" class="btn btn-warning btn-xs"
+        <tr ng-repeat="equip in equiplist">
+          <td>{{equip.name}}</td>
+          <td>{{equip.equipno}}</td>
+          <td>{{equip.spec}}</td>
+          <td align="center">
+            [%- IF editable %]
+              <button type="button" class="btn btn-warning btn-xs"
                   ng-click="openEquipForm(
                     [%- RegProgram.regpgid %], [%- Program.subno %],
                     [%- Program.pgid %], '[%- RegProgram.name %]',
-                    [% item.id %])">
-                  編集
-                </button>
-              [% END %]
-            </td>
-          </tr>
-        [% END %]
+                    equip.id )">
+                編集
+              </button>
+            [% END %]
+          </td>
+        </tr>
         [%- IF editable %]
           <tr>
             <td align="center">
@@ -712,11 +711,11 @@ END -%]
             </tr>
           </tbody>
         </table>
-        <div ng-if="served">
+        <div ng-if="eqtype == 'served'">
           <table class="table table-bordered table-condensed">
             <colgroup>
               <col class="col-sm-2">
-              <col class="col-sm-8">
+              <col class="col-sm-10">
             </colgroup>
             <tbody>
               <tr>
@@ -725,11 +724,75 @@ END -%]
                   <span ng-bind="equip.spec"></span>
                 </td> 
               </tr>
+              <tr>
                 <th>補足</th>
                 <td>
                   <span ng-bind="equip.comment"></span>
                 </td> 
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div ng-if="eqtype == 'bring-AV' || eqtype == 'bring-PC'">
+          <table class="table table-bordered table-condensed">
+            <colgroup>
+              <col class="col-sm-2">
+              <col class="col-sm-4">
+              <col class="col-sm-6">
+            </colgroup>
+            <tbody>
               <tr>
+                <th>映像接続形式</th>
+                <td>
+                  <span ng-if="eqtype == 'bring-AV'">
+                    <select name="vif" ng-model="equip.vif" required
+                      ng-options="i for i in avviflist"></select>
+                  </span>
+                  <span ng-if="eqtype == 'bring-PC'">
+                    <select name="vif" ng-model="equip.vif" required
+                      ng-options="i for i in pcviflist"></select>
+                  </span>
+                </td> 
+                <td>
+                  <span ng-if="equip.vif == 'その他'">
+                    <input type="text" name="ovif" class="col-sm-12" required
+                      ng-model="equip.ovif"/>
+                  </span>
+                </td> 
+              </tr>
+              <tr>
+                <th>音声接続形式</th>
+                <td>
+                  <select name="aif" ng-model="equip.aif" required
+                    ng-options="i for i in aiflist"></select>
+                </td> 
+                <td>
+                  <span ng-if="equip.aif == 'その他'">
+                    <input type="text" name="oaif" class="col-sm-12" required
+                      ng-model="equip.oaif"/>
+                  </span>
+                </td> 
+              </tr>
+              <tr ng-if="eqtype == 'bring-PC'">
+                <th>インタネット接続形式</th>
+                <td>
+                  <select name="eif" ng-model="equip.eif" required
+                    ng-options="i for i in eiflist"></select>
+                </td> 
+                <td>
+                  <span ng-if="equip.eif == 'その他'">
+                    <input type="text" name="oeif" class="col-sm-12" required
+                      ng-model="equip.oeif"/>
+                  </span>
+                </td> 
+              </tr>
+              <tr ng-if="eqtype == 'bring-PC' && equip.eif != '接続しない'">
+                <th>インタネット利用方法</th>
+                <td colspan="2">
+                  <textarea name="intende" class="col-sm-12" rows="2" required
+                      ng-model="equip.intende"></textarea>
+                  </td> 
+              </tr>
             </tbody>
           </table>
         </div>

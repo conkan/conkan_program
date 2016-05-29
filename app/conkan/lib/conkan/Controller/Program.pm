@@ -648,14 +648,6 @@ sub program_show : Chained('program_base') :PathPart('') :CaptureArgs(1) {
                             'order_by' => { '-asc' => 'id' },
                         }
                     ) ];
-    $c->stash->{'Equips'} =
-        [ $c->model('ConkanDB::PgEquip')->search(
-                        { pgid => $pgid },
-                        {
-                            'prefetch' => [ 'equipid' ],
-                            'order_by' => { '-asc' => 'id' },
-                        }
-                    ) ];
     $c->stash->{'pgid'}     = $pgid;
     $c->stash->{'regpgid'}  = $regpgid;
     $c->stash->{'subno'}    = $c->stash->{'Program'}->subno();
@@ -764,6 +756,47 @@ sub pgup_program : Chained('program_show') : PathPart('program') : Args(0) {
     $c->detach( '_pgupdate', [ 'program', $rowprof, $up_items ] );
 }
 
+=head2 program/*/equiplist
+---------------------------------------------
+企画管理 program_equiplist  : 決定機材リスト取得
+
+=cut
+sub program_equiplist : Chained('program_show') : PathPart('equiplist') : Args(0) {
+    my ( $self, $c ) = @_;
+    my $pgid = $c->stash->{'pgid'};
+    try {
+        my $rows =
+            [ $c->model('ConkanDB::PgEquip')->search(
+                        { pgid => $pgid },
+                        {
+                            'prefetch' => [ 'equipid' ],
+                            'order_by' => { '-asc' => 'id' },
+                        }
+                    ) ];
+        my @list = ();
+        foreach my $row ( @$rows ) {
+            my $equip = {
+                'id'        => $row->id(),
+                'name'      => $row->equipid->name(),
+                'equipno'   => $row->equipid->equipno(),
+                'spec'      => $row->equipid->spec(),
+                'vif'       => $row->vif(),
+                'aif'       => $row->aif(),
+                'eif'       => $row->eif(),
+                'intende'   => $row->intende(),
+            };
+            push @list, $equip;
+        }
+        $c->stash->{'json'} = \@list;
+        $c->component('View::JSON')->{expose_stash} = [ 'json', ];
+    } catch {
+        my $e = shift;
+        $c->log->error('program/equiplist error ' . localtime() .
+            ' dbexp : ' . Dumper($e) );
+    };
+    $c->forward('conkan::View::JSON');
+}
+
 =head2 program/*/equip/*
 ---------------------------------------------
 企画管理 pgup_equiptop  : 決定機材追加/更新/削除 起点
@@ -786,7 +819,7 @@ sub pgup_equip : Chained('pgup_equiptop') : PathPart('') : Args(0) {
 
     my $id = $c->stash->{'id'};
     my $up_items = [ qw/
-                    equipid
+                    equipid vif aif eif intende
                     / ];
     my $rowprof = undef;
     try {
@@ -800,48 +833,38 @@ sub pgup_equip : Chained('pgup_equiptop') : PathPart('') : Args(0) {
         if ( $c->request->method eq 'GET' ) {
             $c->stash->{'json'} = {};
             $c->stash->{'json'}->{'pgid'} = $c->stash->{'pgid'};
-            $c->stash->{'json'}->{'equipid'} =
-                $rowprof ? $rowprof->equipid->equipid() : undef;
+            if ( $rowprof ) {
+                $c->stash->{'json'}->{'equipid'} = $rowprof->equipid->equipid();
+                $c->stash->{'json'}->{'vif'} = $rowprof->vif();
+                $c->stash->{'json'}->{'aif'} = $rowprof->aif();
+                $c->stash->{'json'}->{'eif'} = $rowprof->eif();
+                $c->stash->{'json'}->{'intende'} = $rowprof->intende();
+            }
             my $equips = [ $c->model('ConkanDB::PgAllEquip')->search(
                         { 'rmdate' => \'IS NULL' },
                         { 'order_by' => { '-asc' => 'equipno' } }
                     ) ];
             my @equiplist;
             my %equipdata;
-            my $equipcnt;
+            my %bringid;
             for my $equip (@$equips) {
+                my $equipid = $equip->equipid();
+                my $equipno = $equip->equipno();
                 push (@equiplist, {
-                        'id'  => $equip->equipid(),
-                        'val' => $equip->name() . '(' . $equip->equipno() . ')',
+                        'id'  => $equipid,
+                        'val' => $equip->name() . '(' . $equipno . ')',
                     }
                 );
-                $equipdata{$equip->equipid} = {
+                $equipdata{$equipid} = {
                     'spec'      => $equip->spec(),
                     'comment'   => $equip->comment(),
                 };
-                $equipcnt++;
+                $bringid{$equipid} = 'bring-AV' if ( $equipno eq 'bring-AV' );
+                $bringid{$equipid} = 'bring-PC' if ( $equipno eq 'bring-PC' );
             }
-            $equipcnt = 10 ** (int(log($equipcnt)/log(10))+1); # 絶対超えない値
-            $c->stash->{'json'}->{'maxequipid'} = $equipcnt;
-            # 持ち込み機器選択肢追加
-=head3
-
-これは後ほど有効化
-
-            push ( @equiplist, (
-                    {
-                        'id'  => $equipcnt + 1,
-                        'val' => '持ち込み映像機器',
-                    },
-                    {
-                        'id'  => $equipcnt + 2,
-                        'val' => '持ち込みPC',
-                    },
-                ));
-
-=cut
             $c->stash->{'json'}->{'equiplist'} = \@equiplist;
             $c->stash->{'json'}->{'equipdata'} = \%equipdata;
+            $c->stash->{'json'}->{'bringid'}   = \%bringid;
             $c->component('View::JSON')->{expose_stash} = [ 'json' ];
         }
         else {
@@ -1214,7 +1237,7 @@ sub _trnReq2Hash :Private {
             }
         }
         else {
-           $value->{$item} = $c->request->body_params->{$item};
+            $value->{$item} = $c->request->body_params->{$item};
         }
         if ( defined( $value->{$item} ) ) {
             $value->{$item} =~ s/\s+$//;

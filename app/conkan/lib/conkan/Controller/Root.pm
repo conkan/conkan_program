@@ -383,6 +383,11 @@ sub _doInitialProc :Private {
         $dbh->do( "LOAD DATA LOCAL INFILE '$system_conf_f' " .
                     'INTO TABLE pg_system_conf ' .
                     "FIELDS TERMINATED BY ',' ENCLOSED BY '\"';" );
+        # pg_all_equip を登録
+        my $all_equip_f = $c->config->{home} . '/../initializer/all_equip.csv';
+        $dbh->do( "LOAD DATA LOCAL INFILE '$system_conf_f' " .
+                    'INTO TABLE pg_all_equip ' .
+                    "FIELDS TERMINATED BY ',' ENCLOSED BY '\"';" );
         # 時刻シフト
         if ( $torg != 0 ) {
             $dbh->do( 'UPDATE pg_system_conf SET pg_conf_value="[' .

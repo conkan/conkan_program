@@ -914,14 +914,18 @@ sub equip_listget : Chained('equip_base') : PathPart('listget') : Args(0) {
         my @data;
         my $rows = [ $c->model('ConkanDB::PgAllEquip')->search(
                         { },
-                        { 'order_by' => { '-asc' => 'equipid' } }
+                        { 'order_by' => { '-asc' => 'equipno' } }
                     )
                 ];
         for my $row (@$rows) {
+            my $equipno = $row->equipno();
+            next if (   ( $equipno eq 'bring-AV' )
+                     || ( $equipno eq 'bring-PC' )
+            );
             my $rm  = $row->rmdate();
             push ( @data, {
                 'name'     => $row->name(),
-                'equipno'  => $row->equipno(),
+                'equipno'  => $equipno,
                 'spec'     => $row->spec(),
                 'equipid'  => $row->equipid(),
                 'rmdate'   => +( defined( $rm ) ? $rm->strftime('%F %T') : '' ),

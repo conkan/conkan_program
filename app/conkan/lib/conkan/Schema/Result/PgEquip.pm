@@ -59,6 +59,30 @@ __PACKAGE__->table("pg_equip");
   is_foreign_key: 1
   is_nullable: 1
 
+=head2 vif
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 64
+
+=head2 aif
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 64
+
+=head2 eif
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 64
+
+=head2 intende
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 64
+
 =head2 updateflg
 
   data_type: 'varchar'
@@ -89,6 +113,14 @@ __PACKAGE__->add_columns(
     is_foreign_key => 1,
     is_nullable => 1,
   },
+  "vif",
+  { data_type => "varchar", is_nullable => 1, size => 64 },
+  "aif",
+  { data_type => "varchar", is_nullable => 1, size => 64 },
+  "eif",
+  { data_type => "varchar", is_nullable => 1, size => 64 },
+  "intende",
+  { data_type => "varchar", is_nullable => 1, size => 64 },
   "updateflg",
   { data_type => "varchar", is_nullable => 1, size => 64 },
 );
@@ -143,8 +175,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-06-11 16:41:47
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:EKMGgEAxrWOgtbYhigxDtA
+# Created by DBIx::Class::Schema::Loader v0.07045 @ 2016-05-29 19:14:43
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:x7FeedvHaUPHHqTmUhgBvQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
