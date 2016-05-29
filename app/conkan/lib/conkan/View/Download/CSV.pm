@@ -25,7 +25,7 @@ encoding追加
 
 =cut
 
-my $QR_CR = qr/([^"])\r\n/;
+my $QR_CR = qr/([^",])\r\n/;
 sub render {
     my ( $self,
          $c, $template, $args ) = @_;
