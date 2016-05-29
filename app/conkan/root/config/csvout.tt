@@ -55,6 +55,10 @@
                 <input type="checkbox" name="pg_null_stat" value="add">
                   未設定
                 </input>
+                <H4>出力項目</H4>
+                <input type="checkbox" name="pg_outext" value="1" checked="checked">
+                  内容、備考、企画紹介文 を出力する
+                </input>
               </div>
             </td>
           </FORM>

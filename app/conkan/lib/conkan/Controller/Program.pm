@@ -437,6 +437,7 @@ sub csvdownload :Local {
     my $get_status = ( ref($condval) eq 'ARRAY' ) ? $condval : [ $condval ];
     push ( @$get_status, \'IS NULL' )
         if exists( $c->request->body_params->{'pg_null_stat'} );
+    my $outext = exists($c->request->body_params->{'pg_outext'}) ? 1 : 0;
     # 指定の実行ステータスで抽出
     my $rows =
         [ $c->model('ConkanDB::PgProgram')->search(
@@ -513,18 +514,18 @@ $c->log->debug('>>> ' . 'program cnt : ' . scalar(@$rows) );
             $row->subno(),                  # サブNO,
             $row->regpgid->name(),          # 企画名称,
             $row->regpgid->namef(),         # 企画名フリガナ,
-            $row->regpgid->content(),       # 内容,
+            +( $outext ? $row->regpgid->content() : ''),       # 内容,
             $row->regpgid->contentpub(),    # 内容事前公開可否,
             $row->regpgid->openpg(),        # 一般公開可否,
             $row->regpgid->restpg(),        # 未成年参加可否,
-            $row->regpgid->comment(),       # 備考,
+            +( $outext ? $row->regpgid->comment() : ''),       # 備考,
             $row->status(),                 # 実行ステータス,
             $row->memo(),                   # 実行ステータス補足,
             $pfmdatetime[0],                # 実施日時1,
             $pfmdatetime[1],                # 実施日時2,
             $roomno,                        # 部屋番号,
             $roomname,                      # 実施場所,
-            $row->progressprp(),            # 企画紹介文,
+            +( $outext ? $row->progressprp() : ''),            # 企画紹介文,
             @casts,                         # 決定出演者,
         ]);
     }
