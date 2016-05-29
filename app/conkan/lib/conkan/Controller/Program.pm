@@ -449,7 +449,30 @@ sub csvdownload :Local {
             } )
         ];
 $c->log->debug('>>> ' . 'program cnt : ' . scalar(@$rows) );
-    my @data = ();
+    my @data = (
+        [
+            '企画ID',
+            'サブNO',
+            '企画名称',
+            '企画名フリガナ',
+            '内容',
+            '内容事前公開可否',
+            '一般公開可否',
+            '未成年参加可否',
+            '備考',
+            '実行ステータス',
+            '実行ステータス補足',
+            '実施日時1',
+            '実施日時2',
+            '部屋番号',
+            '実施場所',
+            '企画紹介文',
+            '出演者企画ネーム',
+            '出演者肩書',
+            '出演ステータス',
+            '...',
+        ]
+    );
     foreach my $row ( @$rows ) {
         # 実施日付は YYYY/MM/DD、開始終了時刻は HH:MM (いずれも0サフィックス)
         my $datmHash = $c->forward('/program/_trnDateTime4csv', [ $row, ], );
@@ -487,22 +510,22 @@ $c->log->debug('>>> ' . 'program cnt : ' . scalar(@$rows) );
 
         push ( @data, [
             $row->regpgid->regpgid(),       # 企画ID,
-            $row->subno(),                  # サブNO
+            $row->subno(),                  # サブNO,
             $row->regpgid->name(),          # 企画名称,
-            $row->regpgid->namef(),         # 企画名フリガナ
-            $row->regpgid->content(),       # 内容
-            $row->regpgid->contentpub(),    # 内容事前公開可否
-            $row->regpgid->openpg(),        # 一般公開可否
-            $row->regpgid->restpg(),        # 未成年参加可否
-            $row->regpgid->comment(),       # 備考
+            $row->regpgid->namef(),         # 企画名フリガナ,
+            $row->regpgid->content(),       # 内容,
+            $row->regpgid->contentpub(),    # 内容事前公開可否,
+            $row->regpgid->openpg(),        # 一般公開可否,
+            $row->regpgid->restpg(),        # 未成年参加可否,
+            $row->regpgid->comment(),       # 備考,
             $row->status(),                 # 実行ステータス,
             $row->memo(),                   # 実行ステータス補足,
-            $pfmdatetime[0],                # 実施日時1
-            $pfmdatetime[1],                # 実施日時2
+            $pfmdatetime[0],                # 実施日時1,
+            $pfmdatetime[1],                # 実施日時2,
             $roomno,                        # 部屋番号,
             $roomname,                      # 実施場所,
-            $row->progressprp(),            # 企画紹介文
-            @casts,                         # 決定出演者
+            $row->progressprp(),            # 企画紹介文,
+            @casts,                         # 決定出演者,
         ]);
     }
 

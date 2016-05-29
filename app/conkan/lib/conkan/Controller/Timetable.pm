@@ -184,7 +184,22 @@ sub csvdownload :Local {
             } )
         ];
 
-    my @data;
+    my @data = (
+        [
+            '企画ID',
+            '企画名称',
+            '実行ステータス',
+            '実行ステータス補足',
+            '部屋番号',
+            '実施場所',
+            '実施日付1',
+            '開始時刻1',
+            '終了時刻1',
+            '実施日付2',
+            '開始時刻2',
+            '終了時刻2',
+        ]
+    );
     foreach my $row ( @$rows ) {
         # 実施日付は YYYY/MM/DD、開始終了時刻は HH:MM (いずれも0サフィックス)
         my $datmHash =  $c->forward('/program/_trnDateTime4csv', [ $row, ], );
@@ -195,11 +210,11 @@ sub csvdownload :Local {
             $row->memo(),                   # 実行ステータス補足,
             $row->roomid->roomno(),         # 部屋番号,
             $row->roomid->name(),           # 実施場所,
-            $datmHash->{'dates'}->[0],      # 実施日付1
+            $datmHash->{'dates'}->[0],      # 実施日付1,
             $datmHash->{'stms'}->[0],       # 開始時刻1,
             $datmHash->{'etms'}->[0],       # 終了時刻1,
-            $datmHash->{'dates'}->[1],      # 実施日付2
-            $datmHash->{'stms'}->[1],       # 開始時刻2
+            $datmHash->{'dates'}->[1],      # 実施日付2,
+            $datmHash->{'stms'}->[1],       # 開始時刻2,
             $datmHash->{'etms'}->[1],       # 終了時刻2,
         ]);
     }

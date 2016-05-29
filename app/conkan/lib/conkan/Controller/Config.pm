@@ -481,18 +481,30 @@ sub staffcsvdownload :Local {
             },
             { 'order_by' => { '-asc' => [ 'staffid' ] }, }
         ) ];
-    my @data;
+    my @data = (
+        [
+            '名前',
+            'アカウント',
+            '役割',
+            'メールアドレス',
+            '電話番号',
+            '大会登録番号',
+            '担当名',
+            '担当名フリガナ',
+            '備考',
+        ]
+    );
     foreach my $row ( @$rows ) {
         push ( @data, [
-            $row->name(),                   # 名前
-            $row->account(),                # アカウント
-            $RoleTrn{$row->role()},         # 役割
-            $row->ma(),                     # メールアドレス
+            $row->name(),                   # 名前,
+            $row->account(),                # アカウント,
+            $RoleTrn{$row->role()},         # 役割,
+            $row->ma(),                     # メールアドレス,
             $row->telno(),                  # 電話番号,
-            $row->regno(),                  # 大会登録番号
-            $row->tname(),                  # 担当名
-            $row->tnamef(),                 # 担当名フリガナ
-            $row->comment(),                # 備考
+            $row->regno(),                  # 大会登録番号,
+            $row->tname(),                  # 担当名,
+            $row->tnamef(),                 # 担当名フリガナ,
+            $row->comment(),                # 備考,
         ]);
     }
 
@@ -671,7 +683,21 @@ sub roomcsvdownload :Local {
             { 'rmdate' => \'IS NULL' },
             { 'order_by' => { '-asc' => [ 'roomno' ] }, }
         ) ];
-    my @data;
+    my @data = (
+        [
+            '部屋番号',
+            '名前',
+            '定員',
+            '形式',
+            '面積',
+            '利用可能時間',
+            '机数',
+            'イス数',
+            '附属設備',
+            'インタネット回線',
+            '備考',
+        ]
+    );
     foreach my $row ( @$rows ) {
         push ( @data, [
             $row->roomno(),                 # 部屋番号
@@ -861,7 +887,16 @@ sub castcsvdownload :Local {
             { 'rmdate' => \'IS NULL' },
             { 'order_by' => { '-asc' => [ 'regno' ] }, }
         ) ];
-    my @data;
+    my @data = (
+        [
+            '大会登録番号',
+            '名前',
+            'フリガナ',
+            'コンタクトステータス',
+            '備考(連絡先)',
+            '備考(制限事項)',
+        ]
+    );
     foreach my $row ( @$rows ) {
         push ( @data, [
             $row->regno(),                  # 大会登録番号
@@ -1032,7 +1067,14 @@ sub equipcsvdownload :Local {
             { 'rmdate' => \'IS NULL' },
             { 'order_by' => { '-asc' => 'equipno' } }
         ) ];
-    my @data;
+    my @data = (
+        [
+            '機材番号',
+            '名前',
+            '仕様',
+            '備考',
+        ]
+    );
     foreach my $row ( @$rows ) {
         push ( @data, [
             $row->equipno(),                # 機材番号
@@ -1268,7 +1310,14 @@ sub invitate : Chained('csvdl_base') : PathPart('invitate') : Args(0) {
     ];
 $c->log->debug('>>> ' . 'cast cnt : ' . scalar(@$rows) );
 
-    my @data = ();
+    my @data = (
+        [
+            '氏名',
+            '企画名称',
+            '実施日時と場所',
+            '...',
+        ]
+    );
     # 企画絞込用(有効な実行ステータス)
     my $actpgsts = from_json(
         $c->model('ConkanDB::PgSystemConf')->find('pg_active_status')
@@ -1307,8 +1356,9 @@ $c->log->debug('>>> ' . 'cast cnt : ' . scalar(@$rows) );
                 for ( my $idx=0; $idx<scalar(@{$dtmHash->{'dates'}}); $idx++ ) {
                     $pgdata .= ' '
                             .  $dtmHash->{'dates'}->[$idx] . ' '
-                            . $dtmHash->{'stms'}->[$idx] . '-'
-                            . $dtmHash->{'etms'}->[$idx];
+                            . +( $dtmHash->{'stms'}->[$idx] || $__NOTSETSTR__)
+                            . '-'
+                            . +($dtmHash->{'etms'}->[$idx] || $__NOTSETSTR__);
                 }
             }
             else {
@@ -1363,7 +1413,15 @@ sub forroom : Chained('csvdl_base') : PathPart('forroom') : Args(0) {
     ];
 $c->log->debug('>>> ' . 'program cnt : ' . scalar(@$rows) );
 
-    my @data = ();
+    my @data = (
+        [
+            '企画名',
+            '企画番号',
+            '実施日',
+            '開始時刻',
+            '場所名',
+        ]
+    );
     for my $row (@$rows) {
         my $dtmHash =  $c->forward('/program/_trnDateTime4csv', [ $row, ], );
         my $roomname =  $row->roomid ? $row->roomid->name() : $__NOTSETSTR__;
@@ -1373,7 +1431,7 @@ $c->log->debug('>>> ' . 'program cnt : ' . scalar(@$rows) );
                     $row->regpgid->name(),          # 企画名,
                     $row->regpgid->regpgid(),       # 企画番号,
                     $dtmHash->{'dates'}->[$idx],    # 実施日
-                    $dtmHash->{'stms'}->[$idx],     # 開始時刻,
+                    $dtmHash->{'stms'}->[$idx] || $__NOTSETSTR__,     # 開始時刻,
                     $roomname,                      # 場所名,
                 ]);
             }
@@ -1421,7 +1479,16 @@ sub forcast : Chained('csvdl_base') : PathPart('forcast') : Args(0) {
     ];
 $c->log->debug('>>> ' . 'program cnt : ' . scalar(@$rows) );
 
-    my @data = ();
+    my @data = (
+        [
+            '氏名',
+            '企画名',
+            '部屋名',
+            '企画番号',
+            '実施日',
+            '開始時刻',
+        ]
+    );
     for my $row (@$rows) {
         my $pgname = $row->regpgid->name();
         my $roomname =  $row->roomid ? $row->roomid->name() : $__NOTSETSTR__;
@@ -1458,7 +1525,7 @@ $c->log->debug('>>> ' . 'cast cnt : ' . scalar(@$castrows) );
                         $roomname,                      # 場所名,
                         $regpgid,                       # 企画番号,
                         $dtmHash->{'dates'}->[$idx],    # 実施日
-                        $dtmHash->{'stms'}->[$idx],     # 開始時刻,
+                        $dtmHash->{'stms'}->[$idx] || $__NOTSETSTR__,     # 開始時刻,
                     ]);
                 }
             }
@@ -1508,7 +1575,20 @@ sub memcnt : Chained('csvdl_base') : PathPart('memcnt') : Args(0) {
     ];
 $c->log->debug('>>> ' . 'program cnt : ' . scalar(@$rows) );
 
-    my @data = ();
+    my @data = (
+        [
+            '企画名',
+            '企画番号',
+            '実施日',
+            '開始時刻',
+            '部屋名',
+            '内線番号',
+            '出演人数',
+            '裏方人数',
+            '客席人数',
+            '通訳人数',
+        ]
+    );
     for my $row (@$rows) {
         my $pgname = $row->regpgid->name();
         my $regpgid = $row->regpgid->regpgid();
@@ -1558,7 +1638,7 @@ $c->log->debug('>>> ' . 'sum cnt : ' . $sum_cnt );
                     $pgname,                        # 企画名,
                     $regpgid,                       # 企画番号,
                     $dtmHash->{'dates'}->[$idx],    # 実施日
-                    $dtmHash->{'stms'}->[$idx],     # 開始時刻,
+                    $dtmHash->{'stms'}->[$idx] || $__NOTSETSTR__,     # 開始時刻,
                     $roomname,                      # 場所名,
                     '',                             # 内線番号
                     $syutuen_cnt,                   # 出演人数
@@ -1617,7 +1697,17 @@ sub castbyprg : Chained('csvdl_base') : PathPart('castbyprg') : Args(0) {
     ];
 $c->log->debug('>>> ' . 'program cnt : ' . scalar(@$rows) );
 
-    my @data = ();
+    my @data = (
+        [
+            '企画名',
+            '企画番号',
+            '実施日',
+            '開始時刻',
+            '部屋名',
+            '内線番号',
+            '出演者<ステータス>',
+        ]
+    );
     for my $row (@$rows) {
         my $pgname = $row->regpgid->name();
         my $regpgid = $row->regpgid->regpgid();
@@ -1656,7 +1746,7 @@ $c->log->debug('>>> ' . 'program cnt : ' . scalar(@$rows) );
                     $pgname,                        # 企画名,
                     $regpgid,                       # 企画番号,
                     $dtmHash->{'dates'}->[$idx],    # 実施日
-                    $dtmHash->{'stms'}->[$idx],     # 開始時刻,
+                    $dtmHash->{'stms'}->[$idx] || $__NOTSETSTR__,     # 開始時刻,
                     $roomname,                      # 場所名,
                     '',                             # 内線番号
                     $castdata,                      # 出演者<ステータス>
