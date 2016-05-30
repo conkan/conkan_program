@@ -77,6 +77,13 @@
           [%- IF cuRole == 'ROOT' %]
             <li id="config_conf"><a href="/config/setting">設定</a></li>
           [%- END -%]
+          [%- IF pglistsel == 'ACT' %]
+            <li ng-controller="pglistselController">
+              <a><select name="pgdetailsel" ng-model="pgdetailsel"
+                ng-options="i.id as i.val for i in pgsellist">
+              </select></a>
+            </li>
+          [%- END -%]
           <li class="pull-right"><a href="/logout" class="btn btn-info">
             [%- IF addstaff != 1 -%]
               logout

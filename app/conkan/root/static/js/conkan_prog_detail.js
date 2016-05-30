@@ -593,5 +593,42 @@
       }
     ]
   );
+
+  // 企画選択ツールコントローラー
+  ConkanAppModule.controller( 'pglistselController',
+    [ '$scope', '$http', '$log',
+      function( $scope, $http, $log ) {
+        var pathelm = location.pathname.split('/');
+        var allprg = pathelm[1] == 'mypage' ? false : true;
+        var pgid = pathelm[pathelm.length-1];
+        // 値設定
+        $scope.pgsellist = [];
+        $http({
+          method  : 'GET',
+          url     : '/program/listget' + ( allprg ? '_a' : '_r' ),
+        })
+        .success(function(data) {
+          for ( var i=0; i<data.json.length; i++ ) {
+            var name = data.json[i].regpgid + ':';
+            name += data.json[i].sname || data.json[i].name;
+            if(name.length > 20) {
+              name = name.substring(0, 19) + '...';
+            }
+            $scope.pgsellist[i] = {
+              'id'  : data.json[i].pgid,
+              'val' : name,
+            };
+          }
+          $scope.pgdetailsel = pgid;
+        });
+        $scope.$watch('pgdetailsel', function( n, o, scope ) {
+          if ( angular.isDefined(n) && angular.isDefined(o) && ( n != o ) ){
+            pathelm[pathelm.length-1] = n;
+            location.pathname = pathelm.join('/');
+          }
+        });
+      }
+    ]
+  );
 })();
 // -- EOF --

@@ -8,6 +8,7 @@
 <meta name="author" content="Studio REM">
 <title>Conkan Program Detail</title>
 [%- SET useUiGrid  = 1 -%]
+[%- SET pglistsel  = 'ACT' -%]
 [%- PROCESS 'tthead.tt' -%]
 [%- SET editable = 0;
   SET urole = c.user.get('role');
