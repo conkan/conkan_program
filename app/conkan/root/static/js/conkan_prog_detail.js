@@ -120,7 +120,6 @@
         })
         .success(function(data) {
           $scope.equiplist = data.json;
-          $scope.pginfo    = data.pginfo;
           for ( var i=0; i<$scope.equiplist.length; i++ ) {
             var equip = $scope.equiplist[i];
             if (   ( equip.equipno == 'bring-AV' )
@@ -437,12 +436,9 @@
           var itemid = $scope.prog.id;
           // 二重クリック回避
           angular.element('#equipapplybtn').attr('disabled', 'disabled');
+          angular.element('#equipdelbtn').attr('disabled', 'disabled');
           // バリデーション
           //    現在なし
-          // 新規追加時、equipidはNULL
-          if ( $scope.equip.equipid > $scope.maxequipid ) {
-            $scope.equip.equipid = null;
-          }
           // その他 の内容置き換え
           if ( $scope.equip.vif == 'その他' ) {
             $scope.equip.vif = $scope.equip.ovif;
@@ -493,6 +489,7 @@
           var itemid = $scope.prog.id;
           // 二重クリック回避
           angular.element('#equipapplybtn').attr('disabled', 'disabled');
+          angular.element('#equipdelbtn').attr('disabled', 'disabled');
           $http( {
             method : 'POST',
             url : '/program/' + pgid + '/equip/' + itemid + '/del/',

@@ -628,6 +628,7 @@ sub program_listget : Private {
         $c->log->error('program/listget error ' . localtime() .
             ' dbexp : ' . Dumper($e) );
     };
+    $c->component('View::JSON')->{expose_stash} = undef;
     $c->forward('conkan::View::JSON');
 }
 
@@ -812,7 +813,7 @@ sub program_equiplist : Chained('program_show') : PathPart('equiplist') : Args(0
             push @list, $equip;
         }
         $c->stash->{'json'} = \@list;
-        $c->component('View::JSON')->{expose_stash} = [ 'json', ];
+        $c->component('View::JSON')->{expose_stash} = [ 'json' ];
     } catch {
         my $e = shift;
         $c->log->error('program/equiplist error ' . localtime() .
