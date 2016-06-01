@@ -39,6 +39,18 @@
     <button class="btn btn-danger" ng-click="$close()">閉じる</button>
   </div>
 </script>
+<!--  更新失敗(使用中) -->
+<script type="text/ng-template" id="T_result_inuse">
+  <div class="modal-header">
+    <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
+  </div>
+  <div class="modal-body">
+    <H1>使用中なので無効にできません</H1>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-danger" ng-click="$close()">閉じる</button>
+  </div>
+</script>
 <!--  データ取得失敗ダイアログ -->
 <script type="text/ng-template" id="T_httpget_fail">
   <div class="modal-header">

@@ -7,56 +7,6 @@
     angular.element(document).scrollTop( storage.getItem( 'sctop' ) );
     storage.clear();
   });
-  // モーダルダイアログ表示
-  angular.element('#editEquip').on('show.bs.modal', function (event) {
-    var equipid = angular.element(event.relatedTarget).data('whatever');
-    var content = angular.element('#editEquipContent');
-    needreload = false;
-    angular.element(content).load(equipid + '/ FORM');
-    if ( angular.element(event.relatedTarget).data('rmcol') ) {
-      angular.element('#dobtn').hide();
-      angular.element('#dodel').hide();
-    }
-    else {
-      angular.element('#dobtn').show();
-      angular.element('#dodel').show();
-    }
-  } );
-  // モーダルダイアログ非表示
-  angular.element('#editEquip').on('hide.bs.modal', function (event) {
-    storage.setItem( 'sctop', angular.element(document).scrollTop() );
-    if ( needreload ) {
-      location.reload(true);
-    }
-  } );
-  // 更新
-  angular.element('#dobtn').click(function(event) {
-    if (!angular.element('#name').val()) {
-      angular.element('#valerr').text('名称は必須です');
-      return false;
-    }
-    if (!angular.element('#equipno').val()) {
-      angular.element('#valerr').text('機材番号は必須です');
-      return false;
-    }
-    var content = angular.element('#editEquipContent');
-    var data = angular.element('#equipform').serializeArray();
-    var equipid = angular.element('#equipid').val();
-    angular.element('#dobtn').hide();
-    angular.element('#dodel').hide();
-    angular.element(content).load(equipid + '/edit/ FORM', data );
-    needreload = true;
-  } );
-  // 削除
-  angular.element('#dodel').click(function(event) {
-    var content = angular.element('#editEquipContent');
-    var data = angular.element('#equipform').serializeArray();
-    var equipid = angular.element('#equipid').val();
-    angular.element('#dobtn').hide();
-    angular.element('#dodel').hide();
-    angular.element(content).load(equipid + '/del/ FORM', data );
-    needreload = true;
-  } );
 
   // conkanEquipListモジュールの生成(グローバル変数)
   var conkanAppModule = angular.module('conkanEquipList',
@@ -66,13 +16,18 @@
   conkanAppModule.controller( 'equipListController',
     [ '$scope', '$sce', '$http', '$uibModal',
       function( $scope, $sce, $http, $uibModal ) {
-        $scope.__getEditbtn = function( rmdate, equipid ) {
-          var cont = uiGetEditbtn( rmdate, '#editEquip',
-                  [ { 'key' : 'whatever', 'val' : equipid },
-                    { 'key' : 'rmcol', 'val' : rmdate } ] );
-          var wkstr = $sce.trustAsHtml( cont );
-          return wkstr;
-        };
+        // 初期値設定
+        $http.get('/config/equip/listget')
+        .success(function(data) {
+          $scope.equipgrid.data = data.json;
+        })
+        .error(function(data) {
+          var modalinstance = $uibModal.open(
+            { templateUrl : 'T_httpget_fail' }
+          );
+          modalinstance.result.then( function() {} );
+        });
+
         $scope.equipgrid = {
           enableFiltering: false,
           enableSorting: true,
@@ -109,19 +64,136 @@
                   { return uiGetCellCls(row.entity.rmdate); },
               enableSorting: false,
               enableHiding: false,
-              cellTemplate: '<div class="gridcelbtn"><span ng-bind-html="grid.appScope.__getEditbtn(row.entity.rmdate, row.entity.equipid)"></span></div>'
+              cellTemplate: '<div class="gridcelbtn">'
+                          + '<button ng-if="row.entity.rmdate"'
+                          + 'type="button" class="btn btn-xs">無効</button>'
+                          + '<button ng-if="!row.entity.rmdate"'
+                          + 'type="button" class="btn btn-xs btn-primary" '
+                          + 'ng-click="grid.appScope.openAllEquipForm'
+                          + '(row.entity.equipid)">編集</button>'
           },
         ];
-        $http.get('/config/equip/listget')
+
+        // 機材詳細更新追加ダイアログ
+        $scope.openAllEquipForm = function( equipid ) {
+          $scope.equipid = equipid;
+          $scope.applyBtnLbl = ( equipid === 0 ) ? '追加' : '更新';
+          $uibModal.open({
+            templateUrl : 'T_all_equip',
+            controller  : 'allequipFormController',
+            backdrop    : 'static',
+            scope       : $scope,
+            size        : 'lg',
+          });
+        };
+      }
+    ]
+  );
+  
+  // 機材詳細更新追加フォームコントローラ
+  conkanAppModule.controller( 'allequipFormController',
+    [ '$scope', '$http', '$uibModal', '$uibModalInstance',
+      function( $scope, $http, $uibModal, $uibModalInstance ) {
+        // 初期値設定
+        angular.element('#valerr').text('');
+        $http({
+          method  : 'GET',
+          url     : '/config/equip/' + $scope.equipid
+        })
         .success(function(data) {
-          $scope.equipgrid.data = data.json;
+          $scope.equip = {
+            equipid : data.json.equipid,
+            name    : data.json.name,
+            equipno : data.json.equipno,
+            spec    : data.json.spec,
+            comment : data.json.comment,
+            rmdate  : data.json.rmdate,
+          };
         })
         .error(function(data) {
           var modalinstance = $uibModal.open(
-            { templateUrl : 'T_httpget_fail' }
+              { templateUrl : getTemplate( '' ), }
           );
           modalinstance.result.then( function() {} );
         });
+        // 更新実施
+        $scope.equipDoApply = function() {
+          // 二重クリック回避
+          angular.element('#equipapplybtn').attr('disabled', 'disabled');
+          angular.element('#equipdelbtn').attr('disabled', 'disabled');
+          // バリデーション
+          //    現在なし
+          // 実行
+          $http( {
+            method : 'POST',
+            url : '/config/equip/' + $scope.equip.equipid + '/edit',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+            data: $.param($scope.equip)
+          })
+          .success(function(data) {
+            // templateを一つにまとめたいところ
+            var modalinstance;
+            $uibModalInstance.close('done');
+            modalinstance = $uibModal.open(
+              {
+                templateUrl : getTemplate( data.status ),
+                backdrop    : 'static'
+              }
+            );
+            modalinstance.result.then( function() {
+              location.reload();
+            });
+          })
+          .error(function(data) {
+            $uibModalInstance.close('done');
+            var modalinstance = $uibModal.open(
+              {
+                templateUrl : getTemplate( '' ),
+                backdrop    : 'static'
+              }
+            );
+            modalinstance.result.then( function() {
+              location.reload();
+            });
+          });
+        };
+        // 削除実施
+        $scope.equipDoDel = function() {
+          // 二重クリック回避
+          angular.element('#equipapplybtn').attr('disabled', 'disabled');
+          angular.element('#equipdelbtn').attr('disabled', 'disabled');
+          $http( {
+            method : 'POST',
+            url : '/config/equip/' + $scope.equip.equipid + '/del',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+          })
+          .success(function(data) {
+            // templateを一つにまとめたいところ
+            var modalinstance;
+            $uibModalInstance.close('done');
+            modalinstance = $uibModal.open(
+              {
+                templateUrl : getTemplate( data.status ),
+                backdrop    : 'static'
+              }
+            );
+            modalinstance.result.then( function() {
+              location.reload();
+            });
+          })
+          .error(function(data) {
+            $uibModalInstance.close('done');
+            var modalinstance = $uibModal.open(
+              {
+                templateUrl : getTemplate( '' ),
+                backdrop    : 'static'
+              }
+            );
+            modalinstance.result.then( function() {
+              location.reload();
+            });
+          });
+        };
       }
     ]
   );

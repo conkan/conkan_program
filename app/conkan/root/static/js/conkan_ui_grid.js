@@ -204,6 +204,7 @@ var getTemplate = function( stat ) {
         'update' : 'T_result_update',
         'fail'   : 'T_result_fail',
         'dbfail' : 'T_result_dberr',
+        'inuse'  : 'T_result_inuse',
         ''       : 'T_httpget_fail',
     };
     var retval = templateTbl[stat] || 'T_httpget_fail'; // デフォルト値

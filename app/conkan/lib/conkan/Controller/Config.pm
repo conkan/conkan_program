@@ -340,6 +340,7 @@ sub staff_listget : Chained('staff_base') : PathPart('listget') : Args(0) {
         $c->log->error('staff/listget error ' . localtime() .
             ' dbexp : ' . Dumper($e) );
     };
+    $c->component('View::JSON')->{expose_stash} = [ 'json' ];
     $c->forward('conkan::View::JSON');
 }
 
@@ -569,6 +570,7 @@ sub room_listget : Chained('room_base') : PathPart('listget') : Args(0) {
         $c->log->error('room/listget error ' . localtime() .
             ' dbexp : ' . Dumper($e) );
     };
+    $c->component('View::JSON')->{expose_stash} = [ 'json' ];
     $c->forward('conkan::View::JSON');
 }
 
@@ -785,6 +787,7 @@ sub cast_listget : Chained('cast_base') : PathPart('listget') : Args(0) {
         $c->log->error('cast/listget error ' . localtime() .
             ' dbexp : ' . Dumper($e) );
     };
+    $c->component('View::JSON')->{expose_stash} = [ 'json' ];
     $c->forward('conkan::View::JSON');
 }
 
@@ -972,6 +975,7 @@ sub equip_listget : Chained('equip_base') : PathPart('listget') : Args(0) {
         $c->log->error('equip/listget error ' . localtime() .
             ' dbexp : ' . Dumper($e) );
     };
+    $c->component('View::JSON')->{expose_stash} = [ 'json' ];
     $c->forward('conkan::View::JSON');
 }
 
@@ -1010,6 +1014,24 @@ sub equip_show : Chained('equip_base') :PathPart('') :CaptureArgs(1) {
 
 sub equip_detail : Chained('equip_show') : PathPart('') : Args(0) {
     my ( $self, $c ) = @_;
+    my $rs = $c->stash->{'rs'};
+    if ( $c->stash->{'equipid'} != 0 ) {
+        $c->stash->{'json'} = {
+            equipid => $rs->equipid(),
+            name    => $rs->name(),
+            equipno => $rs->equipno(),
+            spec    => $rs->spec(),
+            comment => $rs->comment(),
+            rmdate  => $rs->rmdate(),
+        };
+    }
+    else {
+        $c->stash->{'json'} = {
+            equipid => 0,
+        };
+    }
+    $c->component('View::JSON')->{expose_stash} = [ 'json' ];
+    $c->forward('conkan::View::JSON');
 }
 
 =head2 equip/*/edit
@@ -1031,7 +1053,9 @@ sub equip_edit : Chained('equip_show') : PathPart('edit') : Args(0) {
         my $items = [ qw/
                         name equipno spec comment
                         / ];
-        $c->detach( '_updatecreate', [ $equipid, $items ] );
+        $c->forward( '_updatecreate', [ $equipid, $items ] );
+        $c->component('View::JSON')->{expose_stash} = [ 'status' ];
+        $c->forward('conkan::View::JSON');
     }
 }
 
@@ -1049,7 +1073,9 @@ sub equip_del : Chained('equip_show') : PathPart('del') : Args(0) {
         $c->go->( '/config/equip/' . $equipid );
     }
     else {
-        $c->detach( '_delete', [ $equipid, 'PgEquip', 'equipid' ] );
+        $c->forward( '_delete', [ $equipid, 'PgEquip', 'equipid' ] );
+        $c->component('View::JSON')->{expose_stash} = [ 'status' ];
+        $c->forward('conkan::View::JSON');
     }
 }
 
@@ -1119,18 +1145,22 @@ sub _updatecreate :Private {
                     +( $c->sessionid . $c->session->{'updtic'}) ) {
                 $row->update( $value ); 
                 $c->response->body('<FORM><H1>更新しました</H1></FORM>');
+                $c->stash->{'status'} = 'update';
             }
             else {
                 $c->response->body(
                         '<FORM><H1>更新できませんでした</H1><BR/>' .
                         '他のシステム管理者が変更した可能性があります</FORM>');
+                $c->stash->{'status'} = 'fail';
             }
         }
         else { # 新規登録
             $c->stash->{'M'}->create( $value );
             $c->response->body('<FORM><H1>登録しました</H1></FORM>');
+            $c->stash->{'status'} = 'update';
         }
     } catch {
+        $c->stash->{'status'} = 'dbfail';
         $c->detach( '_dberror', [ shift ] );
     };
     $c->stash->{'rs'} = undef;
@@ -1160,18 +1190,22 @@ sub _delete :Private {
             if ( $usecnt > 0 ) {
                 $c->response->body(
                     '<FORM><H1>使用中なので無効にできません</H1><BR/></FORM>');
+                $c->stash->{'status'} = 'inuse';
             }
             else {
                 $row->update( { 'rmdate'   => \'NOW()', } );
                 $c->response->body('<FORM><H1>無効にしました</H1></FORM>');
+                $c->stash->{'status'} = 'update';
             }
         }
         else {
             $c->response->body(
                     '<FORM><H1>無効にできませんでした</H1><BR/>' .
                     '他のシステム管理者が変更した可能性があります</FORM>');
+            $c->stash->{'status'} = 'fail';
         }
     } catch {
+        $c->stash->{'status'} = 'dbfail';
         $c->detach( '_dberror', [ shift ] );
     };
     $c->stash->{'rs'} = undef;
@@ -1222,6 +1256,7 @@ sub loginlogget :Local {
         $c->log->error('timetable_get error ' . localtime() .
             ' dbexp : ' . Dumper($e) );
     };
+    $c->component('View::JSON')->{expose_stash} = [ 'json' ];
     $c->forward('conkan::View::JSON');
 }
 
