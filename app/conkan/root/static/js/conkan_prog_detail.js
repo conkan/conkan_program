@@ -169,16 +169,35 @@
           });
         };
 
+        // 決定出演者追加フォーム
+        $scope.openCastEditForm = function( regpgid, subno, pgid, name, castid ) {
+          $scope.prog = {
+            regpgid     : regpgid,
+            subno       : subno,
+            pgid        : pgid,
+            name        : name,
+          };
+          $scope.editCastId = castid;
+          $scope.editCastBtnLbl = ( castid === 0 ) ? '追加' : '更新';
+          $uibModal.open({
+            templateUrl : "T_pgup_cast",
+            controller  : 'castFormController',
+            backdrop    : "static",
+            scope       : $scope,
+            size        : 'lg',
+          });
+        };
         // 決定機材更新追加フォーム
         $scope.openEquipForm = function( regpgid, subno, pgid, name, equipid ) {
+          // フォーム表示に必要な情報設定
           $scope.prog = {
-            regpgid : regpgid,
-            subno   : subno,
-            pgid    : pgid,
-            name    : name,
-            id      : equipid,
+            regpgid     : regpgid,
+            subno       : subno,
+            pgid        : pgid,
+            name        : name,
           };
-          $scope.applyBtnLbl = ( equipid === 0 ) ? '追加' : '更新';
+          $scope.editEquipId = equipid;
+          $scope.editEquipBtnLbl = ( equipid === 0 ) ? '追加' : '更新';
           $uibModal.open({
             templateUrl : "T_pgup_equip",
             controller  : 'equipFormController',
@@ -258,10 +277,10 @@
       function( $scope, $http, $uibModal, $uibModalInstance ) {
         // 初期値設定
         angular.element('#valerr').text('');
-        $scope.regcast = {
-          regpgid : $scope.prog.regpgid,
-          pgid : $scope.prog.pgid,
-          name : '', namef : '', regno : '',
+        $scope.cast = {
+          regpgid   : $scope.prog.regpgid,
+          pgid      : $scope.prog.pgid,
+          name      : '', namef : '', regno : '',
           title : '', needreq : '', needguest : '',
         };
         // 選択肢取得
@@ -281,6 +300,64 @@
           angular.element('#regcastapplybtn').attr('disabled', 'disabled');
           doJsonPost( $http, '/program/regcastadd', $.param($scope.regcast),
                       $uibModalInstance, $uibModal);
+        };
+      }
+    ]
+  );
+  // 決定出演者追加編集削除フォームコントローラ
+  ConkanAppModule.controller( 'castFormController',
+    [ '$scope', '$http', '$uibModal', '$uibModalInstance',
+      function( $scope, $http, $uibModal, $uibModalInstance ) {
+        // 初期値設定
+        angular.element('#valerr').text('');
+        $http({
+          method  : 'GET',
+          url     : '/program/' + $scope.prog.pgid + '/cast/'
+                       + $scope.editCastId,
+        })
+        .success(function(data) {
+          $scope.cast = {
+            id          : $scope.editCastId,
+            applyBtnLbl : $scope.editCastBtnLbl,
+            pgid        : data.json.pgid,
+            castid      : data.json.castid,
+            status      : data.json.status,
+            memo        : data.json.memo,
+            name        : data.json.name,
+            namef       : data.json.namef,
+            title       : data.json.title,
+          };
+          $scope.castlist = data.json.castlist;
+          $scope.statlist = data.json.statlist;
+        })
+        .error(function(data) {
+          var modalinstance = $uibModal.open(
+              { templateUrl : getTemplate( '' ), }
+          );
+          modalinstance.result.then( function() {} );
+        });
+        // 登録実施
+        $scope.castdoApply = function() {
+          var pgid   = $scope.cast.pgid;
+          var itemid = $scope.cast.id;
+          // 二重クリック回避
+          angular.element('#castapplybtn').attr('disabled', 'disabled');
+          angular.element('#castdelbtn').attr('disabled', 'disabled');
+          // バリデーション
+          //    現在なし
+          // 実行
+          doJsonPost( $http, '/program/' + pgid + '/cast/' + itemid,
+                  $.param($scope.cast), $uibModalInstance, $uibModal);
+        };
+        // 削除実施
+        $scope.castDoDel = function() {
+          var pgid   = $scope.cast.pgid;
+          var itemid = $scope.cast.id;
+          // 二重クリック回避
+          angular.element('#castapplybtn').attr('disabled', 'disabled');
+          angular.element('#castdelbtn').attr('disabled', 'disabled');
+          doJsonPost( $http, '/program/' + pgid + '/cast/' + itemid + '/del/',
+                      undefined, $uibModalInstance, $uibModal);
         };
       }
     ]
@@ -312,10 +389,13 @@
         angular.element('#valerr').text('');
         $http({
           method  : 'GET',
-          url     : '/program/' + $scope.prog.pgid + '/equip/' + $scope.prog.id
+          url     : '/program/' + $scope.prog.pgid + '/equip/'
+                       + $scope.editEquipId,
         })
         .success(function(data) {
           $scope.equip = {
+            id            : $scope.editEquipId,
+            applyBtnLbl   : $scope.editEquipBtnLbl,
             pgid    : data.json.pgid,
             equipid : data.json.equipid,
             intende : data.json.intende,
@@ -372,8 +452,8 @@
         });
         // 更新実施
         $scope.equipDoApply = function() {
-          var pgid = $scope.prog.pgid;
-          var itemid = $scope.prog.id;
+          var pgid   = $scope.equip.pgid;
+          var itemid = $scope.equip.id;
           // 二重クリック回避
           angular.element('#equipapplybtn').attr('disabled', 'disabled');
           angular.element('#equipdelbtn').attr('disabled', 'disabled');
@@ -395,8 +475,8 @@
         };
         // 削除実施
         $scope.equipDoDel = function() {
-          var pgid = $scope.prog.pgid;
-          var itemid = $scope.prog.id;
+          var pgid   = $scope.equip.pgid;
+          var itemid = $scope.equip.id;
           // 二重クリック回避
           angular.element('#equipapplybtn').attr('disabled', 'disabled');
           angular.element('#equipdelbtn').attr('disabled', 'disabled');
