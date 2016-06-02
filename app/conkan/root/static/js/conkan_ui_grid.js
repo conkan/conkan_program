@@ -198,17 +198,53 @@ var ProgTimeValid = function( prog, scale_hash ) {
   return retval;
 };
 
+// JSON POST汎用実施
+var doJsonPost = function( $http, url, data, $uibModalInstance, $uibModal ) {
+  $http( {
+    method  : 'POST',
+    url     : url,
+    headers : { 'Content-Type':
+                  'application/x-www-form-urlencoded; charset=UTF-8' },
+    data: data
+  })
+  .success(function(data) {
+    var modalinstance;
+    $uibModalInstance.close('done');
+    modalinstance = $uibModal.open(
+      {
+        templateUrl : getTemplate( data.status ),
+        backdrop    : 'static'
+      }
+    );
+    modalinstance.result.then( function() {
+      location.reload();
+    });
+  })
+  .error(function(data) {
+    $uibModalInstance.close('done');
+    var modalinstance = $uibModal.open(
+      {
+        templateUrl : getTemplate( '' ),
+        backdrop    : 'static'
+      }
+    );
+    modalinstance.result.then( function() {
+      location.reload();
+    });
+  });
+};
+
 // JSON POST後のstatusからtemplate名を得る
 var getTemplate = function( stat ) {
-    var templateTbl = {
-        'update' : 'T_result_update',
-        'fail'   : 'T_result_fail',
-        'dbfail' : 'T_result_dberr',
-        'inuse'  : 'T_result_inuse',
-        ''       : 'T_httpget_fail',
-    };
-    var retval = templateTbl[stat] || 'T_httpget_fail'; // デフォルト値
-    return retval;
+  var templateTbl = {
+    'update' : 'T_result_update',
+    'fail'   : 'T_result_fail',
+    'dbfail' : 'T_result_dberr',
+    'inuse'  : 'T_result_inuse',
+    ''       : 'T_httpget_fail',
+  };
+  var retval = templateTbl[stat] || 'T_httpget_fail'; // デフォルト値
+  return retval;
 };
     
 // EOF --

@@ -269,20 +269,15 @@
           $http( {
             method : 'POST',
             url : '/timetable/' + pgid,
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
+            headers: { 'Content-Type':
+                         'application/x-www-form-urlencoded; charset=UTF-8' },
             data: $.param($scope.current)
           })
           .success(function(data) {
             var modalinstance, templateval;
-            if (data.status == 'update') {
-              templateval = 'T_result_update';
-            }
-            else {
-              templateval = 'T_result_fail';
-            }
             modalinstance = $uibModal.open(
               {
-                templateUrl : templateval,
+                templateUrl : getTemplate( data.status ),
                 backdrop    : 'static'
               }
             );
@@ -299,7 +294,7 @@
           .error(function(data) {
             var modalinstance = $uibModal.open(
               {
-                templateUrl : 'T_result_dberr',
+                templateUrl : getTemplate( '' ),
                 backdrop    : 'static'
               }
             );

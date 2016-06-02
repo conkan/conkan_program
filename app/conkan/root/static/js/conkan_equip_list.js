@@ -124,75 +124,16 @@
           // バリデーション
           //    現在なし
           // 実行
-          $http( {
-            method : 'POST',
-            url : '/config/equip/' + $scope.equip.equipid + '/edit',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-            data: $.param($scope.equip)
-          })
-          .success(function(data) {
-            // templateを一つにまとめたいところ
-            var modalinstance;
-            $uibModalInstance.close('done');
-            modalinstance = $uibModal.open(
-              {
-                templateUrl : getTemplate( data.status ),
-                backdrop    : 'static'
-              }
-            );
-            modalinstance.result.then( function() {
-              location.reload();
-            });
-          })
-          .error(function(data) {
-            $uibModalInstance.close('done');
-            var modalinstance = $uibModal.open(
-              {
-                templateUrl : getTemplate( '' ),
-                backdrop    : 'static'
-              }
-            );
-            modalinstance.result.then( function() {
-              location.reload();
-            });
-          });
+          doJsonPost( $http, '/config/equip/' + $scope.equip.equipid + '/edit',
+                      $.param($scope.equip), $uibModalInstance, $uibModal);
         };
         // 削除実施
         $scope.equipDoDel = function() {
           // 二重クリック回避
           angular.element('#equipapplybtn').attr('disabled', 'disabled');
           angular.element('#equipdelbtn').attr('disabled', 'disabled');
-          $http( {
-            method : 'POST',
-            url : '/config/equip/' + $scope.equip.equipid + '/del',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-          })
-          .success(function(data) {
-            // templateを一つにまとめたいところ
-            var modalinstance;
-            $uibModalInstance.close('done');
-            modalinstance = $uibModal.open(
-              {
-                templateUrl : getTemplate( data.status ),
-                backdrop    : 'static'
-              }
-            );
-            modalinstance.result.then( function() {
-              location.reload();
-            });
-          })
-          .error(function(data) {
-            $uibModalInstance.close('done');
-            var modalinstance = $uibModal.open(
-              {
-                templateUrl : getTemplate( '' ),
-                backdrop    : 'static'
-              }
-            );
-            modalinstance.result.then( function() {
-              location.reload();
-            });
-          });
+          doJsonPost( $http, '/config/equip/' + $scope.equip.equipid + '/del',
+                      undefined, $uibModalInstance, $uibModal);
         };
       }
     ]

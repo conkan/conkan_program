@@ -194,8 +194,19 @@
 
   // 企画更新フォームコントローラ
   ConkanAppModule.controller( 'progFormController',
-    [ '$scope', '$http', '$uibModal', '$uibModalInstance',
-      function( $scope, $http, $uibModal, $uibModalInstance ) {
+    [ '$scope', '$http', '$log', '$uibModal', '$uibModalInstance',
+      function( $scope, $http, $log, $uibModal, $uibModalInstance ) {
+        // 選択肢取得
+        $http.get('/config/confget')
+        .success(function(data) {
+          $scope.conf = ConfDataCnv( data, $scope.conf );
+        })
+        .error(function(data) {
+          var modalinstance = $uibModal.open(
+              { templateUrl : getTemplate( '' ), }
+          );
+          modalinstance.result.then( function() {} );
+        });
         // 初期値設定
         angular.element('#valerr').text('');
         $http({
@@ -205,17 +216,6 @@
         .success(function(data) {
           $scope.prog = {};
           ProgDataCnv( data, $scope.prog );
-        })
-        .error(function(data) {
-          var modalinstance = $uibModal.open(
-              { templateUrl : getTemplate( '' ), }
-          );
-          modalinstance.result.then( function() {} );
-        });
-        // 選択肢取得
-        $http.get('/config/confget')
-        .success(function(data) {
-          $scope.conf = ConfDataCnv( data, $scope.conf );
         })
         .error(function(data) {
           var modalinstance = $uibModal.open(
@@ -245,38 +245,8 @@
             angular.element('#prgapplybtn').removeAttr('disabled');
             return;
           }
-          $http( {
-            method : 'POST',
-            url : '/timetable/' + pgid,
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-            data: $.param($scope.prog)
-          })
-          .success(function(data) {
-            // templateを一つにまとめたいところ
-            var modalinstance;
-            $uibModalInstance.close('done');
-            modalinstance = $uibModal.open(
-              {
-                templateUrl : getTemplate( data.status ),
-                backdrop    : 'static'
-              }
-            );
-            modalinstance.result.then( function() {
-              location.reload();
-            });
-          })
-          .error(function(data) {
-            $uibModalInstance.close('done');
-            var modalinstance = $uibModal.open(
-              {
-                templateUrl : getTemplate( '' ),
-                backdrop    : 'static'
-              }
-            );
-            modalinstance.result.then( function() {
-              location.reload();
-            });
-          });
+          doJsonPost( $http, '/timetable/' + pgid, $.param($scope.prog),
+                      $uibModalInstance, $uibModal);
         };
       }
     ]
@@ -309,38 +279,8 @@
         $scope.regcastdoApply = function() {
           // 二重クリック回避
           angular.element('#regcastapplybtn').attr('disabled', 'disabled');
-          $http( {
-            method : 'POST',
-            url : '/program/regcastadd',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-            data: $.param($scope.regcast)
-          })
-          .success(function(data) {
-            // templateを一つにまとめたいところ
-            var modalinstance;
-            $uibModalInstance.close('done');
-            modalinstance = $uibModal.open(
-              {
-                templateUrl : getTemplate( data.status ),
-                backdrop    : 'static'
-              }
-            );
-            modalinstance.result.then( function() {
-              location.reload();
-            });
-          })
-          .error(function(data) {
-            $uibModalInstance.close('done');
-            var modalinstance = $uibModal.open(
-              {
-                templateUrl : getTemplate( '' ),
-                backdrop    : 'static'
-              }
-            );
-            modalinstance.result.then( function() {
-              location.reload();
-            });
-          });
+          doJsonPost( $http, '/program/regcastadd', $.param($scope.regcast),
+                      $uibModalInstance, $uibModal);
         };
       }
     ]
@@ -450,38 +390,8 @@
             $scope.equip.eif = $scope.equip.oeif;
           }
           // 実行
-          $http( {
-            method : 'POST',
-            url : '/program/' + pgid + '/equip/' + itemid,
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-            data: $.param($scope.equip)
-          })
-          .success(function(data) {
-            // templateを一つにまとめたいところ
-            var modalinstance;
-            $uibModalInstance.close('done');
-            modalinstance = $uibModal.open(
-              {
-                templateUrl : getTemplate( data.status ),
-                backdrop    : 'static'
-              }
-            );
-            modalinstance.result.then( function() {
-              location.reload();
-            });
-          })
-          .error(function(data) {
-            $uibModalInstance.close('done');
-            var modalinstance = $uibModal.open(
-              {
-                templateUrl : getTemplate( '' ),
-                backdrop    : 'static'
-              }
-            );
-            modalinstance.result.then( function() {
-              location.reload();
-            });
-          });
+          doJsonPost( $http, '/program/' + pgid + '/equip/' + itemid,
+                      $.param($scope.equip), $uibModalInstance, $uibModal);
         };
         // 削除実施
         $scope.equipDoDel = function() {
@@ -490,37 +400,8 @@
           // 二重クリック回避
           angular.element('#equipapplybtn').attr('disabled', 'disabled');
           angular.element('#equipdelbtn').attr('disabled', 'disabled');
-          $http( {
-            method : 'POST',
-            url : '/program/' + pgid + '/equip/' + itemid + '/del/',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8' },
-          })
-          .success(function(data) {
-            // templateを一つにまとめたいところ
-            var modalinstance;
-            $uibModalInstance.close('done');
-            modalinstance = $uibModal.open(
-              {
-                templateUrl : getTemplate( data.status ),
-                backdrop    : 'static'
-              }
-            );
-            modalinstance.result.then( function() {
-              location.reload();
-            });
-          })
-          .error(function(data) {
-            $uibModalInstance.close('done');
-            var modalinstance = $uibModal.open(
-              {
-                templateUrl : getTemplate( '' ),
-                backdrop    : 'static'
-              }
-            );
-            modalinstance.result.then( function() {
-              location.reload();
-            });
-          });
+          doJsonPost( $http, '/program/' + pgid + '/equip/' + itemid + '/del/',
+                      undefined, $uibModalInstance, $uibModal);
         };
       }
     ]
