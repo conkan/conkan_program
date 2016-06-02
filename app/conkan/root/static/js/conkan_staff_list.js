@@ -33,8 +33,10 @@
       return;
     }
     if ( angular.element('#passwd').val() ) {
-      if ( angular.element('#passwd').val() != angular.element('#passwd2').val() ) {
-        angular.element('#valerr').text('パスワードとパスワード(確認)が一致しません');
+      if ( angular.element('#passwd').val()
+             != angular.element('#passwd2').val() ) {
+        angular.element('#valerr').text(
+          'パスワードとパスワード(確認)が一致しません');
         return;
       }
     }
@@ -114,7 +116,8 @@
               return uiGetCellCls(row.entity.rmdate);
             },
             enableHiding: false,
-            cellTemplate: '<div ng-bind-html="grid.appScope.__getRoll(row.entity.role)"></div>'
+            cellTemplate: '<div ng-bind-html="grid.appScope.__getRoll'
+                        + '(row.entity.role)"></div>'
           },
           { name : '担当名', field: 'tname',
             headerCellClass: 'gridheader',
@@ -147,7 +150,11 @@
             },
             enableSorting: false,
             enableHiding: false,
-            cellTemplate: '<div class="gridcelbtn"><span ng-bind-html="grid.appScope.__getEditbtn(row.entity.rmdate, row.entity.staffid, row.entity.role)"></span></div>'
+            cellTemplate: '<div class="gridcelbtn">'
+                        +   '<span ng-bind-html="grid.appScope.__getEditbtn'
+                        +     '(row.entity.rmdate, row.entity.staffid, '
+                        +      'row.entity.role)">'
+                        + '</span></div>'
           },
         ];
         $http.get('/config/staff/listget')

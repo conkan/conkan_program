@@ -181,16 +181,16 @@ var ProgTimeValid = function( prog, scale_hash ) {
           || ( start < scale[0] ) || ( scale[1] < end ) ) {
         retval = true;
         angular.element('*[name=' + cur.dh + ']').each(function() {
-          $(this).addClass('ng-invalid');
-          $(this).removeClass('ng-valid');
-          $(this).$invalid = true;
+          angular.element(this).addClass('ng-invalid');
+          angular.element(this).removeClass('ng-valid');
+          angular.element(this).$invalid = true;
         });
       }
       else {
         angular.element('*[name=' + cur.dh + ']').each(function() {
-          $(this).removeClass('ng-invalid');
-          $(this).addClass('ng-valid');
-          $(this).$invalid = false;
+          angular.element(this).removeClass('ng-invalid');
+          angular.element(this).addClass('ng-valid');
+          angular.element(this).$invalid = false;
         });
       }
     }

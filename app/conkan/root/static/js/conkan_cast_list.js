@@ -134,7 +134,10 @@
                     { return uiGetCellCls(row.entity.rmdate); },
                 enableSorting: false,
                 enableHiding: false,
-                cellTemplate: '<div class="gridcelbtn"><span ng-bind-html="grid.appScope.__getEditbtn(row.entity.rmdate, row.entity.castid)"></span></div>'
+                cellTemplate: '<div class="gridcelbtn">'
+                            +   '<span ng-bind-html="grid.appScope.__getEditbtn'
+                            +     '(row.entity.rmdate, row.entity.castid)">'
+                            +   '</span></div>'
             },
         ];
         $http.get('/config/cast/listget')

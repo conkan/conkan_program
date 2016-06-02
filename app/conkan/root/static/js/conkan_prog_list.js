@@ -50,13 +50,15 @@
             width: "8%",
             cellClass: 'ui-grid-vcenter',
             enableHiding: false,
-            cellTemplate: '<div ng-bind-html="grid.appScope.__getPgid(row.entity.regpgid, row.entity.subno)"></div>'
+            cellTemplate: '<div ng-bind-html="grid.appScope.__getPgid'
+                        + '(row.entity.regpgid, row.entity.subno)"></div>'
           },
           { name : '企画名称', field: 'pgid',
             headerCellClass: 'gridheader',
             cellClass: 'ui-grid-vcenter',
             enableHiding: false,
-            cellTemplate: '<div ng-bind-html="grid.appScope.__getPgname(row.entity.pgid, row.entity.name)"></div>'
+            cellTemplate: '<div ng-bind-html="grid.appScope.__getPgname'
+                        + '(row.entity.pgid, row.entity.name)"></div>'
           },
           { name : '短縮名', field: 'sname',
             headerCellClass: 'gridheader',

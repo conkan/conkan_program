@@ -66,11 +66,11 @@
               enableHiding: false,
               cellTemplate: '<div class="gridcelbtn">'
                           + '<button ng-if="row.entity.rmdate"'
-                          + 'type="button" class="btn btn-xs">無効</button>'
+                          +   'type="button" class="btn btn-xs">無効</button>'
                           + '<button ng-if="!row.entity.rmdate"'
-                          + 'type="button" class="btn btn-xs btn-primary" '
-                          + 'ng-click="grid.appScope.openAllEquipForm'
-                          + '(row.entity.equipid)">編集</button>'
+                          +   'type="button" class="btn btn-xs btn-primary" '
+                          +   'ng-click="grid.appScope.openAllEquipForm'
+                          +   '(row.entity.equipid)">編集</button>'
           },
         ];
 

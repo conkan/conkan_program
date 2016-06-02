@@ -125,7 +125,10 @@
             },
             enableSorting: false,
             enableHiding: false,
-            cellTemplate: '<div class="gridcelbtn"><span ng-bind-html="grid.appScope.__getEditbtn(row.entity.rmdate, row.entity.roomid)"></span></div>'
+            cellTemplate: '<div class="gridcelbtn">'
+                        +   '<span ng-bind-html="grid.appScope.__getEditbtn'
+                        +     '(row.entity.rmdate, row.entity.roomid)"></span>'
+                        + '</div>'
           },
         ];
         $http.get('/config/room/listget')
