@@ -336,6 +336,16 @@
           );
           modalinstance.result.then( function() {} );
         });
+        // 監視設定
+        $scope.$watch('cast.castid', function( n, o, scope ) {
+          if ( angular.isDefined(n) && angular.isDefined(o) ) {
+            scope.cast.status = undefined;
+            scope.cast.memo   = '';
+            scope.cast.name   = '';
+            scope.cast.namef  = '';
+            scope.cast.title  = '';
+          }
+        });
         // 登録実施
         $scope.castdoApply = function() {
           var pgid   = $scope.cast.pgid;
