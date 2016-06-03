@@ -490,6 +490,7 @@ END -%]
   <script type="text/ng-template" id="T_pgup_program">
     <div class="modal-header">
       <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
+      <h4 class="modal-title">企画詳細</h4>
     </div>
     <div class="modal-body">
       <FORM method="POST" name="progform" class="form-horizontal" role="form" id="progform" novalidate>
@@ -615,6 +616,7 @@ END -%]
   <script type="text/ng-template" id="T_pgup_regcast">
     <div class="modal-header">
       <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
+      <h4 class="modal-title">要望出演者追加</h4>
     </div>
     <div class="modal-body">
       <FORM method="POST" name="regcastform" class="form-horizontal" role="form" id="regcastform" novalidate>
@@ -688,10 +690,11 @@ END -%]
       </button>
     </div>
   </script>
-  <!-- 決定出演者追加ダイアログ -->
+  <!-- 決定出演者編集ダイアログ -->
   <script type="text/ng-template" id="T_pgup_cast">
     <div class="modal-header">
       <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
+      <h4 class="modal-title">決定出演者</h4>
     </div>
     <div class="modal-body">
       <FORM method="POST" name="castform" class="form-horizontal" role="form" id="castform" novalidate>
@@ -777,6 +780,7 @@ END -%]
   <script type="text/ng-template" id="T_pgup_equip">
     <div class="modal-header">
       <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
+      <h4 class="modal-title">決定機材</h4>
     </div>
     <div class="modal-body">
       <FORM method="POST" name="equipform" class="form-horizontal" role="form" id="equipform" novalidate>

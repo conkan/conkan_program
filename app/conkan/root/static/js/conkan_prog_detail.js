@@ -140,7 +140,7 @@
           modalinstance.result.then( function() {} );
         });
 
-        // 企画更新フォーム
+        // 企画更新フォームダイアログ
         $scope.openPgEditForm = function( pgid ) {
           $scope.pgid = pgid;
           $uibModal.open({
@@ -152,7 +152,7 @@
           });
         };
 
-        // 要望出演者追加フォーム
+        // 要望出演者追加フォームダイアログ
         $scope.openRegCastForm = function( regpgid, subno, pgid, name ) {
           $scope.prog = {
             regpgid : regpgid,
@@ -169,7 +169,7 @@
           });
         };
 
-        // 決定出演者追加フォーム
+        // 決定出演者追加フォームダイアログ
         $scope.openCastEditForm = function( regpgid, subno, pgid, name, castid ) {
           $scope.prog = {
             regpgid     : regpgid,
@@ -187,7 +187,8 @@
             size        : 'lg',
           });
         };
-        // 決定機材更新追加フォーム
+
+        // 決定機材更新追加フォームダイアログ
         $scope.openEquipForm = function( regpgid, subno, pgid, name, equipid ) {
           // フォーム表示に必要な情報設定
           $scope.prog = {
@@ -211,7 +212,7 @@
     ]
   );
 
-  // 企画更新フォームコントローラ
+  // 企画更新フォームダイアログコントローラ
   ConkanAppModule.controller( 'progFormController',
     [ '$scope', '$http', '$log', '$uibModal', '$uibModalInstance',
       function( $scope, $http, $log, $uibModal, $uibModalInstance ) {
@@ -235,6 +236,7 @@
         .success(function(data) {
           $scope.prog = {};
           ProgDataCnv( data, $scope.prog );
+          angular.element('.modal-dialog').draggable({handle: '.modal-header'});
         })
         .error(function(data) {
           var modalinstance = $uibModal.open(
@@ -271,7 +273,7 @@
     ]
   );
 
-  // 要望出演者追加フォームコントローラ
+  // 要望出演者追加フォームダイアログコントローラ
   ConkanAppModule.controller( 'regcastFormController',
     [ '$scope', '$http', '$uibModal', '$uibModalInstance',
       function( $scope, $http, $uibModal, $uibModalInstance ) {
@@ -287,6 +289,7 @@
         $http.get('/config/confget')
         .success(function(data) {
           $scope.conf = ConfDataCnv( data, $scope.conf );
+          angular.element('.modal-dialog').draggable({handle: '.modal-header'});
         })
         .error(function(data) {
           var modalinstance = $uibModal.open(
@@ -304,7 +307,8 @@
       }
     ]
   );
-  // 決定出演者追加編集削除フォームコントローラ
+
+  // 決定出演者編集フォームダイアログコントローラ
   ConkanAppModule.controller( 'castFormController',
     [ '$scope', '$http', '$uibModal', '$uibModalInstance',
       function( $scope, $http, $uibModal, $uibModalInstance ) {
@@ -329,6 +333,7 @@
           };
           $scope.castlist = data.json.castlist;
           $scope.statlist = data.json.statlist;
+          angular.element('.modal-dialog').draggable({handle: '.modal-header'});
         })
         .error(function(data) {
           var modalinstance = $uibModal.open(
@@ -391,7 +396,7 @@
   a2h( IfOptions.aif.concat([undefined]), IfOptions.aifH );
   a2h( IfOptions.eif.concat([undefined]), IfOptions.eifH );
 
-  // 決定機材更新追加フォームコントローラ
+  // 決定機材更新追加フォームダイアログコントローラ
   ConkanAppModule.controller( 'equipFormController',
     [ '$scope', '$http', '$uibModal', '$uibModalInstance',
       function( $scope, $http, $uibModal, $uibModalInstance ) {
@@ -440,6 +445,7 @@
           $scope.pcviflist = IfOptions.pcvif;
           $scope.aiflist   = IfOptions.aif;
           $scope.eiflist   = IfOptions.eif;
+          angular.element('.modal-dialog').draggable({handle: '.modal-header'});
         })
         .error(function(data) {
           var modalinstance = $uibModal.open(

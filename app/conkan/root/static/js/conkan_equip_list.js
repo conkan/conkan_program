@@ -109,6 +109,7 @@
             comment : data.json.comment,
             rmdate  : data.json.rmdate,
           };
+          angular.element('.modal-dialog').draggable({handle: '.modal-header'});
         })
         .error(function(data) {
           var modalinstance = $uibModal.open(
