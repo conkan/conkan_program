@@ -208,40 +208,42 @@ var doJsonPost = function( $http, url, data, $uibModalInstance, $uibModal ) {
     data: data
   })
   .success(function(data) {
+    openDialog( data.status );
+  })
+  .error(function(data) {
+    openDialog( '' );
+  });
+
+  var openDialog = function ( stat ) {
     var modalinstance;
     $uibModalInstance.close('done');
     modalinstance = $uibModal.open(
       {
-        templateUrl : getTemplate( data.status ),
-        backdrop    : 'static'
+        templateUrl : getTemplate( stat ),
+        backdrop    : true
       }
     );
+    modalinstance.rendered.then( function() {
+      angular.element('.modal-dialog').draggable({handle: '.modal-header'});
+    });
     modalinstance.result.then( function() {
       location.reload();
     });
-  })
-  .error(function(data) {
-    $uibModalInstance.close('done');
-    var modalinstance = $uibModal.open(
-      {
-        templateUrl : getTemplate( '' ),
-        backdrop    : 'static'
-      }
-    );
-    modalinstance.result.then( function() {
-      location.reload();
-    });
-  });
+  };
 };
 
 // JSON POST後のstatusからtemplate名を得る
 var getTemplate = function( stat ) {
   var templateTbl = {
-    'update' : 'T_result_update',
-    'fail'   : 'T_result_fail',
-    'dbfail' : 'T_result_dberr',
-    'inuse'  : 'T_result_inuse',
-    ''       : 'T_httpget_fail',
+    'update'    : 'T_result_update',
+    'fail'      : 'T_result_fail',
+    'add'       : 'T_result_add',
+    'del'       : 'T_result_del',
+    'delfail'   : 'T_result_delfail',
+    'ipdupfail' : 'T_result_ipdup',
+    'dbfail'    : 'T_result_dberr',
+    'inuse'     : 'T_result_inuse',
+    ''          : 'T_httpget_fail',
   };
   var retval = templateTbl[stat] || 'T_httpget_fail'; // デフォルト値
   return retval;

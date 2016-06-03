@@ -169,7 +169,7 @@ sub regcastadd :Local {
         __PACKAGE__->_addCast( $c, $hval, $hval->{'pgid'} );
         $c->forward('/program/_autoProgress',
             [ $hval->{'regpgid'}, 'regcast', $items, undef, $hval ] );
-        $c->stash->{'status'} = 'update';
+        $c->stash->{'status'} = 'add';
     } catch {
         my $e = shift;
         $c->stash->{'status'} = 'dbfail';
@@ -706,7 +706,7 @@ sub pgup_regprog : Chained('program_show') : PathPart('regprogram') : Args(0) {
                     / ];
     my $regpgid = $c->stash->{'regpgid'};
     $c->stash->{'M'} = $c->model('ConkanDB::PgRegProgram');
-    my $rowprof;
+    my $rowprof = undef;
     try {
         $rowprof = $c->stash->{'M'}->find($regpgid);
     } catch {
@@ -718,26 +718,9 @@ sub pgup_regprog : Chained('program_show') : PathPart('regprogram') : Args(0) {
 =head2 program/*/program
 ---------------------------------------------
 企画管理 pgup_program  : 企画更新(管理分)
+企画更新(管理分) は、 timetable/* を使用する
 
 =cut
-sub pgup_program : Chained('program_show') : PathPart('program') : Args(0) {
-    my ( $self, $c ) = @_;
-    my $up_items = [ qw/
-                    staffid status sname memo
-                    date1 stime1 etime1 date2 stime2 etime2
-                    roomid layerno progressprp
-                    / ];
-    my $pgid = $c->stash->{'pgid'};
-    $c->stash->{'M'} = $c->model('ConkanDB::PgProgram');
-    my $rowprof;
-    try {
-        $rowprof = $c->stash->{'M'}->find( $pgid,
-                     { 'prefetch' => [ 'regpgid', 'staffid', 'roomid' ], } );
-    } catch {
-        $c->detach( '_dberror', [ shift ] );
-    };
-    $c->detach( '_pgupdate', [ 'program', $rowprof, $up_items ] );
-}
 
 =head2 program/*/cast/*
 ---------------------------------------------
@@ -748,7 +731,6 @@ sub pgup_casttop : Chained('program_show') : PathPart('cast') : CaptureArgs(1) {
     my ( $self, $c, $id ) = @_;
     $c->stash->{'id'} = $id;
     $c->stash->{'M'} = $c->model('ConkanDB::PgCast');
-    $c->stash->{'target'} = 'cast';
 }
 
 =head2 program/*/cast/*/
@@ -758,13 +740,13 @@ sub pgup_casttop : Chained('program_show') : PathPart('cast') : CaptureArgs(1) {
 =cut
 sub pgup_cast : Chained('pgup_casttop') : PathPart('') : Args(0) {
     my ( $self, $c ) = @_;
-
-    my $id = $c->stash->{'id'};
     my $up_items = [ qw/
                     castid status memo name namef title
                     / ];
-    my $rowprof = undef;
+    my $pgid = $c->stash->{'pgid'};
+    my $id = $c->stash->{'id'};
     try {
+        my $rowprof = undef;
         if ( $id == 0 ) {   # 追加
             push @$up_items, qw/pgid/;
         }
@@ -774,7 +756,7 @@ sub pgup_cast : Chained('pgup_casttop') : PathPart('') : Args(0) {
         }
         if ( $c->request->method eq 'GET' ) {
             $c->stash->{'json'} = {};
-            $c->stash->{'json'}->{'pgid'} = $c->stash->{'pgid'};
+            $c->stash->{'json'}->{'pgid'} = $pgid;
             if ( $rowprof ) {
                 $c->stash->{'json'}->{'castid'} = $rowprof->castid->castid();
                 $c->stash->{'json'}->{'status'} = $rowprof->status();
@@ -800,10 +782,14 @@ sub pgup_cast : Chained('pgup_casttop') : PathPart('') : Args(0) {
             $c->component('View::JSON')->{expose_stash} = [ 'status' ];
         }
         $c->forward( '_pgupdate', [ 'equip', $rowprof, $up_items ] );
-        $c->forward('conkan::View::JSON');
     } catch {
-        $c->detach( '_dberror', [ shift ] );
+        my $e = shift;
+        $c->log->error('program/' . $pgid . ' /cast/ ' . $id . '/ error '
+            . localtime() . ' dbexp : ' . Dumper($e) );
+        $c->stash->{'status'} = 'dbfail';
+        $c->component('View::JSON')->{expose_stash} = [ 'status' ];
     };
+    $c->forward('conkan::View::JSON');
 }
 
 =head2 program/*/cast/*/del
@@ -813,16 +799,16 @@ sub pgup_cast : Chained('pgup_casttop') : PathPart('') : Args(0) {
 =cut
 sub pgup_castdel : Chained('pgup_casttop') : PathPart('del') : Args(0) {
     my ( $self, $c ) = @_;
-
     my $up_items = [ qw/
                     castid name
                     / ];
-    my $pgid = $c->stash->{'pgid'};
-    my $id   = $c->stash->{'id'};
 
     # あり得ないが念のため
-    $c->detach( '/program/' . $pgid . '/cast/' . $id )
-        if ( ( $c->request->method eq 'GET' ) || ( $id == 0 ) );
+    if ( ( $c->request->method eq 'GET' ) || ( $c->stash->{'id'} == 0 ) ) {
+        $c->detach(
+            '/program/' . $c->stash->{'pgid'} . '/cast/' . $c->stash->{'id'}
+        );
+    }
 
     $c->component('View::JSON')->{expose_stash} = [ 'status' ];
     $c->forward( '_pgdelete', [ 'cast', $up_items ] );
@@ -864,8 +850,10 @@ sub program_equiplist : Chained('program_show') : PathPart('equiplist') : Args(0
         $c->component('View::JSON')->{expose_stash} = [ 'json' ];
     } catch {
         my $e = shift;
-        $c->log->error('program/equiplist error ' . localtime() .
+        $c->log->error('program/' . $pgid . '/equiplist error ' . localtime() .
             ' dbexp : ' . Dumper($e) );
+        $c->stash->{'status'} = 'dbfail';
+        $c->component('View::JSON')->{expose_stash} = [ 'status' ];
     };
     $c->forward('conkan::View::JSON');
 }
@@ -879,7 +867,6 @@ sub pgup_equiptop : Chained('program_show') : PathPart('equip') : CaptureArgs(1)
     my ( $self, $c, $id ) = @_;
     $c->stash->{'id'} = $id;
     $c->stash->{'M'} = $c->model('ConkanDB::PgEquip');
-    $c->stash->{'target'} = 'equip';
 }
 
 =head2 program/*/equip/*/
@@ -889,13 +876,13 @@ sub pgup_equiptop : Chained('program_show') : PathPart('equip') : CaptureArgs(1)
 =cut
 sub pgup_equip : Chained('pgup_equiptop') : PathPart('') : Args(0) {
     my ( $self, $c ) = @_;
-
-    my $id = $c->stash->{'id'};
     my $up_items = [ qw/
                     equipid vif aif eif intende
                     / ];
-    my $rowprof = undef;
+    my $pgid = $c->stash->{'pgid'};
+    my $id = $c->stash->{'id'};
     try {
+        my $rowprof = undef;
         if ( $id == 0 ) {   # 追加
             push @$up_items, qw/pgid/;
         }
@@ -905,7 +892,7 @@ sub pgup_equip : Chained('pgup_equiptop') : PathPart('') : Args(0) {
         }
         if ( $c->request->method eq 'GET' ) {
             $c->stash->{'json'} = {};
-            $c->stash->{'json'}->{'pgid'} = $c->stash->{'pgid'};
+            $c->stash->{'json'}->{'pgid'} = $pgid;
             if ( $rowprof ) {
                 $c->stash->{'json'}->{'equipid'} = $rowprof->equipid->equipid();
                 $c->stash->{'json'}->{'vif'} = $rowprof->vif();
@@ -944,10 +931,14 @@ sub pgup_equip : Chained('pgup_equiptop') : PathPart('') : Args(0) {
             $c->component('View::JSON')->{expose_stash} = [ 'status' ];
         }
         $c->forward( '_pgupdate', [ 'equip', $rowprof, $up_items ] );
-        $c->forward('conkan::View::JSON');
     } catch {
-        $c->detach( '_dberror', [ shift ] );
+        my $e = shift;
+        $c->log->error('program/' . $pgid . ' /equip/ ' . $id . '/ error '
+            . localtime() . ' dbexp : ' . Dumper($e) );
+        $c->stash->{'status'} = 'dbfail';
+        $c->component('View::JSON')->{expose_stash} = [ 'status' ];
     };
+    $c->forward('conkan::View::JSON');
 }
 
 =head2 program/*/equip/*/del
@@ -966,8 +957,11 @@ sub pgup_equipdel : Chained('pgup_equiptop') : PathPart('del') : Args(0) {
     my $id   = $c->stash->{'id'};
 
     # あり得ないが念のため
-    $c->detach( '/program/' . $pgid . '/equip/' . $id )
-        if ( ( $c->request->method eq 'GET' ) || ( $id == 0 ) );
+    if ( ( $c->request->method eq 'GET' ) || ( $c->stash->{'id'} == 0 ) ) {
+        $c->detach(
+            '/program/' . $c->stash->{'pgid'} . '/equip/' . $c->stash->{'id'}
+        );
+    }
 
     $c->component('View::JSON')->{expose_stash} = [ 'status' ];
     $c->forward( '_pgdelete', [ 'equip', $up_items ] );
@@ -1010,8 +1004,12 @@ sub program_progressget : Chained('program_show') : PathPart('progress') : Args(
         $c->component('View::JSON')->{expose_stash} = [ 'json', 'totalItems' ];
     } catch {
         my $e = shift;
-        $c->log->error('program/progressget error ' . localtime() .
-            ' dbexp : ' . Dumper($e) );
+        $c->log->error(
+            'program/' . $regpgid . '/progressget/' . $pageno . '/' . $pagesize
+            . ' error ' . localtime() . ' dbexp : ' . Dumper($e)
+        );
+        $c->stash->{'status'} = 'dbfail';
+        $c->component('View::JSON')->{expose_stash} = [ 'status' ];
     };
     $c->forward('conkan::View::JSON');
 }
@@ -1062,20 +1060,22 @@ $c->log->debug('>>>> regpgid: ' . $regpgid . ' -> ' . $newregpgid);
                                     '<FORM><H1>更新できませんでした</H1><BR/>' .
                                     '<H2>企画番号が重複しています</H2><BR/>' .
                                     '再度やり直してください</FORM>');
-                                $c->stash->{'status'} = 'fail';
+                                $c->stash->{'status'} = 'iddupfail';
                                 return;
                             }
                         }
                         $c->forward('/program/_autoProgress',
-                                [ $regpgid, $target, $up_items, $rowprof, $value ] );
+                            [ $regpgid, $target, $up_items,
+                              $rowprof, $value ] );
                         $rowprof->update( $value ); 
                         $c->response->body(
                             '<FORM><H1>更新しました</H1></FORM>');
                         $c->stash->{'status'} = 'update';
                 }
                 else {
-$c->log->info('updateflg: db: ' . $rowprof->updateflg);
-$c->log->info('updateflg: cu: ' . +( $c->sessionid . $c->session->{'updtic'}) );
+                    $c->log->info('updateflg: db: ' . $rowprof->updateflg);
+                    $c->log->info('updateflg: cu: '
+                        . +( $c->sessionid . $c->session->{'updtic'}) );
                     $c->stash->{'rs'} = undef;
                     $c->response->body(
                         '<FORM><H1>更新できませんでした</H1><BR/>' .
@@ -1088,17 +1088,20 @@ $c->log->info('updateflg: cu: ' . +( $c->sessionid . $c->session->{'updtic'}) );
             else {
                 # 追加
                 $c->forward('/program/_autoProgress',
-                                [ $regpgid, $target, $up_items, undef, $value ] );
+                            [ $regpgid, $target, $up_items, undef, $value ] );
                 $c->stash->{'M'}->create( $value ); 
                 $c->response->body('<FORM><H1>追加しました</H1></FORM>');
-                $c->stash->{'status'} = 'update';
+                $c->stash->{'status'} = 'add';
             }
             $c->stash->{'rs'} = undef;
             $c->response->status(200);
         }
     } catch {
+        my $e = shift;
+        $c->log->error( '_pgupdate error ' . localtime()
+            . ' dbexp : ' . Dumper($e) );
         $c->stash->{'status'} = 'dbfail';
-        $c->detach( '_dberror', [ shift ] );
+        $c->detach( '_dberror', [ shift ] ) if ( $target eq 'regprogram' );
     };
 }
 
@@ -1114,29 +1117,29 @@ sub _pgdelete :Private {
          $up_items,     # 対象列名配列
     ) = @_;
 
+    my $pgid = $c->stash->{'pgid'};
+    my $id   = $c->stash->{'id'};
     try {
-        my $rowprof = $c->stash->{'M'}->find( $c->stash->{'id'} );
+        my $rowprof = $c->stash->{'M'}->find( $id );
         my $regpgid = $c->stash->{'regpgid'};
 
         if ( $rowprof->updateflg eq 
                 +( $c->sessionid . $c->session->{'updtic'}) ) {
             # 削除実施
             $c->forward('/program/_autoProgress',
-                                [ $regpgid, $target, $up_items, $rowprof, undef ] );
+                [ $regpgid, $target, $up_items, $rowprof, undef ] );
             $rowprof->delete(); 
-            $c->response->body('<FORM><H1>削除しました</H1></FORM>');
-            $c->stash->{'status'} = 'update';
+            $c->stash->{'status'} = 'del';
         }
         else {
             $c->stash->{'rs'} = undef;
-            $c->response->body(
-                '<FORM><H1>削除できませんでした</H1><BR/>' .
-                '他スタッフが変更した可能性があります</FORM>');
-            $c->stash->{'status'} = 'fail';
+            $c->stash->{'status'} = 'delfail';
         }
     } catch {
+        my $e = shift;
+        $c->log->error( '_pgdelete error ' . localtime()
+            . ' dbexp : ' . Dumper($e) );
         $c->stash->{'status'} = 'dbfail';
-        $c->detach( '_dberror', [ shift ] );
     };
 }
 
@@ -1332,7 +1335,7 @@ sub _autoProgress :Private {
                 }
             }
             else { # 削除
-                $progstr .= 'Delete ' . $c->stash->{'target'} . ' ';
+                $progstr .= 'Delete ';
                 for my $key (@{$itemkeys}) {
                     $progstr .= $key . ':' . $row->get_column($key) . ' ';
                 }

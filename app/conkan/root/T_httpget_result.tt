@@ -18,8 +18,60 @@
   </div>
   <div class="modal-body">
     <H3><strong>更新できませんでした</strong></H3>
-    他スタッフが変更した可能性があります<br/>
-    最新情報を確認の上、必要なら再度更新してください。
+    更新対象を、他スタッフが変更した可能性があります<br/>
+    対象の内容を確認してください。
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-danger" ng-click="$close()">閉じる</button>
+  </div>
+</script>
+<!--  追加成功 -->
+<script type="text/ng-template" id="T_result_add">
+  <div class="modal-header">
+    <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
+  </div>
+  <div class="modal-body">
+    <H3><strong>追加しました</strong></H3>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-danger" ng-click="$close()">閉じる</button>
+  </div>
+</script>
+<!--  削除成功 -->
+<script type="text/ng-template" id="T_result_del">
+  <div class="modal-header">
+    <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
+  </div>
+  <div class="modal-body">
+    <H3><strong>削除しました</strong></H3>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-danger" ng-click="$close()">閉じる</button>
+  </div>
+</script>
+<!--  削除失敗 -->
+<script type="text/ng-template" id="T_result_fail">
+  <div class="modal-header">
+    <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
+  </div>
+  <div class="modal-body">
+    <H3><strong>削除できませんでした</strong></H3>
+    削除対象を他スタッフが更新した可能性があります。<br/>
+    対象の内容を確認してください。
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-danger" ng-click="$close()">閉じる</button>
+  </div>
+</script>
+<!--  更新失敗(企画番号重複) -->
+<script type="text/ng-template" id="T_result_ipdup">
+  <div class="modal-header">
+    <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
+  </div>
+  <div class="modal-body">
+    <H1><strong>更新できませんでした</strong></H1><BR/>
+    <H2>企画番号が重複しています。</H2><BR/>
+    別の番号で再度やり直してください。
   </div>
   <div class="modal-footer">
     <button class="btn btn-danger" ng-click="$close()">閉じる</button>
