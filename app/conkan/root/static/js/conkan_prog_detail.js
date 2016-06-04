@@ -29,32 +29,6 @@
   var ConkanAppModule = angular.module('conkanProgDetail',
     ['ui.grid', 'ui.grid.resizeColumns', 'ui.grid.pagination', 'ui.bootstrap'] );
 
-  // 共通のHTTPエラー時ダイアログ表示
-  var httpfailDlg = function() {
-    var modalinstance = $uibModal.open(
-        { templateUrl : getTemplate( '' ), }
-    );
-    modalinstance.rendered.then( function() {
-      angular.element('.modal-dialog').draggable({handle: '.modal-header'});
-    });
-    modalinstance.result.then( function() {} );
-  };
-
-  // 共通のダイアログサイズ調整とドラッガブル化
-  var dialogResizeDrag = function() {
-    angular.element('.modal-dialog').draggable({handle: '.modal-header'});
-    if ( angular.element('.modal-dialog').outerHeight()
-            < angular.element(window).height() ) {
-      return;
-    }
-    var content = angular.element('.modal-body');
-    var vh = content.offset().top + 1 +
-                angular.element('.modal-footer').outerHeight() +
-                parseInt( angular.element('.modal-dialog').css('marginTop')) +
-                parseInt( angular.element('.modal-dialog').css('marginBottom'));
-    content.css( 'height', angular.element(window).height() - vh );
-  };
-
   // 企画詳細コントローラ
   ConkanAppModule.controller( 'progDetailController',
     [ '$scope', '$http', '$uibModal',

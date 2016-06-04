@@ -247,12 +247,7 @@
         .success(function(data) {
           $scope.conf = ConfDataCnv( data, $scope.conf );
         })
-        .error(function(data) {
-          var modalinstance = $uibModal.open(
-            { templateUrl : 'T_httpget_fail' }
-          );
-          modalinstance.result.then( function() {} );
-        });
+        .error( httpfailDlg );
 
         $scope.current      = currentprgService.currentval;
 
@@ -274,14 +269,17 @@
             data: $.param($scope.current)
           })
           .success(function(data) {
-            var modalinstance, templateval;
-            modalinstance = $uibModal.open(
+            var resultDlg = $uibModal.open(
               {
                 templateUrl : getTemplate( data.status ),
-                backdrop    : 'static'
+                backdrop    : true,
               }
             );
-            modalinstance.result.then( function() {
+            resultDlg.rendered.then( function() {
+              angular.element('.modal-dialog')
+                .draggable({handle: '.modal-header'});
+            });
+            resultDlg.result.then( function() {
               if (data.status == 'update') {
                 location.reload();
               }
@@ -292,13 +290,17 @@
             });
           })
           .error(function(data) {
-            var modalinstance = $uibModal.open(
+            var resultDlg = $uibModal.open(
               {
                 templateUrl : getTemplate( '' ),
-                backdrop    : 'static'
+                backdrop    : true,
               }
             );
-            modalinstance.result.then( function() {
+            resultDlg.rendered.then( function() {
+              angular.element('.modal-dialog')
+                .draggable({handle: '.modal-header'});
+            });
+            resultDlg.result.then( function() {
               angular.element('#applybtn').removeAttr('disabled');
               currentprgService.query( pgid );
             });

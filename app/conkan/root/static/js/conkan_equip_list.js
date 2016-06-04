@@ -21,12 +21,7 @@
         .success(function(data) {
           $scope.equipgrid.data = data.json;
         })
-        .error(function(data) {
-          var modalinstance = $uibModal.open(
-            { templateUrl : 'T_httpget_fail' }
-          );
-          modalinstance.result.then( function() {} );
-        });
+        .error( httpfailDlg );
 
         $scope.equipgrid = {
           enableFiltering: false,
@@ -79,7 +74,7 @@
           $scope.equipid = equipid;
           $scope.applyBtnLbl = ( equipid === 0 ) ? '追加' : '更新';
           $uibModal.open({
-            templateUrl : 'T_all_equip',
+            templateUrl : 'T_equip_detail',
             controller  : 'allequipFormController',
             backdrop    : 'static',
             scope       : $scope,
@@ -109,14 +104,9 @@
             comment : data.json.comment,
             rmdate  : data.json.rmdate,
           };
-          angular.element('.modal-dialog').draggable({handle: '.modal-header'});
+          dialogResizeDrag();
         })
-        .error(function(data) {
-          var modalinstance = $uibModal.open(
-              { templateUrl : getTemplate( '' ), }
-          );
-          modalinstance.result.then( function() {} );
-        });
+        .error( httpfailDlg );
         // 更新実施
         $scope.equipDoApply = function() {
           // 二重クリック回避

@@ -198,6 +198,32 @@ var ProgTimeValid = function( prog, scale_hash ) {
   return retval;
 };
 
+// 共通のHTTPエラー時ダイアログ表示
+var httpfailDlg = function() {
+  var modalinstance = $uibModal.open(
+      { templateUrl : getTemplate( '' ), }
+  );
+  modalinstance.rendered.then( function() {
+    angular.element('.modal-dialog').draggable({handle: '.modal-header'});
+  });
+  modalinstance.result.then( function() {} );
+};
+
+// 共通のダイアログサイズ調整とドラッガブル化
+var dialogResizeDrag = function() {
+  angular.element('.modal-dialog').draggable({handle: '.modal-header'});
+  if ( angular.element('.modal-dialog').outerHeight()
+          < angular.element(window).height() ) {
+    return;
+  }
+  var content = angular.element('.modal-body');
+  var vh = content.offset().top + 1 +
+              angular.element('.modal-footer').outerHeight() +
+              parseInt( angular.element('.modal-dialog').css('marginTop')) +
+              parseInt( angular.element('.modal-dialog').css('marginBottom'));
+  content.css( 'height', angular.element(window).height() - vh );
+};
+
 // JSON POST汎用実施
 var doJsonPost = function( $http, url, data, $uibModalInstance, $uibModal ) {
   $http( {

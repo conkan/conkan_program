@@ -1,0 +1,67 @@
+<!-- 機材詳細編集ダイアログ -->
+<script type="text/ng-template" id="T_equip_detail">
+  <div class="modal-header">
+    <button type="button" class="close" ng-click="$close()" aria-hidden="true">
+      ×
+    </button>
+    <h4 class="modal-title">機材詳細</h4>
+  </div>
+  <div class="modal-body">
+    <FORM method="POST" name="equipform" class="form-horizontal" role="form" id="equipform">
+      <div style="COLOR:Red;" id="valerr"></div>
+      <div class="form-group">
+        <input type="hidden" name="equipid", id="equipid" ng-model="equip.equipid">
+        <input type="hidden" name="rmdate", id="rmdate" ng-model="equip.rmdate">
+      </div>
+      <table class="table table-bordered table-condensed">
+        <colgroup>
+          <col class="col-sm-1">
+          <col class="col-sm-5">
+          <col class="col-sm-1">
+          <col class="col-sm-5">
+        </colgroup>
+        <tbody>
+          <tr>
+            <th style="text-align:right;">名称</th>
+            <td>
+              <input type="text" name="name" class="col-sm-12" required
+                ng-model="equip.name"/>
+            </td>
+            <th style="text-align:right;">機材番号</th>
+            <td>
+              <input type="text" name="equipno" class="col-sm-12" required
+                ng-model="equip.equipno"/>
+            </td>
+          </tr>
+          <tr>
+            <th style="text-align:right;">仕様</th>
+            <td colspan="3">
+              <textarea name="spec" class="col-sm-12" rows="2"
+               ng-model="equip.spec"></textarea>
+            </td>
+          </tr>
+          <tr>
+            <th style="text-align:right;">補足</th>
+            <td colspan="3">
+              <textarea name="comment" class="col-sm-12" rows="2"
+               ng-model="equip.comment"></textarea>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </FORM>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-default" ng-click="$close()">閉じる</button>
+    <button ng-if="equip.equipid" class="btn " id="equipdelbtn"
+      ng-disabled="!equipform.$pristine"
+      ng-click="equipDoDel()">
+      削除
+    </button>
+    <button class="btn btn-primary" id="equipapplybtn"
+      ng-disabled="equipform.$invalid || equipform.$pristine"
+      ng-click="equipDoApply()">
+      {{applyBtnLbl}}
+    </button>
+  </div>
+</script>
