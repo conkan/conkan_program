@@ -31,7 +31,7 @@ END -%]
       <BR/>
       <div class="form-group">
         <span class="col-sm-4"></span>
-        <button type="submit" class="col-sm-2 text-center btn btn-primary btn-large" id="dobtn">
+        <button type="submit" class="col-sm-2 text-center btn btn-primary btn-large" id="profapplybtn">
           [%- IF addstaff %]
             登録
           [%- ELSE %]
@@ -85,7 +85,7 @@ END -%]
     }
   } );
   // バリデーション
-  $('#dobtn').click(function(){
+  $('#profapplybtn').click(function(){
     if (!$('#account').val()) {
         $('#valerr').text('アカウントは必須です');
         return false;

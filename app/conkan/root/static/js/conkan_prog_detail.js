@@ -14,86 +14,7 @@
     angular.element(document).scrollTop(tp-pd);
     return false;
   });
-  // モーダルダイアログ表示
-  angular.element('#PgEdit').on('show.bs.modal', function (event) {
-    var pgid   = angular.element(event.relatedTarget).data('whatpgid');
-    var id     = angular.element(event.relatedTarget).data('whatitem');
-    var target = angular.element(event.relatedTarget).data('whattarget');
-    var content = angular.element('#PgEditContent');
-    var arg = '/program/' + pgid + '/' + target;
-    if ( id != "-" ) {
-      arg += '/' + id;
-    }
-    arg += '/ FORM';
-    angular.element(content).load(arg);
-    if ( !id ) {
-      angular.element('#dobtn').text('追加');
-    }
-    angular.element('#dobtn').show();
-    if ( target != "regprogram" && id ) {
-      angular.element('#dodel').show();
-    } else {
-      angular.element('#dodel').hide();
-    }
-  } );
-  // モーダルダイアログ表示後サイズ調整
-  angular.element('#PgEdit').on('shown.bs.modal', function (event) {
-    if ( angular.element('#PgEditDialog').outerHeight()
-           < angular.element(window).height() ) {
-      return;
-    }
-    var content = angular.element('#PgEditContent');
-    var vh = content.offset().top + 1 +
-             angular.element('#PgEditFooter').outerHeight() + 
-             parseInt( angular.element('#PgEditDialog').css('marginTop')) +
-             parseInt( angular.element('#PgEditDialog').css('marginBottom'));
-    content.css( 'height', angular.element(window).height() - vh );
-  } );
-  // モーダルダイアログ非表示
-  angular.element('#PgEdit').on('hide.bs.modal', function (event) {
-    storage.setItem( 'sctop', angular.element(document).scrollTop() );
-    location.reload(true);
-  } );
-  // 更新/追加
-  angular.element('#dobtn').click(function(event) {
-    // バリデーション
-    var vha = angular.element('#progform #vha').data('vha');
-    for ( var i in vha ) {
-      if (!angular.element('#'+ vha[i].id).val()) {
-        angular.element('#valerr').text(vha[i].name + 'は必須です');
-        angular.element('#' + vha[i].id).css('background-color', '#ff8e8e');
-        return false;
-      }
-      else {
-        angular.element('#' + vha[i].id).css('background-color', '');
-      }
-    }
-    var content = angular.element('#PgEditContent');
-    var data = angular.element('#progform').serializeArray();
-    var pgid   = angular.element('#progform #pgid').val();
-    var id     = angular.element('#progform #id').val() || 0;
-    var target = angular.element('#progform #target').val();
-    angular.element('#dobtn').hide();
-    angular.element('#dodel').hide();
-    var arg = '/program/' + pgid + '/' + target;
-    if ( id != "-" ) {
-      arg += '/' + id;
-    }
-    arg += '/ FORM';
-    angular.element(content).load(arg, data );
-  } );
-  // 削除
-  angular.element('#dodel').click(function(event) {
-    var content = angular.element('#PgEditContent');
-    var pgid    = angular.element('#progform #pgid').val();
-    var id      = angular.element('#progform #id').val() || 0;
-    var target  = angular.element('#progform #target').val();
-    var data = angular.element('#progform').serializeArray();
-    angular.element('#dobtn').hide();
-    angular.element('#dodel').hide();
-    var arg = '/program/' + pgid + '/' + target + '/' + id + '/del/ FORM';
-    angular.element(content).load(arg, data );
-  } );
+
   // 進捗登録
   angular.element('#addProgress button').click(function(event) {
     storage.setItem( 'sctop', angular.element(document).scrollTop() );
@@ -107,6 +28,32 @@
   // conkanProgDetailモジュールの生成
   var ConkanAppModule = angular.module('conkanProgDetail',
     ['ui.grid', 'ui.grid.resizeColumns', 'ui.grid.pagination', 'ui.bootstrap'] );
+
+  // 共通のHTTPエラー時ダイアログ表示
+  var httpfailDlg = function() {
+    var modalinstance = $uibModal.open(
+        { templateUrl : getTemplate( '' ), }
+    );
+    modalinstance.rendered.then( function() {
+      angular.element('.modal-dialog').draggable({handle: '.modal-header'});
+    });
+    modalinstance.result.then( function() {} );
+  };
+
+  // 共通のダイアログサイズ調整とドラッガブル化
+  var dialogResizeDrag = function() {
+    angular.element('.modal-dialog').draggable({handle: '.modal-header'});
+    if ( angular.element('.modal-dialog').outerHeight()
+            < angular.element(window).height() ) {
+      return;
+    }
+    var content = angular.element('.modal-body');
+    var vh = content.offset().top + 1 +
+                angular.element('.modal-footer').outerHeight() +
+                parseInt( angular.element('.modal-dialog').css('marginTop')) +
+                parseInt( angular.element('.modal-dialog').css('marginBottom'));
+    content.css( 'height', angular.element(window).height() - vh );
+  };
 
   // 企画詳細コントローラ
   ConkanAppModule.controller( 'progDetailController',
@@ -133,20 +80,27 @@
             }
           }
         })
-        .error(function(data) {
-          var modalinstance = $uibModal.open(
-              { templateUrl : getTemplate( '' ), }
-          );
-          modalinstance.result.then( function() {} );
-        });
+        .error( httpfailDlg );
+
+        // 企画要望更新フォームダイアログ
+        $scope.openRegPgEditForm = function( pgid ) {
+          $scope.pgid = pgid;
+          $uibModal.open({
+            templateUrl : 'T_pgup_regprog',
+            controller  : 'regProgFormController',
+            backdrop    : 'static',
+            scope       : $scope,
+            size        : 'lg',
+          });
+        };
 
         // 企画更新フォームダイアログ
         $scope.openPgEditForm = function( pgid ) {
           $scope.pgid = pgid;
           $uibModal.open({
-            templateUrl : "T_pgup_program",
+            templateUrl : 'T_pgup_program',
             controller  : 'progFormController',
-            backdrop    : "static",
+            backdrop    : 'static',
             scope       : $scope,
             size        : 'lg',
           });
@@ -161,9 +115,9 @@
             name    : name,
           };
           $uibModal.open({
-            templateUrl : "T_pgup_regcast",
+            templateUrl : 'T_pgup_regcast',
             controller  : 'regcastFormController',
-            backdrop    : "static",
+            backdrop    : 'static',
             scope       : $scope,
             size        : 'lg',
           });
@@ -180,9 +134,9 @@
           $scope.editCastId = castid;
           $scope.editCastBtnLbl = ( castid === 0 ) ? '追加' : '更新';
           $uibModal.open({
-            templateUrl : "T_pgup_cast",
+            templateUrl : 'T_pgup_cast',
             controller  : 'castFormController',
-            backdrop    : "static",
+            backdrop    : 'static',
             scope       : $scope,
             size        : 'lg',
           });
@@ -200,9 +154,9 @@
           $scope.editEquipId = equipid;
           $scope.editEquipBtnLbl = ( equipid === 0 ) ? '追加' : '更新';
           $uibModal.open({
-            templateUrl : "T_pgup_equip",
+            templateUrl : 'T_pgup_equip',
             controller  : 'equipFormController',
-            backdrop    : "static",
+            backdrop    : 'static',
             scope       : $scope,
             size        : 'lg',
           });
@@ -212,21 +166,71 @@
     ]
   );
 
+  // 企画要望更新フォームダイアログコントローラ
+  ConkanAppModule.controller( 'regProgFormController',
+    [ '$scope', '$http', '$uibModal', '$uibModalInstance',
+      function( $scope, $http, $uibModal, $uibModalInstance ) {
+        // 初期値設定
+        angular.element('#valerr').text('');
+        $http({
+          method  : 'GET',
+          url     : '/program/' + $scope.pgid + '/regprogram'
+        })
+        .success(function(data) {
+          $scope.prog = {
+            pgid        : data.json.pgid,
+            regpgid     : parseInt(data.json.regpgid),
+            subno       : data.json.subno,
+            name        : data.json.name,
+            namef       : data.json.namef,
+            regma       : data.json.regma,
+            regname     : data.json.regname,
+            regdate     : data.json.regdate,
+            experience  : data.json.experience,
+            regno       : data.json.regno,
+            telno       : data.json.telno,
+            faxno       : data.json.faxno,
+            celno       : data.json.celno,
+            type        : data.json.type,
+            place       : data.json.place,
+            layout      : data.json.layout,
+            date        : data.json.date,
+            classlen    : data.json.classlen,
+            expmaxcnt   : data.json.expmaxcnt,
+            content     : data.json.content,
+            contentpub  : data.json.contentpub,
+            realpub     : data.json.realpub,
+            afterpub    : data.json.afterpub,
+            openpg      : data.json.openpg,
+            restpg      : data.json.restpg,
+            avoiddup    : data.json.avoiddup,
+            comment     : data.json.comment
+          };
+          dialogResizeDrag();
+        })
+        .error( httpfailDlg );
+        // 更新実施
+        $scope.regprgDoApply = function() {
+          var pgid = $scope.prog.pgid;
+          // 二重クリック回避
+          angular.element('#regprgapplybtn').attr('disabled', 'disabled');
+          doJsonPost( $http, '/program/' + pgid + '/regprogram',
+            $.param($scope.prog), $uibModalInstance, $uibModal);
+        };
+      }
+    ]
+  );
+
   // 企画更新フォームダイアログコントローラ
   ConkanAppModule.controller( 'progFormController',
-    [ '$scope', '$http', '$log', '$uibModal', '$uibModalInstance',
-      function( $scope, $http, $log, $uibModal, $uibModalInstance ) {
+    [ '$scope', '$http', '$uibModal', '$uibModalInstance',
+      function( $scope, $http, $uibModal, $uibModalInstance ) {
         // 選択肢取得
         $http.get('/config/confget')
         .success(function(data) {
           $scope.conf = ConfDataCnv( data, $scope.conf );
         })
-        .error(function(data) {
-          var modalinstance = $uibModal.open(
-              { templateUrl : getTemplate( '' ), }
-          );
-          modalinstance.result.then( function() {} );
-        });
+        .error( httpfailDlg );
         // 初期値設定
         angular.element('#valerr').text('');
         $http({
@@ -236,14 +240,9 @@
         .success(function(data) {
           $scope.prog = {};
           ProgDataCnv( data, $scope.prog );
-          angular.element('.modal-dialog').draggable({handle: '.modal-header'});
+          dialogResizeDrag();
         })
-        .error(function(data) {
-          var modalinstance = $uibModal.open(
-              { templateUrl : getTemplate( '' ), }
-          );
-          modalinstance.result.then( function() {} );
-        });
+        .error( httpfailDlg );
         // 監視設定
         $scope.$watch('prog.date1', function( n, o, scope ) {
           if ( n != o ) {
@@ -289,14 +288,9 @@
         $http.get('/config/confget')
         .success(function(data) {
           $scope.conf = ConfDataCnv( data, $scope.conf );
-          angular.element('.modal-dialog').draggable({handle: '.modal-header'});
+          dialogResizeDrag();
         })
-        .error(function(data) {
-          var modalinstance = $uibModal.open(
-            { templateUrl : getTemplate( '' ), }
-          );
-          modalinstance.result.then( function() {} );
-        });
+        .error( httpfailDlg );
         // 登録実施
         $scope.regcastdoApply = function() {
           // 二重クリック回避
@@ -333,14 +327,9 @@
           };
           $scope.castlist = data.json.castlist;
           $scope.statlist = data.json.statlist;
-          angular.element('.modal-dialog').draggable({handle: '.modal-header'});
+          dialogResizeDrag();
         })
-        .error(function(data) {
-          var modalinstance = $uibModal.open(
-              { templateUrl : getTemplate( '' ), }
-          );
-          modalinstance.result.then( function() {} );
-        });
+        .error( httpfailDlg );
         // 監視設定
         $scope.$watch('cast.castid', function( n, o, scope ) {
           if ( angular.isDefined(n) && angular.isDefined(o) ) {
@@ -358,8 +347,6 @@
           // 二重クリック回避
           angular.element('#castapplybtn').attr('disabled', 'disabled');
           angular.element('#castdelbtn').attr('disabled', 'disabled');
-          // バリデーション
-          //    現在なし
           // 実行
           doJsonPost( $http, '/program/' + pgid + '/cast/' + itemid,
                   $.param($scope.cast), $uibModalInstance, $uibModal);
@@ -445,14 +432,9 @@
           $scope.pcviflist = IfOptions.pcvif;
           $scope.aiflist   = IfOptions.aif;
           $scope.eiflist   = IfOptions.eif;
-          angular.element('.modal-dialog').draggable({handle: '.modal-header'});
+          dialogResizeDrag();
         })
-        .error(function(data) {
-          var modalinstance = $uibModal.open(
-              { templateUrl : getTemplate( '' ), }
-          );
-          modalinstance.result.then( function() {} );
-        });
+        .error( httpfailDlg );
         // 監視設定
         $scope.$watch('equip.equipid', function( n, o, scope ) {
           if ( angular.isDefined(n) ) {
@@ -473,8 +455,6 @@
           // 二重クリック回避
           angular.element('#equipapplybtn').attr('disabled', 'disabled');
           angular.element('#equipdelbtn').attr('disabled', 'disabled');
-          // バリデーション
-          //    現在なし
           // その他 の内容置き換え
           if ( $scope.equip.vif == 'その他' ) {
             $scope.equip.vif = $scope.equip.ovif;
@@ -530,13 +510,13 @@
         $scope.progressgrid.columnDefs = [
           { name : '報告日時', field : 'repdatetime',
             headerCellClass: 'gridheader',
-            width: "17%",
+            width: '17%',
             cellClass: 'ui-grid-vcenter',
             enableHiding: false,
           },
           { name : '報告者', field : 'tname',
             headerCellClass: 'gridheader',
-            width: "17%",
+            width: '17%',
             cellClass: 'ui-grid-vcenter',
             enableHiding: false,
           },
@@ -555,12 +535,7 @@
             $scope.progressgrid.totalItems = data.totalItems;
             $scope.progressgrid.data = data.json;
           })
-          .error(function(data) {
-            var modalinstance = $uibModal.open(
-              { templateUrl : getTemplate( '' ), }
-            );
-            modalinstance.result.then( function() {} );
-          });
+          .error( httpfailDlg );
         };
 
         getPage(1);
@@ -570,8 +545,8 @@
 
   // 企画選択ツールコントローラー
   ConkanAppModule.controller( 'pglistselController',
-    [ '$scope', '$http', '$log',
-      function( $scope, $http, $log ) {
+    [ '$scope', '$http',
+      function( $scope, $http ) {
         var pathelm = location.pathname.split('/');
         var allprg = pathelm[1] == 'mypage' ? false : true;
         var pgid = pathelm[pathelm.length-1];

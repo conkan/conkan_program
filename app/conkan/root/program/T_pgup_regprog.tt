@@ -1,0 +1,206 @@
+<!-- 企画申込情報編集ダイアログ -->
+<script type="text/ng-template" id="T_pgup_regprog">
+  <div class="modal-header">
+    <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
+    <h4 class="modal-title">企画申込情報</h4>
+  </div>
+  <div class="modal-body" style="overflow-y:auto;">
+    <FORM method="POST" name="regprogform" class="form-horizontal" role="form" id="regprogform" novalidate>
+      <div style="COLOR:Red;" id="valerr"></div>
+      <div class="form-group">
+        <input type="hidden" name="pgid" id="pgid"   ng-model="prog.pgid">
+      </div>
+      <table class="table table-bordered table-condensed">
+        <colgroup>
+          <col class="col-sm-2">
+          <col class="col-sm-2">
+          <col class="col-sm-2">
+        </colgroup>
+        <tbody>
+          <tr>
+            <th style="background-color:#FFcc66">
+              企画ID
+            </th>
+            <th>
+              <input type="number" name="regpgid" class="col-sm-12" required
+                ng-model="prog.regpgid"/>
+            </th>
+            <td style="background-color:#FFcc66">
+              <span ng-cloak>({{prog.subno}})</span>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="3">
+              <input type="text" name="name" class="col-sm-6" required
+                ng-model="prog.name"/>
+              <input type="text" name="namef" class="col-sm-6" required
+                ng-model="prog.namef"/>
+            </td>
+          </tr>
+          <tr>
+            <th>内容</th>
+            <td colspan="2"></td>
+          </tr>
+          <tr>
+            <td colspan="3">
+              <textarea name="content" class="col-sm-12" rows="2"
+                ng-model="prog.content"></textarea>
+            </td>
+          </tr>
+          <tr>
+            <th>申込者名</th>
+            <th>申込日付</th>
+            <th>企画立案経験</th>
+          </tr>
+          <tr>
+            <td>
+              <input type="text" name="regname" class="col-sm-12"required
+                ng-model="prog.regname"/>
+            </td>
+            <td>
+              <span ng-cloak>{{prog.regdate}}</span>
+            </td>
+            <td>
+              <input type="text" name="experience" class="col-sm-12" required
+                ng-model="prog.experience"/>
+            </td>
+          </tr>
+            <th>大会登録番号</th>
+            <th colspan="2">メールアドレス</th>
+          </tr>
+          <tr>
+            <td>
+              <input type="text" name="regno" class="col-sm-12"
+                ng-model="prog.regno"/>
+            </td>
+            <td colspan="2">
+              <input type="email" name="regma" class="col-sm-12"
+                ng-model="prog.regma"/>
+            </td>
+          </tr>
+          <tr>
+            <th>電話番号</th>
+            <th>FAX番号</th>
+            <th>携帯番号</th>
+          </tr>
+          <tr>
+            <td>
+              <input type="text" name="telno" class="col-sm-12"
+                ng-pattern="/^[+]{0,1}\d+[-\d\s]*\d+$/"
+                ng-model="prog.telno"/>
+            </td>
+            <td>
+              <input type="text" name="faxno" class="col-sm-12"
+                ng-pattern="/^[+]{0,1}\d+[-\d\s]*\d+$/"
+                ng-model="prog.faxno"/>
+            </td>
+            <td>
+              <input type="text" name="celno" class="col-sm-12"
+                ng-pattern="/^[+]{0,1}\d+[-\d\s]*\d+$/"
+                ng-model="prog.celno"/>
+            </td>
+          </tr>
+          <tr>
+            <th>企画種別</th>
+            <th>予想参加者数</th>
+            <th>希望場所</th>
+          </tr>
+          <tr>
+            <td>
+              <input type="text" name="type" class="col-sm-12"
+                ng-model="prog.type"/>
+            </td>
+            <td>
+              <input type="text" name="expmaxcnt" class="col-sm-12" required
+                ng-model="prog.expmaxcnt"/>
+            </td>
+            <td>
+              <input type="text" name="place" class="col-sm-12"
+                ng-model="prog.place"/>
+            </td>
+          </tr>
+          <tr>
+            <th>希望日時</th>
+            <th>希望レイアウト</th>
+            <th>希望コマ数</th>
+          </tr>
+          <tr>
+            <td>
+              <input type="text" name="date" class="col-sm-12"
+                ng-model="prog.date"/>
+            </td>
+            <td>
+              <input type="text" name="layout" class="col-sm-12"
+                ng-model="prog.layout"/>
+            </td>
+            <td>
+              <input type="text" name="classlen" class="col-sm-12"
+                ng-model="prog.classlen"/>
+            </td>
+          </tr>
+          <tr>
+            <th>内容事前公開</th>
+            <th>リアルタイム公開</th>
+            <th>事後公開</th>
+          </tr>
+          <tr>
+            <td>
+              <input type="text" name="contentpub" class="col-sm-12" required
+                ng-model="prog.contentpub"/>
+            </td>
+            <td>
+              <input type="text" name="realpub" class="col-sm-12" required
+                ng-model="prog.realpub"/>
+            </td>
+            <td>
+              <input type="text" name="afterpub" class="col-sm-12" required
+                ng-model="prog.afterpub"/>
+            </td>
+          </tr>
+          <tr>
+            <th>一般公開可否</th>
+            <th>未成年参加可否</th>
+          </tr>
+          <tr>
+            <td>
+              <input type="text" name="openpg" class="col-sm-12" required
+                ng-model="prog.openpg"/>
+            </td>
+            <td>
+              <input type="text" name="restpg" class="col-sm-12" required
+                ng-model="prog.restpg"/>
+            </td>
+          </tr>
+          <tr>
+            <th>重なると困る企画</th>
+            <td colspan="2">
+          </tr>
+          <tr>
+            <td colspan="3">
+              <input type="text" name="avoiddup" class="col-sm-12"
+                ng-model="prog.avoiddup"/>
+            </td>
+          </tr>
+          <tr>
+            <th>備考</th>
+            <td colspan="2">
+          </tr>
+          <tr>
+            <td colspan="3">
+              <textarea name="comment" class="col-sm-12" rows="2"
+                ng-model="prog.comment"></textarea>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </FORM>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-default" ng-click="$close()">閉じる</button>
+    <button class="btn btn-primary" id="regprogapplybtn"
+      ng-disabled="regprogform.$invalid || regprogform.$pristine"
+      ng-click="regprgDoApply()">
+      更新
+    </button>
+  </div>
+</script>

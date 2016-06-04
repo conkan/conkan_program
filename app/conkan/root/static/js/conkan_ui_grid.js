@@ -215,18 +215,17 @@ var doJsonPost = function( $http, url, data, $uibModalInstance, $uibModal ) {
   });
 
   var openDialog = function ( stat ) {
-    var modalinstance;
     $uibModalInstance.close('done');
-    modalinstance = $uibModal.open(
+    var resultDlg = $uibModal.open(
       {
         templateUrl : getTemplate( stat ),
-        backdrop    : true
+        backdrop    : true,
       }
     );
-    modalinstance.rendered.then( function() {
+    resultDlg.rendered.then( function() {
       angular.element('.modal-dialog').draggable({handle: '.modal-header'});
     });
-    modalinstance.result.then( function() {
+    resultDlg.result.then( function() {
       location.reload();
     });
   };

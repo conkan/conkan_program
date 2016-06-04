@@ -705,14 +705,54 @@ sub pgup_regprog : Chained('program_show') : PathPart('regprogram') : Args(0) {
                     avoiddup comment
                     / ];
     my $regpgid = $c->stash->{'regpgid'};
+    my $pgid    = $c->stash->{'pgid'};
     $c->stash->{'M'} = $c->model('ConkanDB::PgRegProgram');
-    my $rowprof = undef;
     try {
-        $rowprof = $c->stash->{'M'}->find($regpgid);
+        my $rowprof = $c->stash->{'RegProgram'};
+        if ( $c->request->method eq 'GET' ) {
+            $c->stash->{'json'} = {
+                pgid        => $pgid,
+                regpgid     => $rowprof->regpgid(),
+                subno       => $c->stash->{'subno'},
+                name        => $rowprof->name(),
+                namef       => $rowprof->namef(),
+                regma       => $rowprof->regma(),
+                regname     => $rowprof->regname(),
+                regdate     => $rowprof->regdate()->strftime('%F'),
+                experience  => $rowprof->experience(),
+                regno       => $rowprof->regno(),
+                telno       => $rowprof->telno(),
+                faxno       => $rowprof->faxno(),
+                celno       => $rowprof->celno(),
+                type        => $rowprof->type(),
+                place       => $rowprof->place(),
+                layout      => $rowprof->layout(),
+                date        => $rowprof->date(),
+                classlen    => $rowprof->classlen(),
+                expmaxcnt   => $rowprof->expmaxcnt(),
+                content     => $rowprof->content(),
+                contentpub  => $rowprof->contentpub(),
+                realpub     => $rowprof->realpub(),
+                afterpub    => $rowprof->afterpub(),
+                openpg      => $rowprof->openpg(),
+                restpg      => $rowprof->restpg(),
+                avoiddup    => $rowprof->avoiddup(),
+                comment     => $rowprof->comment(),
+            };
+            $c->component('View::JSON')->{expose_stash} = [ 'json' ];
+        }
+        else {
+            $c->component('View::JSON')->{expose_stash} = [ 'status' ];
+        }
+        $c->forward( '_pgupdate', [ 'regprogram', $rowprof, $up_items ] );
     } catch {
-        $c->detach( '_dberror', [ shift ] );
+        my $e = shift;
+        $c->log->error('program/' . $pgid . ' /regprogram error '
+            . localtime() . ' dbexp : ' . Dumper($e) );
+        $c->stash->{'status'} = 'dbfail';
+        $c->component('View::JSON')->{expose_stash} = [ 'status' ];
     };
-    $c->detach( '_pgupdate', [ 'regprogram', $rowprof, $up_items ] );
+    $c->forward('conkan::View::JSON');
 }
 
 =head2 program/*/program
@@ -1055,11 +1095,6 @@ $c->log->debug('>>>> regpgid: ' . $regpgid . ' -> ' . $newregpgid);
                             my $cannot = $c->model('ConkanDB::PgRegProgram')
                                     ->find($newregpgid);
                             if ( $cannot ) {
-                                $c->stash->{'rs'} = undef;
-                                $c->response->body(
-                                    '<FORM><H1>更新できませんでした</H1><BR/>' .
-                                    '<H2>企画番号が重複しています</H2><BR/>' .
-                                    '再度やり直してください</FORM>');
                                 $c->stash->{'status'} = 'iddupfail';
                                 return;
                             }
@@ -1068,20 +1103,12 @@ $c->log->debug('>>>> regpgid: ' . $regpgid . ' -> ' . $newregpgid);
                             [ $regpgid, $target, $up_items,
                               $rowprof, $value ] );
                         $rowprof->update( $value ); 
-                        $c->response->body(
-                            '<FORM><H1>更新しました</H1></FORM>');
                         $c->stash->{'status'} = 'update';
                 }
                 else {
                     $c->log->info('updateflg: db: ' . $rowprof->updateflg);
                     $c->log->info('updateflg: cu: '
                         . +( $c->sessionid . $c->session->{'updtic'}) );
-                    $c->stash->{'rs'} = undef;
-                    $c->response->body(
-                        '<FORM><H1>更新できませんでした</H1><BR/>' .
-                        '他スタッフが変更した可能性があります<BR/>' .
-                        '最新情報を確認の上、必要なら再度更新してください。' .
-                        '</FORM>');
                     $c->stash->{'status'} = 'fail';
                 }
             }
@@ -1090,18 +1117,14 @@ $c->log->debug('>>>> regpgid: ' . $regpgid . ' -> ' . $newregpgid);
                 $c->forward('/program/_autoProgress',
                             [ $regpgid, $target, $up_items, undef, $value ] );
                 $c->stash->{'M'}->create( $value ); 
-                $c->response->body('<FORM><H1>追加しました</H1></FORM>');
                 $c->stash->{'status'} = 'add';
             }
-            $c->stash->{'rs'} = undef;
-            $c->response->status(200);
         }
     } catch {
         my $e = shift;
         $c->log->error( '_pgupdate error ' . localtime()
             . ' dbexp : ' . Dumper($e) );
         $c->stash->{'status'} = 'dbfail';
-        $c->detach( '_dberror', [ shift ] ) if ( $target eq 'regprogram' );
     };
 }
 

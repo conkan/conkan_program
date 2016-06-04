@@ -1,27 +1,4 @@
 <!-- # Region ttpgupmc.tt -->
-[%- MACRO subtag ( bgcolor ) BLOCK -%]
-  <div class="subtag row">
-    <div class="col-sm-2 [% bgcolor.reg_program %] text-center">
-      <a href="#reg_program"><h5>企画概要</h5></a>
-    </div>
-    <div class="col-sm-2 [% bgcolor.reg_cast %] text-center">
-      <a href="#reg_cast"><h5>要望出演者</h5></a>
-    </div>
-    <div class="col-sm-2 [% bgcolor.cast %] text-center">
-      <a href="#cast"><h5>決定出演者</h5></a>
-    </div>
-    <div class="col-sm-2 [% bgcolor.reg_equip %] text-center">
-      <a href="#reg_equip"><h5>要望機材</h5></a>
-    </div>
-    <div class="col-sm-2 [% bgcolor.equip %] text-center">
-      <a href="#equip"><h5>決定機材</h5></a>
-    </div>
-    <div class="col-sm-2 [% bgcolor.progress %] text-center">
-      <a href="#progress"><h5>進捗</h5></a>
-    </div>
-  </div>
-  <p/>
-[%- END -%]
 [%- MACRO pgupinputtext ( item, val, size ) BLOCK -%]
   <input type="text" name="[% item %]" id="[% item %]" class="col-sm-[% size %]"
     value="[% val | html %]"/>
