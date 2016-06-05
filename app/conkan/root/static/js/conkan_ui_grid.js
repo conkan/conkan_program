@@ -216,12 +216,21 @@ var dialogResizeDrag = function() {
           < angular.element(window).height() ) {
     return;
   }
+  var dialog = angular.element('.modal-dialog');
+  if ( dialog.offset().top < parseInt(dialog.css('marginTop')) ) {
+    setTimeout( dialogResizeDrag, 300 ); // ui-modalのanimation(fade)値から
+    return;
+  }
   var content = angular.element('.modal-body');
-  var vh = content.offset().top + 1 +
+  var vh = angular.element(window).height() -
+            ( content.offset().top + 1 +
               angular.element('.modal-footer').outerHeight() +
               parseInt( angular.element('.modal-dialog').css('marginTop')) +
-              parseInt( angular.element('.modal-dialog').css('marginBottom'));
-  content.css( 'height', angular.element(window).height() - vh );
+              parseInt( angular.element('.modal-dialog').css('marginBottom')) );
+  if ( vh < parseInt(content.css('min-height')) ) {
+    vh = parseInt(content.css('min-height'));
+  }
+  content.css( 'height', vh );
 };
 
 // JSON POST汎用実施

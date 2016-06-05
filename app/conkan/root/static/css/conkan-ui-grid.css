@@ -42,6 +42,7 @@
 
 .modal-body {
     overflow-y: auto;
+    min-height: 200px;
 }
 
 .ral th {

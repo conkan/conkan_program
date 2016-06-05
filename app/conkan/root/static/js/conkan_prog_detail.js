@@ -185,13 +185,14 @@
               avoiddup    : data.json.avoiddup,
               comment     : data.json.comment
             };
-            dialogResizeDrag();
           }
           else {
             openDialog( data.status );
           }
         })
-        .error( httpfailDlg );
+        .error( httpfailDlg )
+        .finally( dialogResizeDrag);
+
         // 更新実施
         $scope.regprgDoApply = function() {
           var pgid = $scope.prog.pgid;
@@ -229,13 +230,14 @@
           if ( data.status === 'ok' ) {
             $scope.prog = {};
             ProgDataCnv( data.json, $scope.prog );
-            dialogResizeDrag();
           }
           else {
             openDialog( data.status );
           }
         })
-        .error( httpfailDlg );
+        .error( httpfailDlg )
+        .finally( dialogResizeDrag);
+
         // 監視設定
         $scope.$watch('prog.date1', function( n, o, scope ) {
           if ( n != o ) {
@@ -282,7 +284,6 @@
         .success(function(data) {
           if ( data.status === 'ok' ) {
             $scope.conf = ConfDataCnv( data, $scope.conf );
-            dialogResizeDrag();
           }
           else {
             openDialog( data.status );
@@ -326,13 +327,14 @@
             };
             $scope.castlist = data.json.castlist;
             $scope.statlist = data.json.statlist;
-            dialogResizeDrag();
           }
           else {
             openDialog( data.status );
           }
         })
-        .error( httpfailDlg );
+        .error( httpfailDlg )
+        .finally( dialogResizeDrag);
+
         // 監視設定
         $scope.$watch('cast.castid', function( n, o, scope ) {
           if ( angular.isDefined(n) && angular.isDefined(o) ) {
@@ -436,13 +438,14 @@
             $scope.pcviflist = IfOptions.pcvif;
             $scope.aiflist   = IfOptions.aif;
             $scope.eiflist   = IfOptions.eif;
-            dialogResizeDrag();
           }
           else {
             openDialog( data.status );
           }
         })
-        .error( httpfailDlg );
+        .error( httpfailDlg )
+        .finally( dialogResizeDrag);
+
         // 監視設定
         $scope.$watch('equip.equipid', function( n, o, scope ) {
           if ( angular.isDefined(n) ) {

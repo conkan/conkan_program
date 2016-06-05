@@ -140,13 +140,14 @@
               rmdate    : data.json.rmdate,
             };
             $scope.statlist = data.statlist;
-            dialogResizeDrag();
           }
           else {
             openDialog( data.status );
           }
         })
-        .error( httpfailDlg );
+        .error( httpfailDlg )
+        .finally( dialogResizeDrag);
+
         // 更新実施
         $scope.castDoApply = function() {
           // 二重クリック回避

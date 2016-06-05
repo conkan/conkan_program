@@ -110,13 +110,14 @@
               comment : data.json.comment,
               rmdate  : data.json.rmdate,
             };
-            dialogResizeDrag();
           }
           else {
             openDialog( data.status );
           }
         })
-        .error( httpfailDlg );
+        .error( httpfailDlg )
+        .finally( dialogResizeDrag);
+
         // 更新実施
         $scope.equipDoApply = function() {
           // 二重クリック回避
