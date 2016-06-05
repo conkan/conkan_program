@@ -54,8 +54,14 @@
           currentval.pgid = '';
           $http({ method  : 'GET', url     : '/timetable/' + pgid })
           .success(function(data) {
-            ProgDataCnv( data, currentval );
-          });
+            if ( data.status === 'ok' ) {
+              ProgDataCnv( data.json, currentval );
+            }
+            else {
+              openDialog( data.status );
+            }
+          })
+          .error( httpfailDlg );
         }
       };
     }
@@ -245,7 +251,12 @@
 
         $http.get('/config/confget')
         .success(function(data) {
-          $scope.conf = ConfDataCnv( data, $scope.conf );
+          if ( data.status === 'ok' ) {
+            $scope.conf = ConfDataCnv( data, $scope.conf );
+          }
+          else {
+            openDialog( data.status );
+          }
         })
         .error( httpfailDlg );
 
@@ -272,7 +283,7 @@
             var resultDlg = $uibModal.open(
               {
                 templateUrl : getTemplate( data.status ),
-                backdrop    : true,
+                backdrop    : 'static',
               }
             );
             resultDlg.rendered.then( function() {
@@ -293,7 +304,7 @@
             var resultDlg = $uibModal.open(
               {
                 templateUrl : getTemplate( '' ),
-                backdrop    : true,
+                backdrop    : 'static',
               }
             );
             resultDlg.rendered.then( function() {

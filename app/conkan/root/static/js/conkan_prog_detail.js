@@ -40,18 +40,23 @@
           url     : '/program/' + pgid + '/equiplist'
         })
         .success(function(data) {
-          $scope.equiplist = data.json;
-          for ( var i=0; i<$scope.equiplist.length; i++ ) {
-            var equip = $scope.equiplist[i];
-            if (   ( equip.equipno == 'bring-AV' )
-                || ( equip.equipno == 'bring-PC' ) ) {
-              $scope.equiplist[i].spec = '映像:' + equip.vif
-                                       + ' 音声:' + equip.aif;
-              if ( equip.equipno == 'bring-PC' ) {
-                $scope.equiplist[i].spec += ' LAN:' + equip.eif
-                                         + ' LAN利用目的:' + equip.intende;
+          if ( data.status === 'ok' ) {
+            $scope.equiplist = data.json;
+            for ( var i=0; i<$scope.equiplist.length; i++ ) {
+              var equip = $scope.equiplist[i];
+              if (   ( equip.equipno == 'bring-AV' )
+                  || ( equip.equipno == 'bring-PC' ) ) {
+                $scope.equiplist[i].spec = '映像:' + equip.vif
+                                         + ' 音声:' + equip.aif;
+                if ( equip.equipno == 'bring-PC' ) {
+                  $scope.equiplist[i].spec += ' LAN:' + equip.eif
+                                           + ' LAN利用目的:' + equip.intende;
+                }
               }
             }
+          }
+          else {
+            openDialog( data.status );
           }
         })
         .error( httpfailDlg );
@@ -151,36 +156,41 @@
           url     : '/program/' + $scope.pgid + '/regprogram'
         })
         .success(function(data) {
-          $scope.prog = {
-            pgid        : data.json.pgid,
-            regpgid     : parseInt(data.json.regpgid),
-            subno       : data.json.subno,
-            name        : data.json.name,
-            namef       : data.json.namef,
-            regma       : data.json.regma,
-            regname     : data.json.regname,
-            regdate     : data.json.regdate,
-            experience  : data.json.experience,
-            regno       : data.json.regno,
-            telno       : data.json.telno,
-            faxno       : data.json.faxno,
-            celno       : data.json.celno,
-            type        : data.json.type,
-            place       : data.json.place,
-            layout      : data.json.layout,
-            date        : data.json.date,
-            classlen    : data.json.classlen,
-            expmaxcnt   : data.json.expmaxcnt,
-            content     : data.json.content,
-            contentpub  : data.json.contentpub,
-            realpub     : data.json.realpub,
-            afterpub    : data.json.afterpub,
-            openpg      : data.json.openpg,
-            restpg      : data.json.restpg,
-            avoiddup    : data.json.avoiddup,
-            comment     : data.json.comment
-          };
-          dialogResizeDrag();
+          if ( data.status === 'ok' ) {
+            $scope.prog = {
+              pgid        : data.json.pgid,
+              regpgid     : parseInt(data.json.regpgid),
+              subno       : data.json.subno,
+              name        : data.json.name,
+              namef       : data.json.namef,
+              regma       : data.json.regma,
+              regname     : data.json.regname,
+              regdate     : data.json.regdate,
+              experience  : data.json.experience,
+              regno       : data.json.regno,
+              telno       : data.json.telno,
+              faxno       : data.json.faxno,
+              celno       : data.json.celno,
+              type        : data.json.type,
+              place       : data.json.place,
+              layout      : data.json.layout,
+              date        : data.json.date,
+              classlen    : data.json.classlen,
+              expmaxcnt   : data.json.expmaxcnt,
+              content     : data.json.content,
+              contentpub  : data.json.contentpub,
+              realpub     : data.json.realpub,
+              afterpub    : data.json.afterpub,
+              openpg      : data.json.openpg,
+              restpg      : data.json.restpg,
+              avoiddup    : data.json.avoiddup,
+              comment     : data.json.comment
+            };
+            dialogResizeDrag();
+          }
+          else {
+            openDialog( data.status );
+          }
         })
         .error( httpfailDlg );
         // 更新実施
@@ -202,7 +212,12 @@
         // 選択肢取得
         $http.get('/config/confget')
         .success(function(data) {
-          $scope.conf = ConfDataCnv( data, $scope.conf );
+          if ( data.status === 'ok' ) {
+            $scope.conf = ConfDataCnv( data, $scope.conf );
+          }
+          else {
+            openDialog( data.status );
+          }
         })
         .error( httpfailDlg );
         // 初期値設定
@@ -212,9 +227,14 @@
           url     : '/timetable/' + $scope.pgid
         })
         .success(function(data) {
-          $scope.prog = {};
-          ProgDataCnv( data, $scope.prog );
-          dialogResizeDrag();
+          if ( data.status === 'ok' ) {
+            $scope.prog = {};
+            ProgDataCnv( data.json, $scope.prog );
+            dialogResizeDrag();
+          }
+          else {
+            openDialog( data.status );
+          }
         })
         .error( httpfailDlg );
         // 監視設定
@@ -252,7 +272,7 @@
       function( $scope, $http, $uibModal, $uibModalInstance ) {
         // 初期値設定
         angular.element('#valerr').text('');
-        $scope.cast = {
+        $scope.regcast = {
           regpgid   : $scope.prog.regpgid,
           pgid      : $scope.prog.pgid,
           name      : '', namef : '', regno : '',
@@ -261,8 +281,13 @@
         // 選択肢取得
         $http.get('/config/confget')
         .success(function(data) {
-          $scope.conf = ConfDataCnv( data, $scope.conf );
-          dialogResizeDrag();
+          if ( data.status === 'ok' ) {
+            $scope.conf = ConfDataCnv( data, $scope.conf );
+            dialogResizeDrag();
+          }
+          else {
+            openDialog( data.status );
+          }
         })
         .error( httpfailDlg );
         // 登録実施
@@ -288,20 +313,25 @@
                        + $scope.editCastId,
         })
         .success(function(data) {
-          $scope.cast = {
-            id          : $scope.editCastId,
-            applyBtnLbl : $scope.editCastBtnLbl,
-            pgid        : data.json.pgid,
-            castid      : data.json.castid,
-            status      : data.json.status,
-            memo        : data.json.memo,
-            name        : data.json.name,
-            namef       : data.json.namef,
-            title       : data.json.title,
-          };
-          $scope.castlist = data.json.castlist;
-          $scope.statlist = data.json.statlist;
-          dialogResizeDrag();
+          if ( data.status === 'ok' ) {
+            $scope.cast = {
+              id          : $scope.editCastId,
+              applyBtnLbl : $scope.editCastBtnLbl,
+              pgid        : data.json.pgid,
+              castid      : data.json.castid,
+              status      : data.json.status,
+              memo        : data.json.memo,
+              name        : data.json.name,
+              namef       : data.json.namef,
+              title       : data.json.title,
+            };
+            $scope.castlist = data.json.castlist;
+            $scope.statlist = data.json.statlist;
+            dialogResizeDrag();
+          }
+          else {
+            openDialog( data.status );
+          }
         })
         .error( httpfailDlg );
         // 監視設定
@@ -369,44 +399,49 @@
                        + $scope.editEquipId,
         })
         .success(function(data) {
-          $scope.equip = {
-            id            : $scope.editEquipId,
-            applyBtnLbl   : $scope.editEquipBtnLbl,
-            pgid    : data.json.pgid,
-            equipid : data.json.equipid,
-            intende : data.json.intende,
-            spec    : '',
-            comment : '',
-          };
-          if ( data.json.vif in IfOptions.vifH ) {
-            $scope.equip.vif = data.json.vif;
+          if ( data.status === 'ok' ) {
+            $scope.equip = {
+              id            : $scope.editEquipId,
+              applyBtnLbl   : $scope.editEquipBtnLbl,
+              pgid    : data.json.pgid,
+              equipid : data.json.equipid,
+              intende : data.json.intende,
+              spec    : '',
+              comment : '',
+            };
+            if ( data.json.vif in IfOptions.vifH ) {
+              $scope.equip.vif = data.json.vif;
+            }
+            else {
+              $scope.equip.vif = 'その他';
+              $scope.equip.ovif = data.json.vif;
+            }
+            if ( data.json.aif in IfOptions.aifH ) {
+              $scope.equip.aif = data.json.aif;
+            }
+            else {
+              $scope.equip.aif = 'その他';
+              $scope.equip.oaif = data.json.aif;
+            }
+            if ( data.json.eif in IfOptions.eifH ) {
+              $scope.equip.eif = data.json.eif;
+            }
+            else {
+              $scope.equip.eif = 'その他';
+              $scope.equip.oeif = data.json.eif;
+            }
+            $scope.equiplist = data.json.equiplist;
+            $scope.equipdata = data.json.equipdata;
+            $scope.bringid   = data.json.bringid;
+            $scope.avviflist = IfOptions.avvif;
+            $scope.pcviflist = IfOptions.pcvif;
+            $scope.aiflist   = IfOptions.aif;
+            $scope.eiflist   = IfOptions.eif;
+            dialogResizeDrag();
           }
           else {
-            $scope.equip.vif = 'その他';
-            $scope.equip.ovif = data.json.vif;
+            openDialog( data.status );
           }
-          if ( data.json.aif in IfOptions.aifH ) {
-            $scope.equip.aif = data.json.aif;
-          }
-          else {
-            $scope.equip.aif = 'その他';
-            $scope.equip.oaif = data.json.aif;
-          }
-          if ( data.json.eif in IfOptions.eifH ) {
-            $scope.equip.eif = data.json.eif;
-          }
-          else {
-            $scope.equip.eif = 'その他';
-            $scope.equip.oeif = data.json.eif;
-          }
-          $scope.equiplist = data.json.equiplist;
-          $scope.equipdata = data.json.equipdata;
-          $scope.bringid   = data.json.bringid;
-          $scope.avviflist = IfOptions.avvif;
-          $scope.pcviflist = IfOptions.pcvif;
-          $scope.aiflist   = IfOptions.aif;
-          $scope.eiflist   = IfOptions.eif;
-          dialogResizeDrag();
         })
         .error( httpfailDlg );
         // 監視設定
@@ -506,8 +541,13 @@
                       + newPage + '/' + pageSize + '/';
           $http.get(url)
           .success(function(data) {
-            $scope.progressgrid.totalItems = data.totalItems;
-            $scope.progressgrid.data = data.json;
+            if ( data.status === 'ok' ) {
+              $scope.progressgrid.totalItems = data.totalItems;
+              $scope.progressgrid.data = data.json;
+            }
+            else {
+              openDialog( data.status );
+            }
           })
           .error( httpfailDlg );
         };
@@ -531,19 +571,25 @@
           url     : '/program/listget' + ( allprg ? '_a' : '_r' ),
         })
         .success(function(data) {
-          for ( var i=0; i<data.json.length; i++ ) {
-            var name = data.json[i].regpgid + ':';
-            name += data.json[i].sname || data.json[i].name;
-            if(name.length > 20) {
-              name = name.substring(0, 19) + '...';
+          if ( data.status === 'ok' ) {
+            for ( var i=0; i<data.json.length; i++ ) {
+              var name = data.json[i].regpgid + ':';
+              name += data.json[i].sname || data.json[i].name;
+              if(name.length > 20) {
+                name = name.substring(0, 19) + '...';
+              }
+              $scope.pgsellist[i] = {
+                'id'  : data.json[i].pgid,
+                'val' : name,
+              };
             }
-            $scope.pgsellist[i] = {
-              'id'  : data.json[i].pgid,
-              'val' : name,
-            };
+            $scope.pgdetailsel = pgid;
           }
-          $scope.pgdetailsel = pgid;
-        });
+          else {
+            openDialog( data.status );
+          }
+        })
+        .error( httpfailDlg );
         $scope.$watch('pgdetailsel', function( n, o, scope ) {
           if ( angular.isDefined(n) && angular.isDefined(o) && ( n != o ) ){
             pathelm[pathelm.length-1] = n;

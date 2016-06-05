@@ -142,7 +142,12 @@
         ];
         $http.get('/config/cast/listget')
         .success(function(data) {
-          $scope.castgrid.data = data.json;
+          if ( data.status === 'ok' ) {
+            $scope.castgrid.data = data.json;
+          }
+          else {
+            openDialog( data.status );
+          }
         })
         .error(function(data) {
           var modalinstance = $uibModal.open(

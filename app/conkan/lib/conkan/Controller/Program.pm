@@ -164,7 +164,6 @@ sub regcastadd :Local {
     my $items = [ qw/ name namef title regno needreq needguest / ];
     my $hval = $c->forward('/program/_trnReq2Hash', [ [ @$ckt, @$items ] ], );
 
-    $c->component('View::JSON')->{expose_stash} = undef;
     try{
         __PACKAGE__->_addCast( $c, $hval, $hval->{'pgid'} );
         $c->forward('/program/_autoProgress',
@@ -176,6 +175,7 @@ sub regcastadd :Local {
         $c->log->error('regcastadd error ' . localtime() .
             ' dbexp : ' . Dumper($e) );
     };
+    $c->component('View::JSON')->{expose_stash} = [ 'status', ];
     $c->forward('conkan::View::JSON');
 };
 
@@ -433,109 +433,113 @@ $c->log->debug('>>>> maxsubno:[' . $row->get_column('maxsubno') . ']');
 
 sub csvdownload :Local {
     my ( $self, $c ) = @_;
-    my $condval = $c->request->body_params->{'pg_status'};
-    my $get_status = ( ref($condval) eq 'ARRAY' ) ? $condval : [ $condval ];
-    push ( @$get_status, \'IS NULL' )
-        if exists( $c->request->body_params->{'pg_null_stat'} );
-    my $outext = exists($c->request->body_params->{'pg_outext'}) ? 1 : 0;
-    # 指定の実行ステータスで抽出
-    my $rows =
-        [ $c->model('ConkanDB::PgProgram')->search(
-            {
-                'status'   => $get_status,
-            },
-            {
-                'prefetch' => [ 'regpgid', 'roomid' ],
-                'order_by' => { '-asc' => [ 'me.regpgid', 'me.subno' ] },
-            } )
-        ];
-$c->log->debug('>>> ' . 'program cnt : ' . scalar(@$rows) );
-    my @data = (
-        [
-            '企画ID',
-            'サブNO',
-            '企画名称',
-            '企画名フリガナ',
-            '内容',
-            '内容事前公開可否',
-            '一般公開可否',
-            '未成年参加可否',
-            '備考',
-            '実行ステータス',
-            '実行ステータス補足',
-            '実施日時1',
-            '実施日時2',
-            '部屋番号',
-            '実施場所',
-            '企画紹介文',
-            '出演者企画ネーム',
-            '出演者肩書',
-            '出演ステータス',
-            '...',
-        ]
-    );
-    foreach my $row ( @$rows ) {
-        # 実施日付は YYYY/MM/DD、開始終了時刻は HH:MM (いずれも0サフィックス)
-        my $datmHash = $c->forward('/program/_trnDateTime4csv', [ $row, ], );
-        my @pfmdatetime  = undef;
-        if ( $datmHash->{'dates'} ) {
-            for ( my $idx=0; $idx<scalar(@{$datmHash->{'dates'}}); $idx++ ) {
-                $pfmdatetime[$idx] = $datmHash->{'dates'}->[$idx] . ' '
-                                   . $datmHash->{'stms'}->[$idx] . '-'
-                                   . $datmHash->{'etms'}->[$idx];
-            }
-        }
-        # 決定出演者取得
-        my $castrows =
-            [ $c->model('ConkanDB::PgCast')->search(
-                        { pgid => $row->pgid() },
-                        {
-                            'prefetch' => [ 'castid' ],
-                            'order_by' => { '-asc' => 'id' },
-                        }
-                    ) ];
-        my @casts = ();
-        foreach my $castrow ( @$castrows ) {
-            my $pname = $castrow->name() || $castrow->castid->name();
-            push ( @casts, $pname );            # 企画ネーム
-            push ( @casts, $castrow->title() ); # 肩書
-            push ( @casts, $castrow->status()); # 出演ステータス
-        }
-        # 実施場所情報
-        my $roomno = undef;
-        my $roomname = undef;
-        if ( $row->roomid() ) {
-            $roomno = $row->roomid->roomno();
-            $roomname = $row->roomid->name();
-        }
-
-        push ( @data, [
-            $row->regpgid->regpgid(),       # 企画ID,
-            $row->subno(),                  # サブNO,
-            $row->regpgid->name(),          # 企画名称,
-            $row->regpgid->namef(),         # 企画名フリガナ,
-            +( $outext ? $row->regpgid->content() : ''),       # 内容,
-            $row->regpgid->contentpub(),    # 内容事前公開可否,
-            $row->regpgid->openpg(),        # 一般公開可否,
-            $row->regpgid->restpg(),        # 未成年参加可否,
-            +( $outext ? $row->regpgid->comment() : ''),       # 備考,
-            $row->status(),                 # 実行ステータス,
-            $row->memo(),                   # 実行ステータス補足,
-            $pfmdatetime[0],                # 実施日時1,
-            $pfmdatetime[1],                # 実施日時2,
-            $roomno,                        # 部屋番号,
-            $roomname,                      # 実施場所,
-            +( $outext ? $row->progressprp() : ''),            # 企画紹介文,
-            @casts,                         # 決定出演者,
-        ]);
-    }
-
-    $c->stash->{'csv'} = \@data;
-    $c->response->header( 'Content-Disposition' =>
-        'attachment; filename=' .
-            strftime("%Y%m%d%H%M%S", localtime()) . '_program.csv' );
-
-    $c->forward('conkan::View::Download::CSV');
+    try {
+       my $condval = $c->request->body_params->{'pg_status'};
+       my $get_status = ( ref($condval) eq 'ARRAY' ) ? $condval : [ $condval ];
+       push ( @$get_status, \'IS NULL' )
+           if exists( $c->request->body_params->{'pg_null_stat'} );
+       my $outext = exists($c->request->body_params->{'pg_outext'}) ? 1 : 0;
+       # 指定の実行ステータスで抽出
+       my $rows =
+           [ $c->model('ConkanDB::PgProgram')->search(
+               {
+                   'status'   => $get_status,
+               },
+               {
+                   'prefetch' => [ 'regpgid', 'roomid' ],
+                   'order_by' => { '-asc' => [ 'me.regpgid', 'me.subno' ] },
+               } )
+           ];
+   $c->log->debug('>>> ' . 'program cnt : ' . scalar(@$rows) );
+       my @data = (
+           [
+               '企画ID',
+               'サブNO',
+               '企画名称',
+               '企画名フリガナ',
+               '内容',
+               '内容事前公開可否',
+               '一般公開可否',
+               '未成年参加可否',
+               '備考',
+               '実行ステータス',
+               '実行ステータス補足',
+               '実施日時1',
+               '実施日時2',
+               '部屋番号',
+               '実施場所',
+               '企画紹介文',
+               '出演者企画ネーム',
+               '出演者肩書',
+               '出演ステータス',
+               '...',
+           ]
+       );
+       foreach my $row ( @$rows ) {
+           # 実施日付は YYYY/MM/DD、開始終了時刻は HH:MM (いずれも0サフィックス)
+           my $datmHash = $c->forward('/program/_trnDateTime4csv', [ $row, ], );
+           my @pfmdatetime  = undef;
+           if ( $datmHash->{'dates'} ) {
+               for ( my $idx=0; $idx<scalar(@{$datmHash->{'dates'}}); $idx++ ) {
+                   $pfmdatetime[$idx] = $datmHash->{'dates'}->[$idx] . ' '
+                                      . $datmHash->{'stms'}->[$idx] . '-'
+                                      . $datmHash->{'etms'}->[$idx];
+               }
+           }
+           # 決定出演者取得
+           my $castrows =
+               [ $c->model('ConkanDB::PgCast')->search(
+                           { pgid => $row->pgid() },
+                           {
+                               'prefetch' => [ 'castid' ],
+                               'order_by' => { '-asc' => 'id' },
+                           }
+                       ) ];
+           my @casts = ();
+           foreach my $castrow ( @$castrows ) {
+               my $pname = $castrow->name() || $castrow->castid->name();
+               push ( @casts, $pname );            # 企画ネーム
+               push ( @casts, $castrow->title() ); # 肩書
+               push ( @casts, $castrow->status()); # 出演ステータス
+           }
+           # 実施場所情報
+           my $roomno = undef;
+           my $roomname = undef;
+           if ( $row->roomid() ) {
+               $roomno = $row->roomid->roomno();
+               $roomname = $row->roomid->name();
+           }
+   
+           push ( @data, [
+               $row->regpgid->regpgid(),       # 企画ID,
+               $row->subno(),                  # サブNO,
+               $row->regpgid->name(),          # 企画名称,
+               $row->regpgid->namef(),         # 企画名フリガナ,
+               +( $outext ? $row->regpgid->content() : ''),       # 内容,
+               $row->regpgid->contentpub(),    # 内容事前公開可否,
+               $row->regpgid->openpg(),        # 一般公開可否,
+               $row->regpgid->restpg(),        # 未成年参加可否,
+               +( $outext ? $row->regpgid->comment() : ''),       # 備考,
+               $row->status(),                 # 実行ステータス,
+               $row->memo(),                   # 実行ステータス補足,
+               $pfmdatetime[0],                # 実施日時1,
+               $pfmdatetime[1],                # 実施日時2,
+               $roomno,                        # 部屋番号,
+               $roomname,                      # 実施場所,
+               +( $outext ? $row->progressprp() : ''),            # 企画紹介文,
+               @casts,                         # 決定出演者,
+           ]);
+       }
+   
+       $c->stash->{'csv'} = \@data;
+       $c->response->header( 'Content-Disposition' =>
+           'attachment; filename=' .
+               strftime("%Y%m%d%H%M%S", localtime()) . '_program.csv' );
+   
+       $c->forward('conkan::View::Download::CSV');
+    } catch {
+        $c->detach( '_dberror', [ shift ] );
+    };
 }
 
 =head2 program
@@ -623,12 +627,14 @@ sub program_listget : Private {
             };
         }
         $c->stash->{'json'} = \@list;
+        $c->stash->{'status'} = 'ok';
     } catch {
         my $e = shift;
         $c->log->error('program/listget error ' . localtime() .
             ' dbexp : ' . Dumper($e) );
+        $c->stash->{'status'} = 'dbfail';
     };
-    $c->component('View::JSON')->{expose_stash} = undef;
+    $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
 
@@ -739,10 +745,6 @@ sub pgup_regprog : Chained('program_show') : PathPart('regprogram') : Args(0) {
                 avoiddup    => $rowprof->avoiddup(),
                 comment     => $rowprof->comment(),
             };
-            $c->component('View::JSON')->{expose_stash} = [ 'json' ];
-        }
-        else {
-            $c->component('View::JSON')->{expose_stash} = [ 'status' ];
         }
         $c->forward( '_pgupdate', [ 'regprogram', $rowprof, $up_items ] );
     } catch {
@@ -750,8 +752,8 @@ sub pgup_regprog : Chained('program_show') : PathPart('regprogram') : Args(0) {
         $c->log->error('program/' . $pgid . ' /regprogram error '
             . localtime() . ' dbexp : ' . Dumper($e) );
         $c->stash->{'status'} = 'dbfail';
-        $c->component('View::JSON')->{expose_stash} = [ 'status' ];
     };
+    $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
 
@@ -816,10 +818,6 @@ sub pgup_cast : Chained('pgup_casttop') : PathPart('') : Args(0) {
                 map +{ 'id' => $_, 'val' => $_ },
                    @{from_json( $M->find('cast_status_vals')->pg_conf_value() )}
             ];
-            $c->component('View::JSON')->{expose_stash} = [ 'json' ];
-        }
-        else {
-            $c->component('View::JSON')->{expose_stash} = [ 'status' ];
         }
         $c->forward( '_pgupdate', [ 'equip', $rowprof, $up_items ] );
     } catch {
@@ -827,8 +825,8 @@ sub pgup_cast : Chained('pgup_casttop') : PathPart('') : Args(0) {
         $c->log->error('program/' . $pgid . ' /cast/ ' . $id . '/ error '
             . localtime() . ' dbexp : ' . Dumper($e) );
         $c->stash->{'status'} = 'dbfail';
-        $c->component('View::JSON')->{expose_stash} = [ 'status' ];
     };
+    $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
 
@@ -850,8 +848,8 @@ sub pgup_castdel : Chained('pgup_casttop') : PathPart('del') : Args(0) {
         );
     }
 
-    $c->component('View::JSON')->{expose_stash} = [ 'status' ];
     $c->forward( '_pgdelete', [ 'cast', $up_items ] );
+    $c->component('View::JSON')->{expose_stash} = [ 'status' ];
     $c->forward('conkan::View::JSON');
 }
 
@@ -887,14 +885,14 @@ sub program_equiplist : Chained('program_show') : PathPart('equiplist') : Args(0
             push @list, $equip;
         }
         $c->stash->{'json'} = \@list;
-        $c->component('View::JSON')->{expose_stash} = [ 'json' ];
+        $c->stash->{'status'} = 'ok';
     } catch {
         my $e = shift;
         $c->log->error('program/' . $pgid . '/equiplist error ' . localtime() .
             ' dbexp : ' . Dumper($e) );
         $c->stash->{'status'} = 'dbfail';
-        $c->component('View::JSON')->{expose_stash} = [ 'status' ];
     };
+    $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
 
@@ -965,10 +963,6 @@ sub pgup_equip : Chained('pgup_equiptop') : PathPart('') : Args(0) {
             $c->stash->{'json'}->{'equiplist'} = \@equiplist;
             $c->stash->{'json'}->{'equipdata'} = \%equipdata;
             $c->stash->{'json'}->{'bringid'}   = \%bringid;
-            $c->component('View::JSON')->{expose_stash} = [ 'json' ];
-        }
-        else {
-            $c->component('View::JSON')->{expose_stash} = [ 'status' ];
         }
         $c->forward( '_pgupdate', [ 'equip', $rowprof, $up_items ] );
     } catch {
@@ -976,8 +970,8 @@ sub pgup_equip : Chained('pgup_equiptop') : PathPart('') : Args(0) {
         $c->log->error('program/' . $pgid . ' /equip/ ' . $id . '/ error '
             . localtime() . ' dbexp : ' . Dumper($e) );
         $c->stash->{'status'} = 'dbfail';
-        $c->component('View::JSON')->{expose_stash} = [ 'status' ];
     };
+    $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
 
@@ -1003,8 +997,8 @@ sub pgup_equipdel : Chained('pgup_equiptop') : PathPart('del') : Args(0) {
         );
     }
 
-    $c->component('View::JSON')->{expose_stash} = [ 'status' ];
     $c->forward( '_pgdelete', [ 'equip', $up_items ] );
+    $c->component('View::JSON')->{expose_stash} = [ 'status' ];
     $c->forward('conkan::View::JSON');
 }
 
@@ -1041,7 +1035,7 @@ sub program_progressget : Chained('program_show') : PathPart('progress') : Args(
         }
         $c->stash->{'totalItems'} = $prgcnt;
         $c->stash->{'json'} = \@list;
-        $c->component('View::JSON')->{expose_stash} = [ 'json', 'totalItems' ];
+        $c->stash->{'status'} = 'ok';
     } catch {
         my $e = shift;
         $c->log->error(
@@ -1049,8 +1043,9 @@ sub program_progressget : Chained('program_show') : PathPart('progress') : Args(
             . ' error ' . localtime() . ' dbexp : ' . Dumper($e)
         );
         $c->stash->{'status'} = 'dbfail';
-        $c->component('View::JSON')->{expose_stash} = [ 'status' ];
     };
+        $c->component('View::JSON')->{expose_stash} = [
+            'json', 'status', 'totalItems' ];
     $c->forward('conkan::View::JSON');
 }
 
@@ -1079,6 +1074,7 @@ sub _pgupdate :Private {
             $c->stash->{'rs'} = $rowprof;
             # 企画開始終了時刻変換
             $c->forward('/program/_trnSEtime', [ $c->stash->{'rs'}, ], );
+            $c->stash->{'status'} = 'ok';
         }
         else {
             my $value = $c->forward('/program/_trnReq2Hash', [ $up_items ], );
@@ -1107,8 +1103,9 @@ $c->log->debug('>>>> regpgid: ' . $regpgid . ' -> ' . $newregpgid);
                 }
                 else {
                     $c->log->info('updateflg: db: ' . $rowprof->updateflg);
-                    $c->log->info('updateflg: cu: '
-                        . +( $c->sessionid . $c->session->{'updtic'}) );
+                    $c->log->info('updateflg: cu: ' . $c->sessionid);
+                    $c->log->info('                   '
+                                                    . $c->session->{'updtic'} );
                     $c->stash->{'status'} = 'fail';
                 }
             }
@@ -1177,7 +1174,7 @@ sub _dberror :Private {
     $c->log->error('>>> ' . localtime() . ' Program:dbexp : ' . Dumper($e) );
     $c->clear_errors();
     my $body = $c->response->body() || Dumper( $e );
-    $c->response->body('<FORM>更新失敗<br/><pre>' . $body . '</pre></FORM>');
+    $c->response->body('<FORM>DBエラー<br/><pre>' . $body . '</pre></FORM>');
     $c->response->status(200);
 }
 

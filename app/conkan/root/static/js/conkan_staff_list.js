@@ -159,14 +159,14 @@
         ];
         $http.get('/config/staff/listget')
         .success(function(data) {
-          $scope.staffgrid.data = data.json;
+          if ( data.status === 'ok' ) {
+            $scope.staffgrid.data = data.json;
+          }
+          else {
+            openDialog( data.status );
+          }
         })
-        .error(function(data) {
-          var modalinstance = $uibModal.open(
-            { templateUrl : 'T_httpget_fail' }
-          );
-          modalinstance.result.then( function() {} );
-        });
+        .error( httpfailDlg );
       }
     ]
   );

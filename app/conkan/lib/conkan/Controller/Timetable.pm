@@ -31,102 +31,106 @@ sub index :Path :Args(0) {
     my ( $self, $c ) = @_;
     # タイムテーブルガントチャート表示用固定値
     my $M = $c->model('ConkanDB::PgSystemConf');
-    my $syscon = {
-        'gantt_header'      => $M->find('gantt_header')->pg_conf_value(),
-        'gantt_back_grid'   => $M->find('gantt_back_grid')->pg_conf_value(),
-        'gantt_colmnum'     => $M->find('gantt_colmnum')->pg_conf_value(),
-        'gantt_scale_str'   => $M->find('gantt_scale_str')->pg_conf_value(),
-        'gantt_color_str'   => $M->find('gantt_color_str')->pg_conf_value(),
-        'shift_hour'        => $c->config->{time_origin},
+    try {
+       my $syscon = {
+           'gantt_header'      => $M->find('gantt_header')->pg_conf_value(),
+           'gantt_back_grid'   => $M->find('gantt_back_grid')->pg_conf_value(),
+           'gantt_colmnum'     => $M->find('gantt_colmnum')->pg_conf_value(),
+           'gantt_scale_str'   => $M->find('gantt_scale_str')->pg_conf_value(),
+           'gantt_color_str'   => $M->find('gantt_color_str')->pg_conf_value(),
+           'shift_hour'        => $c->config->{time_origin},
+       };
+       $c->stash->{'syscon'} = $syscon;
+       # 未設定企画リスト
+       my $unsetPgmlist =
+           [ $c->model('ConkanDB::PgProgram')->search(
+               [
+                   { 'roomid' => \'IS NULL' },
+                   { 'date1'  => \'IS NULL' },
+                   { 'stime1' => \'IS NULL' },
+                   { 'etime1' => \'IS NULL' }
+               ],
+               {
+                   'prefetch' => [ 'regpgid' ],
+                   'order_by' => { '-asc' => [ 'me.regpgid', 'me.subno'] },
+               } )
+           ];
+       my @unsetlist = ();
+       foreach my $pgm ( @$unsetPgmlist ) {
+           push @unsetlist, {
+               'regpgid'       => $pgm->regpgid->regpgid(),
+               'pgid'          => $pgm->pgid(),
+               'subno'         => $pgm->subno(),
+               'sname'         => $pgm->sname() || $pgm->regpgid->name(),
+               'status'        => $pgm->status(),
+           };
+       }
+       $c->stash->{'unsetProgram'} = \@unsetlist;
+       # 部屋別企画リスト
+       my $roomPgmlist =
+           [ $c->model('ConkanDB::PgProgram')->search(
+               { 'me.roomid' => \'IS NOT NULL',
+                 'date1'  => \'IS NOT NULL', 
+                 'stime1' => \'IS NOT NULL', 
+                 'etime1' => \'IS NOT NULL' 
+               },
+               {
+                   'prefetch' => [ 'roomid', 'regpgid' ],
+                   'order_by' => { '-asc' => [ 'me.roomid' ] },
+               } )
+           ];
+       my @roomlist = ();
+       foreach my $pgm ( @$roomPgmlist ) {
+           my $doperiod = $c->forward('/timetable/createPeriod', [ $pgm, ], );
+           push @roomlist, {
+               'roomid'        => $pgm->roomid->roomid(),
+               'roomname'      => $pgm->roomid->name(),
+               'roomno'        => $pgm->roomid->roomno(),
+               'regpgid'       => $pgm->regpgid->regpgid(),
+               'pgid'          => $pgm->pgid(),
+               'subno'         => $pgm->subno(),
+               'sname'         => $pgm->sname() || $pgm->regpgid->name(),
+               'doperiod'      => $doperiod,
+               'status'        => $pgm->status(),
+           };
+       }
+       $c->stash->{'roomProgram'} = \@roomlist;
+       # 出演者別企画リスト
+       my $castPgmlist =
+           [ $c->model('ConkanDB::PgProgram')->search(
+               { 'me.roomid' => \'IS NOT NULL',
+                 'date1'  => \'IS NOT NULL', 
+                 'stime1' => \'IS NOT NULL', 
+                 'etime1' => \'IS NOT NULL' 
+               },
+               {
+                   'prefetch' => [ 'pg_casts', 'regpgid', 'roomid' ],
+                   'order_by' => { '-asc' => [ 'pg_casts.castid' ] },
+               } )
+           ];
+       my @castlist = ();
+       foreach my $pgm ( @$castPgmlist ) {
+           my $doperiod = $c->forward('/timetable/createPeriod', [ $pgm, ], );
+   
+           foreach my $cast ( $pgm->pg_casts->all() ) {
+               push @castlist, {
+                   'regno'         => $cast->castid->regno(),
+                   'castname'      => $cast->name() || $cast->castid->name(),
+                   'regpgid'       => $pgm->regpgid->regpgid(),
+                   'pgid'          => $pgm->pgid(),
+                   'subno'         => $pgm->subno(),
+                   'sname'         => $pgm->sname() || $pgm->regpgid->name(),
+                   'roomno'        => $pgm->roomid->roomno(),
+                   'roomname'      => $pgm->roomid->name(),
+                   'doperiod'      => $doperiod,
+                   'status'        => $pgm->status(),
+               };
+           }
+       }
+       $c->stash->{'castProgram'} = \@castlist;
+    } catch {
+        $c->detach( '_dberror', [ shift ] );
     };
-    $c->stash->{'syscon'} = $syscon;
-    # 未設定企画リスト
-    my $unsetPgmlist =
-        [ $c->model('ConkanDB::PgProgram')->search(
-            [
-                { 'roomid' => \'IS NULL' },
-                { 'date1'  => \'IS NULL' },
-                { 'stime1' => \'IS NULL' },
-                { 'etime1' => \'IS NULL' }
-            ],
-            {
-                'prefetch' => [ 'regpgid' ],
-                'order_by' => { '-asc' => [ 'me.regpgid', 'me.subno'] },
-            } )
-        ];
-    my @unsetlist = ();
-    foreach my $pgm ( @$unsetPgmlist ) {
-        push @unsetlist, {
-            'regpgid'       => $pgm->regpgid->regpgid(),
-            'pgid'          => $pgm->pgid(),
-            'subno'         => $pgm->subno(),
-            'sname'         => $pgm->sname() || $pgm->regpgid->name(),
-            'status'        => $pgm->status(),
-        };
-    }
-    $c->stash->{'unsetProgram'} = \@unsetlist;
-    # 部屋別企画リスト
-    my $roomPgmlist =
-        [ $c->model('ConkanDB::PgProgram')->search(
-            { 'me.roomid' => \'IS NOT NULL',
-              'date1'  => \'IS NOT NULL', 
-              'stime1' => \'IS NOT NULL', 
-              'etime1' => \'IS NOT NULL' 
-            },
-            {
-                'prefetch' => [ 'roomid', 'regpgid' ],
-                'order_by' => { '-asc' => [ 'me.roomid' ] },
-            } )
-        ];
-    my @roomlist = ();
-    foreach my $pgm ( @$roomPgmlist ) {
-        my $doperiod = $c->forward('/timetable/createPeriod', [ $pgm, ], );
-        push @roomlist, {
-            'roomid'        => $pgm->roomid->roomid(),
-            'roomname'      => $pgm->roomid->name(),
-            'roomno'        => $pgm->roomid->roomno(),
-            'regpgid'       => $pgm->regpgid->regpgid(),
-            'pgid'          => $pgm->pgid(),
-            'subno'         => $pgm->subno(),
-            'sname'         => $pgm->sname() || $pgm->regpgid->name(),
-            'doperiod'      => $doperiod,
-            'status'        => $pgm->status(),
-        };
-    }
-    $c->stash->{'roomProgram'} = \@roomlist;
-    # 出演者別企画リスト
-    my $castPgmlist =
-        [ $c->model('ConkanDB::PgProgram')->search(
-            { 'me.roomid' => \'IS NOT NULL',
-              'date1'  => \'IS NOT NULL', 
-              'stime1' => \'IS NOT NULL', 
-              'etime1' => \'IS NOT NULL' 
-            },
-            {
-                'prefetch' => [ 'pg_casts', 'regpgid', 'roomid' ],
-                'order_by' => { '-asc' => [ 'pg_casts.castid' ] },
-            } )
-        ];
-    my @castlist = ();
-    foreach my $pgm ( @$castPgmlist ) {
-        my $doperiod = $c->forward('/timetable/createPeriod', [ $pgm, ], );
-
-        foreach my $cast ( $pgm->pg_casts->all() ) {
-            push @castlist, {
-                'regno'         => $cast->castid->regno(),
-                'castname'      => $cast->name() || $cast->castid->name(),
-                'regpgid'       => $pgm->regpgid->regpgid(),
-                'pgid'          => $pgm->pgid(),
-                'subno'         => $pgm->subno(),
-                'sname'         => $pgm->sname() || $pgm->regpgid->name(),
-                'roomno'        => $pgm->roomid->roomno(),
-                'roomname'      => $pgm->roomid->name(),
-                'doperiod'      => $doperiod,
-                'status'        => $pgm->status(),
-            };
-        }
-    }
-    $c->stash->{'castProgram'} = \@castlist;
 }
 
 =head2 createPeriod
@@ -266,44 +270,45 @@ sub timetable_get : Chained('timetable_base') :PathPart('') :Args(1) {
                         );
         my $regpgid = $row->regpgid->regpgid();
         if ( $c->request->method eq 'GET' ) {
+            my $prog = {};
             # 更新表示
-            $c->stash->{'regpgid'}  = $regpgid;
-            $c->stash->{'subno'}    = $row->subno();
-            $c->stash->{'pgid'}     = $row->pgid();
-            $c->stash->{'sname'}    = $row->sname();
-            $c->stash->{'name'}     = $row->regpgid->name() if ( $regpgid );
+            $prog->{'regpgid'}  = $regpgid;
+            $prog->{'subno'}    = $row->subno();
+            $prog->{'pgid'}     = $row->pgid();
+            $prog->{'sname'}    = $row->sname();
+            $prog->{'name'}     = $row->regpgid->name() if ( $regpgid );
             $c->forward('/program/_trnSEtime', [ $row, ], );
             if ( $row->date1() ) {
                 my @date  = split('T', $row->date1());
                 $date[0] =~ s[-][/]g;
-                $c->stash->{'date1'}    = $date[0];
-                $c->stash->{'shour1'}   = "$row->{'shour1'}";
-                $c->stash->{'smin1'}    = "$row->{'smin1'}";
-                $c->stash->{'ehour1'}   = "$row->{'ehour1'}";
-                $c->stash->{'emin1'}    = "$row->{'emin1'}";
+                $prog->{'date1'}    = $date[0];
+                $prog->{'shour1'}   = "$row->{'shour1'}";
+                $prog->{'smin1'}    = "$row->{'smin1'}";
+                $prog->{'ehour1'}   = "$row->{'ehour1'}";
+                $prog->{'emin1'}    = "$row->{'emin1'}";
             }
             if ( $row->date2() ) {
                 my @date  = split('T', $row->date2());
                 $date[0] =~ s[-][/]g;
-                $c->stash->{'date2'}    = $date[0];
-                $c->stash->{'shour2'}   = "$row->{'shour2'}";
-                $c->stash->{'smin2'}    = "$row->{'smin2'}";
-                $c->stash->{'ehour2'}   = "$row->{'ehour2'}";
-                $c->stash->{'emin2'}    = "$row->{'emin2'}";
+                $prog->{'date2'}    = $date[0];
+                $prog->{'shour2'}   = "$row->{'shour2'}";
+                $prog->{'smin2'}    = "$row->{'smin2'}";
+                $prog->{'ehour2'}   = "$row->{'ehour2'}";
+                $prog->{'emin2'}    = "$row->{'emin2'}";
             }
-            $c->stash->{'status'}   = $row->status();
-            $c->stash->{'layerno'}  = $row->layerno();
-            $c->stash->{'staffid'}  = $row->staffid->staffid()
+            $prog->{'status'}   = $row->status();
+            $prog->{'layerno'}  = $row->layerno();
+            $prog->{'staffid'}  = $row->staffid->staffid()
                 if ( $row->staffid() );
-            $c->stash->{'roomid'}   = $row->roomid->roomid()
+            $prog->{'roomid'}   = $row->roomid->roomid()
                 if ( $row->roomid() );
-            $c->stash->{'memo'}     = $row->memo();
-            $c->stash->{'progressprp'} = $row->progressprp();
-            $c->stash->{'csid'} = $c->user->get('staffid');
-            $c->stash->{'crole'} = $c->user->get('role');
-            if (  ( $c->stash->{'crole'} eq 'ROOT' )
-               || ( $c->stash->{'crole'} eq 'PG'   )
-               || ( $c->stash->{'staffid'} eq $c->stash->{'csid'} )
+            $prog->{'memo'}     = $row->memo();
+            $prog->{'progressprp'} = $row->progressprp();
+            $prog->{'csid'} = $c->user->get('staffid');
+            $prog->{'crole'} = $c->user->get('role');
+            if (  ( $prog->{'crole'} eq 'ROOT' )
+               || ( $prog->{'crole'} eq 'PG'   )
+               || ( $prog->{'staffid'} eq $prog->{'csid'} )
               ) {
                # システム管理者/企画管理者/担当企画の場合、更新可能
                 $c->session->{'updtic'} = time;
@@ -311,10 +316,11 @@ sub timetable_get : Chained('timetable_base') :PathPart('') :Args(1) {
                     'updateflg' => $c->sessionid . $c->session->{'updtic'}
                 } );
             }
+            $c->stash->{'json'} = $prog;
+            $c->stash->{'status'} = 'ok';
         }
         else {
             # 更新実施
-            $c->component('View::JSON')->{expose_stash} = undef;
             if ( $row->updateflg eq 
                     +( $c->sessionid . $c->session->{'updtic'}) ) {
                 my $items = [ qw/
@@ -328,8 +334,9 @@ sub timetable_get : Chained('timetable_base') :PathPart('') :Args(1) {
                 $c->stash->{'status'} = 'update';
             }
             else {
-$c->log->info('updateflg: db: ' . $row->updateflg);
-$c->log->info('updateflg: cu: ' . +( $c->sessionid . $c->session->{'updtic'}) );
+                $c->log->info('updateflg: db: ' . $row->updateflg);
+                $c->log->info('updateflg: cu: ' . $c->sessionid);
+                $c->log->info('                   ' . $c->session->{'updtic'} );
                 $c->stash->{'status'} = 'fail';
             }
         }
@@ -339,7 +346,23 @@ $c->log->info('updateflg: cu: ' . +( $c->sessionid . $c->session->{'updtic'}) );
             ' dbexp : ' . Dumper($e) );
         $c->stash->{'status'} = 'dbfail';
     };
+    $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
+}
+
+=head2 _dberror
+
+DBエラー表示
+
+=cut
+
+sub _dberror :Private {
+    my ( $self, $c, $e) = @_; 
+    $c->log->error('>>> ' . localtime() . ' Timetable:dbexp : ' . Dumper($e) );
+    $c->clear_errors();
+    my $body = $c->response->body() || Dumper( $e );
+    $c->response->body('<FORM>DBエラー<br/><pre>' . $body . '</pre></FORM>');
+    $c->response->status(200);
 }
 
 =encoding utf8

@@ -133,14 +133,14 @@
         ];
         $http.get('/config/room/listget')
         .success(function(data) {
-          $scope.roomgrid.data = data.json;
+          if ( data.status === 'ok' ) {
+            $scope.roomgrid.data = data.json;
+          }
+          else {
+            openDialog( data.status );
+          }
         })
-        .error(function(data) {
-          var modalinstance = $uibModal.open(
-            { templateUrl : 'T_httpget_fail' }
-          );
-          modalinstance.result.then( function() {} );
-        });
+        .error( httpfailDlg );
       }
     ]
   );

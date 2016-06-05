@@ -95,14 +95,14 @@
         var url = '/program/listget' + ( allprg ? '_a' : '_r' );
         $http.get(url)
         .success(function(data) {
-          $scope.proggrid.data = data.json;
+          if ( data.status === 'ok' ) {
+            $scope.proggrid.data = data.json;
+          }
+          else {
+            openDialog( data.status );
+          }
         })
-        .error(function(data) {
-          var modalinstance = $uibModal.open(
-            { templateUrl : 'T_httpget_fail' }
-          );
-          modalinstance.result.then( function() {} );
-        });
+        .error( httpfailDlg );
       }
     ]
   );

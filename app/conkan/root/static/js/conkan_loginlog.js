@@ -30,7 +30,12 @@
 
         $http.get('/config/loginlogget')
         .success(function (data) {
-          $scope.lloggrid.data = data.json;
+          if ( data.status === 'ok' ) {
+            $scope.lloggrid.data = data.json;
+          }
+          else {
+            openDialog( data.status );
+          }
         })
         .error(function(data) {
           var modalinstance = $uibModal.open(

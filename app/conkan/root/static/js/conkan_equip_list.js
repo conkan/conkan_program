@@ -19,7 +19,12 @@
         // 初期値設定
         $http.get('/config/equip/listget')
         .success(function(data) {
-          $scope.equipgrid.data = data.json;
+          if ( data.status === 'ok' ) {
+            $scope.equipgrid.data = data.json;
+          }
+          else {
+            openDialog( data.status );
+          }
         })
         .error( httpfailDlg );
 
@@ -96,15 +101,20 @@
           url     : '/config/equip/' + $scope.equipid
         })
         .success(function(data) {
-          $scope.equip = {
-            equipid : data.json.equipid,
-            name    : data.json.name,
-            equipno : data.json.equipno,
-            spec    : data.json.spec,
-            comment : data.json.comment,
-            rmdate  : data.json.rmdate,
-          };
-          dialogResizeDrag();
+          if ( data.status === 'ok' ) {
+            $scope.equip = {
+              equipid : data.json.equipid,
+              name    : data.json.name,
+              equipno : data.json.equipno,
+              spec    : data.json.spec,
+              comment : data.json.comment,
+              rmdate  : data.json.rmdate,
+            };
+            dialogResizeDrag();
+          }
+          else {
+            openDialog( data.status );
+          }
         })
         .error( httpfailDlg );
         // 更新実施

@@ -245,7 +245,7 @@ var doJsonPost = function( $http, url, data, $uibModalInstance, $uibModal ) {
     var resultDlg = $uibModal.open(
       {
         templateUrl : getTemplate( stat ),
-        backdrop    : true,
+        backdrop    : 'static',
       }
     );
     resultDlg.rendered.then( function() {
