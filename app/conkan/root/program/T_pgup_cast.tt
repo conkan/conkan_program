@@ -25,7 +25,7 @@
             <th style="background-color:#FFcc66">
               企画ID: <span ng-cloak>{{prog.regpgid}}({{prog.subno}})</span>
             </th>
-            <th style="background-color:#FFcc66" colspan="3">
+            <th style="background-color:#FFcc66" colspan="4">
               <span ng-cloak>{{prog.name}}</span>
             </th>
           </tr>

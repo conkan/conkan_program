@@ -62,7 +62,7 @@
     needreload = true;
   } );
 
-  // conkanRoomListモジュールの生成(グローバル変数)
+  // conkanRoomListモジュールの生成
   var ConkanAppModule = angular.module('conkanRoomList',
     ['ui.grid', 'ui.grid.resizeColumns', 'ui.bootstrap'] );
 

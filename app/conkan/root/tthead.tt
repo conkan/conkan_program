@@ -78,6 +78,7 @@
             <li id="config_conf"><a href="/config/setting">設定</a></li>
           [%- END -%]
           [%- IF pglistsel == 'ACT' %]
+            <!- 企画選択ツール ->
             <li ng-controller="pglistselController">
               <a><select name="pgdetailsel" ng-model="pgdetailsel"
                 ng-options="i.id as i.val for i in pgsellist">

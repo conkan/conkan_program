@@ -46,6 +46,10 @@
     margin-bottom: 10px;
 }
 
+#profform label {
+    text-align: right;
+}
+
 .container {
     min-width: 1100px;
 }

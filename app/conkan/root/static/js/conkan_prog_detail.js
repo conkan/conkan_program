@@ -61,7 +61,7 @@
         })
         .error( httpfailDlg );
 
-        // 企画要望更新フォームダイアログ
+        // 企画要望更新ダイアログ
         $scope.openRegPgEditForm = function( pgid ) {
           $scope.pgid = pgid;
           $uibModal.open({
@@ -73,7 +73,7 @@
           });
         };
 
-        // 企画更新フォームダイアログ
+        // 企画更新ダイアログ
         $scope.openPgEditForm = function( pgid ) {
           $scope.pgid = pgid;
           $uibModal.open({
@@ -85,7 +85,7 @@
           });
         };
 
-        // 要望出演者追加フォームダイアログ
+        // 要望出演者追加ダイアログ
         $scope.openRegCastForm = function( regpgid, subno, pgid, name ) {
           $scope.prog = {
             regpgid : regpgid,
@@ -102,7 +102,7 @@
           });
         };
 
-        // 決定出演者追加フォームダイアログ
+        // 決定出演者追加ダイアログ
         $scope.openCastEditForm = function( regpgid, subno, pgid, name, castid ) {
           $scope.prog = {
             regpgid     : regpgid,
@@ -121,9 +121,8 @@
           });
         };
 
-        // 決定機材更新追加フォームダイアログ
+        // 決定機材更新追加ダイアログ
         $scope.openEquipForm = function( regpgid, subno, pgid, name, equipid ) {
-          // フォーム表示に必要な情報設定
           $scope.prog = {
             regpgid     : regpgid,
             subno       : subno,
@@ -145,7 +144,7 @@
     ]
   );
 
-  // 企画要望更新フォームダイアログコントローラ
+  // 企画要望更新ダイアログコントローラ
   ConkanAppModule.controller( 'regProgFormController',
     [ '$scope', '$http', '$uibModal', '$uibModalInstance',
       function( $scope, $http, $uibModal, $uibModalInstance ) {
@@ -205,7 +204,7 @@
     ]
   );
 
-  // 企画更新フォームダイアログコントローラ
+  // 企画更新ダイアログコントローラ
   ConkanAppModule.controller( 'progFormController',
     [ '$scope', '$http', '$uibModal', '$uibModalInstance',
       function( $scope, $http, $uibModal, $uibModalInstance ) {
@@ -266,7 +265,7 @@
     ]
   );
 
-  // 要望出演者追加フォームダイアログコントローラ
+  // 要望出演者追加ダイアログコントローラ
   ConkanAppModule.controller( 'regcastFormController',
     [ '$scope', '$http', '$uibModal', '$uibModalInstance',
       function( $scope, $http, $uibModal, $uibModalInstance ) {
@@ -301,7 +300,7 @@
     ]
   );
 
-  // 決定出演者編集フォームダイアログコントローラ
+  // 決定出演者編集ダイアログコントローラ
   ConkanAppModule.controller( 'castFormController',
     [ '$scope', '$http', '$uibModal', '$uibModalInstance',
       function( $scope, $http, $uibModal, $uibModalInstance ) {
@@ -387,7 +386,7 @@
   a2h( IfOptions.aif.concat([undefined]), IfOptions.aifH );
   a2h( IfOptions.eif.concat([undefined]), IfOptions.eifH );
 
-  // 決定機材更新追加フォームダイアログコントローラ
+  // 決定機材更新追加ダイアログコントローラ
   ConkanAppModule.controller( 'equipFormController',
     [ '$scope', '$http', '$uibModal', '$uibModalInstance',
       function( $scope, $http, $uibModal, $uibModalInstance ) {
@@ -492,7 +491,7 @@
     ]
   );
 
-  // 進捗リストコントローラ
+  // 進捗表示グリッドコントローラ
   ConkanAppModule.controller( 'progressListController',
     [ '$scope', '$sce', '$http', '$uibModal', 'uiGridConstants',
       function( $scope, $sce, $http, $uibModal, uiGridConstants ) {

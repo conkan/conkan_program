@@ -60,7 +60,7 @@ END -%]
             <col class="col-sm-1">
             <col class="col-sm-3">
           </colgroup>
-          <tbody>
+          <tbody class="ral">
             <tr>
               <input type="hidden" ng-model="current.pgid">
             </tr>
@@ -76,18 +76,18 @@ END -%]
                   </span>
                 </div>
               </td>
-              <th style="text-align: right">企画名</th>
-              <th colspan="3">
+              <th>企画名</th>
+              <td colspan="3">
                 <a href="/timetable/detail/{{current.pgid}}">
                   <span class="prgname" ng-cloak>{{current.name}}</span>
                 </a>
-              </th>
+              </td>
               <td colspan="2">
                 <span class="prgname" ng-cloak>{{current.sname}}</span>
               </td>
             </tr>
             <tr>
-              <th style="text-align: right">日時1</th>
+              <th>日時1</th>
               <td>
                 <select class="col-sm-12" name="dh1date"
                   ng-disabled="current.noteditable" ng-model="current.date1"
@@ -108,7 +108,7 @@ END -%]
                   ng-disabled="current.noteditable" ng-model="current.emin1"
                   ng-options="i for i in conf.mins"></select>
               </td>
-              <th style="text-align: right">日時2</th>
+              <th>日時2</th>
               <td colspan="2">
                 <select class="col-sm-12" name="dh2date"
                   ng-disabled="current.noteditable" ng-model="current.date2"
@@ -131,13 +131,13 @@ END -%]
               </td>
             </tr>
             <tr>
-              <th style="text-align: right">場所</th>
+              <th>場所</th>
               <td colspan="2">
                 <select class="col-sm-12"
                   ng-disabled="current.noteditable" ng-model="current.roomid"
                   ng-options="i.id as i.val for i in conf.roomlist"></select>
               </td>
-              <th style="text-align: right" colspan="2">実行ステータス</th>
+              <th colspan="2">実行ステータス</th>
               <td>
                 <select class="col-sm-12"
                   ng-disabled="current.noteditable" ng-model="current.status"

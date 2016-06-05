@@ -7,54 +7,8 @@
     angular.element(document).scrollTop( storage.getItem( 'sctop' ) );
     storage.clear();
   });
-  // モーダルダイアログ表示
-  angular.element('#editCast').on('show.bs.modal', function (event) {
-    var castid = angular.element(event.relatedTarget).data('whatever');
-    var content = angular.element('#editCastContent');
-    needreload = false;
-    angular.element(content).load(castid + '/ FORM');
-    if ( angular.element(event.relatedTarget).data('rmcol') ) {
-      angular.element('#dobtn').hide();
-      angular.element('#dodel').hide();
-    }
-    else {
-      angular.element('#dobtn').show();
-      angular.element('#dodel').show();
-    }
-  } );
-  // モーダルダイアログ非表示
-  angular.element('#editCast').on('hide.bs.modal', function (event) {
-    storage.setItem( 'sctop', angular.element(document).scrollTop() );
-    if ( needreload ) {
-      location.reload(true);
-    }
-  } );
-  // 更新
-  angular.element('#dobtn').click(function(event) {
-    if (!angular.element('#name').val()) {
-      angular.element('#valerr').text('氏名は必須です');
-      return false;
-    }
-    var content = angular.element('#editCastContent');
-    var data = angular.element('#castform').serializeArray();
-    var castid = angular.element('#castid').val();
-    angular.element('#dobtn').hide();
-    angular.element('#dodel').hide();
-    angular.element(content).load(castid + '/edit/ FORM', data );
-    needreload = true;
-  } );
-  // 削除
-  angular.element('#dodel').click(function(event) {
-    var content = angular.element('#editCastContent');
-    var data = angular.element('#castform').serializeArray();
-    var castid = angular.element('#castid').val();
-    angular.element('#dobtn').hide();
-    angular.element('#dodel').hide();
-    angular.element(content).load(castid + '/del/ FORM', data );
-    needreload = true;
-  } );
 
-  // conkanCastListモジュールの生成(グローバル変数)
+  // conkanCastListモジュールの生成
   var ConkanAppModule = angular.module('conkanCastList',
       ['ui.grid', 'ui.grid.resizeColumns', 'ui.bootstrap'] );
 
@@ -62,14 +16,17 @@
   ConkanAppModule.controller( 'castListController',
     [ '$scope', '$sce', '$http', '$uibModal',
       function( $scope, $sce, $http, $uibModal ) {
-        $scope.__getEditbtn = function( rmdate, castid ) {
-          var cont = uiGetEditbtn( rmdate, '#editCast',
-                      [ { 'key' : 'whatever', 'val' : castid },
-                        { 'key' : 'rmcol', 'val' : rmdate } ] );
-          var wkstr = $sce.trustAsHtml( cont );
-          return wkstr;
-        };
-      
+        $http.get('/config/cast/listget')
+        .success(function(data) {
+          if ( data.status === 'ok' ) {
+            $scope.castgrid.data = data.json;
+          }
+          else {
+            openDialog( data.status );
+          }
+        })
+        .error( httpfailDlg );
+
         $scope.castgrid = {
           enableFiltering: false,
           enableSorting: true,
@@ -135,26 +92,80 @@
                 enableSorting: false,
                 enableHiding: false,
                 cellTemplate: '<div class="gridcelbtn">'
-                            +   '<span ng-bind-html="grid.appScope.__getEditbtn'
-                            +     '(row.entity.rmdate, row.entity.castid)">'
-                            +   '</span></div>'
+                          + '<button ng-if="row.entity.rmdate"'
+                          +   'type="button" class="btn btn-xs">無効</button>'
+                          + '<button ng-if="!row.entity.rmdate"'
+                          +   'type="button" class="btn btn-xs btn-primary" '
+                          +   'ng-click="grid.appScope.openAllCastForm'
+                          +   '(row.entity.castid)">編集</button>'
             },
         ];
-        $http.get('/config/cast/listget')
+
+        // 出演者更新追加ダイアログ
+        $scope.openAllCastForm = function( castid ) {
+          $scope.castid = castid;
+          $scope.applyBtnLbl = ( castid === 0 ) ? '追加' : '更新';
+          $uibModal.open({
+            templateUrl : 'T_cast_detail',
+            controller  : 'allcastFormController',
+            backdrop    : 'static',
+            scope       : $scope,
+            size        : 'lg',
+          });
+        };
+      }
+    ]
+  );
+  
+  // 出演者更新追加ダイアログコントローラ
+  ConkanAppModule.controller( 'allcastFormController',
+    [ '$scope', '$http', '$uibModal', '$uibModalInstance',
+      function( $scope, $http, $uibModal, $uibModalInstance ) {
+        // 初期値設定
+        angular.element('#valerr').text('');
+        $http({
+          method  : 'GET',
+          url     : '/config/cast/' + $scope.castid
+        })
         .success(function(data) {
           if ( data.status === 'ok' ) {
-            $scope.castgrid.data = data.json;
+            $scope.cast = {
+              castid    : data.json.castid,
+              regno     : data.json.regno,
+              name      : data.json.name,
+              namef     : data.json.namef,
+              status    : data.json.status,
+              memo      : data.json.memo,
+              restdate  : data.json.restdate,
+              rmdate    : data.json.rmdate,
+            };
+            $scope.statlist = data.statlist;
+            dialogResizeDrag();
           }
           else {
             openDialog( data.status );
           }
         })
-        .error(function(data) {
-          var modalinstance = $uibModal.open(
-               { templateUrl : 'T_httpget_fail' }
-          );
-          modalinstance.result.then( function() {} );
-        });
+        .error( httpfailDlg );
+        // 更新実施
+        $scope.castDoApply = function() {
+          // 二重クリック回避
+          angular.element('#castapplybtn').attr('disabled', 'disabled');
+          angular.element('#castdelbtn').attr('disabled', 'disabled');
+          // バリデーション
+          //    現在なし
+          // 実行
+          doJsonPost( $http, '/config/cast/' + $scope.cast.castid + '/edit',
+                      $.param($scope.cast), $uibModalInstance, $uibModal);
+        };
+        // 削除実施
+        $scope.castDoDel = function() {
+          // 二重クリック回避
+          angular.element('#castapplybtn').attr('disabled', 'disabled');
+          angular.element('#castdelbtn').attr('disabled', 'disabled');
+          doJsonPost( $http, '/config/cast/' + $scope.cast.castid + '/del',
+                      undefined, $uibModalInstance, $uibModal);
+        };
       }
     ]
   );

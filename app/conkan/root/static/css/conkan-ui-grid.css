@@ -44,6 +44,10 @@
     overflow-y: auto;
 }
 
+.ral th {
+    text-align: right;
+}
+
 #progresslist {
     height: 212px;
     /* ui-Gridのデフォルト行高さ * ( 1ページ行数 + ヘッダ行 ) + panel高  */

@@ -8,7 +8,7 @@
     storage.clear();
   });
 
-  // conkanEquipListモジュールの生成(グローバル変数)
+  // conkanEquipListモジュールの生成
   var conkanAppModule = angular.module('conkanEquipList',
       ['ui.grid', 'ui.grid.resizeColumns', 'ui.bootstrap'] );
 
@@ -90,7 +90,7 @@
     ]
   );
   
-  // 機材詳細更新追加フォームコントローラ
+  // 機材詳細更新追加ダイアログコントローラ
   conkanAppModule.controller( 'allequipFormController',
     [ '$scope', '$http', '$uibModal', '$uibModalInstance',
       function( $scope, $http, $uibModal, $uibModalInstance ) {

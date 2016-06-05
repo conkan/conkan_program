@@ -59,7 +59,7 @@
     needreload = true;
   });
 
-  // conkanStaffListモジュールの生成(グローバル変数)
+  // conkanStaffListモジュールの生成
   var ConkanAppModule = angular.module('conkanStaffList',
     ['ui.grid', 'ui.grid.resizeColumns', 'ui.bootstrap'] );
 

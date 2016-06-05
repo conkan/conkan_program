@@ -810,29 +810,38 @@ sub cast_show : Chained('cast_base') :PathPart('') :CaptureArgs(1) {
     
     # castテーブルに対応したmodelオブジェクト取得
     $c->stash->{'M'}   = $c->model('ConkanDB::PgAllCast');
-    my $rowcast;
-    if ( $castid != 0 ) {
-        $rowcast = $c->stash->{'M'}->find($castid);
-        $c->session->{'updtic'} = time;
-        $rowcast->update( { 
-            'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
-        } );
-    }
-    else {
-        $rowcast = {
-            'castid'    => 0,
-        };
-    }
-    if ( $c->request->method eq 'GET' ) {
-        my $M = $c->model('ConkanDB::PgSystemConf');
-        $c->stash->{'statlist'}  = [
-            { 'id' => '', 'val' => '' },
-            map +{ 'id' => $_, 'val' => $_ },
-               @{from_json( $M->find('contact_status_vals')->pg_conf_value() )}
+    try {
+        my $rowcast;
+        if ( $castid != 0 ) {
+            $rowcast = $c->stash->{'M'}->find($castid);
+            $c->session->{'updtic'} = time;
+            $rowcast->update( { 
+                'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
+            } );
+        }
+        else {
+            $rowcast = {
+                'castid'    => 0,
+            };
+        }
+        my $statlist = ();
+        if ( $c->request->method eq 'GET' ) {
+            my $statlistval = $c->model('ConkanDB::PgSystemConf')
+                                ->find('contact_status_vals')->pg_conf_value();
+            $statlist = [
+                map +{ 'id' => $_, 'val' => $_ }, @{from_json( $statlistval ) }
             ];
-    }
-    $c->stash->{'rs'} = $rowcast;
-    $c->stash->{'castid'} = $castid;
+        }
+        $c->stash->{'rs'} = $rowcast;
+        $c->stash->{'castid'} = $castid;
+        $c->stash->{'statlist'} = $statlist;
+        $c->stash->{'status'} = 'ok';
+    } catch {
+        my $e = shift;
+        $c->log->error('config/cast error ' . localtime() .
+            ' dbexp : ' . Dumper($e) );
+        $c->stash->{'status'} = 'dbfail';
+    };
 }
 
 =head2 cast/*
@@ -843,6 +852,27 @@ sub cast_show : Chained('cast_base') :PathPart('') :CaptureArgs(1) {
 
 sub cast_detail : Chained('cast_show') : PathPart('') : Args(0) {
     my ( $self, $c ) = @_;
+    my $rs = $c->stash->{'rs'};
+    if ( $c->stash->{'castid'} != 0 ) {
+        $c->stash->{'json'} = {
+            castid      => $c->stash->{'castid'},
+            regno       => $rs->regno(),
+            name        => $rs->name(),
+            namef       => $rs->namef(),
+            status      => $rs->status(),
+            memo        => $rs->memo(),
+            restdate    => $rs->restdate(),
+            rmdate      => $rs->rmdate(),
+        };
+    }
+    else {
+        $c->stash->{'json'} = {
+            castid => 0,
+        };
+    }
+    $c->component('View::JSON')->{expose_stash} = 
+        [ 'json', 'statlist', 'status' ];
+    $c->forward('conkan::View::JSON');
 }
 
 =head2 cast/*/edit
@@ -862,7 +892,9 @@ sub cast_edit : Chained('cast_show') : PathPart('edit') : Args(0) {
     }
     else {
         my $items = [ qw/ regno name namef status memo restdate / ];
-        $c->detach( '_updatecreate', [ $castid, $items, 1 ] );
+        $c->forward( '_updatecreate', [ $castid, $items, 0 ] );
+        $c->component('View::JSON')->{expose_stash} = [ 'status' ];
+        $c->forward('conkan::View::JSON');
     }
 }
 
@@ -877,10 +909,12 @@ sub cast_del : Chained('cast_show') : PathPart('del') : Args(0) {
     my $castid = $c->stash->{'castid'};
     # GETはおそらく直打ちとかなので再度
     if ( $c->request->method eq 'GET' ) {
-        $c->go->( '/config/room/' . $castid );
+        $c->go->( '/config/cast/' . $castid );
     }
     else {
-        $c->detach( '_delete', [ $castid, 'PgCast', 'castid', 1 ] );
+        $c->forward( '_delete', [ $castid, 'PgCast', 'castid', 0 ] );
+        $c->component('View::JSON')->{expose_stash} = [ 'status' ];
+        $c->forward('conkan::View::JSON');
     }
 }
 

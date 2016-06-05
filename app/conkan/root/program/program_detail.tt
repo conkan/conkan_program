@@ -423,6 +423,7 @@ END -%]
       <textarea name="progress" class="col-sm-12" rows="3"></textarea>
       <button type="submit" class="btn btn-primary btn-xs">上記内容を進捗として追加</button>
     </FORM>
+    <!- 進捗表示グリッド ->
     <div id="gridlist" ng-controller="progressListController">
       <div id="progresslist" ui-grid="progressgrid" class="grid" ui-grid-resize-columns ui-grid-pagination>
       </div>

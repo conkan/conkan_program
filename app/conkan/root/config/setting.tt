@@ -17,35 +17,35 @@
     <FORM method="POST" class="form-horizontal" role="form" action="/config/setting" id="profform">
       <div style="COLOR:Red;" id="valerr"> </div>
       <div class="form-group">
-        <label class="col-sm-3 text-right">[% cnf.dates.pg_conf_name %]</label>
+        <label class="col-sm-3">[% cnf.dates.pg_conf_name %]</label>
         [% pguptextarea( 'dates', cnf.dates.pg_conf_value, 6, 1 ) %]
       </div>
       <div class="form-group">
-        <label class="col-sm-3 text-right">[% cnf.start_hours.pg_conf_name %]</label>
+        <label class="col-sm-3">[% cnf.start_hours.pg_conf_name %]</label>
         [% pguptextarea( 'start_hours', cnf.start_hours.pg_conf_value, 8, 1 ) %]
       </div>
       <div class="form-group">
-        <label class="col-sm-3 text-right">[% cnf.end_hours.pg_conf_name %]</label>
+        <label class="col-sm-3">[% cnf.end_hours.pg_conf_name %]</label>
         [% pguptextarea( 'end_hours', cnf.end_hours.pg_conf_value, 8, 1 ) %]
       </div>
       <div class="form-group">
-        <label class="col-sm-3 text-right">[% cnf.pg_status_vals.pg_conf_name %]</label>
+        <label class="col-sm-3">[% cnf.pg_status_vals.pg_conf_name %]</label>
         [% pguptextarea( 'pg_status_vals', cnf.pg_status_vals.pg_conf_value, 8 ) %]
       </div>
       <div class="form-group">
-        <label class="col-sm-3 text-right">[% cnf.pg_status_color.pg_conf_name %]</label>
+        <label class="col-sm-3">[% cnf.pg_status_color.pg_conf_name %]</label>
         [% pguptextarea( 'pg_status_color', cnf.pg_status_color.pg_conf_value, 8 ) %]
       </div>
       <div class="form-group">
-        <label class="col-sm-3 text-right">[% cnf.pg_active_status.pg_conf_name %]</label>
+        <label class="col-sm-3">[% cnf.pg_active_status.pg_conf_name %]</label>
         [% pguptextarea( 'pg_active_status', cnf.pg_active_status.pg_conf_value, 8 ) %]
       </div>
       <div class="form-group">
-        <label class="col-sm-3 text-right">[% cnf.cast_status_vals.pg_conf_name %]</label>
+        <label class="col-sm-3">[% cnf.cast_status_vals.pg_conf_name %]</label>
         [% pguptextarea( 'cast_status_vals', cnf.cast_status_vals.pg_conf_value, 8 ) %]
       </div>
       <div class="form-group">
-        <label class="col-sm-3 text-right">[% cnf.contact_status_vals.pg_conf_name %]</label>
+        <label class="col-sm-3">[% cnf.contact_status_vals.pg_conf_name %]</label>
         [% pguptextarea( 'contact_status_vals', cnf.contact_status_vals.pg_conf_value, 8, 4 ) %]
       </div>
       <div class="form-group">
