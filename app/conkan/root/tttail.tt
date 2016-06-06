@@ -3,6 +3,7 @@
   <HR/>
   [%- USE dumper(indent=1) -%]
   <pre>
+  Catalyst-version [% cver %]
   cuRole  [% cuRole %]
   acname  [% acname %]
   updstaff [% updstaff %]
@@ -16,6 +17,12 @@
   console.log( 'self_li_id:[% self_li_id -%]' );
 </script>
 [%- END -%]
+<div class="footer container" id="main-footer">
+  Development by volunteers at <a href="https://github.com/conkan" target="_blank">conkan GitHub</a>
+  | Project Founder <a href="http://www.s-rem.jp" target="_blank">Studio-REM</a>
+  | Applicable licenses <a href="http://www.perlfoundation.org/artistic_license_2_0" target="_blank">Artistic License 2.0</a>
+  | Powered by <a href="https://www.catalystframework.org" target="_blank">Catalyst [% cver %]</a>
+</div>
 <script type="text/javascript">
   // ナビのタブ アクティベイト
   $(document).ready(function() {
@@ -25,9 +32,18 @@
   // ナビのリサイズでBody開始位置を変える
   $(window).resize(function() {
     $(document.body).css('padding-top', $('#navbar').height()+30 );
-    [%- IF useUiGrid %]
-    uiGridResize();
-    [%- END %]
+    [% SWITCH self_li_id -%]
+      [%- CASE 'config_csv' -%]
+        uiPlainResize('#csvwrap');
+      [%- CASE 'timetable' -%]
+        // タイムテーブルは独自(conkan_timetable.js)リサイズ
+      [%- CASE DEFAULT -%]
+        [%- IF pglistsel == 'ACT' -%]
+          uiPlainResize('#detailwrap');
+        [%- ELSE -%]
+          uiGridResize();
+        [%- END -%]
+      [%- END -%]
   });
 </script>
 <!-- #End Region "tttail.tt" -->

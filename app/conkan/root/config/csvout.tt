@@ -307,9 +307,5 @@
   </div>
 </div> <!-- End of container ng-app "conkanCsvExport" -->
 [%- PROCESS 'tttail.tt' -%]
-<!--
-<script type="text/javascript">var allprg=true;</script>
-<script type="text/javascript" src="/static/js/conkan_csvexport.js"></script>
--->
 </body>
 </html>

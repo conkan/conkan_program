@@ -4,13 +4,14 @@
   // リサイズによるタイムテーブル領域の調整
   angular.element(window).resize(function() {
     var h,w,gh,
-      wh = window.innerHeight || angular.element(window).innerHeight(),
+      wh = angular.element(window).innerHeight(),
       updiv     = angular.element("#timetable_up"),
       downdiv   = angular.element("#timetable_down"),
       unsetwrap = angular.element("#unset_pglist_wrap"),
       timewrap  = angular.element("#timetable_wrap"),
+      footer = angular.element("#main-footer"),
       viewport  = angular.element("#timetable_wrap.ui-grid-viewport");
-    h = wh - ( updiv.offset().top + downdiv.height() );
+    h = wh - ( updiv.offset().top + downdiv.height() + footer.outerHeight() );
     updiv.css('height', h + 'px');
     updiv.css('max-height', h + 'px');
     updiv.css('min-height', h + 'px');

@@ -80,6 +80,7 @@
 
 #timetable_edit_div table {
     table-layout: fixed;
+    margin-bottom: 0px;
 }
 #timetable_edit_div th,
 #timetable_edit_div td {

@@ -1,12 +1,32 @@
 // conkan_ui_grid.js --- angular 共通関数群 ---
 /*esLint-env jquery, prototypejs */
+// 非グリッドのリサイズ
+var uiPlainResize = function ( target ) {
+  var h,gh,
+    wh = angular.element(window).innerHeight(),
+    welldiv = angular.element(target),
+    adddiv = angular.element("#pgAddDiv"),
+    footer = angular.element("#main-footer");
+  if ( welldiv.size() !== 0 ) {
+    h    = wh - ( welldiv.offset().top +
+                  parseFloat(welldiv.css('marginBottom')) +
+                  adddiv.outerHeight() +
+                  footer.outerHeight()
+                );
+    welldiv.css('height', h + 'px');
+    welldiv.css('min-height', h + 'px');
+    welldiv.css('max-height', h + 'px');
+  }
+};
+
 // グリッドのリサイズ
 var uiGridResize = function () {
   var h,gh,
-    wh = window.innerHeight || angular.element(window).innerHeight(),
+    wh = angular.element(window).innerHeight(),
     pgldiv = angular.element("#gridlist"),
     grddiv = angular.element("#gridlist .grid"),
     adddiv = angular.element("#pgAddDiv"),
+    footer = angular.element("#main-footer"),
     viewport = angular.element('#gridlist .ui-grid-viewport');
   if ( pgldiv.size() !== 0 ) {
     h    = wh - ( pgldiv.offset().top +
@@ -19,7 +39,9 @@ var uiGridResize = function () {
                   parseFloat(grddiv.css('borderTopWidth')) +
                   parseFloat(grddiv.css('borderBottomWidth')) +
                   parseFloat(adddiv.css('marginBottom')) +
-                  adddiv.outerHeight() );
+                  adddiv.outerHeight() +
+                  footer.outerHeight()
+                );
     grddiv.css('height', h + 'px');
     grddiv.css('max-height', h + 'px');
     grddiv.css('min-height', h + 'px');
@@ -211,26 +233,40 @@ var httpfailDlg = function() {
 
 // 共通のダイアログサイズ調整とドラッガブル化
 var dialogResizeDrag = function() {
-  angular.element('.modal-dialog').draggable({handle: '.modal-header'});
-  if ( angular.element('.modal-dialog').outerHeight()
-          < angular.element(window).height() ) {
+  var
+    dialog = angular.element('.modal-dialog'),
+    wh = angular.element(window).innerHeight();
+
+  dialog.draggable({handle: '.modal-header'});
+  if ( dialog.outerHeight() < wh ) {
     return;
   }
-  var dialog = angular.element('.modal-dialog');
-  if ( dialog.offset().top < parseInt(dialog.css('marginTop')) ) {
-    setTimeout( dialogResizeDrag, 300 ); // ui-modalのanimation(fade)値から
-    return;
-  }
-  var content = angular.element('.modal-body');
-  var vh = angular.element(window).height() -
-            ( content.offset().top + 1 +
-              angular.element('.modal-footer').outerHeight() +
-              parseInt( angular.element('.modal-dialog').css('marginTop')) +
-              parseInt( angular.element('.modal-dialog').css('marginBottom')) );
+
+  var
+    content = angular.element('.modal-content'),
+    header  = angular.element('.modal-header'),
+    body    = angular.element('.modal-body'),
+    footer  = angular.element('.modal-footer'); 
+
+  var vh = wh -
+            ( parseInt( dialog.css('marginTop')) +
+              parseInt( dialog.css('borderTop')) +
+              parseInt( dialog.css('paddingTop')) +
+              parseInt( content.css('marginTop')) +
+              parseInt( content.css('borderTop')) +
+              parseInt( content.css('paddingTop')) +
+              parseInt( body.css('marginTop')) +
+              parseInt( body.css('marginBottom')) +
+              parseInt( body.css('borderTop')) +
+              parseInt( body.css('borderBottom')) +
+              parseInt( body.css('paddingTop')) +
+              parseInt( body.css('paddingBottom')) +
+              header.outerHeight() +
+              footer.outerHeight() + 1 );
   if ( vh < parseInt(content.css('min-height')) ) {
     vh = parseInt(content.css('min-height'));
   }
-  content.css( 'height', vh );
+  body.css( 'height', vh );
 };
 
 // JSON POST汎用実施

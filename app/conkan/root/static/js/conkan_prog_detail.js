@@ -8,10 +8,14 @@
   });
   // スクロール制御
   angular.element('.subtag a').click(function(){
-    var pd, tp;
-    pd = parseInt(angular.element(document.body).css('padding-top'));
-    tp = angular.element(this.hash).position().top;
-    angular.element(document).scrollTop(tp-pd);
+    var 
+      targ = angular.element(this.hash),
+      wrap = targ.parent(),
+      tp = targ.position().top,
+      pd = parseInt(angular.element(document.body).css('padding-top')),
+      sd = wrap.scrollTop(),
+      pp = sd+tp-pd;
+    wrap.scrollTop(pp)
     return false;
   });
 
