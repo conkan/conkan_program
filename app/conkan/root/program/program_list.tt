@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" ng-app="conkanProgList">
 <head>
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -10,8 +10,8 @@
 [%- SET self_li_id = 'program_list' -%]
 [%- SET useUiGrid  = 1 -%]
 [%- PROCESS 'tthead.tt' -%]
-<div class="container" ng-app="conkanProgList">
-  <div class="well" id="gridlist" ng-controller="progListController">
+<div class="container" ng-controller="progListController">
+  <div class="well" id="gridlist">
     <div id="proglist" ui-grid="proggrid" class="grid" ui-grid-resize-columns>
     </div>
   </div> <!-- End of well gridlist -->
@@ -19,36 +19,13 @@
   <div id="pgAddDiv">
   [%- IF cuRole != 'NORM' %]
     <button type="button" class="btn btn-primary"
-            data-toggle="modal" data-target="#addProgram">
+      ng-click="openRegPgAddForm()">
       追加
     </button>
+    [% PROCESS 'program/T_add_regprog.tt' %]
   [% END -%]
   </div>
 </div> <!-- End of container ng-app "conkanProgList" -->
-<!-- 企画追加モーダル -->
-<div class="modal fade" id="addProgram" tabindex="-1" role="dialog" aria-labelledby="addProgramLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="addProgramLabel">add new Program</h4>
-      </div>
-      <div class="modal-body" id="addProgram">
-        <FORM id="newProgram" role="form" method="POST" action="/program/add" enctype="multipart/form-data">
-          <div class="form-group">
-            <label for="jsoninputfile">企画登録ファイル(JSON)</label>
-            <input type="file" name= "jsoninputfile" id="jsoninputfile">
-            <p class="help-block">企画申し込みが生成したJSONファイル</p>
-          </div>
-          <button type="submit" class="btn btn-primary" id="doadd">追加</button>
-        </FORM>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" id="cancel" data-dismiss="modal">キャンセル</button>
-      </div>
-    </div>
-  </div>
-</div>
 [%- PROCESS 'tttail.tt' -%]
 <script type="text/javascript">var allprg=true;</script>
 <script type="text/javascript" src="/static/js/conkan_prog_list.js"></script>

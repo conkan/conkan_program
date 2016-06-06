@@ -20,6 +20,25 @@
   var ConkanAppModule = angular.module('conkanProgList',
     ['ui.grid', 'ui.grid.resizeColumns', 'ui.bootstrap'] );
 
+  // ファイル選択ディレクティブ
+  ConkanAppModule.directive("fileModel",
+    ["$parse",
+      function ($parse) {
+        return {
+          restrict: "A",
+          link: function (scope, element, attrs) {
+            var model = $parse(attrs.fileModel);
+            element.bind("change", function () {
+              scope.$apply(function () {
+                model.assign(scope, element[0].files[0]);
+              });
+            });
+          }
+        };
+      }
+    ]
+  );
+
   // 企画リストコントローラ
   ConkanAppModule.controller( 'progListController',
     [ '$scope', '$sce', '$http', '$uibModal',
@@ -103,6 +122,14 @@
           }
         })
         .error( httpfailDlg );
+        // 企画追加ダイアログ
+        $scope.openRegPgAddForm = function( pgid ) {
+          $uibModal.open({
+            templateUrl : 'T_add_regprog',
+            backdrop    : 'static',
+            size        : 'lg',
+          });
+        };
       }
     ]
   );

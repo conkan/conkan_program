@@ -70,9 +70,15 @@ sub add :Local {
             $hval = __PACKAGE__->ParseRegist(
                             $pginfo, $regcnf->{'items'}->[0], undef, ''  );
             if ( ref($hval) eq 'HASH' ) {
-$c->log->debug('>>>> add reg_program:name [' . $hval->{'name'} . ']');
+                my $regpgid = $hval->{'regpgid'};
+                if ( $regpgid &&
+                     $c->model('ConkanDB::' . $regcnf->{'schema'})->find( $regpgid ) ) {
+                    die 'regpgid duplicate ' . $hval->{'name'} . ' [' . $regpgid . ']';
+                    $hval->{'regpgid'} = undef;
+                }
                 my $row =
                     $c->model('ConkanDB::' . $regcnf->{'schema'})->create( $hval );
+$c->log->debug('>>>> add reg_program:name [' . $hval->{'name'} . ']');
 $c->log->debug('>>>> add reg_program:regpgid [' . $row->regpgid . ']');
                 ## $pginfo->{企画ID}の値を再設定 (autoinc対応)
                 $pginfo->{'企画ID'} = $row->regpgid;
@@ -1171,9 +1177,10 @@ DBエラー表示
 
 sub _dberror :Private {
     my ( $self, $c, $e) = @_; 
-    $c->log->error('>>> ' . localtime() . ' Program:dbexp : ' . Dumper($e) );
+    my $msg = ref($e) ? Dumper($e) : $e;
+    $c->log->error( 'DB Error' . localtime() . ' Program:dbexp : ' . $msg );
     $c->clear_errors();
-    my $body = $c->response->body() || Dumper( $e );
+    my $body = $c->response->body() || $msg;
     $c->response->body('<FORM>DBエラー<br/><pre>' . $body . '</pre></FORM>');
     $c->response->status(200);
 }

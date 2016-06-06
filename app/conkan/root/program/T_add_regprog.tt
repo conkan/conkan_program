@@ -1,0 +1,23 @@
+<!-- 企画追加ダイアログ -->
+<script type="text/ng-template" id="T_add_regprog">
+  <FORM method="POST" name="addprogform" class="form-horizontal" role="form"
+    id="addprogform" action="/program/add" enctype="multipart/form-data">
+    <div class="modal-header">
+      <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
+      <h4 class="modal-title">企画追加</h4>
+    </div>
+    <div class="modal-body">
+      <label for="jsoninputfile">企画登録ファイル(JSON)</label>
+      <input type="file" name= "jsoninputfile" id="jsoninputfile"
+        file-model="inputFile">
+      <p class="help-block">企画申し込みが生成したJSONファイル</p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-default" ng-click="$close()">閉じる</button>
+      <button type="submit" class="btn btn-primary" id="addprogapplybtn"
+        ng-disabled="!inputFile">
+        追加
+      </button>
+    </div>
+  </FORM>
+</script>
