@@ -327,10 +327,15 @@ sub progress :Local {
     my $str = $param->{'progress'};
     try {
         $c->forward('/program/_crProgress', [ $regpgid, $str, ], ) if ( $str );
+        $c->stash->{'status'} = 'ok';
     } catch {
-        $c->detach( '_dberror', [ shift ] );
+        my $e = shift;
+        $c->log->error('program/progress error ' . localtime() .
+            ' dbexp : ' . Dumper($e) );
+        $c->stash->{'status'} = 'dbfail';
     };
-    $c->response->redirect('/program/' . $pgid );
+    $c->component('View::JSON')->{expose_stash} = [ 'status' ];
+    $c->forward('conkan::View::JSON');
 }
 
 

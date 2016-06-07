@@ -1,13 +1,6 @@
 // conkan_equip_list.js --- 機材一覧用 JS ---
 /*esLint-env jquery, prototypejs */
 (function() {
-  var storage = sessionStorage;
-  var needreload = false;
-  angular.element(document).ready(function(){
-    angular.element(document).scrollTop( storage.getItem( 'sctop' ) );
-    storage.clear();
-  });
-
   // conkanEquipListモジュールの生成
   var conkanAppModule = angular.module('conkanEquipList',
       ['ui.grid', 'ui.grid.resizeColumns', 'ui.bootstrap'] );
@@ -26,7 +19,7 @@
             openDialog( data.status );
           }
         })
-        .error( httpfailDlg );
+        .error( function() { httpfailDlg( $uibModal ); } );
 
         $scope.equipgrid = {
           enableFiltering: false,
@@ -115,7 +108,7 @@
             openDialog( data.status );
           }
         })
-        .error( httpfailDlg )
+        .error( function() { httpfailDlg( $uibModal ); } )
         .finally( dialogResizeDrag);
 
         // 更新実施

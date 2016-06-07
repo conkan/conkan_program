@@ -1,13 +1,6 @@
 // conkan_cast_list.js --- 出演者一覧用 JS ---
 /*esLint-env jquery, prototypejs */
 (function() {
-  var storage = sessionStorage;
-  var needreload = false;
-  angular.element(document).ready(function(){
-    angular.element(document).scrollTop( storage.getItem( 'sctop' ) );
-    storage.clear();
-  });
-
   // conkanCastListモジュールの生成
   var ConkanAppModule = angular.module('conkanCastList',
       ['ui.grid', 'ui.grid.resizeColumns', 'ui.bootstrap'] );
@@ -25,7 +18,7 @@
             openDialog( data.status );
           }
         })
-        .error( httpfailDlg );
+        .error( function() { httpfailDlg( $uibModal ); } );
 
         $scope.castgrid = {
           enableFiltering: false,
@@ -145,7 +138,7 @@
             openDialog( data.status );
           }
         })
-        .error( httpfailDlg )
+        .error( function() { httpfailDlg( $uibModal ); } )
         .finally( dialogResizeDrag);
 
         // 更新実施

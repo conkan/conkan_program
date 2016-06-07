@@ -221,7 +221,7 @@ var ProgTimeValid = function( prog, scale_hash ) {
 };
 
 // 共通のHTTPエラー時ダイアログ表示
-var httpfailDlg = function() {
+var httpfailDlg = function( $uibModal ) {
   var modalinstance = $uibModal.open(
       { templateUrl : getTemplate( '' ), }
   );

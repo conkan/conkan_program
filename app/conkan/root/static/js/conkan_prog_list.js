@@ -1,21 +1,6 @@
 // conkan_prog_list.js --- 企画一覧用 JS ---
 /*esLint-env jquery, prototypejs */
 (function() {
-  // 追加実施時、ボタンを無効にする
-  angular.element('#doadd').click(function(event) {
-    angular.element('#doadd').addClass('disabled');
-    angular.element('#cancel').addClass('disabled');
-    return true;
-  } );
-  // モーダルダイアログ addProgram 表示
-  angular.element('#addProgram').on('show.bs.modal', function (event) {
-    angular.element('#jsoninputfile').val('');
-  } );
-  // モーダルダイアログ addProgram非表示
-  angular.element('#addProgram').on('hide.bs.modal', function (event) {
-    location.reload(true);
-  } );
-
   // conkanProgListモジュールの生成
   var ConkanAppModule = angular.module('conkanProgList',
     ['ui.grid', 'ui.grid.resizeColumns', 'ui.bootstrap'] );
@@ -121,7 +106,7 @@
             openDialog( data.status );
           }
         })
-        .error( httpfailDlg );
+        .error( function() { httpfailDlg( $uibModal ); } );
         // 企画追加ダイアログ
         $scope.openRegPgAddForm = function( pgid ) {
           $uibModal.open({

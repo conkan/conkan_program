@@ -166,7 +166,7 @@
             openDialog( data.status );
           }
         })
-        .error( httpfailDlg );
+        .error( function() { httpfailDlg( $uibModal ); } );
       }
     ]
   );

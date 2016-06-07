@@ -1,11 +1,6 @@
 // conkan_prog_detail.js --- 企画詳細表示用 JS ---
 /*esLint-env jquery, prototypejs */
 (function() {
-  var storage = sessionStorage;
-  angular.element(document).ready(function(){
-    angular.element(document).scrollTop( storage.getItem( 'sctop' ) );
-    storage.removeItem( 'sctop' );
-  });
   // スクロール制御
   angular.element('.subtag a').click(function(){
     var 
@@ -15,14 +10,10 @@
       pd = parseInt(angular.element(document.body).css('padding-top')),
       sd = wrap.scrollTop(),
       pp = sd+tp-pd;
-    wrap.scrollTop(pp)
+    wrap.scrollTop(pp);
     return false;
   });
 
-  // 進捗登録
-  angular.element('#addProgress button').click(function(event) {
-    storage.setItem( 'sctop', angular.element(document).scrollTop() );
-  } );
   // 企画複製分割
   angular.element('#pgcpysepform button').click(function(event) {
     var act  = angular.element(event.target).data('cpysep');
@@ -38,13 +29,18 @@
     [ '$scope', '$http', '$uibModal',
       function( $scope, $http, $uibModal ) {
         // 初期値設定
-        var pgid = angular.element('#equip_pgid').val();
+        var init_regpgid = angular.element('#init_regpgid').val();
+        var init_pgid    = angular.element('#init_pgid').val();
         $http({
           method  : 'GET',
-          url     : '/program/' + pgid + '/equiplist'
+          url     : '/program/' + init_pgid + '/equiplist'
         })
         .success(function(data) {
           if ( data.status === 'ok' ) {
+            $scope.progress = {
+              regpgid : init_regpgid,
+              pgid    : init_pgid
+            };
             $scope.equiplist = data.json;
             for ( var i=0; i<$scope.equiplist.length; i++ ) {
               var equip = $scope.equiplist[i];
@@ -63,7 +59,7 @@
             openDialog( data.status );
           }
         })
-        .error( httpfailDlg );
+        .error( function() { httpfailDlg( $uibModal ); } );
 
         // 企画要望更新ダイアログ
         $scope.openRegPgEditForm = function( pgid ) {
@@ -144,6 +140,45 @@
           });
         };
 
+        // 進捗登録
+        $scope.progDoAdd = function() {
+          if ( !$scope.progress.progress || $scope.progress.progress == '' ) {
+            return;
+          }
+          $http( {
+            method  : 'POST',
+            url     : '/program/progress',
+            headers : { 'Content-Type':
+                        'application/x-www-form-urlencoded; charset=UTF-8' },
+            data: $.param($scope.progress)
+          })
+          .success(function(data) {
+            if ( data.status != 'ok' ) {
+              openDialog( data.status );
+            }
+          })
+          .error(function(data) {
+            openDialog( '' );
+          })
+          .finally( function() {
+            $scope.progress.progress = undefined;
+            // progressListController.getPage(1)を呼ぶ
+            $scope.$broadcast('PglRelEvent', 1);
+          });
+  
+          var openDialog = function ( stat ) {
+            var resultDlg = $uibModal.open(
+              {
+                templateUrl : getTemplate( stat ),
+                backdrop    : 'static',
+              }
+            );
+            resultDlg.rendered.then( function() {
+              angular.element('.modal-dialog').draggable({handle: '.modal-header'});
+            });
+            resultDlg.result.then( function() { });
+          };
+        };
       }
     ]
   );
@@ -194,7 +229,7 @@
             openDialog( data.status );
           }
         })
-        .error( httpfailDlg )
+        .error( function() { httpfailDlg( $uibModal); } )
         .finally( dialogResizeDrag);
 
         // 更新実施
@@ -223,7 +258,7 @@
             openDialog( data.status );
           }
         })
-        .error( httpfailDlg );
+        .error( function() { httpfailDlg( $uibModal ); } );
         // 初期値設定
         angular.element('#valerr').text('');
         $http({
@@ -239,7 +274,7 @@
             openDialog( data.status );
           }
         })
-        .error( httpfailDlg )
+        .error( function() { httpfailDlg( $uibModal); } )
         .finally( dialogResizeDrag);
 
         // 監視設定
@@ -293,7 +328,7 @@
             openDialog( data.status );
           }
         })
-        .error( httpfailDlg );
+        .error( function() { httpfailDlg( $uibModal ); } );
         // 登録実施
         $scope.regcastdoApply = function() {
           // 二重クリック回避
@@ -336,7 +371,7 @@
             openDialog( data.status );
           }
         })
-        .error( httpfailDlg )
+        .error( function() { httpfailDlg( $uibModal ); } )
         .finally( dialogResizeDrag);
 
         // 監視設定
@@ -447,7 +482,7 @@
             openDialog( data.status );
           }
         })
-        .error( httpfailDlg )
+        .error( function() { httpfailDlg( $uibModal ); } )
         .finally( dialogResizeDrag);
 
         // 監視設定
@@ -500,8 +535,8 @@
 
   // 進捗表示グリッドコントローラ
   ConkanAppModule.controller( 'progressListController',
-    [ '$scope', '$sce', '$http', '$uibModal', 'uiGridConstants',
-      function( $scope, $sce, $http, $uibModal, uiGridConstants ) {
+    [ '$scope', '$http', '$uibModal', 'uiGridConstants',
+      function( $scope, $http, $uibModal, uiGridConstants ) {
         var pageSize = 5;
         $scope.progressgrid = {
           enableFiltering: false,
@@ -542,7 +577,7 @@
           },
         ];
         var getPage = function( newPage ) {
-          var pgid = angular.element('#progress_pgid').val();
+          var pgid    = angular.element('#init_pgid').val();
           var url = '/program/' + pgid + '/progress/'
                       + newPage + '/' + pageSize + '/';
           $http.get(url)
@@ -555,8 +590,11 @@
               openDialog( data.status );
             }
           })
-          .error( httpfailDlg );
+          .error( function() { httpfailDlg( $uibModal ); } );
         };
+        $scope.$on('PglRelEvent', function( ev, dt ) {
+          getPage(dt);
+        });
 
         getPage(1);
       }
@@ -565,8 +603,8 @@
 
   // 企画選択ツールコントローラー
   ConkanAppModule.controller( 'pglistselController',
-    [ '$scope', '$http',
-      function( $scope, $http ) {
+    [ '$scope', '$http', '$uibModal',
+      function( $scope, $http, $uibModal ) {
         var pathelm = location.pathname.split('/');
         var allprg = pathelm[1] == 'mypage' ? false : true;
         var pgid = pathelm[pathelm.length-1];
@@ -595,7 +633,7 @@
             openDialog( data.status );
           }
         })
-        .error( httpfailDlg );
+        .error( function () { httpfailDlg( $uibModal ); } );
         $scope.$watch('pgdetailsel', function( n, o, scope ) {
           if ( angular.isDefined(n) && angular.isDefined(o) && ( n != o ) ){
             pathelm[pathelm.length-1] = n;

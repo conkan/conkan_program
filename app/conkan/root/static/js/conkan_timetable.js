@@ -62,7 +62,7 @@
               openDialog( data.status );
             }
           })
-          .error( httpfailDlg );
+          .error( function() { httpfailDlg( $uibModal ); } );
         }
       };
     }
@@ -259,7 +259,7 @@
             openDialog( data.status );
           }
         })
-        .error( httpfailDlg );
+        .error( function() { httpfailDlg( $uibModal ); } );
 
         $scope.current      = currentprgService.currentval;
 
