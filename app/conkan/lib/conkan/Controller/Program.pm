@@ -466,8 +466,10 @@ sub csvdownload :Local {
            [
                '企画ID',
                'サブNO',
-               '企画名称',
-               '企画名フリガナ',
+               '正式企画名',
+               '正式企画名フリガナ',
+               '企画短縮名',
+               '企画名',
                '内容',
                '内容事前公開可否',
                '一般公開可否',
@@ -521,24 +523,30 @@ sub csvdownload :Local {
                $roomname = $row->roomid->name();
            }
    
+           my $pgname  = $row->sname() || $row->regpgid->name();
+           my $content = $outext ? $row->regpgid->content() : '';
+           my $comment = $outext ? $row->regpgid->comment() : '';
+           my $progres = $outext ? $row->progressprp() : '';
            push ( @data, [
-               $row->regpgid->regpgid(),       # 企画ID,
-               $row->subno(),                  # サブNO,
-               $row->regpgid->name(),          # 企画名称,
-               $row->regpgid->namef(),         # 企画名フリガナ,
-               +( $outext ? $row->regpgid->content() : ''),       # 内容,
-               $row->regpgid->contentpub(),    # 内容事前公開可否,
-               $row->regpgid->openpg(),        # 一般公開可否,
-               $row->regpgid->restpg(),        # 未成年参加可否,
-               +( $outext ? $row->regpgid->comment() : ''),       # 備考,
-               $row->status(),                 # 実行ステータス,
-               $row->memo(),                   # 実行ステータス補足,
-               $pfmdatetime[0],                # 実施日時1,
-               $pfmdatetime[1],                # 実施日時2,
-               $roomno,                        # 部屋番号,
-               $roomname,                      # 実施場所,
-               +( $outext ? $row->progressprp() : ''),            # 企画紹介文,
-               @casts,                         # 決定出演者,
+               $row->regpgid->regpgid(),    # 企画ID,
+               $row->subno(),               # サブNO,
+               $row->regpgid->name(),       # 正式企画名,
+               $row->regpgid->namef(),      # 正式企画名フリガナ,
+               $row->sname(),               # 企画短縮名,
+               $pgname,                     # 企画名,
+               $content,                    # 内容,
+               $row->regpgid->contentpub(), # 内容事前公開可否,
+               $row->regpgid->openpg(),     # 一般公開可否,
+               $row->regpgid->restpg(),     # 未成年参加可否,
+               $comment,                    # 備考,
+               $row->status(),              # 実行ステータス,
+               $row->memo(),                # 実行ステータス補足,
+               $pfmdatetime[0],             # 実施日時1,
+               $pfmdatetime[1],             # 実施日時2,
+               $roomno,                     # 部屋番号,
+               $roomname,                   # 実施場所,
+               $progres,                    # 企画紹介文,
+               @casts,                      # 決定出演者,
            ]);
        }
    
