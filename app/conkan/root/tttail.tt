@@ -43,7 +43,7 @@
         [%- ELSE -%]
           uiGridResize();
         [%- END -%]
-      [%- END -%]
+      [%- END %]
   });
 </script>
 <!-- #End Region "tttail.tt" -->

@@ -10,7 +10,7 @@
       unsetwrap = angular.element("#unset_pglist_wrap"),
       timewrap  = angular.element("#timetable_wrap"),
       footer = angular.element("#main-footer"),
-      viewport  = angular.element("#timetable_wrap.ui-grid-viewport");
+      viewport  = angular.element("#timetable_wrap .ui-grid-viewport");
     h = wh - ( updiv.offset().top + downdiv.height() + footer.outerHeight() );
     updiv.css('height', h + 'px');
     updiv.css('max-height', h + 'px');
