@@ -1,0 +1,107 @@
+<!-- 部屋詳細編集ダイアログ -->
+<script type="text/ng-template" id="T_room_detail">
+  <div class="modal-header">
+    <button type="button" class="close" ng-click="$close()" aria-hidden="true">
+      ×
+    </button>
+    <h4 class="modal-title">部屋詳細</h4>
+  </div>
+  <div class="modal-body">
+    <FORM method="POST" name="roomform" class="form-horizontal" role="form" id="roomform">
+      <div style="COLOR:Red;" id="valerr"></div>
+      <div class="form-group">
+        <input type="hidden" name="roomid", id="roomid" ng-model="room.roomid">
+      </div>
+      <table class="table table-bordered table-condensed">
+        <colgroup>
+          <col class="col-sm-2">
+          <col class="col-sm-2">
+          <col class="col-sm-2">
+          <col class="col-sm-2">
+          <col class="col-sm-2">
+          <col class="col-sm-2">
+        </colgroup>
+        <tbody class="ral">
+          <tr>
+            <th>部屋名</th>
+            <td colspan="3">
+              <input type="text" name="name" class="col-sm-12" required
+                ng-model="room.name"/>
+            </td>
+            <th>部屋番号</th>
+            <td>
+              <input type="text" name="roomno" class="col-sm-12" required
+                ng-model="room.roomno"/>
+            </td>
+          </tr>
+          <tr>
+            <th>定員</th>
+            <td>
+              <input type="text" name="max" class="col-sm-12"
+                ng-model="room.max"/>
+            </td>
+            <th>形式</th>
+            <td>
+              <input type="text" name="type" class="col-sm-12" required
+                ng-model="room.type"/>
+            </td>
+            <th>面積</th>
+            <td>
+              <input type="text" name="size" class="col-sm-12"
+                ng-model="room.size"/>
+            </td>
+          </tr>
+          <tr>
+            <th>利用可能時間</th>
+            <td>
+              <input type="text" name="useabletime" class="col-sm-12"
+                ng-model="room.useabletime"/>
+            </td>
+            <th>机数</th>
+            <td>
+              <input type="text" name="tablecnt" class="col-sm-12"
+                ng-model="room.tablecnt"/>
+            </td>
+            <th>イス数</th>
+            <td>
+              <input type="text" name="chaircnt" class="col-sm-12"
+                ng-model="room.chaircnt"/>
+            </td>
+          </tr>
+          <tr>
+            <th>附属設備</th>
+            <td colspan="3">
+              <textarea name="equips" class="col-sm-12" rows="2"
+                ng-model="room.equips"></textarea>
+            </td>
+            <th>インタネット回線</th>
+            <td>
+              <select name="net" class="col-sm-12" ng-model="room.net"
+                ng-options="i.id as i.val  for i in netlist"></select>
+            </td>
+          </tr>
+          <tr>
+            <th>備考</th>
+            <td colspan="5">
+              <textarea name="comment" class="col-sm-12" rows="2"
+               ng-model="room.comment"></textarea>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </FORM>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-default" ng-click="$close()">閉じる</button>
+    <button ng-if="room.roomid" class="btn " id="roomdelbtn"
+      ng-disabled="!roomform.$pristine"
+      ng-click="roomDoDel()">
+      無効化
+    </button>
+    <button class="btn btn-primary" id="roomapplybtn"
+      ng-disabled="roomform.$invalid || roomform.$pristine"
+      ng-click="roomDoApply()">
+      {{room.applyBtnLbl}}
+    </button>
+  </div>
+</script>

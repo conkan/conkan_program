@@ -95,13 +95,12 @@
                           +   'type="button" class="btn btn-xs btn-primary" '
                           +   'ng-click="grid.appScope.openAllCastForm'
                           +   '(row.entity.castid)">編集</button>'
+                          + '</div>'
             },
         ];
 
         // 出演者更新追加ダイアログ
         $scope.openAllCastForm = function( castid ) {
-          $scope.castid = castid;
-          $scope.applyBtnLbl = ( castid === 0 ) ? '追加' : '更新';
           $uibModal.open({
             templateUrl : 'T_cast_detail',
             controller  : 'allcastFormController',
@@ -151,7 +150,7 @@
           }
         })
         .error( function() { httpfailDlg( $uibModal ); } )
-        .finally( dialogResizeDrag);
+        .finally( dialogResizeDrag );
 
         // 更新実施
         $scope.castDoApply = function() {

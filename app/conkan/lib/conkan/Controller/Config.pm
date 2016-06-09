@@ -591,32 +591,24 @@ sub room_show : Chained('room_base') :PathPart('') :CaptureArgs(1) {
     
     # roomテーブルに対応したmodelオブジェクト取得
     $c->stash->{'M'}   = $c->model('ConkanDB::PgRoom');
-
-    my $rowroom;
-    if ( $roomid != 0 ) {
-        $rowroom = $c->stash->{'M'}->find($roomid);
-        $c->session->{'updtic'} = time;
-        $rowroom->update( { 
-            'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
-        } );
-    } else {
-        $rowroom = {
-            'roomid'        => 0,
-            'name'          => '',
-            'roomno'        => '',
-            'max'           => 0,
-            'type'          => '洋室',
-            'size'          => 0,
-            'tablecnt'      => 0,
-            'chaircnt'      => 0,
-            'equips'        => '',
-            'useabletime'   => undef,
-            'net'           => 'W',
-            'comment'       => undef,
-        };
-    }
-    $c->stash->{'rs'} = $rowroom;
-    $c->stash->{'roomid'} = $roomid;
+    try {
+        my $rowroom;
+        if ( $roomid != 0 ) {
+            $rowroom = $c->stash->{'M'}->find($roomid);
+            $c->session->{'updtic'} = time;
+            $rowroom->update( { 
+                'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
+            } );
+        }
+        $c->stash->{'rs'} = $rowroom;
+        $c->stash->{'roomid'} = $roomid;
+        $c->stash->{'status'} = 'ok';
+    } catch {
+        my $e = shift;
+        $c->log->error('config/room error ' . localtime() .
+            ' dbexp : ' . Dumper($e) );
+        $c->stash->{'status'} = 'dbfail';
+    };
 }
 
 =head2 room/*
@@ -627,6 +619,32 @@ sub room_show : Chained('room_base') :PathPart('') :CaptureArgs(1) {
 
 sub room_detail : Chained('room_show') : PathPart('') : Args(0) {
     my ( $self, $c ) = @_;
+    my $rs = $c->stash->{'rs'};
+    if ( $c->stash->{'roomid'} != 0 ) {
+        $c->stash->{'json'} = {
+            roomid      => $c->stash->{'roomid'},
+            name        => $rs->name(),
+            roomno      => $rs->roomno(),
+            max         => $rs->max(),
+            type        => $rs->type(),
+            size        => $rs->size(),
+            tablecnt    => $rs->tablecnt(),
+            chaircnt    => $rs->chaircnt(),
+            equips      => $rs->equips(),
+            useabletime => $rs->useabletime(),
+            net         => $rs->net(),
+            comment     => $rs->comment(),
+        };
+    }
+    else {
+        $c->stash->{'json'} = {
+            roomid      => 0,
+            type        => '洋室',
+            net         => 'W',
+        };
+    }
+    $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
+    $c->forward('conkan::View::JSON');
 }
 
 =head2 room/*/edit
@@ -649,7 +667,9 @@ sub room_edit : Chained('room_show') : PathPart('edit') : Args(0) {
                         name roomno max type size tablecnt
                         chaircnt equips useabletime net comment
                         / ];
-        $c->detach( '_updatecreate', [ $roomid, $items, 1 ] );
+        $c->forward( '_updatecreate', [ $roomid, $items, 0 ] );
+        $c->component('View::JSON')->{expose_stash} = [ 'status' ];
+        $c->forward('conkan::View::JSON');
     }
 }
 
@@ -667,7 +687,9 @@ sub room_del : Chained('room_show') : PathPart('del') : Args(0) {
         $c->go->( '/config/room/' . $roomid );
     }
     else {
-        $c->detach( '_delete', [ $roomid, 'PgProgram', 'roomid', 1 ] );
+        $c->forward( '_delete', [ $roomid, 'PgProgram', 'roomid', 0 ] );
+        $c->component('View::JSON')->{expose_stash} = [ 'status' ];
+        $c->forward('conkan::View::JSON');
     }
 }
 

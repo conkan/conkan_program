@@ -67,6 +67,7 @@
                           +   'type="button" class="btn btn-xs btn-primary" '
                           +   'ng-click="grid.appScope.openAllEquipForm'
                           +   '(row.entity.equipid)">編集</button>'
+                          + '</div>'
           },
         ];
 

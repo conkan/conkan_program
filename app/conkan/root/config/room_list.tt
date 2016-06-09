@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" ng-app="conkanRoomList">
 <head>
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -10,39 +10,21 @@
 [%- SET self_li_id = 'config_room' -%]
 [%- SET useUiGrid  = 1 -%]
 [%- PROCESS 'tthead.tt' -%]
-<div class="container" ng-app="conkanRoomList">
-  <div class="well" id="gridlist" ng-controller="roomListController">
+<div class="container" ng-controller="roomListController">
+  <div class="well" id="gridlist">
     <div id="roomlist" ui-grid="roomgrid" class="grid" ui-grid-resize-columns>
     </div>
   </div> <!-- End of well gridlist -->
   <div id="pgAddDiv">
     <button type="button" class="btn btn-primary"
             data-toggle="modal" data-target="#editRoom"
-            data-whatever="0" data-rmcol="">
+        ng-click="openAllRoomForm( 0 )">
       追加
     </button>
   </div>
+  [%- PROCESS 'config/T_room_detail.tt' -%]
   [%- PROCESS 'T_httpget_result.tt' -%]
 </div> <!-- End of container ng-app "conkanRoomList -->
-<!-- 部屋詳細モーダル -->
-<div class="modal fade" id="editRoom" tabindex="-1" role="dialog" aria-labelledby="editRoomLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="editRoomLabel">Edit RoomInfo</h4>
-      </div>
-      <div class="modal-body" id="editRoomContent">
-        <FORM>情報取得中</FORM>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
-        <button type="button" class="btn " id="dodel">無効化</button>
-        <button type="button" class="btn btn-primary" id="dobtn">登録/更新</button>
-      </div>
-    </div>
-  </div>
-</div>
 [%- PROCESS 'tttail.tt' -%]
 <script type="text/javascript" src="/static/js/conkan_room_list.js"></script>
 </body>
