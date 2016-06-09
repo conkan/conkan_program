@@ -270,7 +270,8 @@ var dialogResizeDrag = function() {
 };
 
 // JSON POST汎用実施
-var doJsonPost = function( $http, url, data, $uibModalInstance, $uibModal ) {
+var doJsonPost = function( $http, url, data, $uibModalInstance, $uibModal,
+                           finalcallback ) {
   $http( {
     method  : 'POST',
     url     : url,
@@ -279,14 +280,23 @@ var doJsonPost = function( $http, url, data, $uibModalInstance, $uibModal ) {
     data: data
   })
   .success(function(data) {
-    openDialog( data.status );
+    if ( data.status != 'nodlgok' ) {
+      openDialog( data.status );
+    }
   })
   .error(function(data) {
     openDialog( '' );
+  })
+  .finally( function() {
+    if ( !$uibModalInstance && finalcallback ) {
+      finalcallback();
+    }
   });
 
   var openDialog = function ( stat ) {
-    $uibModalInstance.close('done');
+    if ( $uibModalInstance ) {
+      $uibModalInstance.close('done');
+    }
     var resultDlg = $uibModal.open(
       {
         templateUrl : getTemplate( stat ),
@@ -297,7 +307,14 @@ var doJsonPost = function( $http, url, data, $uibModalInstance, $uibModal ) {
       angular.element('.modal-dialog').draggable({handle: '.modal-header'});
     });
     resultDlg.result.then( function() {
-      location.reload();
+      if ( $uibModalInstance ) {
+        if ( finalcallback ) {
+          finalcallback();
+        }
+        else {
+          location.reload();
+        }
+      }
     });
   };
 };

@@ -71,7 +71,7 @@
     <button class="btn btn-primary" id="castapplybtn"
       ng-disabled="castform.$invalid || castform.$pristine"
       ng-click="castDoApply()">
-      {{applyBtnLbl}}
+      {{cast.applyBtnLbl}}
     </button>
   </div>
 </script>

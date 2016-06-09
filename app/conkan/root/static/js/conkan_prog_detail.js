@@ -28,170 +28,222 @@
   ConkanAppModule.controller( 'progDetailController',
     [ '$scope', '$http', '$uibModal',
       function( $scope, $http, $uibModal ) {
-        // 初期値設定
+        // 固定値設定
         var init_regpgid = angular.element('#init_regpgid').val();
         var init_pgid    = angular.element('#init_pgid').val();
-        $http({
-          method  : 'GET',
-          url     : '/program/' + init_pgid + '/equiplist'
-        })
-        .success(function(data) {
-          if ( data.status === 'ok' ) {
-            $scope.progress = {
-              regpgid : init_regpgid,
-              pgid    : init_pgid
-            };
-            $scope.equiplist = data.json;
-            for ( var i=0; i<$scope.equiplist.length; i++ ) {
-              var equip = $scope.equiplist[i];
-              if (   ( equip.equipno == 'bring-AV' )
-                  || ( equip.equipno == 'bring-PC' ) ) {
-                $scope.equiplist[i].spec = '映像:' + equip.vif
-                                         + ' 音声:' + equip.aif;
-                if ( equip.equipno == 'bring-PC' ) {
-                  $scope.equiplist[i].spec += ' LAN:' + equip.eif
-                                           + ' LAN利用目的:' + equip.intende;
+        var init_subno   = angular.element('#init_subno').val();
+        var init_name    = angular.element('#init_name').val();
+        $scope.progress = {
+          regpgid : init_regpgid,
+          pgid    : init_pgid
+        };
+      // 表示データ取得メソッド群
+        // 要望出演者リスト取得
+        $scope.getRegCast = function () {
+          $http({
+            method  : 'GET',
+            url     : '/program/' + init_pgid + '/regcastlist'
+          })
+          .success(function(data) {
+            if ( data.status === 'ok' ) {
+              $scope.regcastlist = data.json;
+            }
+            else {
+              openDialog( data.status );
+            }
+          })
+          .error( function() { httpfailDlg( $uibModal ); } );
+        };
+        // 決定出演者リスト取得
+        $scope.getCast = function() {
+          $http({
+            method  : 'GET',
+            url     : '/program/' + init_pgid + '/castlist'
+          })
+          .success(function(data) {
+            if ( data.status === 'ok' ) {
+              $scope.castlist = data.json;
+              for ( var i=0; i<$scope.castlist.length; i++ ) {
+                var cast = $scope.castlist[i];
+                if (   ( cast.status == '企画不参加' )
+                    || ( cast.status == '大会不参加' )
+                    || ( cast.status == '欠席' )
+                    || ( cast.status == '企画中止' )
+                   ) {
+                  cast.class = 'rmcast';
+                }
+                else {
+                  cast.class = 'cast';
                 }
               }
             }
-          }
-          else {
-            openDialog( data.status );
-          }
-        })
-        .error( function() { httpfailDlg( $uibModal ); } );
+            else {
+              openDialog( data.status );
+            }
+          })
+          .error( function() { httpfailDlg( $uibModal ); } );
+        }; 
+        // 決定機材リスト取得
+        $scope.getEquip = function() {
+          $http({
+            method  : 'GET',
+            url     : '/program/' + init_pgid + '/equiplist'
+          })
+          .success(function(data) {
+            if ( data.status === 'ok' ) {
+              $scope.equiplist = data.json;
+              for ( var i=0; i<$scope.equiplist.length; i++ ) {
+                var equip = $scope.equiplist[i];
+                if (   ( equip.equipno == 'bring-AV' )
+                    || ( equip.equipno == 'bring-PC' ) ) {
+                  $scope.equiplist[i].spec = '映像:' + equip.vif
+                                           + ' 音声:' + equip.aif;
+                  if ( equip.equipno == 'bring-PC' ) {
+                    $scope.equiplist[i].spec += ' LAN:' + equip.eif
+                                             + ' LAN利用目的:' + equip.intende;
+                  }
+                }
+              }
+            }
+            else {
+              openDialog( data.status );
+            }
+          })
+          .error( function() { httpfailDlg( $uibModal ); } );
+        };
 
+      // ダイアログ表示メソッド群
         // 企画要望更新ダイアログ
-        $scope.openRegPgEditForm = function( pgid ) {
-          $scope.pgid = pgid;
+        $scope.openRegPgEditForm = function() {
           $uibModal.open({
             templateUrl : 'T_pgup_regprog',
             controller  : 'regProgFormController',
             backdrop    : 'static',
             scope       : $scope,
             size        : 'lg',
+            resolve     :
+              { params: function() {
+                return {
+                  pgid    : init_pgid
+                };
+              }},
           });
         };
 
         // 企画更新ダイアログ
-        $scope.openPgEditForm = function( pgid ) {
-          $scope.pgid = pgid;
+        $scope.openPgEditForm = function() {
           $uibModal.open({
             templateUrl : 'T_pgup_program',
             controller  : 'progFormController',
             backdrop    : 'static',
             scope       : $scope,
             size        : 'lg',
+            resolve     :
+              { params: function() {
+                return {
+                  pgid    : init_pgid
+                };
+              }},
           });
         };
 
         // 要望出演者追加ダイアログ
-        $scope.openRegCastForm = function( regpgid, subno, pgid, name ) {
-          $scope.prog = {
-            regpgid : regpgid,
-            subno   : subno,
-            pgid    : pgid,
-            name    : name,
-          };
+        $scope.openRegCastForm = function() {
           $uibModal.open({
             templateUrl : 'T_pgup_regcast',
             controller  : 'regcastFormController',
             backdrop    : 'static',
             scope       : $scope,
             size        : 'lg',
+            resolve     :
+              { params: function() {
+                return {
+                  regpgid : init_regpgid,
+                  subno   : init_subno,
+                  pgid    : init_pgid,
+                  name    : init_name,
+                };
+              }},
           });
         };
 
-        // 決定出演者追加ダイアログ
-        $scope.openCastEditForm = function( regpgid, subno, pgid, name, castid ) {
-          $scope.prog = {
-            regpgid     : regpgid,
-            subno       : subno,
-            pgid        : pgid,
-            name        : name,
-          };
-          $scope.editCastId = castid;
-          $scope.editCastBtnLbl = ( castid === 0 ) ? '追加' : '更新';
+        // 決定出演者更新追加ダイアログ
+        $scope.openCastEditForm = function( castid ) {
           $uibModal.open({
             templateUrl : 'T_pgup_cast',
             controller  : 'castFormController',
             backdrop    : 'static',
             scope       : $scope,
             size        : 'lg',
+            resolve     :
+              { params: function() {
+                return {
+                  regpgid : init_regpgid,
+                  subno   : init_subno,
+                  pgid    : init_pgid,
+                  name    : init_name,
+                  editCastId : castid,
+                  editCastBtnLbl : ( castid === 0 ) ? '追加' : '更新',
+                };
+              }},
           });
         };
 
         // 決定機材更新追加ダイアログ
-        $scope.openEquipForm = function( regpgid, subno, pgid, name, equipid ) {
-          $scope.prog = {
-            regpgid     : regpgid,
-            subno       : subno,
-            pgid        : pgid,
-            name        : name,
-          };
-          $scope.editEquipId = equipid;
-          $scope.editEquipBtnLbl = ( equipid === 0 ) ? '追加' : '更新';
+        $scope.openEquipForm = function( equipid ) {
           $uibModal.open({
             templateUrl : 'T_pgup_equip',
             controller  : 'equipFormController',
             backdrop    : 'static',
             scope       : $scope,
             size        : 'lg',
+            resolve     :
+              { params: function() {
+                return {
+                  regpgid : init_regpgid,
+                  subno   : init_subno,
+                  pgid    : init_pgid,
+                  name    : init_name,
+                  editEquipId : equipid,
+                  editEquipBtnLbl : ( equipid === 0 ) ? '追加' : '更新',
+                };
+              }},
           });
         };
 
+      // 埋め込みFormSubmitメソッド群
         // 進捗登録
         $scope.progDoAdd = function() {
           if ( !$scope.progress.progress || $scope.progress.progress == '' ) {
             return;
           }
-          $http( {
-            method  : 'POST',
-            url     : '/program/progress',
-            headers : { 'Content-Type':
-                        'application/x-www-form-urlencoded; charset=UTF-8' },
-            data: $.param($scope.progress)
-          })
-          .success(function(data) {
-            if ( data.status != 'ok' ) {
-              openDialog( data.status );
+          doJsonPost( $http, '/program/progress',
+            $.param($scope.progress), undefined, $uibModal,
+            function() {
+              $scope.progress.progress = undefined;
+              // 子コントローラのscopeは参照できないので、メッセージで実現
+              $scope.$broadcast('PglRelEvent', 1);
             }
-          })
-          .error(function(data) {
-            openDialog( '' );
-          })
-          .finally( function() {
-            $scope.progress.progress = undefined;
-            // progressListController.getPage(1)を呼ぶ
-            $scope.$broadcast('PglRelEvent', 1);
-          });
-  
-          var openDialog = function ( stat ) {
-            var resultDlg = $uibModal.open(
-              {
-                templateUrl : getTemplate( stat ),
-                backdrop    : 'static',
-              }
-            );
-            resultDlg.rendered.then( function() {
-              angular.element('.modal-dialog').draggable({handle: '.modal-header'});
-            });
-            resultDlg.result.then( function() { });
-          };
+          );
         };
+
+        // 初期値設定
+        $scope.getRegCast();
+        $scope.getCast();
+        $scope.getEquip();
       }
     ]
   );
 
   // 企画要望更新ダイアログコントローラ
   ConkanAppModule.controller( 'regProgFormController',
-    [ '$scope', '$http', '$uibModal', '$uibModalInstance',
-      function( $scope, $http, $uibModal, $uibModalInstance ) {
+    [ '$scope', '$http', '$uibModal', '$uibModalInstance', 'params',
+      function( $scope, $http, $uibModal, $uibModalInstance, params ) {
         // 初期値設定
         angular.element('#valerr').text('');
         $http({
           method  : 'GET',
-          url     : '/program/' + $scope.pgid + '/regprogram'
+          url     : '/program/' + params.pgid + '/regprogram'
         })
         .success(function(data) {
           if ( data.status === 'ok' ) {
@@ -230,7 +282,7 @@
           }
         })
         .error( function() { httpfailDlg( $uibModal); } )
-        .finally( dialogResizeDrag);
+        .finally( dialogResizeDrag );
 
         // 更新実施
         $scope.regprgDoApply = function() {
@@ -238,7 +290,7 @@
           // 二重クリック回避
           angular.element('#regprgapplybtn').attr('disabled', 'disabled');
           doJsonPost( $http, '/program/' + pgid + '/regprogram',
-            $.param($scope.prog), $uibModalInstance, $uibModal);
+            $.param($scope.prog), $uibModalInstance, $uibModal );
         };
       }
     ]
@@ -246,8 +298,8 @@
 
   // 企画更新ダイアログコントローラ
   ConkanAppModule.controller( 'progFormController',
-    [ '$scope', '$http', '$uibModal', '$uibModalInstance',
-      function( $scope, $http, $uibModal, $uibModalInstance ) {
+    [ '$scope', '$http', '$uibModal', '$uibModalInstance', 'params',
+      function( $scope, $http, $uibModal, $uibModalInstance, params ) {
         // 選択肢取得
         $http.get('/config/confget')
         .success(function(data) {
@@ -259,11 +311,12 @@
           }
         })
         .error( function() { httpfailDlg( $uibModal ); } );
+
         // 初期値設定
         angular.element('#valerr').text('');
         $http({
           method  : 'GET',
-          url     : '/timetable/' + $scope.pgid
+          url     : '/timetable/' + params.pgid
         })
         .success(function(data) {
           if ( data.status === 'ok' ) {
@@ -275,7 +328,7 @@
           }
         })
         .error( function() { httpfailDlg( $uibModal); } )
-        .finally( dialogResizeDrag);
+        .finally( dialogResizeDrag );
 
         // 監視設定
         $scope.$watch('prog.date1', function( n, o, scope ) {
@@ -299,8 +352,8 @@
             angular.element('#prgapplybtn').removeAttr('disabled');
             return;
           }
-          doJsonPost( $http, '/timetable/' + pgid, $.param($scope.prog),
-                      $uibModalInstance, $uibModal);
+          doJsonPost( $http, '/timetable/' + pgid,
+            $.param($scope.prog), $uibModalInstance, $uibModal );
         };
       }
     ]
@@ -308,16 +361,17 @@
 
   // 要望出演者追加ダイアログコントローラ
   ConkanAppModule.controller( 'regcastFormController',
-    [ '$scope', '$http', '$uibModal', '$uibModalInstance',
-      function( $scope, $http, $uibModal, $uibModalInstance ) {
+    [ '$scope', '$http', '$uibModal', '$uibModalInstance', 'params',
+      function( $scope, $http, $uibModal, $uibModalInstance, params ) {
         // 初期値設定
         angular.element('#valerr').text('');
         $scope.regcast = {
-          regpgid   : $scope.prog.regpgid,
-          pgid      : $scope.prog.pgid,
+          regpgid   : params.regpgid,
+          pgid      : params.pgid,
           name      : '', namef : '', regno : '',
           title : '', needreq : '', needguest : '',
         };
+        $scope.prog = params;
         // 選択肢取得
         $http.get('/config/confget')
         .success(function(data) {
@@ -328,13 +382,19 @@
             openDialog( data.status );
           }
         })
-        .error( function() { httpfailDlg( $uibModal ); } );
+        .error( function() { httpfailDlg( $uibModal ); } )
+        .finally( dialogResizeDrag );
+
         // 登録実施
         $scope.regcastdoApply = function() {
           // 二重クリック回避
           angular.element('#regcastapplybtn').attr('disabled', 'disabled');
-          doJsonPost( $http, '/program/regcastadd', $.param($scope.regcast),
-                      $uibModalInstance, $uibModal);
+          doJsonPost( $http, '/program/regcastadd',
+            $.param($scope.regcast), $uibModalInstance, $uibModal,
+            function() {
+              $scope.getRegCast();
+              $scope.getCast();
+            } );
         };
       }
     ]
@@ -342,20 +402,20 @@
 
   // 決定出演者編集ダイアログコントローラ
   ConkanAppModule.controller( 'castFormController',
-    [ '$scope', '$http', '$uibModal', '$uibModalInstance',
-      function( $scope, $http, $uibModal, $uibModalInstance ) {
+    [ '$scope', '$http', '$uibModal', '$uibModalInstance', 'params',
+      function( $scope, $http, $uibModal, $uibModalInstance, params ) {
         // 初期値設定
         angular.element('#valerr').text('');
+        $scope.prog = params;
         $http({
           method  : 'GET',
-          url     : '/program/' + $scope.prog.pgid + '/cast/'
-                       + $scope.editCastId,
+          url     : '/program/' + params.pgid + '/cast/' + params.editCastId,
         })
         .success(function(data) {
           if ( data.status === 'ok' ) {
             $scope.cast = {
-              id          : $scope.editCastId,
-              applyBtnLbl : $scope.editCastBtnLbl,
+              id          : params.editCastId,
+              applyBtnLbl : params.editCastBtnLbl,
               pgid        : data.json.pgid,
               castid      : data.json.castid,
               status      : data.json.status,
@@ -372,7 +432,7 @@
           }
         })
         .error( function() { httpfailDlg( $uibModal ); } )
-        .finally( dialogResizeDrag);
+        .finally( dialogResizeDrag );
 
         // 監視設定
         $scope.$watch('cast.castid', function( n, o, scope ) {
@@ -393,7 +453,8 @@
           angular.element('#castdelbtn').attr('disabled', 'disabled');
           // 実行
           doJsonPost( $http, '/program/' + pgid + '/cast/' + itemid,
-                  $.param($scope.cast), $uibModalInstance, $uibModal);
+            $.param($scope.cast), $uibModalInstance, $uibModal,
+            function() { $scope.getCast(); } );
         };
         // 削除実施
         $scope.castDoDel = function() {
@@ -403,7 +464,8 @@
           angular.element('#castapplybtn').attr('disabled', 'disabled');
           angular.element('#castdelbtn').attr('disabled', 'disabled');
           doJsonPost( $http, '/program/' + pgid + '/cast/' + itemid + '/del/',
-                      undefined, $uibModalInstance, $uibModal);
+            undefined, $uibModalInstance, $uibModal,
+            function() { $scope.getCast(); } );
         };
       }
     ]
@@ -429,20 +491,20 @@
 
   // 決定機材更新追加ダイアログコントローラ
   ConkanAppModule.controller( 'equipFormController',
-    [ '$scope', '$http', '$uibModal', '$uibModalInstance',
-      function( $scope, $http, $uibModal, $uibModalInstance ) {
+    [ '$scope', '$http', '$uibModal', '$uibModalInstance', 'params',
+      function( $scope, $http, $uibModal, $uibModalInstance, params ) {
         // 初期値設定
         angular.element('#valerr').text('');
+        $scope.prog = params;
         $http({
           method  : 'GET',
-          url     : '/program/' + $scope.prog.pgid + '/equip/'
-                       + $scope.editEquipId,
+          url     : '/program/' + params.pgid + '/equip/' + params.editEquipId,
         })
         .success(function(data) {
           if ( data.status === 'ok' ) {
             $scope.equip = {
-              id            : $scope.editEquipId,
-              applyBtnLbl   : $scope.editEquipBtnLbl,
+              id            : params.editEquipId,
+              applyBtnLbl   : params.editEquipBtnLbl,
               pgid    : data.json.pgid,
               equipid : data.json.equipid,
               intende : data.json.intende,
@@ -517,7 +579,8 @@
           }
           // 実行
           doJsonPost( $http, '/program/' + pgid + '/equip/' + itemid,
-                      $.param($scope.equip), $uibModalInstance, $uibModal);
+            $.param($scope.equip), $uibModalInstance, $uibModal,
+            function() { $scope.getEquip(); } );
         };
         // 削除実施
         $scope.equipDoDel = function() {
@@ -527,7 +590,8 @@
           angular.element('#equipapplybtn').attr('disabled', 'disabled');
           angular.element('#equipdelbtn').attr('disabled', 'disabled');
           doJsonPost( $http, '/program/' + pgid + '/equip/' + itemid + '/del/',
-                      undefined, $uibModalInstance, $uibModal);
+            undefined, $uibModalInstance, $uibModal,
+            function() { $scope.getEquip(); } );
         };
       }
     ]
@@ -592,6 +656,7 @@
           })
           .error( function() { httpfailDlg( $uibModal ); } );
         };
+        // 親からのメッセージでリスト更新
         $scope.$on('PglRelEvent', function( ev, dt ) {
           getPage(dt);
         });

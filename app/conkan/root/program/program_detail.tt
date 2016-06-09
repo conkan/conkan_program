@@ -45,6 +45,8 @@ END -%]
   <!-- angular 初期化用変数値設定 -->
   <input type="hidden" id="init_pgid" value="[% Program.pgid %]"/>
   <input type="hidden" id="init_regpgid" value="[% RegProgram.regpgid %]"/>
+  <input type="hidden" id="init_subno" value="[% Program.subno %]"/>
+  <input type="hidden" id="init_name" value="[% RegProgram.name %]"/>
   <div id="detailwrap">
     <!-- 企画概要 -->
     <div class="well" id="reg_program">
@@ -123,7 +125,7 @@ END -%]
             <td align="center">
               [%- IF editable %]
                 <button type="button" class="btn btn-warning btn-xs"
-                  ng-click="openRegPgEditForm([% Program.pgid %])">
+                  ng-click="openRegPgEditForm()">
                   編集
                 </button>
                 [% PROCESS 'program/T_pgup_regprog.tt' %]
@@ -190,7 +192,7 @@ END -%]
             <td align="center">
               [%- IF editable %]
                 <button type="button" class="btn btn-warning btn-xs"
-                  ng-click="openPgEditForm([% Program.pgid %])">
+                  ng-click="openPgEditForm()">
                   編集
                 </button>
                 [% PROCESS 'program/T_pgup_program.tt' %]
@@ -222,22 +224,18 @@ END -%]
           </tr>
         </thead>
         <tbody>
-          [% FOREACH item = RegCasts %]
-            <tr>
-              <td>[% item.name         | html %]</td>
-              <td>[% item.namef        | html %]</td>
-              <td>[% item.title        | html %]</td>
-              <td>[% item.needreq      | html %]</td>
-              <td>[% item.needguest    | html %]</td>
-            </tr>
-          [% END %]
+          <tr ng-repeat="regcast in regcastlist">
+            <td>{{regcast.name}}</td>
+            <td>{{regcast.namef}}</td>
+            <td>{{regcast.title}}</td>
+            <td>{{regcast.needreq}}</td>
+            <td>{{regcast.needguest}}</td>
+          </tr>
           [%- IF editable %]
             <tr>
               <td align="center">
                 <button type="button" class="btn btn-primary btn-xs"
-                  ng-click="openRegCastForm(
-                    [%- RegProgram.regpgid %], [%- Program.subno %],
-                    [%- Program.pgid %], '[%- RegProgram.name %]' )">
+                  ng-click="openRegCastForm()">
                   追加
                 </button>
               </td>
@@ -278,42 +276,29 @@ END -%]
           </tr>
         </thead>
         <tbody>
-          [% FOREACH item = Casts %]
-            [% IF item.status == '企画不参加' || item.status == '大会不参加' || item.status == '欠席' || item.status == '企画中止';
-              SET rmcol = 'background-color:#aaa;';
-            ELSE;
-              SET rmcol = '';
-            END %]
-            <tr>
-              <td style="[% rmcol %]">[% item.castid.regno %] [% item.castid.name   | html %]</td>
-              <td style="[% rmcol %]">[% item.name          | html %]</td>
-              <td style="[% rmcol %]">[% item.title         | html %]</td>
-              <td style="[% rmcol %]">[% item.castid.status | html %]</td>
+          <tr ng-repeat="cast in castlist">
+            <td class="{{cast.class}}">{{cast.regno}} {{cast.name}}</td>
+            <td style="{{cast.class}}">{{cast.pname}}</td>
+            <td style="{{cast.class}}">{{cast.title}}</td>
+            <td style="{{cast.class}}">{{cast.constatus}}</td>
+            [%- IF editable %]
+              <td style="{{cast.class}}">{{cast.memo}}</td>
+            [% END %]
+            <td style="{{cast.class}}">{{cast.status}}</td>
+            <td  style="{{cast.class}}" align="center">
               [%- IF editable %]
-                <td style="[% rmcol %]">[% item.castid.memo | html %]</td>
+              <button type="button" class="btn btn-warning btn-xs"
+                ng-click="openCastEditForm( cast.id )">
+                編集
+              </button>
               [% END %]
-              <td style="[% rmcol %]">[% item.status        | html %]</td>
-              <td  style="[% rmcol %]" align="center">
-                [%- IF editable %]
-                  <button type="button" class="btn btn-warning btn-xs"
-                    ng-click="openCastEditForm(
-                      [%- RegProgram.regpgid %], [%- Program.subno %],
-                      [%- Program.pgid %], '[%- RegProgram.name %]',
-                      [%- item.id %] )">
-                    編集
-                  </button>
-                [% END %]
-              </td>
-            </tr>
-          [% END %]
+            </td>
+          </tr>
           [%- IF editable %]
             <tr>
               <td align="center">
                 <button type="button" class="btn btn-warning btn-xs"
-                  ng-click="openCastEditForm(
-                    [%- RegProgram.regpgid %], [%- Program.subno %],
-                    [%- Program.pgid %], '[%- RegProgram.name %]',
-                    0 )">
+                  ng-click="openCastEditForm( 0 )">
                   追加
                 </button>
               </td>
@@ -388,10 +373,7 @@ END -%]
             <td align="center">
               [%- IF editable %]
                 <button type="button" class="btn btn-warning btn-xs"
-                    ng-click="openEquipForm(
-                      [%- RegProgram.regpgid %], [%- Program.subno %],
-                      [%- Program.pgid %], '[%- RegProgram.name %]',
-                      equip.id )">
+                    ng-click="openEquipForm( equip.id )">
                   編集
                 </button>
               [% END %]
@@ -401,10 +383,7 @@ END -%]
             <tr>
               <td align="center">
                 <button type="button" class="btn btn-warning btn-xs"
-                  ng-click="openEquipForm(
-                      [%- RegProgram.regpgid %], [%- Program.subno %],
-                      [%- Program.pgid %], '[%- RegProgram.name %]',
-                      0)">
+                  ng-click="openEquipForm( 0 )">
                   追加
                 </button>
               </td>

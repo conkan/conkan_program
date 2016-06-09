@@ -9,16 +9,20 @@
   ConkanAppModule.controller( 'castListController',
     [ '$scope', '$sce', '$http', '$uibModal',
       function( $scope, $sce, $http, $uibModal ) {
-        $http.get('/config/cast/listget')
-        .success(function(data) {
-          if ( data.status === 'ok' ) {
-            $scope.castgrid.data = data.json;
-          }
-          else {
-            openDialog( data.status );
-          }
-        })
-        .error( function() { httpfailDlg( $uibModal ); } );
+        $scope.getCastList = function() {
+          $http.get('/config/cast/listget')
+          .success(function(data) {
+            if ( data.status === 'ok' ) {
+              $scope.castgrid.data = data.json;
+            }
+            else {
+              openDialog( data.status );
+            }
+          })
+          .error( function() { httpfailDlg( $uibModal ); } );
+        }
+
+        $scope.getCastList();
 
         $scope.castgrid = {
           enableFiltering: false,
@@ -104,6 +108,13 @@
             backdrop    : 'static',
             scope       : $scope,
             size        : 'lg',
+            resolve     :
+              { params: function() {
+                return {
+                  editCastId : castid,
+                  editCastBtnLbl : ( castid === 0 ) ? '追加' : '更新',
+                };
+              }},
           });
         };
       }
@@ -112,17 +123,18 @@
   
   // 出演者更新追加ダイアログコントローラ
   ConkanAppModule.controller( 'allcastFormController',
-    [ '$scope', '$http', '$uibModal', '$uibModalInstance',
-      function( $scope, $http, $uibModal, $uibModalInstance ) {
+    [ '$scope', '$http', '$uibModal', '$uibModalInstance', 'params',
+      function( $scope, $http, $uibModal, $uibModalInstance, params ) {
         // 初期値設定
         angular.element('#valerr').text('');
         $http({
           method  : 'GET',
-          url     : '/config/cast/' + $scope.castid
+          url     : '/config/cast/' + params.editCastId
         })
         .success(function(data) {
           if ( data.status === 'ok' ) {
             $scope.cast = {
+              applyBtnLbl : params.editCastBtnLbl,
               castid    : data.json.castid,
               regno     : data.json.regno,
               name      : data.json.name,
@@ -150,7 +162,8 @@
           //    現在なし
           // 実行
           doJsonPost( $http, '/config/cast/' + $scope.cast.castid + '/edit',
-                      $.param($scope.cast), $uibModalInstance, $uibModal);
+                      $.param($scope.cast), $uibModalInstance, $uibModal,
+                      function() { $scope.getCastList(); } );
         };
         // 削除実施
         $scope.castDoDel = function() {
@@ -158,7 +171,8 @@
           angular.element('#castapplybtn').attr('disabled', 'disabled');
           angular.element('#castdelbtn').attr('disabled', 'disabled');
           doJsonPost( $http, '/config/cast/' + $scope.cast.castid + '/del',
-                      undefined, $uibModalInstance, $uibModal);
+                      undefined, $uibModalInstance, $uibModal,
+                      function() { $scope.getCastList(); } );
         };
       }
     ]

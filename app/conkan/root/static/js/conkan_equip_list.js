@@ -10,16 +10,19 @@
     [ '$scope', '$sce', '$http', '$uibModal',
       function( $scope, $sce, $http, $uibModal ) {
         // 初期値設定
-        $http.get('/config/equip/listget')
-        .success(function(data) {
-          if ( data.status === 'ok' ) {
-            $scope.equipgrid.data = data.json;
-          }
-          else {
-            openDialog( data.status );
-          }
-        })
-        .error( function() { httpfailDlg( $uibModal ); } );
+        $scope.getEquipList = function() {
+          $http.get('/config/equip/listget')
+          .success(function(data) {
+            if ( data.status === 'ok' ) {
+              $scope.equipgrid.data = data.json;
+            }
+            else {
+              openDialog( data.status );
+            }
+          })
+          .error( function() { httpfailDlg( $uibModal ); } );
+        };
+        $scope.getEquipList();
 
         $scope.equipgrid = {
           enableFiltering: false,
@@ -77,6 +80,13 @@
             backdrop    : 'static',
             scope       : $scope,
             size        : 'lg',
+            resolve     :
+              { params: function() {
+                return {
+                  editEquipId : equipid,
+                  editEquipBtnLbl : ( equipid === 0 ) ? '追加' : '更新',
+                };
+              }},
           });
         };
       }
@@ -85,17 +95,18 @@
   
   // 機材詳細更新追加ダイアログコントローラ
   conkanAppModule.controller( 'allequipFormController',
-    [ '$scope', '$http', '$uibModal', '$uibModalInstance',
-      function( $scope, $http, $uibModal, $uibModalInstance ) {
+    [ '$scope', '$http', '$uibModal', '$uibModalInstance', 'params',
+      function( $scope, $http, $uibModal, $uibModalInstance, params ) {
         // 初期値設定
         angular.element('#valerr').text('');
         $http({
           method  : 'GET',
-          url     : '/config/equip/' + $scope.equipid
+          url     : '/config/equip/' + params.editEquipId
         })
         .success(function(data) {
           if ( data.status === 'ok' ) {
             $scope.equip = {
+              applyBtnLbl : params.editEquipBtnLbl,
               equipid : data.json.equipid,
               name    : data.json.name,
               equipno : data.json.equipno,
@@ -120,7 +131,8 @@
           //    現在なし
           // 実行
           doJsonPost( $http, '/config/equip/' + $scope.equip.equipid + '/edit',
-                      $.param($scope.equip), $uibModalInstance, $uibModal);
+                      $.param($scope.equip), $uibModalInstance, $uibModal,
+                      function() { $scope.getEquipList(); } );
         };
         // 削除実施
         $scope.equipDoDel = function() {
@@ -128,7 +140,8 @@
           angular.element('#equipapplybtn').attr('disabled', 'disabled');
           angular.element('#equipdelbtn').attr('disabled', 'disabled');
           doJsonPost( $http, '/config/equip/' + $scope.equip.equipid + '/del',
-                      undefined, $uibModalInstance, $uibModal);
+                      undefined, $uibModalInstance, $uibModal,
+                      function() { $scope.getEquipList(); } );
         };
       }
     ]

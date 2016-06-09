@@ -60,7 +60,7 @@
     <button class="btn btn-primary" id="equipapplybtn"
       ng-disabled="equipform.$invalid || equipform.$pristine"
       ng-click="equipDoApply()">
-      {{applyBtnLbl}}
+      {{equip.applyBtnLbl}}
     </button>
   </div>
 </script>

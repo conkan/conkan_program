@@ -327,7 +327,7 @@ sub progress :Local {
     my $str = $param->{'progress'};
     try {
         $c->forward('/program/_crProgress', [ $regpgid, $str, ], ) if ( $str );
-        $c->stash->{'status'} = 'ok';
+        $c->stash->{'status'} = 'nodlgok';
     } catch {
         my $e = shift;
         $c->log->error('program/progress error ' . localtime() .
@@ -674,15 +674,6 @@ sub program_show : Chained('program_base') :PathPart('') :CaptureArgs(1) {
     my $regpgid = $c->stash->{'Program'}->regpgid->regpgid();
     # 企画開始終了時刻変換
     $c->forward('/program/_trnSEtime', [ $c->stash->{'Program'}, ], );
-    $c->stash->{'RegProgram'} =
-        $c->model('ConkanDB::PgRegProgram')->find($regpgid);
-    $c->stash->{'RegCasts'} =
-        [ $c->model('ConkanDB::PgRegCast')->search(
-                        { regpgid => $regpgid },
-                        {
-                            'order_by' => { '-asc' => 'id' },
-                        }
-                    ) ];
     $c->stash->{'RegEquips'} =
         [ $c->model('ConkanDB::PgRegEquip')->search(
                         { regpgid => $regpgid },
@@ -690,18 +681,9 @@ sub program_show : Chained('program_base') :PathPart('') :CaptureArgs(1) {
                             'order_by' => { '-asc' => 'id' },
                         }
                     ) ];
-    $c->stash->{'Casts'} =
-        [ $c->model('ConkanDB::PgCast')->search(
-                        { pgid => $pgid },
-                        {
-                            'prefetch' => [ 'castid' ],
-                            'order_by' => { '-asc' => 'id' },
-                        }
-                    ) ];
     $c->stash->{'pgid'}     = $pgid;
     $c->stash->{'regpgid'}  = $regpgid;
     $c->stash->{'subno'}    = $c->stash->{'Program'}->subno();
-    $c->stash->{'pgname'}   = $c->stash->{'RegProgram'}->name();
     $c->stash->{'self_li_id'} = $c->stash->{'self_li_id'} || 'program_list';
 }
 
@@ -713,6 +695,9 @@ sub program_show : Chained('program_base') :PathPart('') :CaptureArgs(1) {
 
 sub program_detail : Chained('program_show') : PathPart('') : Args(0) {
     my ( $self, $c ) = @_;
+    my $regpgid = $c->stash->{'regpgid'};
+    $c->stash->{'RegProgram'} =
+        $c->model('ConkanDB::PgRegProgram')->find($regpgid);
 }
 
 =head2 program/*/regprogram
@@ -733,7 +718,7 @@ sub pgup_regprog : Chained('program_show') : PathPart('regprogram') : Args(0) {
     my $pgid    = $c->stash->{'pgid'};
     $c->stash->{'M'} = $c->model('ConkanDB::PgRegProgram');
     try {
-        my $rowprof = $c->stash->{'RegProgram'};
+        my $rowprof = $c->stash->{'M'}->find($regpgid);
         if ( $c->request->method eq 'GET' ) {
             $c->stash->{'json'} = {
                 pgid        => $pgid,
@@ -782,6 +767,87 @@ sub pgup_regprog : Chained('program_show') : PathPart('regprogram') : Args(0) {
 企画更新(管理分) は、 timetable/* を使用する
 
 =cut
+
+=head2 program/*/regcastlist
+---------------------------------------------
+企画管理 pgdt_regcastlist  : 要望出演者リスト取得
+
+=cut
+
+sub pgdt_regcastlist : Chained('program_show') : PathPart('regcastlist') : Args(0) {
+    my ( $self, $c ) = @_;
+    my $pgid = $c->stash->{'pgid'};
+    my $regpgid = $c->stash->{'regpgid'};
+    try {
+        my $rows = [ $c->model('ConkanDB::PgRegCast')->search(
+                        { regpgid => $regpgid },
+                        { 'order_by' => { '-asc' => 'id' }, } ) ];
+        my @list = ();
+        foreach my $row ( @$rows ) {
+            my $regcast = {
+                'name'      => $row->name(),
+                'namef'     => $row->namef(),
+                'title'     => $row->title(),
+                'needreq'   => $row->needreq(),
+                'needguest' => $row->needguest(),
+            };
+            push @list, $regcast;
+        }
+        $c->stash->{'json'} = \@list;
+        $c->stash->{'status'} = 'ok';
+    } catch {
+        my $e = shift;
+        $c->log->error('program/' . $pgid . ' /regcastlist/ error '
+            . localtime() . ' dbexp : ' . Dumper($e) );
+        $c->stash->{'status'} = 'dbfail';
+    };
+    $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
+    $c->forward('conkan::View::JSON');
+}
+
+=head2 program/*/castlist
+---------------------------------------------
+企画管理 pgdt_castlist  : 決定出演者リスト取得
+
+=cut
+
+sub pgdt_castlist : Chained('program_show') : PathPart('castlist') : Args(0) {
+    my ( $self, $c ) = @_;
+    my $pgid = $c->stash->{'pgid'};
+    my $regpgid = $c->stash->{'regpgid'};
+    try {
+        my $rows = [ $c->model('ConkanDB::PgCast')->search(
+                        { pgid => $pgid },
+                        {
+                            'prefetch' => [ 'castid' ],
+                            'order_by' => { '-asc' => 'id' },
+                        }
+                    ) ];
+        my @list = ();
+        foreach my $row ( @$rows ) {
+            my $cast = {
+                'id'        => $row->id(),
+                'status'    => $row->status(),
+                'memo'      => $row->memo(),
+                'pname'     => $row->name(),
+                'title'     => $row->title(),
+                'regno'     => $row->castid->regno(),
+                'name'      => $row->castid->name(),
+                'constatus' => $row->castid->status(),
+            };
+            push @list, $cast;
+        }
+        $c->stash->{'json'} = \@list;
+        $c->stash->{'status'} = 'ok';
+    } catch {
+        my $e = shift;
+        $c->log->error('program/' . $pgid . ' /regcastlist/ error '
+            . localtime() . ' dbexp : ' . Dumper($e) );
+        $c->stash->{'status'} = 'dbfail';
+    };
+    $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
+    $c->forward('conkan::View::JSON');
+}
 
 =head2 program/*/cast/*
 ---------------------------------------------

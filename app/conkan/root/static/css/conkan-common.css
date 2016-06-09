@@ -69,6 +69,10 @@
     min-width: 1100px;
 }
 
+.rmcast {
+    background-color: #aaa';
+}
+
 @media (min-width: 1520px) {
     .container {
         width: 1500px;
