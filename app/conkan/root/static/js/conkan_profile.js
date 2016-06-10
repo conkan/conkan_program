@@ -96,7 +96,23 @@
           angular.element('#profapplybtn').attr('disabled', 'disabled');
           angular.element('#profdelbtn').attr('disabled', 'disabled');
           // バリデーション
-          //    現在なし
+          if ( $scope.prof.passwd != $scope.prof.passwd2 ) {
+            angular.element('#valerr').text('パスワードが一致しません');
+            angular.element('*[name=passwd]').addClass('ng-invalid');
+            angular.element('*[name=passwd]').removeClass('ng-valid');
+            angular.element('*[name=passwd]').$invalid = true;
+            angular.element('*[name=passwd2]').addClass('ng-invalid');
+            angular.element('*[name=passwd2]').removeClass('ng-valid');
+            angular.element('*[name=passwd2]').$invalid = true;
+            angular.element('#profapplybtn').removeAttr('disabled');
+            return;
+          }
+          angular.element('*[name=passwd]').removeClass('ng-invalid');
+          angular.element('*[name=passwd]').addClass('ng-valid');
+          angular.element('*[name=passwd]').$invalid = false;
+          angular.element('*[name=passwd2]').removeClass('ng-invalid');
+          angular.element('*[name=passwd2]').addClass('ng-valid');
+          angular.element('*[name=passwd2]').$invalid = false;
           // 実行
           doJsonPost( $http, '/config/staff/' + $scope.prof.staffid + '/edit',
                       $.param($scope.prof), $uibModalInstance, $uibModal,
