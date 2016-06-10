@@ -23,6 +23,9 @@
     -webkit-transform: translateY(-50%);
     -ms-transform: translateY(-50%);
     transform: translateY(-50%);
+}
+
+#progresslist .ui-grid-vcenter div {
     white-space: pre-line;
     overflow:   auto;
     line-height: 1;
