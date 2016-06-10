@@ -84,7 +84,6 @@
             $scope.rolelist = params.rolelist;
           }
           else {
-            $scope.rolelist = params.rolelist;
             openDialog( data.status );
           }
         })

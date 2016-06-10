@@ -358,20 +358,7 @@ sub staff_listget : Chained('staff_base') : PathPart('listget') : Args(0) {
 
 sub staff_show : Chained('staff_base') :PathPart('') :CaptureArgs(1) {
     my ( $self, $c, $staffid ) = @_;
-    
-    # Staffテーブルに対応したmodelオブジェクト取得
-    $c->stash->{'M'}   = $c->model('ConkanDB::PgStaff');
-
-    try {
-        my $rowstaff = $c->stash->{'M'}->find($staffid);
-        $c->stash->{'rs'} = $rowstaff;
-        $c->stash->{'staffid'} = $staffid;
-        $c->stash->{'status'} = 'ok';
-    } catch {
-        my $e = shift;
-        $c->stash->{'status'} = 'dbfail';
-        $c->stash->{'dbexp'} = $e;
-    };
+    $c->forward( '_showCommon', [ $staffid, 'staffid', 'PgStaff', ] );
 }
 
 =head2 staff/*
@@ -631,22 +618,7 @@ sub room_listget : Chained('room_base') : PathPart('listget') : Args(0) {
 
 sub room_show : Chained('room_base') :PathPart('') :CaptureArgs(1) {
     my ( $self, $c, $roomid ) = @_;
-    
-    # roomテーブルに対応したmodelオブジェクト取得
-    $c->stash->{'M'}   = $c->model('ConkanDB::PgRoom');
-    try {
-        my $rowroom;
-        if ( $roomid != 0 ) {
-            $rowroom = $c->stash->{'M'}->find($roomid);
-        }
-        $c->stash->{'rs'} = $rowroom;
-        $c->stash->{'roomid'} = $roomid;
-        $c->stash->{'status'} = 'ok';
-    } catch {
-        my $e = shift;
-        $c->stash->{'status'} = 'dbfail';
-        $c->stash->{'dbexp'} = $e;
-    };
+    $c->forward( '_showCommon', [ $roomid, 'roomid', 'PgRoom' ] );
 }
 
 =head2 room/*
@@ -895,27 +867,7 @@ sub cast_listget : Chained('cast_base') : PathPart('listget') : Args(0) {
 
 sub cast_show : Chained('cast_base') :PathPart('') :CaptureArgs(1) {
     my ( $self, $c, $castid ) = @_;
-    
-    # castテーブルに対応したmodelオブジェクト取得
-    $c->stash->{'M'}   = $c->model('ConkanDB::PgAllCast');
-    try {
-        my $rowcast;
-        if ( $castid != 0 ) {
-            $rowcast = $c->stash->{'M'}->find($castid);
-        }
-        else {
-            $rowcast = {
-                'castid'    => 0,
-            };
-        }
-        $c->stash->{'rs'} = $rowcast;
-        $c->stash->{'castid'} = $castid;
-        $c->stash->{'status'} = 'ok';
-    } catch {
-        my $e = shift;
-        $c->stash->{'status'} = 'dbfail';
-        $c->stash->{'dbexp'} = $e;
-    };
+    $c->forward( '_showCommon', [ $castid, 'castid', 'PgAllCast' ] );
 }
 
 =head2 cast/*
@@ -1138,26 +1090,7 @@ sub equip_listget : Chained('equip_base') : PathPart('listget') : Args(0) {
 
 sub equip_show : Chained('equip_base') :PathPart('') :CaptureArgs(1) {
     my ( $self, $c, $equipid ) = @_;
-    
-    # equipテーブルに対応したmodelオブジェクト取得
-    $c->stash->{'M'}   = $c->model('ConkanDB::PgAllEquip');
-    try {
-        my $rowequip;
-        if ( $equipid != 0 ) {
-            $rowequip = $c->stash->{'M'}->find($equipid);
-        } else {
-            $rowequip = {
-                'equipid'       => 0,
-            };
-        }
-        $c->stash->{'rs'} = $rowequip;
-        $c->stash->{'equipid'} = $equipid;
-        $c->stash->{'status'} = 'ok';
-    } catch {
-        my $e = shift;
-        $c->stash->{'status'} = 'dbfail';
-        $c->stash->{'dbexp'} = $e;
-    };
+    $c->forward( '_showCommon', [ $equipid, 'equipid', 'PgAllEquip' ] );
 }
 
 =head2 equip/*
@@ -1301,6 +1234,42 @@ sub equipcsvdownload :Local {
 
 =head2 更新削除共通
 
+=head2 _showCommon
+
+情報更新のための表示起点共通
+
+=cut
+
+sub _showCommon : Private {
+    my ( $self, $c, 
+         $id,       # 対象ID
+         $idstr,    # 対象IDの名前
+         $table,    # 対象テーブル名
+       ) = @_;
+
+    # 対象テーブルに対応したmodelオブジェクト取得
+    $c->stash->{'M'}   = $c->model('ConkanDB::' . $table);
+
+    try {
+        my $row;
+        if ( $id != 0 ) {
+            $row = $c->stash->{'M'}->find($id);
+        }
+        else {
+            $row = {
+                $idstr => 0,
+            };
+        }
+        $c->stash->{'rs'} = $row;
+        $c->stash->{$idstr} = $id;
+        $c->stash->{'status'} = 'ok';
+    } catch {
+        my $e = shift;
+        $c->stash->{'status'} = 'dbfail';
+        $c->stash->{'dbexp'} = $e;
+    };
+}
+
 =head2 _updatecreate
 
 部屋、出演者、機材 更新追加実施
@@ -1390,7 +1359,7 @@ sub loginlog :Local {
 }
 
 =head2 loginlogget
------------------------------------------------------------------------------
+
 ログイン履歴取得
 
 =cut
