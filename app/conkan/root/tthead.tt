@@ -16,6 +16,12 @@
   END;
   DEFAULT self_li_id = 'mypage';
   SET cuRole = c.user.get('role');
+  # 操作者が管理者か設定;
+  IF cuRole == 'ROOT' || cuRole == 'PG' || cuRole == 'ADMIN';
+    SET currentSU = 1;
+  ELSE;
+    SET currentSU = 0;
+  END;
 ## <-- 制御パラメータの設定 -%]
 <!-- #Region "tthead.tt" -->
 <!-- ## script/css include ------------------------------------------------ -->
@@ -61,7 +67,6 @@
               <li id="program_list"><a href="/program/list">企画一覧</a></li>
               <li id="timetable"><a href="/timetable">タイムテーブル</a></li>
             [% END %]
-            <li id="mypage_profile"><a href="/mypage/profile">プロファイル設定</a></li>
           [% END %]
           [%- IF cuRole == 'ROOT' || cuRole == 'ADMIN' %]
             <li id="config_staff"><a href="/config/staff/list">スタッフ管理</a></li>

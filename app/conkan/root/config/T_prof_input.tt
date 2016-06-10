@@ -1,11 +1,4 @@
 <!-- プロファイルダイアログ -->
-[%- ## 操作者が管理者か設定
-IF cuRole == 'ROOT' || cuRole == 'PG' || cuRole == 'ADMIN';
-  SET currentSU = 1;
-ELSE;
-  SET currentSU = 0;
-END;
-## <-- 管理ユーザの設定 -%]
 <script type="text/ng-template" id="T_prof_input">
   <div class="modal-header">
     <button type="button" class="close" ng-click="$close()" aria-hidden="true">
@@ -64,7 +57,7 @@ END;
             <th>役割</th>
             <td>
               <select name="role" class="col-sm-12" ng-model="prof.role"
-                ng-readonly="![% currentSU %]"
+                ng-disabled="[% currentSU == 0 %]"
                 ng-options="i.id as i.val  for i in rolelist"></select>
             </td>
           </tr>

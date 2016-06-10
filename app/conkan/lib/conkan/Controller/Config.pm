@@ -36,6 +36,7 @@ sub auto :Private {
     return 1 if ( $c->user->get('role') eq 'ROOT' );
     return 1 if ( $c->user->get('role') eq 'PG' );
     return 1 if ( $c->user->get('role') eq 'ADMIN' );
+    return 1 if ( $c->action->reverse =~ qr(^config/staff) );
 
     $c->response->status(412);
     $c->stash->{template} = 'accessDeny.tt';
@@ -358,7 +359,18 @@ sub staff_listget : Chained('staff_base') : PathPart('listget') : Args(0) {
 
 sub staff_show : Chained('staff_base') :PathPart('') :CaptureArgs(1) {
     my ( $self, $c, $staffid ) = @_;
-    $c->forward( '_showCommon', [ $staffid, 'staffid', 'PgStaff', ] );
+    if (  ( $c->user->get('role') eq 'ROOT' )
+       || ( $c->user->get('role') eq 'PG' )
+       || ( $c->user->get('role') eq 'ADMIN' )
+       || ( $c->user->get('staffid') eq $staffid ) ) {
+        $c->forward( '_showCommon', [ $staffid, 'staffid', 'PgStaff', ] );
+    }
+    else {
+        $c->stash->{'status'} = 'accessdeny';
+        $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
+        $c->component('View::JSON')->{expose_stash} = [ 'status' ];
+        $c->forward('conkan::View::JSON');
+    }
 }
 
 =head2 staff/*
@@ -369,6 +381,12 @@ sub staff_show : Chained('staff_base') :PathPart('') :CaptureArgs(1) {
 
 sub staff_detail : Chained('staff_show') : PathPart('') : Args(0) {
     my ( $self, $c ) = @_;
+    if ( $c->stash->{'status'} eq 'accessdeny' ) {
+        $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
+        $c->component('View::JSON')->{expose_stash} = [ 'status' ];
+        $c->forward('conkan::View::JSON');
+        return;
+    }
     try {
         die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
         my $rs = $c->stash->{'rs'};
@@ -404,7 +422,6 @@ sub staff_detail : Chained('staff_show') : PathPart('') : Args(0) {
         $c->log->error('config/staff error ' . localtime() .
             ' dbexp : ' . Dumper($e) );
         $c->stash->{'status'} = 'dbfail';
-        return;
     };
     $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
     $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];

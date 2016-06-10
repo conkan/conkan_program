@@ -84,7 +84,19 @@
             $scope.rolelist = params.rolelist;
           }
           else {
-            openDialog( data.status );
+            $uibModalInstance.close('done');
+            if ( data.status != 'accessdeny' ) { // アクセス不正なら何もしない
+              var resultDlg = $uibModal.open(
+                {
+                  templateUrl : getTemplate( data.status ),
+                  backdrop    : 'static',
+                }
+              );
+              resultDlg.rendered.then( function() {
+                angular.element('.modal-dialog').draggable({handle: '.modal-header'});
+              });
+              resultDlg.result.then( function() {} );
+            }
           }
         })
         .error( function() { httpfailDlg( $uibModal ); } )

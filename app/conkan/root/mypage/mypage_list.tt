@@ -10,17 +10,53 @@
 [%- SET self_li_id = 'mypage' -%]
 [%- SET useUiGrid  = 1 -%]
 [%- PROCESS 'tthead.tt' -%]
-<div class="container" ng-app="conkanProgList">
-  <div class="well" id="gridlist" ng-controller="progListController">
-    <div id="proglist" ui-grid="proggrid" class="grid" ui-grid-resize-columns>
-    </div>
-  </div> <!-- End of well gridlist -->
+<div class="container">
+  <div ng-app="conkanProgList">
+    <div class="well" id="gridlist" ng-controller="progListController">
+      <div id="proglist" ui-grid="proggrid" class="grid" ui-grid-resize-columns>
+      </div>
+    </div> <!-- End of well gridlist ng-controller "progListController" -->
+  </div> <!-- End of div ng-app "conkanProgList" -->
+  <table id="pgAddDiv" class="table table-condensed">
+    <tbody>
+      <tr>
+        <td align="center" id="profileElm" ng-app="conkanProfile">
+          <div ng-controller="profileController">
+            <button class="btn btn-primary" id="profbtn"
+              ng-click="openProfForm([% c.user.get('staffid') %])">
+              プロファイル設定
+            </button>
+            [%- PROCESS 'config/T_prof_input.tt' -%]
+          </div> <!-- End of div ng-controller "profileController" -->
+        </td> <!-- End of div ng-app "conkanProfile" -->
+        <td ng-if="[% currentSU %]" align="center" id="configElm"
+          ng-app="conkanConfig">
+          <div ng-controller="configController">
+            <button class="btn btn-primary" id="profbtn"
+              ng-click="openConfForm()">
+              システム設定
+            </button>
+            [%- PROCESS 'config/T_conf_setting.tt' -%]
+          </div> <!-- End of div ng-controller "configController" -->
+        </td> <!-- End of div ng-app "conkanConfig" -->
+    </tbody>
+  </table>
   [%- PROCESS 'T_httpget_result.tt' -%]
-  <div id="pgAddDiv">
-  </div>
-</div> <!-- End of container ng-app "conkanProgList" -->
+</div>
 [%- PROCESS 'tttail.tt' -%]
 <script type="text/javascript">var allprg=false;</script>
 <script type="text/javascript" src="/static/js/conkan_prog_list.js"></script>
+<script type="text/javascript" src="/static/js/conkan_profile.js"></script>
+[% IF currentSU %]
+  <script type="text/javascript" src="/static/js/conkan_config.js"></script>
+[% END %]
+<script type="text/javascript">
+  angular.element(document).ready(function() {
+    angular.bootstrap($('#profileElm'), ['conkanProfile']);
+    [% IF currentSU %]
+      angular.bootstrap($('#configElm'), ['conkanConfig']);
+    [% END %]
+  });
+</script>
 </body>
 </html>
