@@ -355,6 +355,7 @@ sub timetable_get : Chained('timetable_base') :PathPart('') :Args(1) {
             ' dbexp : ' . Dumper($e) );
         $c->stash->{'status'} = 'dbfail';
     };
+    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
     $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }

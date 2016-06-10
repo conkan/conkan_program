@@ -250,15 +250,15 @@ var dialogResizeDrag = function() {
 
   var vh = wh -
             ( parseInt( dialog.css('marginTop')) +
-              parseInt( dialog.css('borderTop')) +
+              parseInt( dialog.css('borderTopWidth')) +
               parseInt( dialog.css('paddingTop')) +
               parseInt( content.css('marginTop')) +
-              parseInt( content.css('borderTop')) +
+              parseInt( content.css('borderTopWidth')) +
               parseInt( content.css('paddingTop')) +
               parseInt( body.css('marginTop')) +
               parseInt( body.css('marginBottom')) +
-              parseInt( body.css('borderTop')) +
-              parseInt( body.css('borderBottom')) +
+              parseInt( body.css('borderTopWidth')) +
+              parseInt( body.css('borderBottomWidth')) +
               parseInt( body.css('paddingTop')) +
               parseInt( body.css('paddingBottom')) +
               header.outerHeight() +

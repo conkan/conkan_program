@@ -143,7 +143,7 @@
               restdate  : data.json.restdate,
               rmdate    : data.json.rmdate,
             };
-            $scope.statlist = data.statlist;
+            $scope.statlist = data.json.statlist;
           }
           else {
             openDialog( data.status );

@@ -276,6 +276,7 @@ sub confget :Local {
             ' dbexp : ' . Dumper($e) );
         $c->stash->{'status'} = 'dbfail';
     };
+    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
     $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
@@ -344,6 +345,7 @@ sub staff_listget : Chained('staff_base') : PathPart('listget') : Args(0) {
             ' dbexp : ' . Dumper($e) );
         $c->stash->{'status'} = 'dbfail';
     };
+    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
     $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
@@ -362,23 +364,13 @@ sub staff_show : Chained('staff_base') :PathPart('') :CaptureArgs(1) {
 
     try {
         my $rowstaff = $c->stash->{'M'}->find($staffid);
-        $c->session->{'updtic'} = time;
-        $rowstaff->update( { 
-            'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
-        } );
         $c->stash->{'rs'} = $rowstaff;
-        if ( $rowstaff->otheruid ) {
-            my $cybozu = decode_json( $rowstaff->otheruid );
-            while ( my( $key, $val ) = each( %$cybozu )) {
-            $c->stash->{'rs'}->{$key} = $val;
-        }
-        }
-        $c->stash->{'rs'}->{'passwd'} = undef;
         $c->stash->{'staffid'} = $staffid;
+        $c->stash->{'status'} = 'ok';
     } catch {
         my $e = shift;
-        $c->log->error('staff/show error ' . localtime() .
-            ' dbexp : ' . Dumper($e) );
+        $c->stash->{'status'} = 'dbfail';
+        $c->stash->{'dbexp'} = $e;
     };
 }
 
@@ -390,6 +382,46 @@ sub staff_show : Chained('staff_base') :PathPart('') :CaptureArgs(1) {
 
 sub staff_detail : Chained('staff_show') : PathPart('') : Args(0) {
     my ( $self, $c ) = @_;
+    try {
+        die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
+        my $rs = $c->stash->{'rs'};
+        $c->session->{'updtic'} = time;
+        $rs->update( { 
+            'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
+        } );
+        my $ll = $rs->lastlogin();
+        my $ma = $rs->ma();
+        $ma =~ s/\s+$//;
+        $c->stash->{'json'} = {
+            staffid     => $rs->staffid(),
+            name        => $rs->name(),
+            account     => $rs->account(),
+            lastlogin   => $ll ? $ll->strftime('%F %T') : '',
+            role        => $rs->role(),
+            ma          => $ma,
+            telno       => $rs->telno(),
+            regno       => $rs->regno(),
+            tname       => $rs->tname(),
+            tnamef      => $rs->tnamef(),
+            comment     => $rs->comment(),
+        };
+        my $otheruidstr = $rs->otheruid();
+        unless ( $otheruidstr eq '' ) {
+            my $otheruid = decode_json( $otheruidstr );
+            while ( my( $key, $val ) = each( %$otheruid )) {
+                $c->stash->{'json'}->{$key} = $val;
+            }
+        }
+    } catch {
+        my $e = shift;
+        $c->log->error('config/staff error ' . localtime() .
+            ' dbexp : ' . Dumper($e) );
+        $c->stash->{'status'} = 'dbfail';
+        return;
+    };
+    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
+    $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
+    $c->forward('conkan::View::JSON');
 }
 
 =head2 staff/*/edit
@@ -404,12 +436,13 @@ sub staff_edit : Chained('staff_show') : PathPart('edit') : Args(0) {
     my $staffid = $c->stash->{'staffid'};
     # GETはおそらく直打ちとかなので再度
     if ( $c->request->method eq 'GET' ) {
-        $c->go->( '/config/staff/' . $staffid );
+        $c->go->( '/config/staff/' . $staffid ); # goなので帰ってこない
     }
-    else {
-        # 更新実施
-        my $rowstaff = $c->stash->{'M'}->find($staffid);
-        if ( $rowstaff->updateflg eq 
+    try {
+        die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
+        # 更新実施 パスワード処理があるため、__updatecreate は使えない
+        my $rs = $c->stash->{'rs'};
+        if ( $rs->updateflg eq 
                 +( $c->sessionid . $c->session->{'updtic'}) ) {
             my $value = {};
             for my $item qw/name role ma
@@ -417,32 +450,32 @@ sub staff_edit : Chained('staff_show') : PathPart('edit') : Args(0) {
                             tname tnamef comment / {
                 $value->{$item} = $c->request->body_params->{$item};
                 $value->{$item} =~ s/\s+$// if defined($value->{$item});
-                delete $value->{$item} if ( $value->{$item} eq '' );
             }
-            $value->{'staffid'}  = $rowstaff->staffid;
-            $value->{'otheruid'} = $rowstaff->otheruid;
+            $value->{'staffid'}  = $rs->staffid;
+            $value->{'otheruid'} = $rs->otheruid;
             if ( $value->{'passwd'} ) {
                 $value->{'passwd'} =
                     crypt( $value->{'passwd'}, random_string( 'cccc' ));
             }
             else {
-                $value->{'passwd'}   = $rowstaff->passwd
+                $value->{'passwd'}   = $rs->passwd
             }
             $value->{'tname'} = $value->{'tname'} || $value->{'name'};
-            try {
-                $rowstaff->update( $value ); 
-                $c->response->body('<FORM><H1>更新しました</H1></FORM>');
-            } catch {
-                $c->detach( '_dberror', [ shift ] );
-            };
+                $rs->update( $value ); 
+                $c->stash->{'status'} = 'update';
         }
         else {
-            $c->stash->{'rs'} = undef;
-            $c->response->body( '<FORM><H1>更新できませんでした</H1><BR/>他のシステム管理者が変更した可能性があります</FORM>');
+            $c->stash->{'status'} = 'fail';
         }
-        $c->stash->{'rs'} = undef;
-        $c->response->status(200);
-    }
+    } catch {
+        my $e = shift;
+        $c->log->error('config/staff/' . $staffid . '/edit error '
+            . localtime() . ' dbexp : ' . Dumper($e) );
+        $c->stash->{'status'} = 'dbfail';
+    };
+    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
+    $c->component('View::JSON')->{expose_stash} = [ 'status' ];
+    $c->forward('conkan::View::JSON');
 }
 
 =head2 staff/*/del
@@ -456,11 +489,20 @@ sub staff_del : Chained('staff_show') : PathPart('del') : Args(0) {
     my $staffid = $c->stash->{'staffid'};
     # GETはおそらく直打ちとかなので再度
     if ( $c->request->method eq 'GET' ) {
-        $c->go->( '/config/staff/' . $staffid );
+        $c->go->( '/config/staff/' . $staffid ); # goなので帰ってこない
     }
-    else {
-        $c->detach( '_delete', [ $staffid, 'PgProgram', 'staffid', 1 ] );
-    }
+    try {
+        die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
+        $c->forward( '_delete', [ $staffid, 'PgProgram', 'staffid' ] );
+    } catch {
+        my $e = shift;
+        $c->log->error('config/staff_del error ' . localtime() .
+            ' dbexp : ' . Dumper($e) );
+        $c->stash->{'status'} = 'dbfail';
+    };
+    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
+    $c->component('View::JSON')->{expose_stash} = [ 'status' ];
+    $c->forward('conkan::View::JSON');
 }
 
 =head2 staffcsvdownload
@@ -576,6 +618,7 @@ sub room_listget : Chained('room_base') : PathPart('listget') : Args(0) {
             ' dbexp : ' . Dumper($e) );
         $c->stash->{'status'} = 'dbfail';
     };
+    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
     $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
@@ -595,19 +638,14 @@ sub room_show : Chained('room_base') :PathPart('') :CaptureArgs(1) {
         my $rowroom;
         if ( $roomid != 0 ) {
             $rowroom = $c->stash->{'M'}->find($roomid);
-            $c->session->{'updtic'} = time;
-            $rowroom->update( { 
-                'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
-            } );
         }
         $c->stash->{'rs'} = $rowroom;
         $c->stash->{'roomid'} = $roomid;
         $c->stash->{'status'} = 'ok';
     } catch {
         my $e = shift;
-        $c->log->error('config/room error ' . localtime() .
-            ' dbexp : ' . Dumper($e) );
         $c->stash->{'status'} = 'dbfail';
+        $c->stash->{'dbexp'} = $e;
     };
 }
 
@@ -619,30 +657,43 @@ sub room_show : Chained('room_base') :PathPart('') :CaptureArgs(1) {
 
 sub room_detail : Chained('room_show') : PathPart('') : Args(0) {
     my ( $self, $c ) = @_;
-    my $rs = $c->stash->{'rs'};
-    if ( $c->stash->{'roomid'} != 0 ) {
-        $c->stash->{'json'} = {
-            roomid      => $c->stash->{'roomid'},
-            name        => $rs->name(),
-            roomno      => $rs->roomno(),
-            max         => $rs->max(),
-            type        => $rs->type(),
-            size        => $rs->size(),
-            tablecnt    => $rs->tablecnt(),
-            chaircnt    => $rs->chaircnt(),
-            equips      => $rs->equips(),
-            useabletime => $rs->useabletime(),
-            net         => $rs->net(),
-            comment     => $rs->comment(),
-        };
-    }
-    else {
-        $c->stash->{'json'} = {
-            roomid      => 0,
-            type        => '洋室',
-            net         => 'W',
-        };
-    }
+    try {
+        die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
+        my $rs = $c->stash->{'rs'};
+        if ( $c->stash->{'roomid'} != 0 ) {
+            $c->session->{'updtic'} = time;
+            $rs->update( { 
+                'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
+            } );
+            $c->stash->{'json'} = {
+                roomid      => $c->stash->{'roomid'},
+                name        => $rs->name(),
+                roomno      => $rs->roomno(),
+                max         => $rs->max(),
+                type        => $rs->type(),
+                size        => $rs->size(),
+                tablecnt    => $rs->tablecnt(),
+                chaircnt    => $rs->chaircnt(),
+                equips      => $rs->equips(),
+                useabletime => $rs->useabletime(),
+                net         => $rs->net(),
+                comment     => $rs->comment(),
+            };
+        }
+        else {
+            $c->stash->{'json'} = {
+                roomid      => 0,
+                type        => '洋室',
+                net         => 'W',
+            };
+        }
+    } catch {
+        my $e = shift;
+        $c->log->error('config/room error ' . localtime() .
+            ' dbexp : ' . Dumper($e) );
+        $c->stash->{'status'} = 'dbfail';
+    };
+    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
     $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
@@ -660,17 +711,24 @@ sub room_edit : Chained('room_show') : PathPart('edit') : Args(0) {
 
     # GETはおそらく直打ちとかなので再度
     if ( $c->request->method eq 'GET' ) {
-        $c->go->( '/config/room/' . $roomid );
+        $c->go->( '/config/room/' . $roomid ); # goなので帰ってこない
     }
-    else {
+    try {
+        die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
         my $items = [ qw/
                         name roomno max type size tablecnt
                         chaircnt equips useabletime net comment
                         / ];
-        $c->forward( '_updatecreate', [ $roomid, $items, 0 ] );
-        $c->component('View::JSON')->{expose_stash} = [ 'status' ];
-        $c->forward('conkan::View::JSON');
-    }
+        $c->forward( '_updatecreate', [ $roomid, $items ] );
+    } catch {
+        my $e = shift;
+        $c->log->error('config/room/' . $roomid . '/edit error '
+            . localtime() . ' dbexp : ' . Dumper($e) );
+        $c->stash->{'status'} = 'dbfail';
+    };
+    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
+    $c->component('View::JSON')->{expose_stash} = [ 'status' ];
+    $c->forward('conkan::View::JSON');
 }
 
 =head2 room/*/del
@@ -684,13 +742,20 @@ sub room_del : Chained('room_show') : PathPart('del') : Args(0) {
     my $roomid = $c->stash->{'roomid'};
     # GETはおそらく直打ちとかなので再度
     if ( $c->request->method eq 'GET' ) {
-        $c->go->( '/config/room/' . $roomid );
+        $c->go->( '/config/room/' . $roomid ); # goなので帰ってこない
     }
-    else {
-        $c->forward( '_delete', [ $roomid, 'PgProgram', 'roomid', 0 ] );
-        $c->component('View::JSON')->{expose_stash} = [ 'status' ];
-        $c->forward('conkan::View::JSON');
-    }
+    try {
+        die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
+        $c->forward( '_delete', [ $roomid, 'PgProgram', 'roomid' ] );
+    } catch {
+        my $e = shift;
+        $c->log->error('config/room/' . $roomid . '/del error ' . localtime() .
+            ' dbexp : ' . Dumper($e) );
+        $c->stash->{'status'} = 'dbfail';
+    };
+    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
+    $c->component('View::JSON')->{expose_stash} = [ 'status' ];
+    $c->forward('conkan::View::JSON');
 }
 
 =head2 roomcsvdownload
@@ -817,6 +882,7 @@ sub cast_listget : Chained('cast_base') : PathPart('listget') : Args(0) {
             ' dbexp : ' . Dumper($e) );
         $c->stash->{'status'} = 'dbfail';
     };
+    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
     $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
@@ -836,33 +902,19 @@ sub cast_show : Chained('cast_base') :PathPart('') :CaptureArgs(1) {
         my $rowcast;
         if ( $castid != 0 ) {
             $rowcast = $c->stash->{'M'}->find($castid);
-            $c->session->{'updtic'} = time;
-            $rowcast->update( { 
-                'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
-            } );
         }
         else {
             $rowcast = {
                 'castid'    => 0,
             };
         }
-        my $statlist = ();
-        if ( $c->request->method eq 'GET' ) {
-            my $statlistval = $c->model('ConkanDB::PgSystemConf')
-                                ->find('contact_status_vals')->pg_conf_value();
-            $statlist = [
-                map +{ 'id' => $_, 'val' => $_ }, @{from_json( $statlistval ) }
-            ];
-        }
         $c->stash->{'rs'} = $rowcast;
         $c->stash->{'castid'} = $castid;
-        $c->stash->{'statlist'} = $statlist;
         $c->stash->{'status'} = 'ok';
     } catch {
         my $e = shift;
-        $c->log->error('config/cast error ' . localtime() .
-            ' dbexp : ' . Dumper($e) );
         $c->stash->{'status'} = 'dbfail';
+        $c->stash->{'dbexp'} = $e;
     };
 }
 
@@ -874,26 +926,44 @@ sub cast_show : Chained('cast_base') :PathPart('') :CaptureArgs(1) {
 
 sub cast_detail : Chained('cast_show') : PathPart('') : Args(0) {
     my ( $self, $c ) = @_;
-    my $rs = $c->stash->{'rs'};
-    if ( $c->stash->{'castid'} != 0 ) {
-        $c->stash->{'json'} = {
-            castid      => $c->stash->{'castid'},
-            regno       => $rs->regno(),
-            name        => $rs->name(),
-            namef       => $rs->namef(),
-            status      => $rs->status(),
-            memo        => $rs->memo(),
-            restdate    => $rs->restdate(),
-            rmdate      => $rs->rmdate(),
-        };
-    }
-    else {
-        $c->stash->{'json'} = {
-            castid => 0,
-        };
-    }
-    $c->component('View::JSON')->{expose_stash} = 
-        [ 'json', 'statlist', 'status' ];
+    try {
+        die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
+        my $rs = $c->stash->{'rs'};
+        if ( $c->stash->{'castid'} != 0 ) {
+            $c->session->{'updtic'} = time;
+            $rs->update( { 
+                'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
+            } );
+            $c->stash->{'json'} = {
+                castid      => $c->stash->{'castid'},
+                regno       => $rs->regno(),
+                name        => $rs->name(),
+                namef       => $rs->namef(),
+                status      => $rs->status(),
+                memo        => $rs->memo(),
+                restdate    => $rs->restdate(),
+                rmdate      => $rs->rmdate(),
+            };
+        }
+        else {
+            $c->stash->{'json'} = {
+                castid => 0,
+            };
+        }
+        my $statlistval = $c->model('ConkanDB::PgSystemConf')
+                            ->find('contact_status_vals')->pg_conf_value();
+        my $statlist = [
+                map +{ 'id' => $_, 'val' => $_ }, @{from_json( $statlistval ) }
+        ];
+        $c->stash->{'json'}->{'statlist'} = $statlist;
+    } catch {
+        my $e = shift;
+        $c->log->error('config/cast error ' . localtime() .
+            ' dbexp : ' . Dumper($e) );
+        $c->stash->{'status'} = 'dbfail';
+    };
+    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
+    $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
 
@@ -910,14 +980,21 @@ sub cast_edit : Chained('cast_show') : PathPart('edit') : Args(0) {
 
     # GETはおそらく直打ちとかなので再度
     if ( $c->request->method eq 'GET' ) {
-        $c->go->( '/config/cast/' . $castid );
+        $c->go->( '/config/cast/' . $castid ); # goなので帰ってこない
     }
-    else {
+    try {
+        die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
         my $items = [ qw/ regno name namef status memo restdate / ];
-        $c->forward( '_updatecreate', [ $castid, $items, 0 ] );
-        $c->component('View::JSON')->{expose_stash} = [ 'status' ];
-        $c->forward('conkan::View::JSON');
-    }
+        $c->forward( '_updatecreate', [ $castid, $items ] );
+    } catch {
+        my $e = shift;
+        $c->log->error('config/cast/' . $castid . '/edit error '
+            . localtime() . ' dbexp : ' . Dumper($e) );
+        $c->stash->{'status'} = 'dbfail';
+    };
+    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
+    $c->component('View::JSON')->{expose_stash} = [ 'status' ];
+    $c->forward('conkan::View::JSON');
 }
 
 =head2 cast/*/del
@@ -931,13 +1008,20 @@ sub cast_del : Chained('cast_show') : PathPart('del') : Args(0) {
     my $castid = $c->stash->{'castid'};
     # GETはおそらく直打ちとかなので再度
     if ( $c->request->method eq 'GET' ) {
-        $c->go->( '/config/cast/' . $castid );
+        $c->go->( '/config/cast/' . $castid ); # goなので帰ってこない
     }
-    else {
-        $c->forward( '_delete', [ $castid, 'PgCast', 'castid', 0 ] );
-        $c->component('View::JSON')->{expose_stash} = [ 'status' ];
-        $c->forward('conkan::View::JSON');
-    }
+    try {
+        die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
+        $c->forward( '_delete', [ $castid, 'PgCast', 'castid' ] );
+    } catch {
+        my $e = shift;
+        $c->log->error('config/cast/' . $castid . '/del error ' . localtime() .
+            ' dbexp : ' . Dumper($e) );
+        $c->stash->{'status'} = 'dbfail';
+    };
+    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
+    $c->component('View::JSON')->{expose_stash} = [ 'status' ];
+    $c->forward('conkan::View::JSON');
 }
 
 =head2 castcsvdownload
@@ -1041,6 +1125,7 @@ sub equip_listget : Chained('equip_base') : PathPart('listget') : Args(0) {
             ' dbexp : ' . Dumper($e) );
         $c->stash->{'status'} = 'dbfail';
     };
+    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
     $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
@@ -1060,10 +1145,6 @@ sub equip_show : Chained('equip_base') :PathPart('') :CaptureArgs(1) {
         my $rowequip;
         if ( $equipid != 0 ) {
             $rowequip = $c->stash->{'M'}->find($equipid);
-            $c->session->{'updtic'} = time;
-            $rowequip->update( { 
-                'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
-            } );
         } else {
             $rowequip = {
                 'equipid'       => 0,
@@ -1074,9 +1155,8 @@ sub equip_show : Chained('equip_base') :PathPart('') :CaptureArgs(1) {
         $c->stash->{'status'} = 'ok';
     } catch {
         my $e = shift;
-        $c->log->error('config/equip error ' . localtime() .
-            ' dbexp : ' . Dumper($e) );
         $c->stash->{'status'} = 'dbfail';
+        $c->stash->{'dbexp'} = $e;
     };
 }
 
@@ -1088,22 +1168,35 @@ sub equip_show : Chained('equip_base') :PathPart('') :CaptureArgs(1) {
 
 sub equip_detail : Chained('equip_show') : PathPart('') : Args(0) {
     my ( $self, $c ) = @_;
-    my $rs = $c->stash->{'rs'};
-    if ( $c->stash->{'equipid'} != 0 ) {
-        $c->stash->{'json'} = {
-            equipid => $rs->equipid(),
-            name    => $rs->name(),
-            equipno => $rs->equipno(),
-            spec    => $rs->spec(),
-            comment => $rs->comment(),
-            rmdate  => $rs->rmdate(),
-        };
-    }
-    else {
-        $c->stash->{'json'} = {
-            equipid => 0,
-        };
-    }
+    try {
+        die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
+        my $rs = $c->stash->{'rs'};
+        if ( $c->stash->{'equipid'} != 0 ) {
+            $c->session->{'updtic'} = time;
+            $rs->update( { 
+                'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
+            } );
+            $c->stash->{'json'} = {
+                equipid => $rs->equipid(),
+                name    => $rs->name(),
+                equipno => $rs->equipno(),
+                spec    => $rs->spec(),
+                comment => $rs->comment(),
+                rmdate  => $rs->rmdate(),
+            };
+        }
+        else {
+            $c->stash->{'json'} = {
+                equipid => 0,
+            };
+        }
+    } catch {
+        my $e = shift;
+        $c->log->error('config/equip error ' . localtime() .
+            ' dbexp : ' . Dumper($e) );
+        $c->stash->{'status'} = 'dbfail';
+    };
+    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
     $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
@@ -1121,16 +1214,23 @@ sub equip_edit : Chained('equip_show') : PathPart('edit') : Args(0) {
 
     # GETはおそらく直打ちとかなので再度
     if ( $c->request->method eq 'GET' ) {
-        $c->go->( '/config/equip/' . $equipid );
+        $c->go->( '/config/equip/' . $equipid ); # goなので帰ってこない
     }
-    else {
+    try {
+        die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
         my $items = [ qw/
                         name equipno spec comment
                         / ];
-        $c->forward( '_updatecreate', [ $equipid, $items, 0 ] );
-        $c->component('View::JSON')->{expose_stash} = [ 'status' ];
-        $c->forward('conkan::View::JSON');
-    }
+        $c->forward( '_updatecreate', [ $equipid, $items ] );
+    } catch {
+        my $e = shift;
+        $c->log->error('config/equip/' . $equipid . '/edit error '
+            . localtime() . ' dbexp : ' . Dumper($e) );
+        $c->stash->{'status'} = 'dbfail';
+    };
+    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
+    $c->component('View::JSON')->{expose_stash} = [ 'status' ];
+    $c->forward('conkan::View::JSON');
 }
 
 =head2 equip/*/del
@@ -1144,13 +1244,20 @@ sub equip_del : Chained('equip_show') : PathPart('del') : Args(0) {
     my $equipid = $c->stash->{'equipid'};
     # GETはおそらく直打ちとかなので再度
     if ( $c->request->method eq 'GET' ) {
-        $c->go->( '/config/equip/' . $equipid );
+        $c->go->( '/config/equip/' . $equipid ); # goなので帰ってこない
     }
-    else {
-        $c->forward( '_delete', [ $equipid, 'PgEquip', 'equipid', 0 ] );
-        $c->component('View::JSON')->{expose_stash} = [ 'status' ];
-        $c->forward('conkan::View::JSON');
-    }
+    try {
+        die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
+        $c->forward( '_delete', [ $equipid, 'PgEquip', 'equipid' ] );
+    } catch {
+        my $e = shift;
+        $c->log->error('config/equip/' . $equipid . '/del error ' . localtime() .
+            ' dbexp : ' . Dumper($e) );
+        $c->stash->{'status'} = 'dbfail';
+    };
+    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
+    $c->component('View::JSON')->{expose_stash} = [ 'status' ];
+    $c->forward('conkan::View::JSON');
 }
 
 =head2 equipcsvdownload
@@ -1204,45 +1311,34 @@ sub _updatecreate :Private {
     my ( $self, $c, 
          $id,           # 対象ID
          $items,        # 対象列名配列
-         $dodetach,     # この中でdetachするか
        ) = @_;
 
     my $value = {};
     for my $item (@{$items}) {
         $value->{$item} = $c->request->body_params->{$item};
         $value->{$item} =~ s/\s+$// if defined($value->{$item});
-        delete $value->{$item} if ( $value->{$item} eq '' );
     }
     try {
         if ( $id != 0 ) { # 更新
-            my $row = $c->stash->{'M'}->find($id);
+            my $row = $c->stash->{'rs'};
             if ( $row->updateflg eq 
                     +( $c->sessionid . $c->session->{'updtic'}) ) {
                 $row->update( $value ); 
-                $c->response->body('<FORM><H1>更新しました</H1></FORM>');
                 $c->stash->{'status'} = 'update';
             }
             else {
-                $c->response->body(
-                        '<FORM><H1>更新できませんでした</H1><BR/>' .
-                        '他のシステム管理者が変更した可能性があります</FORM>');
                 $c->stash->{'status'} = 'fail';
             }
         }
         else { # 新規登録
             $c->stash->{'M'}->create( $value );
-            $c->response->body('<FORM><H1>登録しました</H1></FORM>');
             $c->stash->{'status'} = 'add';
         }
     } catch {
         my $e = shift;
-        $c->log->error('config/_delete error ' . localtime() .
-            ' dbexp : ' . Dumper($e) );
         $c->stash->{'status'} = 'dbfail';
-        $c->detach( '_dberror', [ $e ] ) if ( $dodetach );
+        die $e;
     };
-    $c->stash->{'rs'} = undef;
-    $c->response->status(200);
 }
 
 =head2 _delete
@@ -1256,42 +1352,31 @@ sub _delete :Private {
          $id,           # 対象ID
          $ckTable,      # 使用中チェックテーブル名
          $ckkey,        # 使用中チェック項目名
-         $dodetach,     # この中でdetachするか
        ) = @_;
 
     try {
-        my $row = $c->stash->{'M'}->find($id);
+        my $row = $c->stash->{'rs'};
         if ( $row->updateflg eq 
             +( $c->sessionid . $c->session->{'updtic'}) ) {
             # 対象IDを使用中でないか確認
             my $usecnt = $c->model('ConkanDB::' . $ckTable)->search(
                             { $ckkey => $id } )->count;
             if ( $usecnt > 0 ) {
-                $c->response->body(
-                    '<FORM><H1>使用中なので無効にできません</H1><BR/></FORM>');
                 $c->stash->{'status'} = 'inuse';
             }
             else {
                 $row->update( { 'rmdate'   => \'NOW()', } );
-                $c->response->body('<FORM><H1>無効にしました</H1></FORM>');
                 $c->stash->{'status'} = 'del';
             }
         }
         else {
-            $c->response->body(
-                    '<FORM><H1>無効にできませんでした</H1><BR/>' .
-                    '他のシステム管理者が変更した可能性があります</FORM>');
             $c->stash->{'status'} = 'delfail';
         }
     } catch {
         my $e = shift;
-        $c->log->error('config/_delete error ' . localtime() .
-            ' dbexp : ' . Dumper($e) );
         $c->stash->{'status'} = 'dbfail';
-        $c->detach( '_dberror', [ $e ] ) if ( $dodetach );
+        die $e;
     };
-    $c->stash->{'rs'} = undef;
-    $c->response->status(200);
 }
 
 =head2 loginlog
@@ -1340,6 +1425,7 @@ sub loginlogget :Local {
             ' dbexp : ' . Dumper($e) );
         $c->stash->{'status'} = 'dbfail';
     };
+    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
     $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }

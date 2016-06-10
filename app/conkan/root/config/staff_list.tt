@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" ng-app="conkanProfile">
 <head>
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -10,38 +10,21 @@
 [%- SET self_li_id = 'config_staff' -%]
 [%- SET useUiGrid  = 1 -%]
 [%- PROCESS 'tthead.tt' -%]
-<div class="container" ng-app="conkanStaffList">
+<div class="container" ng-controller="profileController">
   <div class="well" id="gridlist" ng-controller="staffListController">
     <div id="stafflist" ui-grid="staffgrid" class="grid" ui-grid-resize-columns>
     </div>
-  </div> <!-- End of well gridlist -->
+  </div> <!-- End of well gridlist ng-controller "staffListController" -->
   <div id="pgAddDiv">
     <a href="/config/loginlog" type="button" class="btn btn-primary">
       ログイン履歴
     </a>
   </div>
+  [%- PROCESS 'config/T_prof_input.tt' -%]
   [%- PROCESS 'T_httpget_result.tt' -%]
-</div> <!-- End of container ng-app "conkanStaffList" -->
-<!-- スタッフ詳細モーダル -->
-<div class="modal fade" id="editStaff" tabindex="-1" role="dialog" aria-labelledby="editStaffLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="editStaffLabel">Edit Profile</h4>
-      </div>
-      <div class="modal-body" id="editStaffContent">
-        <FORM>情報取得中</FORM>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
-        <button type="button" class="btn " id="dodel">無効化</button>
-        <button type="button" class="btn btn-primary" id="dobtn">更新</button>
-      </div>
-    </div>
-  </div>
-</div>
+</div> <!-- End of container ng-controller "profileController" -->
 [%- PROCESS 'tttail.tt' -%]
+<script type="text/javascript" src="/static/js/conkan_profile.js"></script>
 <script type="text/javascript" src="/static/js/conkan_staff_list.js"></script>
 </body>
-</html>
+</html> <!-- End of container ng-app "conkanProfile" -->

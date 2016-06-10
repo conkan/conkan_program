@@ -50,7 +50,7 @@
   </div>
 </script>
 <!--  削除失敗 -->
-<script type="text/ng-template" id="T_result_fail">
+<script type="text/ng-template" id="T_result_delfail">
   <div class="modal-header">
     <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
   </div>

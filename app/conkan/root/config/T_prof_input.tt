@@ -1,0 +1,131 @@
+<!-- プロファイルダイアログ -->
+[%- ## 操作者が管理者か設定
+IF cuRole == 'ROOT' || cuRole == 'PG' || cuRole == 'ADMIN';
+  SET currentSU = 1;
+ELSE;
+  SET currentSU = 0;
+END;
+## <-- 管理ユーザの設定 -%]
+<script type="text/ng-template" id="T_prof_input">
+  <div class="modal-header">
+    <button type="button" class="close" ng-click="$close()" aria-hidden="true">
+      ×
+    </button>
+    <h4 class="modal-title">プロファイル</h4>
+  </div>
+  <div class="modal-body">
+    <FORM method="POST" name="profform" class="form-horizontal" role="form" id="profform">
+      <div style="COLOR:Red;" id="valerr"></div>
+      <div class="form-group">
+        <input type="hidden" name="staffid", ng-model="prof.staffid"/>
+        <input type="hidden" name="cyid", ng-model="prof.cyid"/>
+        <input type="hidden" name="CybozuToken",  ng-model="prof.CybozuToken"/>
+        <input type="hidden" name="CybozuSecret", ng-model="prof.CybozuSecret"/>
+      </div>
+      <table class="table table-bordered table-condensed">
+        <colgroup>
+          <col class="col-sm-4">
+          <col class="col-sm-8">
+        </colgroup>
+        <tbody class="ral">
+          <tr>
+            <th>名前</th>
+            <td>
+              <input type="text" name="name" class="col-sm-12" required
+                ng-model="prof.name"/>
+            </td>
+          </tr>
+          <tr>
+            <th>アカウント</th>
+            <td>
+              <input type="text" name="account" class="col-sm-12" required
+                ng-model="prof.account"/>
+            </td>
+          </tr>
+          <tr>
+            <th>最終ログイン日時</th>
+            <td>{{prof.lastlogin}}</td>
+          </tr>
+          <tr>
+            <th>パスワード</th>
+            <td>
+              <input type="password" name="passwd" class="col-sm-12"
+                ng-model="prof.passwd">
+            </td>
+          </tr>
+          <tr>
+            <th>パスワード(確認)</th>
+            <td>
+              <input type="password" name="passwd2" class="col-sm-12"
+                ng-model="prof.passwd2">
+            </td>
+          </tr>
+          <tr>
+            <th>役割</th>
+            <td>
+              <select name="role" class="col-sm-12" ng-model="prof.role"
+                ng-readonly="![% currentSU %]"
+                ng-options="i.id as i.val  for i in rolelist"></select>
+            </td>
+          </tr>
+          <tr>
+            <th>メールアドレス</th>
+            <td>
+              <input type="email" name="ma" class="col-sm-12"
+                ng-model="prof.ma">
+            </td>
+          </tr>
+          <tr>
+            <th>電話番号</th>
+            <td>
+              <input type="text" name="telno" class="col-sm-12"
+                ng-pattern="/^[+]{0,1}\d+[-\d\s]*\d+$/"
+                ng-model="prof.telno"/>
+            </td>
+          </tr>
+          <tr>
+            <th>大会登録番号</th>
+            <td>
+              <input type="text" name="regno" class="col-sm-12"
+                ng-model="prof.regno"/>
+            </td>
+          </tr>
+          <tr>
+            <th>担当名</th>
+            <td>
+              <input type="text" name="tname" class="col-sm-12"
+                ng-model="prof.tname"/>
+            </td>
+          </tr>
+          <tr>
+            <th>担当名フリガナ</th>
+            <td>
+              <input type="text" name="tnamef" class="col-sm-12"
+                ng-model="prof.tnamef"/>
+            </td>
+          </tr>
+          <tr>
+            <th>備考</th>
+            <td>
+              <input type="text" name="comment" class="col-sm-12"
+                ng-model="prof.comment"/>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </FORM>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-default" ng-click="$close()">閉じる</button>
+    <button ng-if="[% currentSU %]" class="btn" id="profdelbtn"
+      ng-disabled="!profform.$pristine"
+      ng-click="profDoDel()">
+      無効化
+    </button>
+    <button class="btn btn-primary" id="profapplybtn"
+      ng-disabled="profform.$invalid || profform.$pristine"
+      ng-click="profDoApply()">
+      更新
+    </button>
+  </div>
+</script>

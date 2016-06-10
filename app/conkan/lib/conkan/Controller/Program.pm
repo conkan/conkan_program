@@ -181,6 +181,7 @@ sub regcastadd :Local {
         $c->log->error('regcastadd error ' . localtime() .
             ' dbexp : ' . Dumper($e) );
     };
+    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
     $c->component('View::JSON')->{expose_stash} = [ 'status', ];
     $c->forward('conkan::View::JSON');
 };
@@ -334,6 +335,7 @@ sub progress :Local {
             ' dbexp : ' . Dumper($e) );
         $c->stash->{'status'} = 'dbfail';
     };
+    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
     $c->component('View::JSON')->{expose_stash} = [ 'status' ];
     $c->forward('conkan::View::JSON');
 }
@@ -653,6 +655,7 @@ sub program_listget : Private {
             ' dbexp : ' . Dumper($e) );
         $c->stash->{'status'} = 'dbfail';
     };
+    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
     $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
@@ -757,6 +760,7 @@ sub pgup_regprog : Chained('program_show') : PathPart('regprogram') : Args(0) {
             . localtime() . ' dbexp : ' . Dumper($e) );
         $c->stash->{'status'} = 'dbfail';
     };
+    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
     $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
@@ -801,6 +805,7 @@ sub pgdt_regcastlist : Chained('program_show') : PathPart('regcastlist') : Args(
             . localtime() . ' dbexp : ' . Dumper($e) );
         $c->stash->{'status'} = 'dbfail';
     };
+    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
     $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
@@ -845,6 +850,7 @@ sub pgdt_castlist : Chained('program_show') : PathPart('castlist') : Args(0) {
             . localtime() . ' dbexp : ' . Dumper($e) );
         $c->stash->{'status'} = 'dbfail';
     };
+    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
     $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
@@ -911,6 +917,7 @@ sub pgup_cast : Chained('pgup_casttop') : PathPart('') : Args(0) {
             . localtime() . ' dbexp : ' . Dumper($e) );
         $c->stash->{'status'} = 'dbfail';
     };
+    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
     $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
@@ -934,6 +941,7 @@ sub pgup_castdel : Chained('pgup_casttop') : PathPart('del') : Args(0) {
     }
 
     $c->forward( '_pgdelete', [ 'cast', $up_items ] );
+    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
     $c->component('View::JSON')->{expose_stash} = [ 'status' ];
     $c->forward('conkan::View::JSON');
 }
@@ -977,6 +985,7 @@ sub program_equiplist : Chained('program_show') : PathPart('equiplist') : Args(0
             ' dbexp : ' . Dumper($e) );
         $c->stash->{'status'} = 'dbfail';
     };
+    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
     $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
@@ -1056,6 +1065,7 @@ sub pgup_equip : Chained('pgup_equiptop') : PathPart('') : Args(0) {
             . localtime() . ' dbexp : ' . Dumper($e) );
         $c->stash->{'status'} = 'dbfail';
     };
+    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
     $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
@@ -1083,6 +1093,7 @@ sub pgup_equipdel : Chained('pgup_equiptop') : PathPart('del') : Args(0) {
     }
 
     $c->forward( '_pgdelete', [ 'equip', $up_items ] );
+    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
     $c->component('View::JSON')->{expose_stash} = [ 'status' ];
     $c->forward('conkan::View::JSON');
 }
@@ -1129,8 +1140,9 @@ sub program_progressget : Chained('program_show') : PathPart('progress') : Args(
         );
         $c->stash->{'status'} = 'dbfail';
     };
-        $c->component('View::JSON')->{expose_stash} = [
-            'json', 'status', 'totalItems' ];
+    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
+    $c->component('View::JSON')->{expose_stash} = [
+        'json', 'status', 'totalItems' ];
     $c->forward('conkan::View::JSON');
 }
 

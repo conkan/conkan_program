@@ -1,96 +1,28 @@
 // conkan_staff_list.js --- スタッフ一覧用 JS ---
 /*esLint-env jquery, prototypejs */
 (function() {
-  var storage = sessionStorage;
-  var needreload = false;
-  angular.element(document).ready(function(){
-    angular.element(document).scrollTop( storage.getItem( 'sctop' ) );
-    storage.clear();
-  });
-
-  angular.element('#editStaff').on('show.bs.modal', function (event) {
-    var staffid = angular.element(event.relatedTarget).data('whatever');
-    var role = angular.element(event.relatedTarget).data('whatrole');
-    var content = angular.element('#editStaffContent');
-    needreload = false;
-    angular.element(content).load(staffid + '/ FORM', '', function() {
-      angular.element('#' + role).prop('selected', true);
-    });
-    angular.element('#dobtn').show();
-    angular.element('#dodel').show();
-  });
-
-  angular.element('#editStaff').on('hide.bs.modal', function (event) {
-    storage.setItem( 'sctop', angular.element(document).scrollTop() );
-    if ( needreload ) {
-      location.reload(true);
-    }
-  });
-
-  angular.element('#dobtn').click(function(event) {
-    if (!angular.element('#account').val()) {
-      angular.element('#valerr').text('アカウントは必須です');
-      return;
-    }
-    if ( angular.element('#passwd').val() ) {
-      if ( angular.element('#passwd').val()
-             != angular.element('#passwd2').val() ) {
-        angular.element('#valerr').text(
-          'パスワードとパスワード(確認)が一致しません');
-        return;
-      }
-    }
-    var content = angular.element('#editStaffContent');
-    var data = angular.element('#profform').serializeArray();
-    var staffid = angular.element('#staffid').val();
-    angular.element('#dobtn').hide();
-    angular.element('#dodel').hide();
-    angular.element(content).load(staffid + '/edit/ FORM', data );
-    needreload = true;
-  });
-
-  angular.element('#dodel').click(function(event) {
-    var content = angular.element('#editStaffContent');
-    var data = angular.element('#profform').serializeArray();
-    var staffid = angular.element('#staffid').val();
-    angular.element('#dobtn').hide();
-    angular.element('#dodel').hide();
-    angular.element(content).load(staffid + '/del/ FORM', data );
-    needreload = true;
-  });
-
-  // conkanStaffListモジュールの生成
-  var ConkanAppModule = angular.module('conkanStaffList',
-    ['ui.grid', 'ui.grid.resizeColumns', 'ui.bootstrap'] );
+  // conkanProfileモジュールの取得(conkan_profile.jsで生成)
+  var ConkanAppModule = angular.module('conkanProfile');
 
   // スタッフリストコントローラ
   ConkanAppModule.controller( 'staffListController',
     [ '$scope', '$sce', '$http', '$uibModal',
       function( $scope, $sce, $http, $uibModal ) {
-        $scope.__getRoll = function( role ) {
-          var cont;
-          switch (role) {
-          case 'NORM':
-            cont = '企画スタッフ';
-            break;
-          case 'PG':
-            cont = '企画管理スタッフ';
-            break;
-          case 'ROOT':
-            cont = 'システム管理者';
-            break;
-          }
-          var wkstr = $sce.trustAsHtml( cont );
-          return wkstr;
+        $scope.getStaffList = function() {
+          $http.get('/config/staff/listget')
+          .success(function(data) {
+            if ( data.status === 'ok' ) {
+              $scope.staffgrid.data = data.json;
+            }
+            else {
+              openDialog( data.status );
+            }
+          })
+          .error( function() { httpfailDlg( $uibModal ); } );
         };
-
-        $scope.__getEditbtn = function( rmdate, staffid, role ) {
-          var cont = uiGetEditbtn( rmdate, '#editStaff',
-                    [ { 'key' : 'whatever', 'val' : staffid },
-                      { 'key' : 'whatrole', 'val' : role } ] );
-          var wkstr = $sce.trustAsHtml( cont );
-          return wkstr;
-        };
+        $scope.$on('PrfRelEvent', function( ev, dt ) {
+          $scope.getStaffList();
+        });
 
         $scope.staffgrid = {
           enableFiltering: false,
@@ -116,8 +48,8 @@
               return uiGetCellCls(row.entity.rmdate);
             },
             enableHiding: false,
-            cellTemplate: '<div ng-bind-html="grid.appScope.__getRoll'
-                        + '(row.entity.role)"></div>'
+            cellTemplate: '<div ng-bind-html="'
+                        + 'grid.appScope.__getRole(row.entity.role)"></div>'
           },
           { name : '担当名', field: 'tname',
             headerCellClass: 'gridheader',
@@ -151,22 +83,16 @@
             enableSorting: false,
             enableHiding: false,
             cellTemplate: '<div class="gridcelbtn">'
-                        +   '<span ng-bind-html="grid.appScope.__getEditbtn'
-                        +     '(row.entity.rmdate, row.entity.staffid, '
-                        +      'row.entity.role)">'
-                        + '</span></div>'
+                          + '<button ng-if="row.entity.rmdate"'
+                          +   'type="button" class="btn btn-xs">無効</button>'
+                          + '<button ng-if="!row.entity.rmdate"'
+                          +   'type="button" class="btn btn-xs btn-primary" '
+                          +   'ng-click="grid.appScope.openProfForm'
+                          +   '(row.entity.staffid)">編集</button>'
+                          + '</div>'
           },
         ];
-        $http.get('/config/staff/listget')
-        .success(function(data) {
-          if ( data.status === 'ok' ) {
-            $scope.staffgrid.data = data.json;
-          }
-          else {
-            openDialog( data.status );
-          }
-        })
-        .error( function() { httpfailDlg( $uibModal ); } );
+        $scope.getStaffList();
       }
     ]
   );
