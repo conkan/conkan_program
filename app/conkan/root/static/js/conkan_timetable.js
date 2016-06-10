@@ -33,6 +33,8 @@
     w = timewrap.width();
     angular.element("#timetable_room").width(w);
     angular.element("#timetable_cast").width(w);
+    angular.element("#timetable_room").height('auto');
+    angular.element("#timetable_cast").height('auto');
   });
 
   // conkanTimeTableモジュールの取得(生成済のもの)
