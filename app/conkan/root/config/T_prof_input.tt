@@ -39,6 +39,7 @@
             <th>アカウント</th>
             <td>
               <input type="text" name="account" class="col-sm-12" required
+                ng-disabled="[% currentSU == 0 %]"
                 ng-model="prof.account"/>
             </td>
           </tr>

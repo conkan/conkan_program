@@ -124,7 +124,7 @@
   </div>
   <div class="modal-body">
     <H1><strong>更新できませんでした</strong></H1><BR/>
-    <H2>{{dupkey}}の値{{dupval}}が重複しています。</H2><BR/>
+    <H2>一意でなければならない値が重複しています。</H2><BR/>
     別の値で再設定してください。
   </div>
   <div class="modal-footer">

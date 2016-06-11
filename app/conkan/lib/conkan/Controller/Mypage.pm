@@ -2,6 +2,7 @@ package conkan::Controller::Mypage;
 use Moose;
 use JSON;
 use String::Random qw/ random_string /;
+use Try::Tiny;
 use namespace::autoclean;
 use Data::Dumper;
 
@@ -74,191 +75,161 @@ sub mypage_show : Chained('mypage_base') :PathPart('') :Args(1) {
 sub profile :Local {
     my ( $self, $c ) = @_;
 
-    my $param = $c->request->body_params;
-    # flashかformからパラメータを取り出し、末尾の空白を除く
-    my $value = {};
-    for my $item qw/name role ma
-                    passwd staffid account telno regno
-                    tname tnamef comment / {
-        $value->{$item} = $c->flash->{$item} || $param->{$item};
-        $value->{$item} =~ s/\s+$// if defined($value->{$item});
-        $value->{$item} = undef
-            if (defined($value->{$item}) && ($value->{$item} eq '') );
-    }
-    # flashかformからoainfoパラメータを取り出し、末尾の空白を除く
-    my $oainfo = {};
-    for my $item qw/cyid CybozuToken CybozuSecret / {
-        $oainfo->{$item} = $c->flash->{'oainfo'}->{$item} || $param->{$item};
-        $oainfo->{$item} =~ s/\s+$// if defined($oainfo->{$item});
-    }
-
-    my $staffM = $c->model('ConkanDB::PgStaff');
-    my $staffid = $value->{'staffid'};
-    my $curacnt = $c->user->get('account');
-    unless ( defined($staffid) ) {
-        if ( !defined($curacnt) || $curacnt ne 'admin' ) {
-            $staffid = $c->user->get('staffid');
+    try {
+        my $param = $c->request->body_params;
+        # flashかformからパラメータを取り出し、末尾の空白を除く
+        my $value = {};
+        for my $item qw/name role ma
+                        passwd staffid account telno regno
+                        tname tnamef comment / {
+            $value->{$item} = $c->flash->{$item} || $param->{$item};
+            $value->{$item} =~ s/\s+$// if defined($value->{$item});
+            $value->{$item} = undef
+                if (defined($value->{$item}) && ($value->{$item} eq '') );
         }
-    }
-    # 既存のスタッフ検索
-    my $row = $staffM->find( $value->{'account'}, { 'key' => 'account_UNIQUE' });
-    if ( $row ) {
-        $staffid = $row->staffid;
-    }
-    if ( $staffid ) { # 更新
-        my $rowprof = $staffM->find($staffid);
-        if ( $rowprof->passwd eq '' ) {
-            # 仮登録 -> 本登録
-            $c->stash->{'addstaff'} = 1;
+        # flashかformからoainfoパラメータを取り出し、末尾の空白を除く
+        my $oainfo = {};
+        for my $item qw/cyid CybozuToken CybozuSecret / {
+            $oainfo->{$item} = $c->flash->{'oainfo'}->{$item} || $param->{$item};
+            $oainfo->{$item} =~ s/\s+$// if defined($oainfo->{$item});
         }
-        else {
-            # 既存スタッフの再登録
-            if ( defined( $c->flash->{'oainfo'}->{'cyid'} ) ) {
-                $c->stash->{'updstaff'} = 1;
+    
+        my $staffM = $c->model('ConkanDB::PgStaff');
+        my $staffid = $value->{'staffid'};
+        my $curacnt = $c->user->get('account');
+        unless ( defined($staffid) ) {
+            if ( !defined($curacnt) || $curacnt ne 'admin' ) {
+                $staffid = $c->user->get('staffid');
             }
         }
-        if ( $c->request->method eq 'GET' ) {
-            # 更新表示
-            $c->session->{'updtic'} = time;
-            $rowprof->update( { 
-                'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
-            } );
-            $c->stash->{'rs'} = $rowprof;
-            my $cybozu = $rowprof->otheruid ? decode_json( $rowprof->otheruid )
-                                            : $oainfo;
-            while ( my( $key, $val ) = each( %$cybozu )) {
-                $c->stash->{'rs'}->{$key} = $val;
-            }
-            $c->stash->{'rs'}->{'passwd'} = undef;
+        # 既存のスタッフ検索
+        my $row = $staffM->find( $value->{'account'}, { 'key' => 'account_UNIQUE' });
+        if ( $row ) {
+            $staffid = $row->staffid;
         }
-        else {
-            # 更新実施
-            if ( $rowprof->updateflg eq 
-                +( $c->sessionid . $c->session->{'updtic'}) ) {
-                $value->{'otheruid'} = $rowprof->otheruid ||
-                                       encode_json( $oainfo );
-                if ( $value->{'passwd'} ) {
-                    $value->{'passwd'} =
-                        crypt( $value->{'passwd'}, random_string( 'cccc' ));
+        if ( $staffid ) { # 更新
+            my $rowprof = $staffM->find($staffid);
+            if ( $rowprof->passwd eq '' ) {
+                # 仮登録 -> 本登録
+                $c->stash->{'addstaff'} = 1;
+            }
+            else {
+                # 既存スタッフの再登録
+                if ( defined( $c->flash->{'oainfo'}->{'cyid'} ) ) {
+                    $c->stash->{'updstaff'} = 1;
+                }
+            }
+            if ( $c->request->method eq 'GET' ) {
+                # 更新表示
+                $c->session->{'updtic'} = time;
+                $rowprof->update( { 
+                    'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
+                } );
+                $c->stash->{'rs'} = $rowprof;
+                my $cybozu = $rowprof->otheruid ? decode_json( $rowprof->otheruid )
+                                                : $oainfo;
+                while ( my( $key, $val ) = each( %$cybozu )) {
+                    $c->stash->{'rs'}->{$key} = $val;
+                }
+                $c->stash->{'rs'}->{'passwd'} = undef;
+            }
+            else {
+                # 更新実施
+                if ( $rowprof->updateflg eq 
+                    +( $c->sessionid . $c->session->{'updtic'}) ) {
+                    $value->{'otheruid'} = $rowprof->otheruid ||
+                                           encode_json( $oainfo );
+                    if ( $value->{'passwd'} ) {
+                        $value->{'passwd'} =
+                            crypt( $value->{'passwd'}, random_string( 'cccc' ));
+                    }
+                    else {
+                        $value->{'passwd'}   = $rowprof->passwd
+                    }
+                    $value->{'tname'} = $value->{'tname'} || $value->{'name'};
+                    $rowprof->update( $value ); 
+                    $c->stash->{'state'} = 'success';
                 }
                 else {
-                    $value->{'passwd'}   = $rowprof->passwd
+                    $c->log->info('updateflg: db: ' . $rowprof->updateflg);
+                    $c->log->info('updateflg: cu: ' . $c->sessionid);
+                    $c->log->info('                   '
+                                                    . $c->session->{'updtic'} );
+                    $c->stash->{'state'} = 'deny';
                 }
+                $c->stash->{'rs'} = undef;
+            }
+        }
+        else {  # 新規登録
+            $c->stash->{'addstaff'} = 1;
+            if ( $c->request->method eq 'GET' ) {
+                # 登録表示
+                while ( my( $key, $val ) = each( %$oainfo ) ) {
+                    $value->{$key} = $val;
+                }
+                $c->stash->{'rs'} = $value;
+            }
+            else {
+                # 登録実施
+                $value->{'otheruid'} = encode_json( $oainfo );
+                $value->{'passwd'} =
+                    crypt( $value->{'passwd'}, random_string( 'cccc' ));
                 $value->{'tname'} = $value->{'tname'} || $value->{'name'};
-                $rowprof->update( $value ); 
+                $value->{'staffid'} = undef;
+                $staffM->create( $value );
+                # 出演者一覧に登録(名前かregnoが一致するものがない場合)
+                my $acrow;
+                # 出演者名の正規化
+                # 空白前後の文字がASCIIの時は、空白を挿入
+                # そうでない時は空白を詰める
+                my $castname = '';
+                my @names = split(/\s/, $value->{'name'});
+                my $maxcnt = scalar(@names);
+                for ( my $cnt=0; $cnt< $maxcnt; $cnt++ ) {
+                    $castname .= $names[$cnt];
+                    if (   ( substr($castname, -1, 1) =~ /^[\x20-\x7E]+$/ )
+                        && ( $cnt+1 < $maxcnt )
+                        && ( substr($names[$cnt+1], 0, 1) =~ /^[\x20-\x7E]+$/ ) ) {
+                            $castname .= ' '
+                    }
+                }
+                if ( exists($value->{'regno'}) && $value->{'regno'} ) {
+                    $acrow = $c->model('ConkanDB::PgAllCast')->search(
+                        { 'regno' => $value->{'regno'} } )->count;
+                }
+                else {
+                    $acrow = $c->model('ConkanDB::PgAllCast')->search(
+                        { 'name'  => $castname } )->count;
+                }
+                unless ( $acrow ) {
+                    my $allcastval = {
+                        'name'      => $castname,
+                        'memo'      => $value->{'ma'},
+                        'restdate'  => $value->{'comment'} . '[staff]',
+                    };
+                    if ( exists($value->{'regno'}) && $value->{'regno'} ) {
+                        $allcastval->{'regno'} = $value->{'regno'};
+                    }
+                    $c->model('ConkanDB::PgAllCast')->create( $allcastval );
+                }
+                else {
+    $c->log->debug('>>> '. $castname . '[' . $value->{'regno'} . '] is already in AllCast' );
+                }
                 $c->stash->{'rs'} = undef;
                 $c->stash->{'state'} = 'success';
             }
-            else {
-                $c->stash->{'rs'} = undef;
-                $c->stash->{'state'} = 'deny';
-            }
         }
-    }
-    else {  # 新規登録
-        $c->stash->{'addstaff'} = 1;
-        if ( $c->request->method eq 'GET' ) {
-            # 登録表示
-            while ( my( $key, $val ) = each( %$oainfo ) ) {
-                $value->{$key} = $val;
-            }
-            $c->stash->{'rs'} = $value;
-        }
-        else {
-            # 登録実施
-            $value->{'otheruid'} = encode_json( $oainfo );
-            $value->{'passwd'} =
-                crypt( $value->{'passwd'}, random_string( 'cccc' ));
-            $value->{'tname'} = $value->{'tname'} || $value->{'name'};
-            $value->{'staffid'} = undef;
-            $staffM->create( $value );
-            # 出演者一覧に登録(名前かregnoが一致するものがない場合)
-            my $acrow;
-            # 出演者名の正規化
-            # 空白前後の文字がASCIIの時は、空白を挿入
-            # そうでない時は空白を詰める
-            my $castname = '';
-            my @names = split(/\s/, $value->{'name'});
-            my $maxcnt = scalar(@names);
-            for ( my $cnt=0; $cnt< $maxcnt; $cnt++ ) {
-                $castname .= $names[$cnt];
-                if (   ( substr($castname, -1, 1) =~ /^[\x20-\x7E]+$/ )
-                    && ( $cnt+1 < $maxcnt )
-                    && ( substr($names[$cnt+1], 0, 1) =~ /^[\x20-\x7E]+$/ ) ) {
-                        $castname .= ' '
-                }
-            }
-            if ( exists($value->{'regno'}) && $value->{'regno'} ) {
-                $acrow = $c->model('ConkanDB::PgAllCast')->search(
-                    { 'regno' => $value->{'regno'} } )->count;
-            }
-            else {
-                $acrow = $c->model('ConkanDB::PgAllCast')->search(
-                    { 'name'  => $castname } )->count;
-            }
-            unless ( $acrow ) {
-                my $allcastval = {
-                    'name'      => $castname,
-                    'memo'      => $value->{'ma'},
-                    'restdate'  => $value->{'comment'} . '[staff]',
-                };
-                if ( exists($value->{'regno'}) && $value->{'regno'} ) {
-                    $allcastval->{'regno'} = $value->{'regno'};
-                }
-                $c->model('ConkanDB::PgAllCast')->create( $allcastval );
-            }
-            else {
-$c->log->debug('>>> '. $castname . '[' . $value->{'regno'} . '] is already in AllCast' );
-            }
-            $c->stash->{'rs'} = undef;
-            $c->stash->{'state'} = 'success';
-        }
+    } catch {
+        my $e = shift;
+        $c->stash->{'state'} = 'dbfail';
+        $c->log->error('mypage/profile error ' . localtime() .
+            ' dbexp : ' . Dumper($e) );
+    };
+    if ( $c->request->method eq 'POST' ) {
+        $c->component('View::JSON')->{expose_stash} = [ 'state', ];
+        $c->forward('conkan::View::JSON');
     }
 }
-
-=head2 staff2allcast
-
-スタッフを出演者一覧に登録
-(隠し機能 URL直打) 無効化
-
-sub staff2allcast :Local {
-    my ( $self, $c ) = @_;
-
-    my @rowstaff = $c->model('ConkanDB::PgStaff')->search(
-                    { 'staffid' => { '!=' =>  1 },
-                      'rmdate' => \'IS NULL' },
-                    { 'order_by' => { '-asc' => 'staffid' } }
-                );
-    foreach my $row ( @rowstaff ) {
-        my $acrow;
-        my $regno = $row->regno();
-        if ( $regno ) {
-            $acrow = $c->model('ConkanDB::PgAllCast')->search(
-                { 'regno' => $regno } )->count;
-        }
-        else {
-            $acrow = $c->model('ConkanDB::PgAllCast')->search(
-                { 'name'  => $row->name() } )->count;
-        }
-        unless ( $acrow ) {
-            my $allcastval = {
-                'name'      => $row->name(),
-                'memo'      => $row->ma(),
-                'restdate'  => $row->comment() . '[staff]',
-            };
-            if ( $regno ) {
-                $allcastval->{'regno'} = $regno;
-            }
-$c->log->debug( '>>> s2c: '
-    . +( $regno ? 'regno[' . $regno . '] ' : '' )
-    . 'name[' . $allcastval->{'name'} . '] '
-    . 'memo[' . $allcastval->{'memo'} . ']' );
-            $c->model('ConkanDB::PgAllCast')->create( $allcastval );
-        }
-    }
-    $c->response->redirect( '/mypage/list' );
-}
-
 =encoding utf8
 
 =head1 AUTHOR

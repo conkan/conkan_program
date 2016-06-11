@@ -6,67 +6,98 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="conkan profile">
 <meta name="author" content="Studio REM">
-<title>Conkan Profile</title>
+<title>Conkan Profile【[% state %]】【[% rs.state %]】</title>
 [%- SET self_li_id = 'mypage_profile' -%]
 [%- SET useUiGrid  = 0 -%]
-[%- PROCESS 'tthead.tt' -%]
-[%- DEFAULT state = 'inputform' -%]
+[%- IF! state;
+    SET state = 'inputform';
+END -%]
 [%- IF addstaff && state == 'success';
     SET state = 'initadd';
 END -%]
-<div class="container">
-  <div class="well" id="inputform" style="display:none;">
+[%- PROCESS 'tthead.tt' -%]
+<div class="container" ng-app="conkanProfile">
+  <div class="well" id="inputform" style="display:none;"
+    ng-controller="profileController">
     [% IF updstaff %]
       <div class="row">
         <div class="col-sm-5" style="COLOR:Red;">
           既に登録済みのアカウントです。パスワードを設定しなおして下さい
         </div>
-        <div class="col-sm-2">
-          <a href="/logout" class="btn btn-sm btn-info">キャンセル</a>
-        </div>
       </div>
     [% END %]
-    <FORM method="POST" class="form-horizontal" role="form" action="/mypage/profile" id="profform">
-      [%- PROCESS 'ttprofinput.tt' -%]
+    <FORM method="POST" name="profform" class="form-horizontal" role="form" id="profform">
+      <div style="COLOR:Red;" id="valerr"></div>
+      <div class="form-group">
+        <input type="hidden" name="staffid",        ng-model="prof.staffid"/>
+        <input type="hidden" name="cyid",           ng-model="prof.cyid"/>
+        <input type="hidden" name="CybozuToken",    ng-model="prof.CybozuToken"/>
+        <input type="hidden" name="CybozuSecret",   ng-model="prof.CybozuSecret"/>
+        <input type="hidden" name="role",           ng-model="prof.role"/>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-3 text-right">名前</label>
+        <input type="text" name="name" class="col-sm-4" required
+          ng-model="prof.name"/>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-3 text-right">アカウント</label>
+        <input type="text" name="account" id="account" class="col-sm-4" required
+          ng-model="prof.account"/>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-3 text-right">メールアドレス</label>
+        <input type="email" name="ma" class="col-sm-4"
+          ng-model="prof.ma"/>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-3 text-right">パスワード</label>
+        <input type="password" name="passwd" class="col-sm-4" required
+          ng-model="prof.passwd"/>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-3 text-right">パスワード(確認) </label>
+        <input type="password" name="passwd2" class="col-sm-4" required
+          ng-model="prof.passwd2"/>
+      </div>
       <BR/>
       <div class="form-group">
         <span class="col-sm-4"></span>
-        <button type="submit" class="col-sm-2 text-center btn btn-primary btn-large" id="profapplybtn">
-          [%- IF addstaff %]
-            登録
-          [%- ELSE %]
-            更新
-          [% END %]
+        <button class="col-sm-2 text-center btn btn-primary btn-large"
+          id="profapplybtn"
+          ng-disabled="profform.$invalid || profform.$pristine"
+          ng-click="profDoApply()">
+          登録
         </button>
         <span class="col-sm-1"></span>
-        [%- IF! addstaff %]
-          <a class="col-sm-3 text-center btn btn-large" href="/mypage/list">マイページに戻る</a>
-        [% END %]
+        <a class="col-sm-3 text-center btn btn-large" href="/logout">
+          キャンセル</a>
       </div>
     </FORM>
   </div>
   <div class="well" id="success" style="display:none;">
-    <H1>
-      [%- IF addroot || addstaff -%]
-      登録
-      [%- ELSE -%]
-      更新
-      [%- END -%]
-      しました</H1>
-    <a class="btn btn-primary btn-large" href="/mypage/list">マイページに戻る</a>
+    <H1>登録しました</H1>
+    loginしなおしてください
+    <a class="btn btn-primary btn-large" href="/logout">login</a>
   </div>
   <div class="well" id="deny" style="display:none;">
-    <H1>更新できませんでした</H1>
-    更新を始めてから登録するまでの間に、システム管理者が更新しました。
-    改めて実施してください
-    <a class="btn btn-primary btn-large" href="/mypage/list">マイページに戻る</a>
+    <H1>登録失敗しました</H1>
+    同じアカウントで重複登録が発生しました。<br/>
+    登録しなおしてください。
+    <a class="btn btn-primary btn-large" href="/logout">login</a>
+  </div>
+  <div class="well" id="dbfail" style="display:none;">
+    <H1>登録失敗しました</H1>
+    DBエラーが発生しました。<br/>
+    登録しなおしてください。
+    <a class="btn btn-primary btn-large" href="/logout">login</a>
   </div>
   <div class="well" id="initadd" style="display:none;">
     <H1>登録しました</H1>
     [% IF addroot %]
       登録した管理者でloginしなおしてください
     [% ELSE %]
-      loginしてください
+      loginしなおしてください
     [% END %]
     <a class="btn btn-primary btn-large" href="/logout">login</a>
   </div>
@@ -75,37 +106,77 @@ END -%]
 <script type="text/javascript"> <!-- TTマクロを含むので、srcではなく埋め込み -->
   // 役割 選択リスト アクティベイト, 有効なdivを表示
   $(document).ready(function() {
-    $('#[%- rs.role | html -%]').prop('selected', true);
-    $('#[%- state | html -%]').show();
+    $('#[% state %]').show();
     if ( '[% cuRole -%]' == 'NORM' && ![% addroot %]) {
       $('#account').prop('readonly', 'readonly');
       $('#account').css('background-color', '#eee' );
-      $('#role').prop('readonly', 'readonly');
-      $('#role').css('background-color', '#eee' );
     }
   } );
-  // バリデーション
-  $('#profapplybtn').click(function(){
-    if (!$('#account').val()) {
-        $('#valerr').text('アカウントは必須です');
-        return false;
-    }
-    if ( $('#passwd').val() ) {
-        if ( $('#passwd').val() != $('#passwd2').val() ) {
+  // conkanConfigモジュールの生成
+  var ConkanAppModule = angular.module('conkanProfile', [ ] );
+
+  // プロファイル設定コントローラ
+  ConkanAppModule.controller( 'profileController',
+    [ '$scope', '$http',
+      function( $scope, $http ) {
+        // 初期値設定
+        $scope.prof = {};
+        [% IF rs.cyid %]
+          $scope.prof.scyid        = '[% rs.cyid %]';
+          $scope.prof.CybozuToken  = '[% rs.CybozuToken %]';
+          $scope.prof.CybozuSecret = '[% rs.CybozuSecret %]';
+        [% END %]
+        [% IF addroot %]
+          $scope.prof.role         = 'PG';
+        [% ELSE %]
+          $scope.prof.role         = 'NORM';
+        [% END %]
+        [% IF rs.staffid %]
+          $scope.prof.staffid      = '[% rs.staffid %]';
+        [% END %]
+        [% IF rs.name %]
+          $scope.prof.name         = '[% rs.name %]';
+        [% END %]
+        [% IF rs.account %]
+          $scope.prof.account      = '[% rs.account %]';
+          $scope.prof.ma           = '[% rs.account %]';
+        [% END %]
+
+        // 更新実施
+        $scope.profDoApply = function() {
+          // 二重クリック回避
+          angular.element('#profapplybtn').attr('disabled', 'disabled');
+          // バリデーション
+          elmSetValid( angular.element('*[name=passwd]'), true );
+          elmSetValid( angular.element('*[name=passwd2]'), true );
+          $('#valerr').text('');
+          if ( $scope.prof.passwd != $scope.prof.passwd2 ) {
             $('#valerr').text('パスワードとパスワード(確認)が一致しません');
-            return false;
+            elmSetValid( angular.element('*[name=passwd]'), false );
+            elmSetValid( angular.element('*[name=passwd2]'), false );
+            angular.element('#profapplybtn').removeAttr('disabled');
+            return;
+          }
+          $http( {
+            method  : 'POST',
+            url     : '/mypage/profile',
+            headers : { 'Content-Type':
+                  'application/x-www-form-urlencoded; charset=UTF-8' },
+            data    : $.param($scope.prof)
+          })
+          .success(function(data) {
+             $('#' + data.state).show();
+          })
+          .error(function(data) {
+             $('#' + data.state).show();
+          })
+          .finally( function(data) {
+             $('#[% state %]').hide();
+          });
         }
-    }
-    [%- IF addroot || addstaff || updstaff %]
-    else {
-        $('#valerr').text('パスワードは必須です');
-        return false;
-    }
-    [% END -%]
-  } );
-  // キャンセル(管理者による更新の場合のみ)
-  $('#cancel').click(function(){
-  } );
+      }
+    ]
+  );
 </script>
 </body>
 </html>
