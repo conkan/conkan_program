@@ -117,4 +117,18 @@
     <button class="btn btn-danger" ng-click="$close()">閉じる</button>
   </div>
 </script>
+<!--  更新失敗(重複) -->
+<script type="text/ng-template" id="T_result_dupl">
+  <div class="modal-header">
+    <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
+  </div>
+  <div class="modal-body">
+    <H1><strong>更新できませんでした</strong></H1><BR/>
+    <H2>{{dupkey}}の値{{dupval}}が重複しています。</H2><BR/>
+    別の値で再設定してください。
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-danger" ng-click="$close()">閉じる</button>
+  </div>
+</script>
 <!-- ## END of Region T_httpget_result.tt -->

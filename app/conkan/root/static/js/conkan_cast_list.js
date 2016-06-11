@@ -20,7 +20,7 @@
             }
           })
           .error( function() { httpfailDlg( $uibModal ); } );
-        }
+        };
 
         $scope.getCastList();
 

@@ -16,13 +16,7 @@
   END;
   DEFAULT self_li_id = 'mypage';
   SET cuRole = c.user.get('role');
-  # 操作者が管理者か設定;
-  IF cuRole == 'ROOT' || cuRole == 'PG' || cuRole == 'ADMIN';
-    SET currentSU = 1;
-  ELSE;
-    SET currentSU = 0;
-  END;
-## <-- 制御パラメータの設定 -%]
+# <-- 制御パラメータの設定 -%]
 <!-- #Region "tthead.tt" -->
 <!-- ## script/css include ------------------------------------------------ -->
 <!-- jQuery -->
@@ -76,9 +70,6 @@
             <li id="config_room"><a href="/config/room/list">部屋管理</a></li>
             <li id="config_equip"><a href="/config/equip/list">機材管理</a></li>
             <li id="config_csv"><a href="/config/csvout">CSV出力</a></li>
-          [%- END -%]
-          [%- IF cuRole == 'ROOT' %]
-            <li id="config_conf"><a href="/config/setting">設定</a></li>
           [%- END -%]
           [%- IF pglistsel == 'ACT' %]
             <!- 企画選択ツール ->

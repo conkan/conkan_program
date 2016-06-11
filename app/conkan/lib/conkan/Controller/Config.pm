@@ -45,127 +45,141 @@ sub auto :Private {
 
 =head2 index
 
-システム全体設定にgo
+マイページにgo
 
 =cut
 
 sub index :Path :Args(0) {
     my ( $self, $c ) = @_;
 
-    $c->go('setting');
+    $c->go('/mypage/list');
 }
 
 =head2 setting
 -----------------------------------------------------------------------------
 システム全体設定
-    system_confの更新
-    regist_confは別途 -> DBではなくregist.ymlに移行
+
+内部計算する固定設定値ハッシュ
+    キー: 設定値名
+    値: _crGntStr戻り値の配列添え字
+
+=cut
+
+my %GantConfHash = (
+    'gantt_header'      => 0,
+    'gantt_back_grid'   => 1,
+    'gantt_colmnum'     => 2,
+    'gantt_scale_str'   => 3,
+    'gantt_color_str'   => 4,
+);
+
+=head2
+
+system_confの更新
 
 =cut
 
 sub setting :Local {
     my ( $self, $c ) = @_;
 
-    if ( $c->user->get('role') eq 'PG' ) {
-        $c->response->status(412);
-        $c->stash->{template} = 'accessDeny.tt';
-        return 0;
+    if ( $c->user->get('role') ne 'ROOT' ) {
+        $c->stash->{'status'} = 'accessdeny';
+        $c->component('View::JSON')->{expose_stash} = [ 'status' ];
+        $c->forward('conkan::View::JSON');
+        return;
     }
-    my $sysconM = $c->model('ConkanDB::PgSystemConf');
-    my @rowconf = $sysconM->all;
-    my $pHconf = {};
-    foreach my $pHwk ( @rowconf ) {
-        $pHconf->{$pHwk->pg_conf_code} = {
-                pg_conf_name => $pHwk->pg_conf_name,
-                pg_conf_value => $pHwk->pg_conf_value,
-            };
-        $pHconf->{$pHwk->pg_conf_code}->{pg_conf_value} =~ s/\s+$//;
-    }
-
-    if ( $c->request->method eq 'GET' ) {
-        # 希望的排他処理
-        $c->session->{'updtic'} = time;
-        $sysconM->update_or_create( {
-            pg_conf_code => 'updateflg',
-            pg_conf_name => 'updateflg',
-            pg_conf_value => $c->sessionid . $c->session->{'updtic'},
-        });
-        # 更新表示
-        $c->stash->{'cnf'} = $pHconf;
-    }
-    else {
-        # 更新実施
-        my $updaterow = $sysconM->find('updateflg');
-        if ( $updaterow->pg_conf_value eq
-                +( $c->sessionid . $c->session->{'updtic'}) ) {
-            my $param = $c->request->body_params;
-            try {
+    try {
+        my $sysconM = $c->model('ConkanDB::PgSystemConf');
+        my @rowconf = $sysconM->all;
+        my $pHconf = {};
+        foreach my $pHwk ( @rowconf ) {
+            $pHconf->{$pHwk->pg_conf_code} = {
+                    pg_conf_name => $pHwk->pg_conf_name,
+                    pg_conf_value => $pHwk->pg_conf_value,
+                };
+            $pHconf->{$pHwk->pg_conf_code}->{pg_conf_value} =~ s/\s+$//;
+        }
+            
+        $c->stash->{'json'} = {}; 
+        if ( $c->request->method eq 'GET' ) {
+            # 希望的排他処理
+            $c->session->{'updtic'} = time;
+            $sysconM->update_or_create( {
+                pg_conf_code => 'updateflg',
+                pg_conf_name => 'updateflg',
+                pg_conf_value => $c->sessionid . $c->session->{'updtic'},
+            });
+            # 更新表示
+            my @items = qw/
+                dates               start_hours         end_hours
+                pg_status_vals      pg_status_color     pg_active_status
+                cast_status_vals    contact_status_vals
+            /;
+            foreach my $item ( @items ) {
+                $c->stash->{'json'}->{$item} = $pHconf->{$item};
+            }
+            $c->stash->{'status'} = 'ok';
+        }
+        else {
+            # 更新実施
+            my $updaterow = $sysconM->find('updateflg');
+            if ( $updaterow->pg_conf_value eq
+                    +( $c->sessionid . $c->session->{'updtic'}) ) {
+                my $param = $c->request->body_params;
+                
                 foreach my $pHwk ( @rowconf ) {
-                    my $code = $pHwk->pg_conf_code;
-                    next if   ( $code eq 'updateflg' )
-                           || ( $code eq 'gantt_header' )
-                           || ( $code eq 'gantt_back_grid' )
-                           || ( $code eq 'gantt_colmnum' )
-                           || ( $code eq 'gantt_scale_str' )
-                           || ( $code eq 'gantt_color_str' );
-                    $param->{$code} =~ s/\s+$//;
-                    $pHwk->pg_conf_value( $param->{$pHwk->pg_conf_code} );
+                    my $code = $pHwk->pg_conf_code();
+                    next if   ( $code eq 'updateflg' );
+                    next if exists( $GantConfHash{$code} );
+                    my $val = $param->{$code . '[pg_conf_value]'};
+                    $val =~ s/\s+$//;
+                    $pHwk->pg_conf_value( $val );
+$c->log->debug('>>> ' . 'code : ' . $code . ' val : ' . $pHwk->pg_conf_value() );
                     $pHwk->update();
                 }
                 # タイムテーブルガントチャート表示用固定値算出設定
                 # 日付、開始時刻列、終了時刻列を修正した場合のみでよいが、
                 # めったにないので毎回設定
                 my $ganttStrs = $c->forward('/config/_crGntStr', [ $param, ], );
-                $sysconM->update_or_create( {
-                    pg_conf_code => 'gantt_header',
-                    pg_conf_name => 'gantt_header(cache)',
-                    pg_conf_value => $ganttStrs->[0],
-                });
-                $sysconM->update_or_create( {
-                    pg_conf_code => 'gantt_back_grid',
-                    pg_conf_name => 'gantt_back_grid(cache)',
-                    pg_conf_value => $ganttStrs->[1],
-                });
-                $sysconM->update_or_create( {
-                    pg_conf_code => 'gantt_colmnum',
-                    pg_conf_name => 'gantt_colmnum(cache)',
-                    pg_conf_value => $ganttStrs->[2],
-                });
-                $sysconM->update_or_create( {
-                    pg_conf_code => 'gantt_scale_str',
-                    pg_conf_name => 'gantt_scale_str(cache)',
-                    pg_conf_value => $ganttStrs->[3],
-                });
-                $sysconM->update_or_create( {
-                    pg_conf_code => 'gantt_color_str',
-                    pg_conf_name => 'gantt_color_str(cache)',
-                    pg_conf_value => $ganttStrs->[4],
-                });
-
-                $c->stash->{'state'} = 'success';
-            } catch {
-                $c->detach( '_dberror', [ shift ] );
-            };
+                while ( my ( $key, $val ) = each( %GantConfHash ) ) {
+$c->log->debug('>>> ' . 'key : ' . $key . ' val : ' . $val );
+$c->log->debug('>>> ' . 'value : ' . $ganttStrs->[0] );
+$c->log->debug('>>> ' . 'value : ' . $ganttStrs->[$val] );
+                    $sysconM->update_or_create( {
+                        pg_conf_code => $key,
+                        pg_conf_name => $key . '(cache)',
+                        pg_conf_value => $ganttStrs->[$val],
+                    });
+                };
+                $c->stash->{'status'} = 'update';
+            }
+            else {
+                $c->stash->{'status'} = 'fail';
+            }
         }
-        else {
-            $c->stash->{'state'} = 'deny';
-        }
-        $c->stash->{'cnf'} = undef;
-    }
+    } catch {
+        my $e = shift;
+        $c->forward( '_dberror', [ $e, 'config/setting' ] );
+    };
+    $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
+    $c->forward('conkan::View::JSON');
 }
 
 =head2 _crGntStr
 
 タイムテーブルガントチャート表示用固定値算出
 
-戻り値 固定値配列参照 [0]ヘッダ [1]背景グリッド [2]カラム総数
-              [3]タイムスケール表示用ハッシュ(JSON)
-                    キー: 日付
-                      値: [ 開始時刻(分表示), 終了時刻(分表示), 先頭カラム数,
-                            開始時刻(時), 終了時刻(時) ]
-              [4]ガントバー色ハッシュ(JSON)
-                    キー: 実行ステータス
-                      値: 色コード
+戻り値 固定値配列参照
+[0]ヘッダ
+[1]背景グリッド
+[2]カラム総数
+[3]タイムスケール表示用ハッシュ(JSON)
+    キー: 日付
+    値: [ 開始時刻(分表示), 終了時刻(分表示), 先頭カラム数,
+          開始時刻(時),     終了時刻(時) ]
+[4]ガントバー色ハッシュ(JSON)
+    キー: 実行ステータス
+    値: 色コード
 
 =cut
 
@@ -174,9 +188,9 @@ sub _crGntStr :Private {
          $param,      # 設定フォームパラメータハッシュ
        ) = @_;
 
-    my @dates  = @{from_json($param->{'dates'})};
-    my @starts = @{from_json($param->{'start_hours'})};
-    my @ends   = @{from_json($param->{'end_hours'})};
+    my @dates  = @{from_json($param->{'dates[pg_conf_value]'})};
+    my @starts = @{from_json($param->{'start_hours[pg_conf_value]'})};
+    my @ends   = @{from_json($param->{'end_hours[pg_conf_value]'})};
 
     my $daycnt = scalar(@dates);
     my @colnum = ();
@@ -222,8 +236,8 @@ sub _crGntStr :Private {
 
     $ganttStrs[3] = to_json($gantt_scale);
 
-    my @status = @{from_json($param->{'pg_status_vals'})};
-    my @colors = @{from_json($param->{'pg_status_color'})};
+    my @status = @{from_json($param->{'pg_status_vals[pg_conf_value]'})};
+    my @colors = @{from_json($param->{'pg_status_color[pg_conf_value]'})};
     push @status, (""); # 未定分追加
 
     my $stcnt = scalar(@status);
@@ -273,11 +287,8 @@ sub confget :Local {
         $c->stash->{'status'} = 'ok';
     } catch {
         my $e = shift;
-        $c->log->error('confget error ' . localtime() .
-            ' dbexp : ' . Dumper($e) );
-        $c->stash->{'status'} = 'dbfail';
+        $c->forward( '_dberror', [ $e, 'config/confget' ] );
     };
-    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
     $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
@@ -342,11 +353,8 @@ sub staff_listget : Chained('staff_base') : PathPart('listget') : Args(0) {
         $c->stash->{'status'} = 'ok';
     } catch {
         my $e = shift;
-        $c->log->error('staff/listget error ' . localtime() .
-            ' dbexp : ' . Dumper($e) );
-        $c->stash->{'status'} = 'dbfail';
+        $c->forward( '_dberror', [ $e, 'config/staff/listget' ] );
     };
-    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
     $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
@@ -367,9 +375,9 @@ sub staff_show : Chained('staff_base') :PathPart('') :CaptureArgs(1) {
     }
     else {
         $c->stash->{'status'} = 'accessdeny';
-        $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
         $c->component('View::JSON')->{expose_stash} = [ 'status' ];
         $c->forward('conkan::View::JSON');
+        return;
     }
 }
 
@@ -382,7 +390,6 @@ sub staff_show : Chained('staff_base') :PathPart('') :CaptureArgs(1) {
 sub staff_detail : Chained('staff_show') : PathPart('') : Args(0) {
     my ( $self, $c ) = @_;
     if ( $c->stash->{'status'} eq 'accessdeny' ) {
-        $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
         $c->component('View::JSON')->{expose_stash} = [ 'status' ];
         $c->forward('conkan::View::JSON');
         return;
@@ -419,11 +426,8 @@ sub staff_detail : Chained('staff_show') : PathPart('') : Args(0) {
         }
     } catch {
         my $e = shift;
-        $c->log->error('config/staff error ' . localtime() .
-            ' dbexp : ' . Dumper($e) );
-        $c->stash->{'status'} = 'dbfail';
+        $c->forward( '_dberror', [ $e, 'config/staff' ] );
     };
-    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
     $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
@@ -473,12 +477,9 @@ sub staff_edit : Chained('staff_show') : PathPart('edit') : Args(0) {
         }
     } catch {
         my $e = shift;
-        $c->log->error('config/staff/' . $staffid . '/edit error '
-            . localtime() . ' dbexp : ' . Dumper($e) );
-        $c->stash->{'status'} = 'dbfail';
+        $c->forward( '_dberror', [ $e, 'config/staff/' . $staffid . '/edit' ] );
     };
-    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
-    $c->component('View::JSON')->{expose_stash} = [ 'status' ];
+    $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
 
@@ -500,11 +501,8 @@ sub staff_del : Chained('staff_show') : PathPart('del') : Args(0) {
         $c->forward( '_delete', [ $staffid, 'PgProgram', 'staffid' ] );
     } catch {
         my $e = shift;
-        $c->log->error('config/staff_del error ' . localtime() .
-            ' dbexp : ' . Dumper($e) );
-        $c->stash->{'status'} = 'dbfail';
+        $c->forward( '_dberror', [ $e, 'config/staff/' . $staffid . '/del' ] );
     };
-    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
     $c->component('View::JSON')->{expose_stash} = [ 'status' ];
     $c->forward('conkan::View::JSON');
 }
@@ -589,7 +587,7 @@ sub room_list : Chained('room_base') : PathPart('list') : Args(0) {
 
 =head2 room/listget
 
-機材管理 room_listget  : 機材一覧取得
+部屋管理 room_listget  : 部屋一覧取得
 
 =cut
 
@@ -618,11 +616,8 @@ sub room_listget : Chained('room_base') : PathPart('listget') : Args(0) {
         $c->stash->{'status'} = 'ok';
     } catch {
         my $e = shift;
-        $c->log->error('room/listget error ' . localtime() .
-            ' dbexp : ' . Dumper($e) );
-        $c->stash->{'status'} = 'dbfail';
+        $c->forward( '_dberror', [ $e, 'room/listget' ] );
     };
-    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
     $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
@@ -646,16 +641,17 @@ sub room_show : Chained('room_base') :PathPart('') :CaptureArgs(1) {
 
 sub room_detail : Chained('room_show') : PathPart('') : Args(0) {
     my ( $self, $c ) = @_;
+    my $roomid = $c->stash->{'roomid'};
     try {
         die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
         my $rs = $c->stash->{'rs'};
-        if ( $c->stash->{'roomid'} != 0 ) {
+        if ( $roomid != 0 ) {
             $c->session->{'updtic'} = time;
             $rs->update( { 
                 'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
             } );
             $c->stash->{'json'} = {
-                roomid      => $c->stash->{'roomid'},
+                roomid      => $roomid,
                 name        => $rs->name(),
                 roomno      => $rs->roomno(),
                 max         => $rs->max(),
@@ -678,11 +674,8 @@ sub room_detail : Chained('room_show') : PathPart('') : Args(0) {
         }
     } catch {
         my $e = shift;
-        $c->log->error('config/room error ' . localtime() .
-            ' dbexp : ' . Dumper($e) );
-        $c->stash->{'status'} = 'dbfail';
+        $c->forward( '_dberror', [ $e, 'config/room/' . $roomid ] );
     };
-    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
     $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
@@ -711,12 +704,9 @@ sub room_edit : Chained('room_show') : PathPart('edit') : Args(0) {
         $c->forward( '_updatecreate', [ $roomid, $items ] );
     } catch {
         my $e = shift;
-        $c->log->error('config/room/' . $roomid . '/edit error '
-            . localtime() . ' dbexp : ' . Dumper($e) );
-        $c->stash->{'status'} = 'dbfail';
+        $c->forward( '_dberror', [ $e, 'config/room/' . $roomid . '/edit' ] );
     };
-    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
-    $c->component('View::JSON')->{expose_stash} = [ 'status' ];
+    $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
 
@@ -738,11 +728,8 @@ sub room_del : Chained('room_show') : PathPart('del') : Args(0) {
         $c->forward( '_delete', [ $roomid, 'PgProgram', 'roomid' ] );
     } catch {
         my $e = shift;
-        $c->log->error('config/room/' . $roomid . '/del error ' . localtime() .
-            ' dbexp : ' . Dumper($e) );
-        $c->stash->{'status'} = 'dbfail';
+        $c->forward( '_dberror', [ $e, 'config/room/' . $roomid . '/del' ] );
     };
-    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
     $c->component('View::JSON')->{expose_stash} = [ 'status' ];
     $c->forward('conkan::View::JSON');
 }
@@ -867,11 +854,8 @@ sub cast_listget : Chained('cast_base') : PathPart('listget') : Args(0) {
         $c->stash->{'status'} = 'ok';
     } catch {
         my $e = shift;
-        $c->log->error('cast/listget error ' . localtime() .
-            ' dbexp : ' . Dumper($e) );
-        $c->stash->{'status'} = 'dbfail';
+        $c->forward( '_dberror', [ $e, 'cast/listget' ] );
     };
-    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
     $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
@@ -895,16 +879,17 @@ sub cast_show : Chained('cast_base') :PathPart('') :CaptureArgs(1) {
 
 sub cast_detail : Chained('cast_show') : PathPart('') : Args(0) {
     my ( $self, $c ) = @_;
+    my $castid = $c->stash->{'castid'};
     try {
         die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
         my $rs = $c->stash->{'rs'};
-        if ( $c->stash->{'castid'} != 0 ) {
+        if ( $castid != 0 ) {
             $c->session->{'updtic'} = time;
             $rs->update( { 
                 'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
             } );
             $c->stash->{'json'} = {
-                castid      => $c->stash->{'castid'},
+                castid      => $castid,
                 regno       => $rs->regno(),
                 name        => $rs->name(),
                 namef       => $rs->namef(),
@@ -927,11 +912,8 @@ sub cast_detail : Chained('cast_show') : PathPart('') : Args(0) {
         $c->stash->{'json'}->{'statlist'} = $statlist;
     } catch {
         my $e = shift;
-        $c->log->error('config/cast error ' . localtime() .
-            ' dbexp : ' . Dumper($e) );
-        $c->stash->{'status'} = 'dbfail';
+        $c->forward( '_dberror', [ $e, 'config/cast/' . $castid ] );
     };
-    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
     $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
@@ -957,12 +939,9 @@ sub cast_edit : Chained('cast_show') : PathPart('edit') : Args(0) {
         $c->forward( '_updatecreate', [ $castid, $items ] );
     } catch {
         my $e = shift;
-        $c->log->error('config/cast/' . $castid . '/edit error '
-            . localtime() . ' dbexp : ' . Dumper($e) );
-        $c->stash->{'status'} = 'dbfail';
+        $c->forward( '_dberror', [ $e, 'config/cast/' . $castid . '/edit' ] );
     };
-    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
-    $c->component('View::JSON')->{expose_stash} = [ 'status' ];
+    $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
 
@@ -984,11 +963,8 @@ sub cast_del : Chained('cast_show') : PathPart('del') : Args(0) {
         $c->forward( '_delete', [ $castid, 'PgCast', 'castid' ] );
     } catch {
         my $e = shift;
-        $c->log->error('config/cast/' . $castid . '/del error ' . localtime() .
-            ' dbexp : ' . Dumper($e) );
-        $c->stash->{'status'} = 'dbfail';
+        $c->forward( '_dberror', [ $e, 'config/cast/' . $castid . '/del' ] );
     };
-    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
     $c->component('View::JSON')->{expose_stash} = [ 'status' ];
     $c->forward('conkan::View::JSON');
 }
@@ -1090,11 +1066,8 @@ sub equip_listget : Chained('equip_base') : PathPart('listget') : Args(0) {
         $c->stash->{'status'} = 'ok';
     } catch {
         my $e = shift;
-        $c->log->error('equip/listget error ' . localtime() .
-            ' dbexp : ' . Dumper($e) );
-        $c->stash->{'status'} = 'dbfail';
+        $c->forward( '_dberror', [ $e, 'equip/listget' ] );
     };
-    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
     $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
@@ -1118,16 +1091,17 @@ sub equip_show : Chained('equip_base') :PathPart('') :CaptureArgs(1) {
 
 sub equip_detail : Chained('equip_show') : PathPart('') : Args(0) {
     my ( $self, $c ) = @_;
+    my $equipid = $c->stash->{'equipid'};
     try {
         die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
         my $rs = $c->stash->{'rs'};
-        if ( $c->stash->{'equipid'} != 0 ) {
+        if ( $equipid != 0 ) {
             $c->session->{'updtic'} = time;
             $rs->update( { 
                 'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
             } );
             $c->stash->{'json'} = {
-                equipid => $rs->equipid(),
+                equipid => $equipid,
                 name    => $rs->name(),
                 equipno => $rs->equipno(),
                 spec    => $rs->spec(),
@@ -1142,11 +1116,8 @@ sub equip_detail : Chained('equip_show') : PathPart('') : Args(0) {
         }
     } catch {
         my $e = shift;
-        $c->log->error('config/equip error ' . localtime() .
-            ' dbexp : ' . Dumper($e) );
-        $c->stash->{'status'} = 'dbfail';
+        $c->forward( '_dberror', [ $e, 'config/equip/' . $equipid ] );
     };
-    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
     $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
@@ -1174,12 +1145,9 @@ sub equip_edit : Chained('equip_show') : PathPart('edit') : Args(0) {
         $c->forward( '_updatecreate', [ $equipid, $items ] );
     } catch {
         my $e = shift;
-        $c->log->error('config/equip/' . $equipid . '/edit error '
-            . localtime() . ' dbexp : ' . Dumper($e) );
-        $c->stash->{'status'} = 'dbfail';
+        $c->forward( '_dberror', [ $e, 'config/equip/' . $equipid . '/edit' ] );
     };
-    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
-    $c->component('View::JSON')->{expose_stash} = [ 'status' ];
+    $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
 
@@ -1201,11 +1169,8 @@ sub equip_del : Chained('equip_show') : PathPart('del') : Args(0) {
         $c->forward( '_delete', [ $equipid, 'PgEquip', 'equipid' ] );
     } catch {
         my $e = shift;
-        $c->log->error('config/equip/' . $equipid . '/del error ' . localtime() .
-            ' dbexp : ' . Dumper($e) );
-        $c->stash->{'status'} = 'dbfail';
+        $c->forward( '_dberror', [ $e, 'config/equip/' . $equipid . '/del' ] );
     };
-    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
     $c->component('View::JSON')->{expose_stash} = [ 'status' ];
     $c->forward('conkan::View::JSON');
 }
@@ -1266,7 +1231,7 @@ sub _showCommon : Private {
 
     # 対象テーブルに対応したmodelオブジェクト取得
     $c->stash->{'M'}   = $c->model('ConkanDB::' . $table);
-
+    $c->stash->{'json'} = {};
     try {
         my $row;
         if ( $id != 0 ) {
@@ -1411,7 +1376,6 @@ sub loginlogget :Local {
             ' dbexp : ' . Dumper($e) );
         $c->stash->{'status'} = 'dbfail';
     };
-    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
     $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
@@ -1972,31 +1936,25 @@ DBエラー表示
 =cut
 
 sub _dberror :Private {
-    my ( $self, $c, $e) = @_; 
-
-    my %dictbl = (
-        "'name_UNIQUE'"     => '名前',
-        "'roomNo_UNIQUE'"   => '部屋番号',
-        "'equipNo_UNIQUE'"  => '機材番号',
-        "'regno_UNIQUE'"    => '大会登録番号',
-    );
+    my ( $self, $c,
+         $e,        # エラーオブジェクト
+         $logstr,   # ログ出力文字列
+        ) = @_; 
 
     my @str = split(/\s/, $e);
+    $c->clear_errors();
     if ( $str[6] eq 'Duplicate' ) {
-        $c->response->body(
-            '<FORM><H1>登録/更新失敗しました</H1><BR/>' .
-            '[' . $dictbl{$str[11]} . '] の値 ' .
-                        decode('UTF-8', $str[8] ) .
-            ' は、既に登録されています' .
-            '</FORM>');
+        $c->log->error( localtime() . $logstr . 'error dupl: ' . 
+            $str[11] . 'val ' . decode('UTF-8', $str[8] ) );
+        $c->stash->{'status'} = 'dupl';
+        $c->stash->{'json'} = {
+            dupkey => $str[11],
+            dupval => $str[8],
+        };
     }
     else {
-        $c->log->error( localtime() . " dbexp : \n" . Dumper($e) );
-        $c->clear_errors();
-        my $body = $c->response->body() || Dumper( $e );
-        $c->response->body(
-            '<FORM>更新失敗<br/><pre>' . $body . '</pre></FORM>');
-        $c->response->status(200);
+        $c->log->error( localtime() . $logstr . 'error dbexp: ' . Dumper($e) );
+        $c->stash->{'status'} = 'dbfail';
     }
 }
 

@@ -206,21 +206,30 @@ var ProgTimeValid = function( prog, scale_hash ) {
           || ( start < scale[0] ) || ( scale[1] < end ) ) {
         retval = true;
         angular.element('*[name=' + cur.dh + ']').each(function() {
-          angular.element(this).addClass('ng-invalid');
-          angular.element(this).removeClass('ng-valid');
-          angular.element(this).$invalid = true;
+          elmSetValid( this, false );
         });
       }
       else {
         angular.element('*[name=' + cur.dh + ']').each(function() {
-          angular.element(this).removeClass('ng-invalid');
-          angular.element(this).addClass('ng-valid');
-          angular.element(this).$invalid = false;
+          elmSetValid( this, true );
         });
       }
     }
   }
   return retval;
+};
+
+var elmSetValid = function( obj, valid ) {
+  if ( valid ) {
+    angular.element(obj).removeClass('ng-invalid');
+    angular.element(obj).addClass('ng-valid');
+    angular.element(obj).$invalid = false;
+  }
+  else {
+    angular.element(obj).removeClass('ng-valid');
+    angular.element(obj).addClass('ng-invalid');
+    angular.element(obj).$invalid = true;
+  }
 };
 
 // 共通のHTTPエラー時ダイアログ表示
@@ -284,11 +293,11 @@ var doJsonPost = function( $http, url, data, $uibModalInstance, $uibModal,
   })
   .success(function(data) {
     if ( data.status != 'nodlgok' ) {
-      openDialog( data.status );
+      openDialog( data.status, data.json );
     }
   })
   .error(function(data) {
-    openDialog( '' );
+    openDialog( '', data.json );
   })
   .finally( function() {
     if ( !$uibModalInstance && finalcallback ) {
@@ -296,14 +305,22 @@ var doJsonPost = function( $http, url, data, $uibModalInstance, $uibModal,
     }
   });
 
-  var openDialog = function ( stat ) {
+  var openDialog = function ( stat, json ) {
     if ( $uibModalInstance ) {
       $uibModalInstance.close('done');
+    }
+    var dlgctl;
+    if ( stat == 'dupl' ) {
+      dlgctl = function() {
+        $scope.dubkey = json.dupkey;
+        $scope.dubval = json.dupval;
+      };
     }
     var resultDlg = $uibModal.open(
       {
         templateUrl : getTemplate( stat ),
         backdrop    : 'static',
+        controller  : dlgctl,
       }
     );
     resultDlg.rendered.then( function() {
@@ -333,6 +350,7 @@ var getTemplate = function( stat ) {
     'ipdupfail' : 'T_result_ipdup',
     'dbfail'    : 'T_result_dberr',
     'inuse'     : 'T_result_inuse',
+    'dupl'      : 'T_result_dupl',
     ''          : 'T_httpget_fail',
   };
   var retval = templateTbl[stat] || 'T_httpget_fail'; // デフォルト値

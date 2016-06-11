@@ -1,0 +1,90 @@
+<!-- システム設定ダイアログ -->
+<script type="text/ng-template" id="T_conf_setting">
+  <div class="modal-header">
+    <button type="button" class="close" ng-click="$close()" aria-hidden="true">
+      ×
+    </button>
+    <h4 class="modal-title">システム設定</h4>
+  </div>
+  <div class="modal-body">
+    <FORM method="POST" name="confform" class="form-horizontal" role="form" id="confform">
+      <div style="COLOR:Red;" id="valerr"> </div>
+      <table class="table table-bordered table-condensed">
+        <colgroup>
+          <col class="col-sm-4">
+          <col class="col-sm-8">
+        </colgroup>
+        <tbody class="ral">
+          <tr>
+            <th>{{conf.dates.pg_conf_name}}</th>
+            <td>
+              <textarea name="dates" class="col-sm-6" rows="1" required
+               ng-model="conf.dates.pg_conf_value"></textarea>
+            </td>
+          </tr>
+          <tr>
+            <th>{{conf.start_hours.pg_conf_name}}</th>
+            <td>
+              <textarea name="start_hours" class="col-sm-4" rows="1" required
+               ng-model="conf.start_hours.pg_conf_value"></textarea>
+            </td>
+          </tr>
+          <tr>
+            <th>{{conf.end_hours.pg_conf_name}}</th>
+            <td>
+              <textarea name="end_hours" class="col-sm-4" rows="1" required
+               ng-model="conf.end_hours.pg_conf_value"></textarea>
+            </td>
+          </tr>
+          <tr>
+          </tr>
+          <tr>
+            <th>{{conf.pg_status_vals.pg_conf_name}}</th>
+            <td>
+              <textarea name="pg_status_vals" class="col-sm-12" required
+               ng-model="conf.pg_status_vals.pg_conf_value"></textarea>
+            </td>
+          </tr>
+          <tr>
+            <th>{{conf.pg_status_color.pg_conf_name}}</th>
+            <td>
+              <textarea name="pg_status_color" class="col-sm-12" required
+               ng-model="conf.pg_status_color.pg_conf_value"></textarea>
+            </td>
+          </tr>
+          <tr>
+            <th>{{conf.pg_active_status.pg_conf_name}}</th>
+            <td>
+              <textarea name="pg_active_status" class="col-sm-4" rows="1" required
+               ng-model="conf.pg_active_status.pg_conf_value"></textarea>
+            </td>
+          </tr>
+          <tr>
+          </tr>
+          <tr>
+            <th>{{conf.cast_status_vals.pg_conf_name}}</th>
+            <td>
+              <textarea name="cast_status_vals" class="col-sm-12" required
+               ng-model="conf.cast_status_vals.pg_conf_value"></textarea>
+            </td>
+          </tr>
+          <tr>
+            <th>{{conf.contact_status_vals.pg_conf_name}}</th>
+            <td>
+              <textarea name="contact_status_vals" class="col-sm-12" required
+               ng-model="conf.contact_status_vals.pg_conf_value"></textarea>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </FORM>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-default" ng-click="$close()">閉じる</button>
+    <button class="btn btn-primary" id="confapplybtn"
+      ng-disabled="confform.$invalid || confform.$pristine"
+      ng-click="confDoApply()">
+      設定
+    </button>
+  </div>
+</script>

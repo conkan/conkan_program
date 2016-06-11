@@ -18,6 +18,11 @@
     </div> <!-- End of well gridlist ng-controller "progListController" -->
   </div> <!-- End of div ng-app "conkanProgList" -->
   <table id="pgAddDiv" class="table table-condensed">
+    <colgroup>
+      <col class="col-sm-2">
+      <col class="col-sm-2">
+      <col class="col-sm-8">
+    </colgroup>
     <tbody>
       <tr>
         <td align="center" id="profileElm" ng-app="conkanProfile">
@@ -28,32 +33,38 @@
             </button>
             [%- PROCESS 'config/T_prof_input.tt' -%]
           </div> <!-- End of div ng-controller "profileController" -->
+          [%- PROCESS 'T_httpget_result.tt' -%]
         </td> <!-- End of div ng-app "conkanProfile" -->
-        <td ng-if="[% currentSU %]" align="center" id="configElm"
-          ng-app="conkanConfig">
-          <div ng-controller="configController">
-            <button class="btn btn-primary" id="profbtn"
-              ng-click="openConfForm()">
-              システム設定
-            </button>
-            [%- PROCESS 'config/T_conf_setting.tt' -%]
-          </div> <!-- End of div ng-controller "configController" -->
-        </td> <!-- End of div ng-app "conkanConfig" -->
+        [% IF cuRole == 'ROOT' %]
+          <td align="center" id="configElm" ng-app="conkanConfig">
+            <div ng-controller="configController">
+              <button class="btn btn-primary" id="profbtn"
+                ng-click="openConfForm()">
+                システム設定
+              </button>
+              [%- PROCESS 'config/T_conf_setting.tt' -%]
+            </div> <!-- End of div ng-controller "configController" -->
+            [%- PROCESS 'T_httpget_result.tt' -%]
+          </td> <!-- End of div ng-app "conkanConfig" -->
+        [% ELSE %]
+          <td></td>
+        [% END %]
+        <td></td>
+      </tr>
     </tbody>
   </table>
-  [%- PROCESS 'T_httpget_result.tt' -%]
 </div>
 [%- PROCESS 'tttail.tt' -%]
 <script type="text/javascript">var allprg=false;</script>
 <script type="text/javascript" src="/static/js/conkan_prog_list.js"></script>
 <script type="text/javascript" src="/static/js/conkan_profile.js"></script>
-[% IF currentSU %]
+[% IF cuRole == 'ROOT' %]
   <script type="text/javascript" src="/static/js/conkan_config.js"></script>
 [% END %]
 <script type="text/javascript">
   angular.element(document).ready(function() {
     angular.bootstrap($('#profileElm'), ['conkanProfile']);
-    [% IF currentSU %]
+    [% IF cuRole == 'ROOT' %]
       angular.bootstrap($('#configElm'), ['conkanConfig']);
     [% END %]
   });
