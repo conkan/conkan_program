@@ -58,7 +58,6 @@ sub index :Path :Args(0) {
         my @unsetlist = ();
         foreach my $pgm ( @$unsetPgmlist ) {
             my $pgname = $pgm->sname() || $pgm->regpgid->name();
-$c->log->debug('>>>> pgname: [' . $pgname . ']') if ( $pgname =~ /[\n\r]/ );
             $pgname =~ s/[\n\r]//g;
 
             push @unsetlist, {
@@ -80,7 +79,8 @@ $c->log->debug('>>>> pgname: [' . $pgname . ']') if ( $pgname =~ /[\n\r]/ );
                 },
                 {
                     'prefetch' => [ 'roomid', 'regpgid' ],
-                    'order_by' => { '-asc' => [ 'me.roomid' ] },
+                    'order_by' => { '-asc' =>
+                                        [ 'me.roomid', 'date1', 'stime1' ] },
                 } )
             ];
         my @roomlist = ();
@@ -110,8 +110,9 @@ $c->log->debug('>>>> pgname: [' . $pgname . ']') if ( $pgname =~ /[\n\r]/ );
                     'etime1' => \'IS NOT NULL' 
                 },
                 {
-                    'prefetch' => [ 'pg_casts', 'regpgid', 'roomid' ],
-                    'order_by' => { '-asc' => [ 'pg_casts.castid' ] },
+                    'prefetch' => [ 'pg_casts', { 'pg_casts' => 'castid' }, 'regpgid', 'roomid' ],
+                    'order_by' => { '-asc' =>
+                        [ 'castid.regno', 'castid.name', 'date1', 'stime1' ] },
                 } )
             ];
         my @castlist = ();
