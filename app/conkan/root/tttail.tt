@@ -32,18 +32,18 @@
   // ナビのリサイズでBody開始位置を変える
   $(window).resize(function() {
     $(document.body).css('padding-top', $('#navbar').height()+30 );
-    [% SWITCH self_li_id -%]
-      [%- CASE 'config_csv' -%]
-        uiPlainResize('#csvwrap');
-      [%- CASE 'timetable' -%]
+    [% IF self_li_id == 'config_csv' -%]
+      uiPlainResize('#csvwrap');
+    [%- ELSE -%]
+      [%- IF pglistsel == 'ACT' -%]
+        uiPlainResize('#detailwrap');
+      [%- ELSE -%]
+        [%- IF self_li_id != 'timetable' -%]
         // タイムテーブルは独自(conkan_timetable.js)リサイズ
-      [%- CASE DEFAULT -%]
-        [%- IF pglistsel == 'ACT' -%]
-          uiPlainResize('#detailwrap');
-        [%- ELSE -%]
           uiGridResize();
         [%- END -%]
-      [%- END %]
+      [%- END -%]
+    [%- END %]
   });
 </script>
 <!-- #End Region "tttail.tt" -->
