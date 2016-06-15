@@ -10,8 +10,6 @@ use String::Random qw/ random_string /;
 use Catalyst::Exception ();
 use namespace::autoclean;
 
-use Data::Dumper;
-
 our $VERSION = '0.04';
 
 has debug => ( is => 'ro', isa => Bool );
@@ -38,7 +36,8 @@ sub _build_ua {
 sub authenticate {
 	my ($self, $c, $realm, $auth_info) = @_;
 
-    $c->log->debug( '>>> This is fixed by Studio-REM version' );
+    $c->log->debug( '>>> This PACKAGE [' . __PACKAGE__
+                    . '] is fixed by Studio-REM version' );
     Catalyst::Exception->throw( "Provider is not defined." )
         unless defined $auth_info->{provider} || defined $self->providers->{ $auth_info->{provider} };
 
@@ -57,8 +56,9 @@ sub authenticate {
         request_method => 'GET',
         signature_method => 'HMAC-SHA1',
 	oauth_version => '1.0a',
-        callback => '',                         # fix rem
+        callback => $c->uri_for( $c->action, $c->req->captures, @{ $c->req->args } )->as_string
     );
+
 	$c->log->debug( "authenticate() called from " . $c->request->uri ) if $self->debug;     # fix rem
 
     my $oauth_token = $c->req->method eq 'GET'
@@ -116,6 +116,7 @@ sub authenticate {
 			%defaults,
 			token => $response->token,
 		);
+
         $c->flash->{req_token_sec} = $response->token_secret;   # fix rem
 		$c->res->redirect( $request->to_url( $provider->{user_auth_endpoint} ) );
 	}

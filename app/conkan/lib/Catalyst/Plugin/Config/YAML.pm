@@ -49,6 +49,8 @@ or absolute), each found file will be loaded in order.
 sub setup {
 	my $c = shift;
 	my @config_files;
+    $c->log->debug( '>>> This PACKAGE [' . __PACKAGE__
+                    . '] is fixed by Studio-REM version' );
 	if ( defined $c->config->{'config_file'} && ref $c->config->{'config_file'} eq 'ARRAY' ) {
 		@config_files = @{$c->config->{'config_file'}};
 	} else {
@@ -60,10 +62,9 @@ sub setup {
 		next unless -e $config_file;
 		my $options = LoadFile($config_file);
 		$c->config($options);
-        $c->log->debug( qq(YAML Loaded Config "$config_file") )
-            if $c->debug;
+        $c->log->debug( qq(Loaded Config "$config_file") ) if $c->debug;
 	}
-	$c->NEXT::setup();
+	$c->NEXT::setup;
 }
 
 =back
