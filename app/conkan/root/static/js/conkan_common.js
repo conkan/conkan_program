@@ -293,11 +293,11 @@ var doJsonPost = function( $http, url, data, $uibModalInstance, $uibModal,
   })
   .success(function(data) {
     if ( data.status != 'nodlgok' ) {
-      openDialog( data.status );
+      openDialog( data.status, data.json );
     }
   })
   .error(function(data) {
-    openDialog( '' );
+    openDialog( '', data.json );
   })
   .finally( function() {
     if ( !$uibModalInstance && finalcallback ) {
@@ -305,7 +305,7 @@ var doJsonPost = function( $http, url, data, $uibModalInstance, $uibModal,
     }
   });
 
-  var openDialog = function ( stat ) {
+  var openDialog = function ( stat, json ) {
     if ( $uibModalInstance ) {
       $uibModalInstance.close('done');
     }
@@ -317,6 +317,8 @@ var doJsonPost = function( $http, url, data, $uibModalInstance, $uibModal,
     );
     resultDlg.rendered.then( function() {
       angular.element('.modal-dialog').draggable({handle: '.modal-header'});
+      angular.element('#dupkey').text(json.dupkey);
+      angular.element('#dupval').text(json.dupval);
     });
     resultDlg.result.then( function() {
       if ( $uibModalInstance ) {

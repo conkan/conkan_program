@@ -499,6 +499,7 @@ sub staff_del : Chained('staff_show') : PathPart('del') : Args(0) {
     try {
         die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
         $c->forward( '_delete', [ $staffid, 'PgProgram', 'staffid' ] );
+        die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
     } catch {
         my $e = shift;
         $c->forward( '_dberror', [ $e, 'config/staff/' . $staffid . '/del' ] );
@@ -702,6 +703,7 @@ sub room_edit : Chained('room_show') : PathPart('edit') : Args(0) {
                         chaircnt equips useabletime net comment
                         / ];
         $c->forward( '_updatecreate', [ $roomid, $items ] );
+        die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
     } catch {
         my $e = shift;
         $c->forward( '_dberror', [ $e, 'config/room/' . $roomid . '/edit' ] );
@@ -726,6 +728,7 @@ sub room_del : Chained('room_show') : PathPart('del') : Args(0) {
     try {
         die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
         $c->forward( '_delete', [ $roomid, 'PgProgram', 'roomid' ] );
+        die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
     } catch {
         my $e = shift;
         $c->forward( '_dberror', [ $e, 'config/room/' . $roomid . '/del' ] );
@@ -937,6 +940,7 @@ sub cast_edit : Chained('cast_show') : PathPart('edit') : Args(0) {
         die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
         my $items = [ qw/ regno name namef status memo restdate / ];
         $c->forward( '_updatecreate', [ $castid, $items ] );
+        die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
     } catch {
         my $e = shift;
         $c->forward( '_dberror', [ $e, 'config/cast/' . $castid . '/edit' ] );
@@ -961,6 +965,7 @@ sub cast_del : Chained('cast_show') : PathPart('del') : Args(0) {
     try {
         die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
         $c->forward( '_delete', [ $castid, 'PgCast', 'castid' ] );
+        die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
     } catch {
         my $e = shift;
         $c->forward( '_dberror', [ $e, 'config/cast/' . $castid . '/del' ] );
@@ -1143,6 +1148,7 @@ sub equip_edit : Chained('equip_show') : PathPart('edit') : Args(0) {
                         name equipno spec comment
                         / ];
         $c->forward( '_updatecreate', [ $equipid, $items ] );
+        die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
     } catch {
         my $e = shift;
         $c->forward( '_dberror', [ $e, 'config/equip/' . $equipid . '/edit' ] );
@@ -1167,6 +1173,7 @@ sub equip_del : Chained('equip_show') : PathPart('del') : Args(0) {
     try {
         die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
         $c->forward( '_delete', [ $equipid, 'PgEquip', 'equipid' ] );
+        die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
     } catch {
         my $e = shift;
         $c->forward( '_dberror', [ $e, 'config/equip/' . $equipid . '/del' ] );
@@ -1267,8 +1274,12 @@ sub _updatecreate :Private {
     my $value = {};
     for my $item (@{$items}) {
         $value->{$item} = $c->request->body_params->{$item};
-        $value->{$item} =~ s/\s+$// if defined($value->{$item});
+        if ( defined($value->{$item}) ) {
+            $value->{$item} =~ s/\s+$//;
+            delete $value->{$item} if ($value->{$item} eq '');
+        }
     }
+$c->log->debug('>>>> _updatecreate value ' . Dumper( $value ) );
     try {
         if ( $id != 0 ) { # 更新
             my $row = $c->stash->{'rs'};
@@ -1288,7 +1299,7 @@ sub _updatecreate :Private {
     } catch {
         my $e = shift;
         $c->stash->{'status'} = 'dbfail';
-        die $e;
+        $c->stash->{'dbexp'} = $e;
     };
 }
 
@@ -1326,7 +1337,7 @@ sub _delete :Private {
     } catch {
         my $e = shift;
         $c->stash->{'status'} = 'dbfail';
-        die $e;
+        $c->stash->{'dbexp'} = $e;
     };
 }
 
@@ -1944,9 +1955,10 @@ sub _dberror :Private {
     my @str = split(/\s/, $e);
     $c->clear_errors();
     if ( $str[6] eq 'Duplicate' ) {
-        $c->log->error( localtime() . $logstr . 'error dupl: ' . 
+        $c->log->error( localtime() . ' ' . $logstr . ' error dupl: ' . 
             $str[11] . 'val ' . decode('UTF-8', $str[8] ) );
         $c->stash->{'status'} = 'dupl';
+        $str[11] =~ s/_UNIQUE//;
         $c->stash->{'json'} = {
             dupkey => $str[11],
             dupval => $str[8],
