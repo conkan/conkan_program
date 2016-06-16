@@ -25,12 +25,16 @@ encoding追加
 
 =cut
 
-my $QR_CR = qr/([^",])\r\n/;
+my $QR_CRLF = qr/\r\n/;
+my $QR_LF = qr/\r/;
+my $QR_CR = qr/([^",])\n/;
 sub render {
     my ( $self,
          $c, $template, $args ) = @_;
 
     my $content = $self->SUPER::render( $c, $template, $args );
+    $content =~ s/$QR_CRLF/\n/g;
+    $content =~ s/$QR_LF/\n/g;
     $content =~ s/$QR_CR/$1\\n/g;
     if ( $c->stash->{'csvenc'} ) {
         $c->response->content_type('application/octet-stream');
