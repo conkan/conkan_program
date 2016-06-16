@@ -702,7 +702,8 @@ sub room_edit : Chained('room_show') : PathPart('edit') : Args(0) {
                         name roomno max type size tablecnt
                         chaircnt equips useabletime net comment
                         / ];
-        $c->forward( '_updatecreate', [ $roomid, $items ] );
+        my $uniqitems = [ qw/ name roomno / ];
+        $c->forward( '_updatecreate', [ $roomid, $items, $uniqitems ] );
         die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
     } catch {
         my $e = shift;
@@ -939,7 +940,8 @@ sub cast_edit : Chained('cast_show') : PathPart('edit') : Args(0) {
     try {
         die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
         my $items = [ qw/ regno name namef status memo restdate / ];
-        $c->forward( '_updatecreate', [ $castid, $items ] );
+        my $uniqitems = [ qw/ regno / ];
+        $c->forward( '_updatecreate', [ $castid, $items, $uniqitems ] );
         die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
     } catch {
         my $e = shift;
@@ -1144,10 +1146,9 @@ sub equip_edit : Chained('equip_show') : PathPart('edit') : Args(0) {
     }
     try {
         die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
-        my $items = [ qw/
-                        name equipno spec comment
-                        / ];
-        $c->forward( '_updatecreate', [ $equipid, $items ] );
+        my $items = [ qw/ name equipno spec comment / ];
+        my $uniqitems = [ qw/ equipno / ];
+        $c->forward( '_updatecreate', [ $equipid, $items, $uniqitems ] );
         die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
     } catch {
         my $e = shift;
@@ -1269,15 +1270,17 @@ sub _updatecreate :Private {
     my ( $self, $c, 
          $id,           # 対象ID
          $items,        # 対象列名配列
+         $uniqitems,    # 一意対象列名配列
        ) = @_;
 
     my $value = {};
     for my $item (@{$items}) {
         $value->{$item} = $c->request->body_params->{$item};
-        if ( defined($value->{$item}) ) {
-            $value->{$item} =~ s/\s+$//;
-            delete $value->{$item} if ($value->{$item} eq '');
-        }
+        $value->{$item} =~ s/\s+$// if defined( $value->{$item} );
+    }
+    for my $item (@{$uniqitems}) {
+        delete $value->{$item}
+            if ( defined( $value->{$item} ) && ( $value->{$item} eq '' ) );
     }
 $c->log->debug('>>>> _updatecreate value ' . Dumper( $value ) );
     try {
