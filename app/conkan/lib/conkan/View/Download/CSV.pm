@@ -35,7 +35,9 @@ sub render {
     my $content = $self->SUPER::render( $c, $template, $args );
     $content =~ s/$QR_CRLF/\n/g;
     $content =~ s/$QR_LF/\n/g;
-    $content =~ s/$QR_CR/$1\\n/g;
+    while ( $content =~ $QR_CR ) {
+        $content =~ s/$QR_CR/$1\\n/g;
+    }
     if ( $c->stash->{'csvenc'} ) {
         $c->response->content_type('application/octet-stream');
         $content = encode( $c->stash->{'csvenc'}, $content );
