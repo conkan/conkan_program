@@ -93,6 +93,7 @@ sub auto :Private {
         }
     }
     $c->stash->{cver} = Catalyst->version();
+    $c->stash->{ver} = $conkan::VERSION;
     $c->config->{time_origin} = 0 unless (exists($c->config->{time_origin}));
     # login->login ループ回避
     if ( $c->action->reverse eq 'login' ) {

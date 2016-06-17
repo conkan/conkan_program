@@ -18,9 +18,11 @@
 </script>
 [%- END -%]
 <div class="footer container" id="main-footer">
-  Development by volunteers at <a href="https://github.com/conkan" target="_blank">conkan GitHub</a>
+  <a href="https://conkan.github.io" target="_blank">Conkan [% ver %]</a>
+  |Development by volunteers at <a href="https://github.com/conkan" target="_blank">conkan GitHub</a>
   | Project Founder <a href="http://www.s-rem.jp" target="_blank">Studio-REM</a>
-  | Applicable licenses <a href="http://www.perlfoundation.org/artistic_license_2_0" target="_blank">Artistic License 2.0</a>
+<br/>
+  Applicable licenses <a href="http://www.perlfoundation.org/artistic_license_2_0" target="_blank">Artistic License 2.0</a>
   | Powered by <a href="https://www.catalystframework.org" target="_blank">Catalyst [% cver %]</a>
 </div>
 <script type="text/javascript">
