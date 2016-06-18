@@ -387,7 +387,7 @@ sub _doInitialProc :Private {
                     "FIELDS TERMINATED BY ',' ENCLOSED BY '\"';" );
         # pg_all_equip を登録
         my $all_equip_f = $c->config->{home} . '/../initializer/all_equip.csv';
-        $dbh->do( "LOAD DATA LOCAL INFILE '$system_conf_f' " .
+        $dbh->do( "LOAD DATA LOCAL INFILE '$all_equip_f' " .
                     'INTO TABLE pg_all_equip ' .
                     "FIELDS TERMINATED BY ',' ENCLOSED BY '\"';" );
         # 時刻シフト

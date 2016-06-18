@@ -1,3 +1,8 @@
+-- MySQL Script
+-- Model: conkan
+
+-- 登録企画情報のリセット
+
 DELETE from pg_cast;
 ALTER TABLE pg_cast AUTO_INCREMENT=1;
 DELETE from pg_all_cast;
