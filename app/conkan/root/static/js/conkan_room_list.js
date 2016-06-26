@@ -71,7 +71,11 @@
         
         // 部屋一覧取得
         $scope.getRoomList = function() {
-          $http.get('/config/room/listget')
+          $http( {
+            method  : 'GET',
+            headers : { 'If-Modifired-Since' : (new Date(0)).toUTCString() },
+            url     : '/config/room/listget'
+          })
           .success(function(data) {
             if ( data.status === 'ok' ) {
               $scope.roomgrid.data = data.json;

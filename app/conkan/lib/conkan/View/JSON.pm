@@ -15,6 +15,21 @@ See L<conkan>
 
 Catalyst JSON View.
 
+=head1 METHOD
+
+=head2 process
+
+Cache-Controlヘッダ追加
+
+=cut
+
+sub process {
+    my($self, $c) = @_;
+    
+    $c->res->header('Cache-Control' => 'no-cache');
+    $self->SUPER::process( $c );
+}
+
 =head1 AUTHOR
 
 root

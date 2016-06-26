@@ -18,7 +18,7 @@
   SET cuRole = c.user.get('role');
 # <-- 制御パラメータの設定 -%]
 <!-- #Region "tthead.tt" -->
-<!-- ## script/css include ------------------------------------------------ -->
+<!-- ## script/css include -->
 <!-- jQuery -->
 <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.0/jquery-ui.min.js"></script>
@@ -37,7 +37,7 @@
 <!-- conkan-common -->
 <script type="text/javascript" src="/static/js/conkan_common.js"></script>
 <link rel="stylesheet" href="/static/css/conkan-common.css" />
-<!-- --------------------------------------- ## END of script/css include -->
+<!-- END of script/css include -->
 </head>
 
 <body style="padding-top:200px;">
@@ -72,7 +72,7 @@
             <li id="config_csv"><a href="/config/csvout">CSV出力</a></li>
           [%- END -%]
           [%- IF pglistsel == 'ACT' %]
-            <!- 企画選択ツール ->
+            <!-- 企画選択ツール -->
             <li ng-controller="pglistselController">
               <a><select name="pgdetailsel" ng-model="pgdetailsel"
                 ng-options="i.id as i.val for i in pgsellist">

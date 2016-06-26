@@ -39,7 +39,7 @@ END -%]
       <a href="#progress"><h5>進捗</h5></a>
     </div>
   </div>
-  <p/>
+  <p></p>
 [%- END -%]
 <div class="container" ng-controller="progDetailController">
   <!-- angular 初期化用変数値設定 -->
@@ -398,9 +398,9 @@ END -%]
     <div class="well" id="progress">
       [% subtag( { 'progress' => 'bg-info' } ) %]
       <FORM method="POST" name="addProgress" class="form-horizontal" role="form" id="addProgress" novalidate>
-        <input type="hidden" name="regpgid", id="progress_regpgid"
+        <input type="hidden" name="regpgid" id="progress_regpgid"
             ng-model="progress.regpgid"/>
-        <input type="hidden" name="pgid", id="progress_pgid"
+        <input type="hidden" name="pgid" id="progress_pgid"
             ng-model="progress.pgid"/>
         <textarea name="progress" class="col-sm-12" rows="3"
             ng-model="progress.progress"></textarea>
@@ -422,7 +422,7 @@ END -%]
         <div class="form-group">
           <input type="hidden" name="pgid" value="[% Program.pgid %]">
           <input type="hidden" name="regpgid" value="[% RegProgram.regpgid %]">
-          <input type="hidden" name="cpysep_act", id="cpysep_act" value="">
+          <input type="hidden" name="cpysep_act" id="cpysep_act" value="">
         </div>
         <table class="table table-bordered table-condensed">
           <colgroup>

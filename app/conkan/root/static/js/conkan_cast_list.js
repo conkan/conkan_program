@@ -10,7 +10,11 @@
     [ '$scope', '$sce', '$http', '$uibModal',
       function( $scope, $sce, $http, $uibModal ) {
         $scope.getCastList = function() {
-          $http.get('/config/cast/listget')
+          $http( {
+            method  : 'GET',
+            headers : { 'If-Modifired-Since' : (new Date(0)).toUTCString() },
+            url     : '/config/cast/listget'
+          } )
           .success(function(data) {
             if ( data.status === 'ok' ) {
               $scope.castgrid.data = data.json;

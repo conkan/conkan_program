@@ -317,8 +317,10 @@ var doJsonPost = function( $http, url, data, $uibModalInstance, $uibModal,
     );
     resultDlg.rendered.then( function() {
       angular.element('.modal-dialog').draggable({handle: '.modal-header'});
-      angular.element('#dupkey').text(json.dupkey);
-      angular.element('#dupval').text(json.dupval);
+      if ( stat === 'dupl' ) {
+        angular.element('#dupkey').text(json.dupkey);
+        angular.element('#dupval').text(json.dupval);
+      }
     });
     resultDlg.result.then( function() {
       if ( $uibModalInstance ) {

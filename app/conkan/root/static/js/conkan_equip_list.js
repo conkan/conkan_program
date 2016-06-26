@@ -11,7 +11,11 @@
       function( $scope, $sce, $http, $uibModal ) {
         // 初期値設定
         $scope.getEquipList = function() {
-          $http.get('/config/equip/listget')
+          $http( {
+            method  : 'GET',
+            headers : { 'If-Modifired-Since' : (new Date(0)).toUTCString() },
+            url     : '/config/equip/listget'
+          } )
           .success(function(data) {
             if ( data.status === 'ok' ) {
               $scope.equipgrid.data = data.json;

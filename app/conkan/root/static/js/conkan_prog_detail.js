@@ -42,6 +42,7 @@
         $scope.getRegCast = function () {
           $http({
             method  : 'GET',
+            headers : { 'If-Modifired-Since' : (new Date(0)).toUTCString() },
             url     : '/program/' + init_pgid + '/regcastlist'
           })
           .success(function(data) {
@@ -58,6 +59,7 @@
         $scope.getCast = function() {
           $http({
             method  : 'GET',
+            headers : { 'If-Modifired-Since' : (new Date(0)).toUTCString() },
             url     : '/program/' + init_pgid + '/castlist'
           })
           .success(function(data) {
@@ -87,6 +89,7 @@
         $scope.getEquip = function() {
           $http({
             method  : 'GET',
+            headers : { 'If-Modifired-Since' : (new Date(0)).toUTCString() },
             url     : '/program/' + init_pgid + '/equiplist'
           })
           .success(function(data) {
@@ -212,6 +215,12 @@
         };
 
       // 埋め込みFormSubmitメソッド群
+        // 進捗再表示
+        $scope.progReload = function() {
+          $scope.progress.progress = undefined;
+          // 子コントローラのscopeは参照できないので、メッセージで実現
+          $scope.$broadcast('PglRelEvent', 1);
+        };
         // 進捗登録
         $scope.progDoAdd = function() {
           if ( !$scope.progress.progress || $scope.progress.progress == '' ) {
@@ -220,9 +229,7 @@
           doJsonPost( $http, '/program/progress',
             $.param($scope.progress), undefined, $uibModal,
             function() {
-              $scope.progress.progress = undefined;
-              // 子コントローラのscopeは参照できないので、メッセージで実現
-              $scope.$broadcast('PglRelEvent', 1);
+              $scope.progReload(); // 登録した進捗を表示
             }
           );
         };
@@ -394,6 +401,7 @@
             function() {
               $scope.getRegCast();
               $scope.getCast();
+              $scope.progReload(); // 更新した進捗を表示
             } );
         };
       }
@@ -454,7 +462,10 @@
           // 実行
           doJsonPost( $http, '/program/' + pgid + '/cast/' + itemid,
             $.param($scope.cast), $uibModalInstance, $uibModal,
-            function() { $scope.getCast(); } );
+            function() {
+              $scope.getCast();
+              $scope.progReload(); // 更新した進捗を表示
+            } );
         };
         // 削除実施
         $scope.castDoDel = function() {
@@ -465,7 +476,10 @@
           angular.element('#castdelbtn').attr('disabled', 'disabled');
           doJsonPost( $http, '/program/' + pgid + '/cast/' + itemid + '/del/',
             undefined, $uibModalInstance, $uibModal,
-            function() { $scope.getCast(); } );
+            function() {
+              $scope.getCast();
+              $scope.progReload(); // 更新した進捗を表示
+            } );
         };
       }
     ]
@@ -580,7 +594,10 @@
           // 実行
           doJsonPost( $http, '/program/' + pgid + '/equip/' + itemid,
             $.param($scope.equip), $uibModalInstance, $uibModal,
-            function() { $scope.getEquip(); } );
+            function() {
+              $scope.getEquip();
+              $scope.progReload(); // 更新した進捗を表示
+            } );
         };
         // 削除実施
         $scope.equipDoDel = function() {
@@ -591,7 +608,10 @@
           angular.element('#equipdelbtn').attr('disabled', 'disabled');
           doJsonPost( $http, '/program/' + pgid + '/equip/' + itemid + '/del/',
             undefined, $uibModalInstance, $uibModal,
-            function() { $scope.getEquip(); } );
+            function() {
+              $scope.getEquip();
+              $scope.progReload(); // 更新した進捗を表示
+            } );
         };
       }
     ]
@@ -644,7 +664,11 @@
           var pgid    = angular.element('#init_pgid').val();
           var url = '/program/' + pgid + '/progress/'
                       + newPage + '/' + pageSize + '/';
-          $http.get(url)
+          $http( {
+            method  : 'GET',
+            headers : { 'If-Modifired-Since' : (new Date(0)).toUTCString() },
+            url     : url
+          } )
           .success(function(data) {
             if ( data.status === 'ok' ) {
               $scope.progressgrid.totalItems = data.totalItems;

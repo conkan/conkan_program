@@ -9,7 +9,11 @@
     [ '$scope', '$sce', '$http', '$uibModal',
       function( $scope, $sce, $http, $uibModal ) {
         $scope.getStaffList = function() {
-          $http.get('/config/staff/listget')
+          $http( {
+            method  : 'GET',
+            headers : { 'If-Modifired-Since' : (new Date(0)).toUTCString() },
+            url     : '/config/staff/listget'
+          } )
           .success(function(data) {
             if ( data.status === 'ok' ) {
               $scope.staffgrid.data = data.json;
