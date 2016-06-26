@@ -35,7 +35,7 @@ use Catalyst qw/
     Authentication
 /;
 
-our $VERSION = '0.90';
+our $VERSION = '0.91';
 
 # Configure the application.
 #
