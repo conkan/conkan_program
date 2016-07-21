@@ -1426,10 +1426,20 @@ sub _autoProgress :Private {
          $value,    # 更新用ハッシュ
        ) = @_;
 
+    my %mask_items = (  # 値をマスクする項目名(利便性のためハッシュ)
+        'regma' => 1,
+        'telno' => 1,
+        'faxno' => 1,
+        'celno' => 1,
+    );
+
     try {
+        my $progstrlog = '';
         my $progstr = '';
         if ( defined( $row ) ) {
             if ( defined( $value ) ) { # 更新
+                my $addstrlog = '';
+                my $addstr    = '';
                 for my $key (@{$itemkeys}) {
                     my $rowval = $row->get_column($key);
                     my $val = $value->{$key};
@@ -1446,30 +1456,44 @@ sub _autoProgress :Private {
                         $rowval = '';
                     }
                     if ( defined( $val ) && ($rowval ne $val ) ) {
-
-                        $progstr = 'Update ' if ( $progstr eq '' );
-                        $progstr .= $key . ' change to ' . $val . ' ';
+                        my $maskval = +( exists($mask_items{$key}) ? 'xxxxxx'
+                                                                   : $val );
+                        if ( $addstr eq '' ) {
+                            $addstrlog = 'Update ';
+                            $addstr    = 'Update ';
+                        }
+                        $addstrlog .= $key . ' change to ' . $val . ' ';
+                        $addstr    .= $key . ' change to ' . $maskval . ' ';
                     }
                 }
+                $progstrlog .= $addstrlog;
+                $progstr    .= $addstr;
             }
             else { # 削除
-                $progstr .= 'Delete ';
+                my $addstr = 'Delete ';
                 for my $key (@{$itemkeys}) {
-                    $progstr .= $key . ':' . $row->get_column($key) . ' ';
+                    $addstr .= $key . ':' . $row->get_column($key) . ' ';
                 }
+                $progstrlog .= $addstr;
+                $progstr    .= $addstr;
             }
         }
         else { # 生成
-            $progstr .= 'Create ';
+            my $addstrlog = 'Create ';
+            my $addstr    = 'Create ';
             for my $key (@{$itemkeys}) {
-                $progstr .= $key . ':'
-                            . +( exists($value->{$key}) ? $value->{$key} : '' )
-                            . ' ';
+                my $val = +( exists($value->{$key}) ? $value->{$key} : '' );
+                my $maskval = +( exists($mask_items{$key}) ? 'xxxxxx'
+                                                           : $val );
+                $addstrlog .= $key . ':' . $val . ' ';
+                $addstr    .= $key . ':' . $maskval . ' ';
             }
+            $progstrlog .= $addstrlog;
+            $progstr    .= $addstr;
         }
         if ( $progstr ne '' ) {
-            $c->log->info( localtime()  . ' _autoProgress regpgid:' .$regpgid
-                                        . ' progstr:' . $progstr );
+            $c->log->info( localtime()  . ' _autoProgress regpgid:' . $regpgid
+                                        . ' progstr:' . $progstrlog );
             my $repstr = '[Auto Progress] ' . $target . ' ' . $progstr;
             $c->forward('/program/_crProgress', [ $regpgid, $repstr, ], );
         }
