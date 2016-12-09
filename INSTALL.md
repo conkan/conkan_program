@@ -141,7 +141,8 @@ systemd利用開始処理として、以下のコマンドを実施
 nginxの起動方法はここでは記述しない
 conkan_programのリバースプロキシ設定部分のみ記述する
 
-https://<サービスホストFQDN>/conkan_program でconkan_programにアクセスするよう、
+https://<サービスホストFQDN>/conkan_program でconkan_programにアクセスし、
+conkan_program内でのリクエストが正しく処理されるよう、
 /etc/nginx/nginx.conf に、以下のように設定する
 
 +----
@@ -162,6 +163,25 @@ https://<サービスホストFQDN>/conkan_program でconkan_programにアクセ
 |       # For conkan_program
 |       location /conkan_program {
 |           proxy_pass http://localhost:9002;
+|           proxy_redirect / /conkan_program/; # レスポンスヘッダの置き換え
+|       }
+|
+|       location / {
+|           # Refererがconkan_programだったら、URIを書き換える
+|           if ( $http_Referer ~ ^https://[^/]+/conkan_program/ ) {
+|               rewrite ^/(.+) /conkan_program/$1;
+|               set $rewriten 1;
+|           }
+|           # POSTの時は続けてそのURIの処理(上位サーバに渡す)
+|           if ( $request_method ~* (post) ) {
+|               rewrite ^/(.+) /$1 last;
+|           }
+|           # GETでURIを書き換えていた時はリダイレクト
+|           if ( $rewriten ) {
+|               rewrite ^/(.+) /$1 redirect;
+|           }
+|
+|           root    /usr/share/nginx/html;
 |       }
     <後略>
 +----

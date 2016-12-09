@@ -1,6 +1,6 @@
 #!/bin/bash
 NAME='conkanprog'
-PSET='-p 9002:9002'
+PSET='-p 127.0.0.1:9002:9002'
 RUNOPT='-d --restart=always'
 LOGMNT='-v /var/log/conkanprog:/var/log/conkanprog'
 # 本番系は、run.sh product で起動
@@ -14,6 +14,12 @@ else
         cp `pwd`/app/conkan/conkan.yml_default `pwd`/app/conkan/conkan.yml
     fi
 fi
+
+# デバッグ時はconkan_server.plを起動
+if [ "$1" = "debug" ] ; then
+    RUNCMD='/root/app/conkan/script/conkan_server.pl -r -d -p 9002'
+fi
+
 STAT=`docker inspect $NAME | grep Status | awk -F'"' '{print $4}'`
 if [ !${STAT} ]; then
     STAT=`docker inspect $NAME | grep Running | awk '{print $2}'`
@@ -27,4 +33,4 @@ if [ ${STAT} ]; then
     fi
     docker rm ${NAME}
 fi
-docker run ${RUNOPT} --name ${NAME} ${PSET} ${LOGMNT} ${DEVMNT} conkan/conkan_program
+docker run ${RUNOPT} --name ${NAME} ${PSET} ${LOGMNT} ${DEVMNT} conkan/conkan_program ${RUNCMD}
