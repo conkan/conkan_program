@@ -48,7 +48,7 @@ https://developer.cybozulive.com にて登録
 ----------------------- | ---------------------------
 アプリケーション名 | 任意の値
 アプリケーションの種類 | ウェブブラウザ
-コールバックURL | https://<conkanトップURL>/addstaff/cybozu
+コールバックURL | <conkanトップURL>/addstaff/cybozu
 アクセスレベル | レベルA
 
 登録すると、ConsumerKey と ConsumerSecret が表示される。
@@ -132,7 +132,7 @@ systemd利用開始処理として、以下のコマンドを実施
 <稼働サーバ>で実施して作成する。
 
 稼働サーバ > cd <repo>
-稼働サーバ > sudo ./cert.sh <conkanトップURLのFQDN>
+稼働サーバ > sudo ./cert.sh <サービスホストFQDN>
 
 ここで生成したサーバ証明書は、nginx.confに指定する
 
@@ -165,27 +165,10 @@ conkan_program内でのリクエストが正しく処理されるよう、
 |           proxy_pass http://localhost:9002;
 |           proxy_redirect / /conkan_program/; # レスポンスヘッダの置き換え
 |       }
-|
-|       location / {
-|           # Refererがconkan_programだったら、URIを書き換える
-|           if ( $http_Referer ~ ^https://[^/]+/conkan_program/ ) {
-|               rewrite ^/(.+) /conkan_program/$1;
-|               set $rewriten 1;
-|           }
-|           # POSTの時は続けてそのURIの処理(上位サーバに渡す)
-|           if ( $request_method ~* (post) ) {
-|               rewrite ^/(.+) /$1 last;
-|           }
-|           # GETでURIを書き換えていた時はリダイレクト
-|           if ( $rewriten ) {
-|               rewrite ^/(.+) /$1 redirect;
-|           }
-|
-|           root    /usr/share/nginx/html;
-|       }
     <後略>
 +----
 
+なお、ここで指定したlocation値は、後述の初期化アクセス時に「公開URIプレフィックス」として登録しなければならない
 
 1. dockerイメージの生成
 
@@ -212,7 +195,7 @@ conkan初期化処理
 
 1. 初期化アクセス
 
-https://<conkanトップURL>/ にアクセスする。
+<conkanトップURL>/ にアクセスする。
 初回のみ、【conkan初期化ページ】 が表示される。
 
 すべての値を設定し、「初期化実行」をクリックすると、conkan初期化処理を実施する。
@@ -224,6 +207,8 @@ DBサーバ | データベースサーバのFQDNまたはIPアドレス
 DB名 | データベース設定で使用した DB名
 DBユーザ | データベース設定で使用した 管理ユーザ名
 DBパスワード | データベース設定で使用した パスワード
+表示切り替え時刻 | 00:00をまたがったスケジュールを可能にする時のシフト時間
+公開URIプレフィックス| リバースプロキシによるURI変更時のパス
 コンシュマートークンキー | CybozuLiveアプリケーション登録 で取得した ConsumerKey
 コンシュマーシークレット | CybozuLiveアプリケーション登録 で取得した ConsumerSecret
 グループ | 登録可否を判断するCybozuLiveグループ名

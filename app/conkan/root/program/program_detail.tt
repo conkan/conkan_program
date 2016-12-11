@@ -418,7 +418,7 @@ END -%]
     </div> <!-- END of 進捗 -->
     <!-- 複製/分割 -->
     [%- IF editable %]
-      <FORM id="pgcpysepform" role="form" method="POST" action="/program/cpysep">
+      <FORM id="pgcpysepform" role="form" method="POST" action="[% uriprefix %]/program/cpysep">
         <div class="form-group">
           <input type="hidden" name="pgid" value="[% Program.pgid %]">
           <input type="hidden" name="regpgid" value="[% RegProgram.regpgid %]">
@@ -452,6 +452,7 @@ END -%]
   [% PROCESS 'T_httpget_result.tt' %]
 </div> <!-- End of container  ng-controller progDetailController -->
 [%- PROCESS 'tttail.tt' -%]
-<script type="text/javascript" src="/static/js/conkan_prog_detail.js"></script>
+<script type="text/javascript">var uriprefix="[% uriprefix %]";</script>
+<script type="text/javascript" src="[% uriprefix %]/static/js/conkan_prog_detail.js"></script>
 </body>
 </html> <!-- End of ng-app "conkanProgDetail" -->

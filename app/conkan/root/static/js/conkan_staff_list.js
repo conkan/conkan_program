@@ -12,7 +12,7 @@
           $http( {
             method  : 'GET',
             headers : { 'If-Modifired-Since' : (new Date(0)).toUTCString() },
-            url     : '/config/staff/listget'
+            url     : uriprefix + '/config/staff/listget'
           } )
           .success(function(data) {
             if ( data.status === 'ok' ) {

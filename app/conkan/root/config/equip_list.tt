@@ -25,6 +25,7 @@
   [%- PROCESS 'T_httpget_result.tt' -%]
 </div> <!-- End of container ng-controller "equipListController" -->
 [%- PROCESS 'tttail.tt' -%]
-<script type="text/javascript" src="/static/js/conkan_equip_list.js"></script>
+<script type="text/javascript">var uriprefix="[% uriprefix %]";</script>
+<script type="text/javascript" src="[% uriprefix %]/static/js/conkan_equip_list.js"></script>
 </body>
 </html> <!-- End of ng-app "conkanEquipList" -->

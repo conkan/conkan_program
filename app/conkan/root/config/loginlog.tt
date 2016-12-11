@@ -16,12 +16,13 @@
     </div>
   </div> <!-- End of well gridlist -->
   <div id="pgAddDiv">
-    <a href="/config/staff/list" type="button" class="btn btn-primary">
+    <a href="[% uriprefix %]/config/staff/list" type="button" class="btn btn-primary">
       スタッフ管理
     </a>
   </div>
 </div> <!-- End of container ng-app "conkanLoginLog" -->
 [%- PROCESS 'tttail.tt' -%]
-<script type="text/javascript" src="/static/js/conkan_loginlog.js"></script>
+<script type="text/javascript">var uriprefix="[% uriprefix %]";</script>
+<script type="text/javascript" src="[% uriprefix %]/static/js/conkan_loginlog.js"></script>
 </body>
 </html>

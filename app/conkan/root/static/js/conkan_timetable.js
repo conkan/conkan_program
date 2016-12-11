@@ -55,7 +55,7 @@
         query:   function(pgid) {
           angular.element('#valerr').text('');
           currentval.pgid = '';
-          $http({ method  : 'GET', url     : '/timetable/' + pgid })
+          $http({ method  : 'GET', url     : uriprefix + '/timetable/' + pgid })
           .success(function(data) {
             if ( data.status === 'ok' ) {
               ProgDataCnv( data.json, currentval );
@@ -252,7 +252,7 @@
           scope.timetable_edit_form.$setPristine();
         });
 
-        $http.get('/config/confget')
+        $http.get(uriprefix + '/config/confget')
         .success(function(data) {
           if ( data.status === 'ok' ) {
             $scope.conf = ConfDataCnv( data, $scope.conf );
@@ -277,7 +277,7 @@
           }
           $http( {
             method : 'POST',
-            url : '/timetable/' + pgid,
+            url : uriprefix + '/timetable/' + pgid,
             headers: { 'Content-Type':
                          'application/x-www-form-urlencoded; charset=UTF-8' },
             data: $.param($scope.current)
