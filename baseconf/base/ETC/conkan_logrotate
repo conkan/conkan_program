@@ -5,7 +5,4 @@
     notifempty
     compress
     sharedscripts
-    postrotate
-        /usr/bin/pkill starman
-    endscript
 }
