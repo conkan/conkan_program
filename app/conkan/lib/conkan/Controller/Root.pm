@@ -55,7 +55,7 @@ sub auto :Private {
         . '         sessionid ['
         . +( defined($c->sessionid) ? $c->sessionid : '' ) . ']'
     );
-    $c->stash->{uriprefix} = $c->config->{uriprefix} | '';
+    $c->stash->{uriprefix} = $c->config->{uriprefix} || '';
     # 初期化済判断
     unless (exists($c->config->{inited})) {
         $c->log->info(localtime() . ' 未初期化');
