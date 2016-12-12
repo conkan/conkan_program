@@ -38,9 +38,6 @@ RUN yum -y install gcc patch expat-devel libxml2-devel
 #----------------------------------------------------------
 # Perlライブラリインストール
 #----------------------------------------------------------
-# Starman
-RUN cpanm -i Starman
-
 # Install Perl Module (Catalyst)
 RUN cpanm -in YAML DBI DBD::mysql DBIx::Class DBIx::Class::Cursor::Cached Email::MIME DateTime::Format::MySQL CGI FormValidator::Simple::Plugin::Japanese HTTP::Server::Simple Moose MooseX::Daemonize Test::Expect DBIx::Class::Schema::Loader MooseX::NonMoose LWP::Protocol::https Term::Size::Any XML::LibXML XML::RSS XML::Atom XML::Feed
 
@@ -50,6 +47,9 @@ RUN cpanm -in Catalyst::Runtime CatalystX::REPL Task::Catalyst Catalyst::Devel C
 # OAuthは独自拡張版を使用するが、
 # オリジナルも入れておかないと依存モジュールが入らない
 RUN cpanm -in Catalyst::Authentication::Credential::OAuth
+
+# Starman
+RUN cpanm -i Starman
 
 # cpanm work削除
 RUN rm -rf .cpanm/*
