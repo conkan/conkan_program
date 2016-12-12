@@ -28,6 +28,7 @@
 </div> <!-- End of container ng-app "conkanProgList" -->
 [%- PROCESS 'tttail.tt' -%]
 <script type="text/javascript">var allprg=true;</script>
-<script type="text/javascript" src="/static/js/conkan_prog_list.js"></script>
+<script type="text/javascript">var uriprefix="[% uriprefix %]";</script>
+<script type="text/javascript" src="[% uriprefix %]/static/js/conkan_prog_list.js"></script>
 </body>
 </html>

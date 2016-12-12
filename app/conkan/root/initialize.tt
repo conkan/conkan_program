@@ -15,7 +15,7 @@
 
   <!-- 初期化パラメータ入力ページ -->
   <div class="well" id="init">
-    <FORM method="POST" action="/initialprocess">
+    <FORM method="POST" action="[% uriprefix %]/initialprocess">
       <div>
         <label>adminパスワード</label><br/>
         <input type="password" name="adpw" class="col-sm-3 input-small" placeholder="Password">
@@ -49,6 +49,14 @@
         <label class="col-sm-2 text-right">表示切り替え時刻</label>
         <input type="text" name="torg" class="col-sm-3" placeholder="TimeOrigin">
         <span class="col-sm-4 help-inline"> 日付を切り替える時刻<br>例:6 なら、06:00-29:59が一日になる</span>
+      </div>
+      <div class="row">
+        <label class="col-sm-2 text-right">公開URIプレフィックス</label>
+        <input type="text" name="uripre" class="col-sm-3" placeholder="/conkan_program">
+        <span class="col-sm-4 help-inline"> conkanの公開URIプレフィックス<br>
+            サーバトップで公開する場合は空白<br/>
+            リバースプロキシを使って、パスを指定する場合は必須<br/>
+            例:https://<FQDN>/conkan_program/ をconkanトップURLとする場合、<B>/conkan_program</B>(先頭の<B>/</B>を指定すること</span>
       </div>
       <HR/>
       <label>スタッフ登録方法</label><br/>

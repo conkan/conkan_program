@@ -70,7 +70,7 @@ END -%]
           登録
         </button>
         <span class="col-sm-1"></span>
-        <a class="col-sm-3 text-center btn btn-large" href="/logout">
+        <a class="col-sm-3 text-center btn btn-large" href="[% uriprefix %]/logout">
           キャンセル</a>
       </div>
     </FORM>
@@ -78,19 +78,19 @@ END -%]
   <div class="well" id="success" style="display:none;">
     <H1>登録しました</H1>
     loginしなおしてください
-    <a class="btn btn-primary btn-large" href="/logout">login</a>
+    <a class="btn btn-primary btn-large" href="[% uriprefix %]/logout">login</a>
   </div>
   <div class="well" id="deny" style="display:none;">
     <H1>登録失敗しました</H1>
     同じアカウントで重複登録が発生しました。<br/>
     登録しなおしてください。
-    <a class="btn btn-primary btn-large" href="/logout">login</a>
+    <a class="btn btn-primary btn-large" href="[% uriprefix %]/logout">login</a>
   </div>
   <div class="well" id="dbfail" style="display:none;">
     <H1>登録失敗しました</H1>
     DBエラーが発生しました。<br/>
     登録しなおしてください。
-    <a class="btn btn-primary btn-large" href="/logout">login</a>
+    <a class="btn btn-primary btn-large" href="[% uriprefix %]/logout">login</a>
   </div>
   <div class="well" id="initadd" style="display:none;">
     <H1>登録しました</H1>
@@ -99,7 +99,7 @@ END -%]
     [% ELSE %]
       loginしなおしてください
     [% END %]
-    <a class="btn btn-primary btn-large" href="/logout">login</a>
+    <a class="btn btn-primary btn-large" href="[% uriprefix %]/logout">login</a>
   </div>
 </div>
 [%- PROCESS 'tttail.tt' -%]
@@ -127,7 +127,7 @@ END -%]
           $scope.prof.CybozuSecret = '[% rs.CybozuSecret %]';
         [% END %]
         [% IF addroot %]
-          $scope.prof.role         = 'PG';
+          $scope.prof.role         = 'ROOT';
         [% ELSE %]
           $scope.prof.role         = 'NORM';
         [% END %]
@@ -159,7 +159,7 @@ END -%]
           }
           $http( {
             method  : 'POST',
-            url     : '/mypage/profile',
+            url     : '[% uriprefix %]/mypage/profile',
             headers : { 'Content-Type':
                   'application/x-www-form-urlencoded; charset=UTF-8' },
             data    : $.param($scope.prof)

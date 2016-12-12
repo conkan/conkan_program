@@ -54,9 +54,6 @@ DBサーバで使用する設定ファイルが存在するので、個々に配
     _tcshrc                 =>  ~/.tcshrc   (0644)
     _vimrc                  =>  ~/.vimrc    (0644)
 
-<Dockerホーム>/baseconf/base/OPTBIN 下のものは、常時配置
-    docker-enter            =>  /opt/bin/docker-enter   (755)
-
 systemd利用開始処理として、以下のコマンドを実施
 
 DBサーバ > sudo systemctl enable mysqld.service

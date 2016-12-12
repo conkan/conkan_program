@@ -31,7 +31,7 @@
         angular.element('#valerr').text('');
         $http({
           method  : 'GET',
-          url     : '/config/setting'
+          url     : uriprefix + '/config/setting'
         })
         .success(function(data) {
           if ( data.status === 'ok' ) {
@@ -111,7 +111,7 @@
             return;
           }
           // 実行
-          doJsonPost( $http, '/config/setting',
+          doJsonPost( $http, uriprefix + '/config/setting',
                       $.param($scope.conf), $uibModalInstance, $uibModal,
                       function() {} );
         };

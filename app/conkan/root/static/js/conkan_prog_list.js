@@ -97,7 +97,7 @@
           },
         ];
         var url = '/program/listget' + ( allprg ? '_a' : '_r' );
-        $http.get(url)
+        $http.get(uriprefix + url)
         .success(function(data) {
           if ( data.status === 'ok' ) {
             $scope.proggrid.data = data.json;

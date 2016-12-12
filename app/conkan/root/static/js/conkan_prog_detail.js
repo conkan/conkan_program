@@ -43,7 +43,7 @@
           $http({
             method  : 'GET',
             headers : { 'If-Modifired-Since' : (new Date(0)).toUTCString() },
-            url     : '/program/' + init_pgid + '/regcastlist'
+            url     : uriprefix + '/program/' + init_pgid + '/regcastlist'
           })
           .success(function(data) {
             if ( data.status === 'ok' ) {
@@ -60,7 +60,7 @@
           $http({
             method  : 'GET',
             headers : { 'If-Modifired-Since' : (new Date(0)).toUTCString() },
-            url     : '/program/' + init_pgid + '/castlist'
+            url     : uriprefix + '/program/' + init_pgid + '/castlist'
           })
           .success(function(data) {
             if ( data.status === 'ok' ) {
@@ -90,7 +90,7 @@
           $http({
             method  : 'GET',
             headers : { 'If-Modifired-Since' : (new Date(0)).toUTCString() },
-            url     : '/program/' + init_pgid + '/equiplist'
+            url     : uriprefix + '/program/' + init_pgid + '/equiplist'
           })
           .success(function(data) {
             if ( data.status === 'ok' ) {
@@ -226,7 +226,7 @@
           if ( !$scope.progress.progress || $scope.progress.progress == '' ) {
             return;
           }
-          doJsonPost( $http, '/program/progress',
+          doJsonPost( $http, uriprefix + '/program/progress',
             $.param($scope.progress), undefined, $uibModal,
             function() {
               $scope.progReload(); // 登録した進捗を表示
@@ -250,7 +250,7 @@
         angular.element('#valerr').text('');
         $http({
           method  : 'GET',
-          url     : '/program/' + params.pgid + '/regprogram'
+          url     : uriprefix + '/program/' + params.pgid + '/regprogram'
         })
         .success(function(data) {
           if ( data.status === 'ok' ) {
@@ -296,7 +296,7 @@
           var pgid = $scope.prog.pgid;
           // 二重クリック回避
           angular.element('#regprgapplybtn').attr('disabled', 'disabled');
-          doJsonPost( $http, '/program/' + pgid + '/regprogram',
+          doJsonPost( $http, uriprefix + '/program/' + pgid + '/regprogram',
             $.param($scope.prog), $uibModalInstance, $uibModal );
         };
       }
@@ -308,7 +308,7 @@
     [ '$scope', '$http', '$uibModal', '$uibModalInstance', 'params',
       function( $scope, $http, $uibModal, $uibModalInstance, params ) {
         // 選択肢取得
-        $http.get('/config/confget')
+        $http.get(uriprefix + '/config/confget')
         .success(function(data) {
           if ( data.status === 'ok' ) {
             $scope.conf = ConfDataCnv( data, $scope.conf );
@@ -323,7 +323,7 @@
         angular.element('#valerr').text('');
         $http({
           method  : 'GET',
-          url     : '/timetable/' + params.pgid
+          url     : uriprefix + '/timetable/' + params.pgid
         })
         .success(function(data) {
           if ( data.status === 'ok' ) {
@@ -359,7 +359,7 @@
             angular.element('#prgapplybtn').removeAttr('disabled');
             return;
           }
-          doJsonPost( $http, '/timetable/' + pgid,
+          doJsonPost( $http, uriprefix + '/timetable/' + pgid,
             $.param($scope.prog), $uibModalInstance, $uibModal );
         };
       }
@@ -380,7 +380,7 @@
         };
         $scope.prog = params;
         // 選択肢取得
-        $http.get('/config/confget')
+        $http.get(uriprefix + '/config/confget')
         .success(function(data) {
           if ( data.status === 'ok' ) {
             $scope.conf = ConfDataCnv( data, $scope.conf );
@@ -396,7 +396,7 @@
         $scope.regcastdoApply = function() {
           // 二重クリック回避
           angular.element('#regcastapplybtn').attr('disabled', 'disabled');
-          doJsonPost( $http, '/program/regcastadd',
+          doJsonPost( $http, uriprefix + '/program/regcastadd',
             $.param($scope.regcast), $uibModalInstance, $uibModal,
             function() {
               $scope.getRegCast();
@@ -417,7 +417,7 @@
         $scope.prog = params;
         $http({
           method  : 'GET',
-          url     : '/program/' + params.pgid + '/cast/' + params.editCastId,
+          url     : uriprefix + '/program/' + params.pgid + '/cast/' + params.editCastId,
         })
         .success(function(data) {
           if ( data.status === 'ok' ) {
@@ -460,7 +460,7 @@
           angular.element('#castapplybtn').attr('disabled', 'disabled');
           angular.element('#castdelbtn').attr('disabled', 'disabled');
           // 実行
-          doJsonPost( $http, '/program/' + pgid + '/cast/' + itemid,
+          doJsonPost( $http, uriprefix + '/program/' + pgid + '/cast/' + itemid,
             $.param($scope.cast), $uibModalInstance, $uibModal,
             function() {
               $scope.getCast();
@@ -474,7 +474,7 @@
           // 二重クリック回避
           angular.element('#castapplybtn').attr('disabled', 'disabled');
           angular.element('#castdelbtn').attr('disabled', 'disabled');
-          doJsonPost( $http, '/program/' + pgid + '/cast/' + itemid + '/del/',
+          doJsonPost( $http, uriprefix + '/program/' + pgid + '/cast/' + itemid + '/del/',
             undefined, $uibModalInstance, $uibModal,
             function() {
               $scope.getCast();
@@ -592,7 +592,7 @@
             $scope.equip.eif = $scope.equip.oeif;
           }
           // 実行
-          doJsonPost( $http, '/program/' + pgid + '/equip/' + itemid,
+          doJsonPost( $http, uriprefix + '/program/' + pgid + '/equip/' + itemid,
             $.param($scope.equip), $uibModalInstance, $uibModal,
             function() {
               $scope.getEquip();
@@ -606,7 +606,7 @@
           // 二重クリック回避
           angular.element('#equipapplybtn').attr('disabled', 'disabled');
           angular.element('#equipdelbtn').attr('disabled', 'disabled');
-          doJsonPost( $http, '/program/' + pgid + '/equip/' + itemid + '/del/',
+          doJsonPost( $http, uriprefix + '/program/' + pgid + '/equip/' + itemid + '/del/',
             undefined, $uibModalInstance, $uibModal,
             function() {
               $scope.getEquip();
@@ -667,7 +667,7 @@
           $http( {
             method  : 'GET',
             headers : { 'If-Modifired-Since' : (new Date(0)).toUTCString() },
-            url     : url
+            url     : uriprefix + url
           } )
           .success(function(data) {
             if ( data.status === 'ok' ) {
@@ -701,7 +701,7 @@
         $scope.pgsellist = [];
         $http({
           method  : 'GET',
-          url     : '/program/listget' + ( allprg ? '_a' : '_r' ),
+          url     : uriprefix + '/program/listget' + ( allprg ? '_a' : '_r' ),
         })
         .success(function(data) {
           if ( data.status === 'ok' ) {

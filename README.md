@@ -1,33 +1,26 @@
-conkan
+conkan_program
 ======
 
 汎用コンベンション運営管理システムconkan 企画管理サブシステム
 
 各種コンベンション(主にSF大会)の、企画、機材 を管理するシステム。
 
-開発手順
-======
-conkan開発にあたって、ある程度詳細な手順を定めたが、結局開発メンバが集まらなかったので、
-こちらでは実装することを第一義にAdHocに進めて行く。
-
-唯一、成果物は「費用負担なく閲覧できるもの」にすることだけは継承する。
-
-(PlainText, OOoで参照できるExcel、Cacoo ( http://cacoo.com/ )など)
-
 実装範囲
 ======
 conkan全体のうち、企画/機材管理機能のみ実装する
 
-参加者(関係者)に関しては、大会参加番号で別システムと紐付ける
+参加者(関係者)に関しては、大会参加番号で別システムconkan_stakeholderと紐付ける
 
 
 事前準備
 ----------------
 * 稼働サーバ
-conkanそのものとそのフロントエンドとなるnginxを動かすサーバとして、
-Docker環境を用意する。
+conkan_programのDockerコンテナを動かすサーバ
+リバースプロキシとして、nginxも起動する。
+nginxはホストで直接起動、Dockerコンテナとして起動 のどちらでも良い
 
-例:Microsoft AzureのCoreOS VM
+例:Microsoft AzureのCoreOS VM でnginx Dockerコンテナとconkan_program Dockerコンテナを起動
+例:AWS EC2のCentOS VMで、nginx自身とconkan_program Dockerコンテナを起動
 
 * DBサーバ
 稼働サーバ(で動かすDockerコンテナ)からアクセス可能な、mysqlサーバを用意する。
@@ -35,8 +28,8 @@ Docker環境を用意する。
 (接続制限が4だと、初期化中にエラーになる事がある。
  時間をおけば復旧し継続できるので実害はない)
 
-例:Microsoft Azureのmysql(clearDB) <- 火星セット(無料)接続制限が4なので注意
 例:Microsoft AzureのCoreOS VMで、mysqlのDockerコンテナ(ex mysql:5.5)を起動
+例:AWS RDSのmysqlサービス
 
 インストール方法/初期設定
 ----------------

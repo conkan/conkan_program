@@ -28,7 +28,7 @@
           },
         ];
 
-        $http.get('/config/loginlogget')
+        $http.get(uriprefix + '/config/loginlogget')
         .success(function (data) {
           if ( data.status === 'ok' ) {
             $scope.lloggrid.data = data.json;

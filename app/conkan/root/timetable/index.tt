@@ -14,7 +14,7 @@
 IF cuRole == 'ROOT' || cuRole == 'PG';
   SET editable = 1;
 END -%]
-<link rel="stylesheet" href="/static/css/conkan-timetable.css" />
+<link rel="stylesheet" href="[% uriprefix %]/static/css/conkan-timetable.css" />
 <div class="container" ng-app="conkanTimeTable">
   <div class="row" id="timetable_up">
     <div id="unset_pglist_wrap" class="col-sm-2">
@@ -78,7 +78,7 @@ END -%]
               </td>
               <th>企画名</th>
               <td colspan="3">
-                <a href="/timetable/detail/{{current.pgid}}">
+                <a href="[% uriprefix %]/timetable/detail/{{current.pgid}}">
                   <span class="prgname" ng-cloak>{{current.name}}</span>
                 </a>
               </td>
@@ -162,7 +162,8 @@ END -%]
   [%- PROCESS 'T_httpget_result.tt' -%]
 </div> <!-- End of container ng-app "conkanTimeTable" -->
 [%- PROCESS 'tttail.tt' -%]
-<script type="text/javascript" src="/static/js/conkan_timetable.js"></script>
+<script type="text/javascript">var uriprefix="[% uriprefix %]";</script>
+<script type="text/javascript" src="[% uriprefix %]/static/js/conkan_timetable.js"></script>
 </body>
 </html>
 

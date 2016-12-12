@@ -14,7 +14,7 @@
           $http( {
             method  : 'GET',
             headers : { 'If-Modifired-Since' : (new Date(0)).toUTCString() },
-            url     : '/config/equip/listget'
+            url     : uriprefix + '/config/equip/listget'
           } )
           .success(function(data) {
             if ( data.status === 'ok' ) {
@@ -106,7 +106,7 @@
         angular.element('#valerr').text('');
         $http({
           method  : 'GET',
-          url     : '/config/equip/' + params.editEquipId
+          url     : uriprefix + '/config/equip/' + params.editEquipId
         })
         .success(function(data) {
           if ( data.status === 'ok' ) {
@@ -135,7 +135,7 @@
           // バリデーション
           //    現在なし
           // 実行
-          doJsonPost( $http, '/config/equip/' + $scope.equip.equipid + '/edit',
+          doJsonPost( $http, uriprefix + '/config/equip/' + $scope.equip.equipid + '/edit',
                       $.param($scope.equip), $uibModalInstance, $uibModal,
                       function() { $scope.getEquipList(); } );
         };
@@ -144,7 +144,7 @@
           // 二重クリック回避
           angular.element('#equipapplybtn').attr('disabled', 'disabled');
           angular.element('#equipdelbtn').attr('disabled', 'disabled');
-          doJsonPost( $http, '/config/equip/' + $scope.equip.equipid + '/del',
+          doJsonPost( $http, uriprefix + '/config/equip/' + $scope.equip.equipid + '/del',
                       undefined, $uibModalInstance, $uibModal,
                       function() { $scope.getEquipList(); } );
         };

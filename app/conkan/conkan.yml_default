@@ -1,14 +1,14 @@
 ---
 Model::ConkanDB:
   connect_info:
+    AutoCommit: 1
     dsn: 
-    mysql_enable_utf8: '1'
+    mysql_enable_utf8: 1
     on_connect_do:
       - SET NAMES utf8
       - SET time_zone='+09:00'
     password: 
     user: 
-    AutoCommit: '1'
   schema_class: conkan::Schema
 Plugin::Authentication:
   default_realm: passwd
@@ -42,11 +42,13 @@ Plugin::Authentication:
     use_session: 1
   use_session: 1
 Plugin::Session:
+  cookie_expires: 0
+  cookie_name: conkan_session
   expires: 3600
+  expiry_threshold: 0
+  storage: /tmp/conkan/session_data
   verify_address: 1
   verify_user_agent: 1
-  cookie_name: conkan_session
-  cookie_expires: 0
 addstaff:
   group: 
   type: 
@@ -56,3 +58,5 @@ disable_component_resolution_regex_fallback: 1
 enable_catalyst_header: 1
 name: conkan
 time_origin: 6
+uriprefix: 
+using_frontend_proxy: 1

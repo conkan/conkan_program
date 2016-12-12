@@ -61,7 +61,7 @@
         angular.element('#valerr').text('');
         $http({
           method  : 'GET',
-          url     : '/config/staff/' + params.editStaffId
+          url     : uriprefix + '/config/staff/' + params.editStaffId
         })
         .success(function(data) {
           if ( data.status === 'ok' ) {
@@ -118,7 +118,7 @@
             return;
           }
           // 実行
-          doJsonPost( $http, '/config/staff/' + $scope.prof.staffid + '/edit',
+          doJsonPost( $http, uriprefix + '/config/staff/' + $scope.prof.staffid + '/edit',
                       $.param($scope.prof), $uibModalInstance, $uibModal,
                       function() { $scope.firePrfRel(); } );
         };
@@ -127,7 +127,7 @@
           // 二重クリック回避
           angular.element('#profapplybtn').attr('disabled', 'disabled');
           angular.element('#profdelbtn').attr('disabled', 'disabled');
-          doJsonPost( $http, '/config/staff/' + $scope.prof.staffid + '/del',
+          doJsonPost( $http, uriprefix + '/config/staff/' + $scope.prof.staffid + '/del',
                       undefined, $uibModalInstance, $uibModal,
                       function() { $scope.firePrfRel(); } );
         };
