@@ -1,7 +1,7 @@
 <!-- 企画追加ダイアログ -->
 <script type="text/ng-template" id="T_add_regprog">
   <FORM method="POST" name="addprogform" class="form-horizontal" role="form"
-    id="addprogform" action="/program/add" enctype="multipart/form-data">
+    id="addprogform" action="[% uriprefix %]/program/add" enctype="multipart/form-data">
     <div class="modal-header">
       <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
       <h4 class="modal-title">企画追加</h4>

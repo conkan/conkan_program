@@ -7,7 +7,7 @@
 <meta name="description" content="conkan login">
 <meta name="author" content="Studio REM">
 <title>Conkan login</title>
-<link rel="stylesheet" href="/static/css/conkan-common.css" />
+<link rel="stylesheet" href="[% uriprefix %]/static/css/conkan-common.css" />
 <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 </head>
@@ -19,7 +19,7 @@
   <!-- パスワードlogin -->
   <div class="well" id="passwordauth">
     <div style="COLOR:Red;" id="valerr"></div>
-    <FORM method="POST" action="/login">
+    <FORM method="POST" action="[% uriprefix %]/login">
       <div class="row">
         <label>パスワード認証</label>
       </div>
@@ -44,7 +44,7 @@
         </button>
         [%- IF canaddstaff %]
           <span class="col-sm-5"></span>
-          <a class="col-sm-2 text-center btn" href="/addstaff">スタッフ登録</a>
+          <a class="col-sm-2 text-center btn" href="[% uriprefix %]/addstaff">スタッフ登録</a>
         [% END %]
       </div>
     </FORM>
@@ -52,7 +52,7 @@
   <div style="COLOR:Red;">[% errmsg | html %]</div>
   [%- ELSE %]
   <div class="well" id="logout">
-    <FORM method="POST" action="/logout">
+    <FORM method="POST" action="[% uriprefix %]/logout">
       <label>login済です</label><br/>
       アカウントを切り替えるには一旦logoutしてください<BR/>
       <button type="submit" class="btn btn-primary btn-large">

@@ -55,6 +55,7 @@ sub auto :Private {
         . '         sessionid ['
         . +( defined($c->sessionid) ? $c->sessionid : '' ) . ']'
     );
+    $c->stash->{uriprefix} = $c->config->{uriprefix} || '';
     # 初期化済判断
     unless (exists($c->config->{inited})) {
         $c->log->info(localtime() . ' 未初期化');
@@ -314,6 +315,7 @@ sub initialprocess :Local {
     my $dbpw = $c->request->body_params->{dbpw};
     my $adrt = $c->request->body_params->{addstaff};
     my $torg = $c->request->body_params->{torg} || 0;
+    my $urip = $c->request->body_params->{uripre} || '';
     my $oakey= $c->request->body_params->{oakey};
     my $oasec= $c->request->body_params->{oasec};
     my $cygr = $c->request->body_params->{cygr};
@@ -327,7 +329,7 @@ sub initialprocess :Local {
 
     $c->detach( '/_doInitialProc',
                 [ $adpw, $dbnm, $dbsv, $dbus, $dbpw,
-                  $adrt, $torg, $oakey, $oasec, $cygr ],
+                  $adrt, $torg, $urip, $oakey, $oasec, $cygr ],
               );
 }
 
@@ -346,6 +348,7 @@ sub _doInitialProc :Private {
          $dbpw,     # DBユーザパスワード
          $adrt,     # スタッフ登録方法 plain | cybozu
          $torg,     # 時刻切り替え基準時
+         $urip,     # 公開URIプレフィックス
          $oakey,    # CybozuLive oAuthキー
          $oasec,    # CybozuLive oAuthシークレット
          $cygr,     # CybozuLive 参照グループ名
@@ -415,8 +418,8 @@ sub _doInitialProc :Private {
                 dsn      => $dsn,
                 user     => $dbus,
                 password => $dbpw,
-                AutoCommit => q{1},
-                mysql_enable_utf8 => 1,
+                AutoCommit => '1',
+                mysql_enable_utf8 => '1',
                 on_connect_do => ["SET NAMES utf8", "SET time_zone='+09:00'", ],
             };
 
@@ -430,11 +433,14 @@ sub _doInitialProc :Private {
             'default_model' => 'conkanDB',
             'default_view'  => 'TT',
             'time_origin' => $torg,
+            'uriprefix'     => $urip,
+            'using_frontend_proxy'  => 1,
             'addstaff' => {
                 'type' => $adrt,
             },
             'Model::ConkanDB' => $c->config->{'Model::ConkanDB'},
             'Plugin::Authentication' => $c->config->{'Plugin::Authentication'},
+            'Plugin::Session'   => $c->config->{'Plugin::Session'},
         };
         my $ymlwk = $conkan_yml->{'Model::ConkanDB'}->{'connect_info'};
         $ymlwk->{'dsn'} = $dsn;
@@ -451,7 +457,7 @@ sub _doInitialProc :Private {
         # サーバ再起動
         # これにより、$c->config->{inited} が設定される
         unless ( 0 == system('/usr/bin/pkill -HUP starman') ) {
-            $c->error('conkan再起動失敗 at ' . scalar localtime );
+#            $c->error('conkan再起動失敗 at ' . scalar localtime );
         }
     } catch {
         my $e = shift;

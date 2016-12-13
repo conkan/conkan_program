@@ -13,7 +13,7 @@
 <div class="container">
   <H1>conkan初期化完了&gt;&gt;管理者登録</H1>
   <div class="well" id="init">
-    <FORM method="POST" action="/login">
+    <FORM method="POST" action="./login">
       <input type="hidden" name="init_role" value="initial"></input>
       <button type="submit" class="btn btn-primary btn-large">
         管理者login

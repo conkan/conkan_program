@@ -48,7 +48,7 @@ https://developer.cybozulive.com にて登録
 ----------------------- | ---------------------------
 アプリケーション名 | 任意の値
 アプリケーションの種類 | ウェブブラウザ
-コールバックURL | https://<conkanトップURL>/addstaff/cybozu
+コールバックURL | <conkanトップURL>/addstaff/cybozu
 アクセスレベル | レベルA
 
 登録すると、ConsumerKey と ConsumerSecret が表示される。
@@ -56,42 +56,46 @@ https://developer.cybozulive.com にて登録
 これらの値は、初期化処理時に使用するので控えておくこと。
 また、セキュリティ上これらの値は秘匿すべきである。
 
-conkanインストールと起動
+conkan_program 開発環境構築
 ====
 
 1. 稼働サーバ条件
 
 - dockerのイメージ生成と、コンテナ起動ができる環境であること
+- nginxはサーバ上で直接起動している方が良い
 
 以下、稼働サーバを<稼働サーバ>と表記する
 
 1. デプロイ
 
-GitHub https://github.com/conkan/conkan_program のmastarブランチを
+GitHub https://github.com/conkan/conkan_program のdevelopブランチを
 稼働サーバに展開する
-(zipをダウンロードして展開してもよいが、update時の手間を考慮するとcloneしたほうが良い)
 
-$> git clone git://github.com/conkan/conkan_program <Dockerホーム>
+$> git clone git://github.com/conkan/conkan_program <repo>
 
-以下、展開したディレクトリを<Dockerホーム>と表記する
+以下、展開したディレクトリを<repo>と表記する
 
 1. 稼働サーバの設定ファイル展開
 
-<Dockerホーム>/baseconf/ 下に、
+<repo>/baseconf/ 下に、
 稼働サーバで使用する設定ファイルが存在するので、個々に配置する。
 
-<Dockerホーム>/baseconf/base/HOME 下のものは、常時配置
+<repo>/baseconf/base/HOME 下のものは、常時配置
     _bashrc                 =>  ~/.bashrc   (0644)
     _cshrc                  =>  ~/.cshrc    (0644)
     _my.cnf                 =>  ~/.my.cnf   (0644)
     _tcshrc                 =>  ~/.tcshrc   (0644)
     _vimrc                  =>  ~/.vimrc    (0644)
 
-<Dockerホーム>/baseconf/base/OPTBIN 下のものは、常時配置
-    docker-enter            =>  /opt/bin/docker-enter   (755)
+1.1 logrotate, cron設定 (centOS6)
 
-<Dockerホーム>/baseconf/conkan/SYSTEM 下のものは、systemd利用時に配置
-  ※coreOS上で動かす場合必須
+<repo>/baseconf/conkan/ETC 下のものを、下記のように配置
+    conkan_logrotate        =>  /etc/logrotate.d/conkan_program (0644)
+    conkandbbackup          =>  /etc/cron.daily/conkandbbackup (0755)
+
+1.1 systemd設定 (coreOS, centOS7)
+
+<repo>/baseconf/conkan/SYSTEM 下のものを、下記のように配置
     conkan.service          =>  /etc/systemd/system/conkan.service
     conkandbbackup.service  =>  /etc/systemd/system/conkandbbackup.service
     conkandbbackup.timer    =>  /etc/systemd/system/conkandbbackup.timer
@@ -122,48 +126,76 @@ systemd利用開始処理として、以下のコマンドを実施
 
     稼働サーバ > sudo journalctl -u docker
 
-1. サーバ証明書の生成
+1.1 自己証明サーバ証明書の生成
+
+有効なサーバ証明書を保有しておらず、自己証明サーバ証明書を利用する場合には、
+<稼働サーバ>で実施して作成する。
+
+稼働サーバ > cd <repo>
+稼働サーバ > sudo ./cert.sh <サービスホストFQDN>
+
+ここで生成したサーバ証明書は、nginx.confに指定する
+
+1.1 nginxのリバースプロキシ設定
+
+nginxの起動方法はここでは記述しない
+conkan_programのリバースプロキシ設定部分のみ記述する
+
+https://<サービスホストFQDN>/conkan_program でconkan_programにアクセスし、
+conkan_program内でのリクエストが正しく処理されるよう、
+/etc/nginx/nginx.conf に、以下のように設定する
+
++----
+   <前略>
+|http {
+   <中略>
+|   # redirect http to https
+|   server {
+|       listen      80;
+|       server_name "";
+|       return 301 https://$host$request_uri;
+|   }
+|
+|# Settings for a TLS enabled server.
+|   server {
+|       listen      443 ssl default_server;
+    <サーバ名、SSL設定省略>
+|       # For conkan_program
+|       location /conkan_program {
+|           proxy_pass http://localhost:9002;
+|           proxy_redirect / /conkan_program/; # レスポンスヘッダの置き換え
+|       }
+    <後略>
++----
+
+なお、ここで指定したlocation値は、後述の初期化アクセス時に「公開URIプレフィックス」として登録しなければならない
+
+1. dockerイメージの生成
 
 <稼働サーバ>で実施
 
-稼働サーバ > cd <Dockerホーム>
-稼働サーバ > sudo ./cert.sh <conkanトップURLのFQDN>
-
-ここで生成したサーバ証明書は、dockerコンテナ起動時(nginx起動時)に読み込む
-
-1. ダミー設定ファイル作成
-
-<稼働サーバ>で実施
-
-稼働サーバ > cd <Dockerホーム>/app/conkan
-稼働サーバ > cp conkan.yml_default conkan.yml
-
-1. dockerイメージの取得
-
-<稼働サーバ>で実施
-
-稼働サーバ > docker pull srem/conkan
+稼働サーバ > cd <repo>
+稼働サーバ > ./build.sh
 
 1. dockerコンテナの起動
 
 <稼働サーバ>で実施
 
-稼働サーバ > cd <Dockerホーム>
-稼働サーバ > ./run.sh product
+稼働サーバ > cd <repo>
+稼働サーバ > ./run.sh
 
-引数 product を指定しなかった場合、外部(The Internet)からのconkanへのアクセスポートは
-  HTTP  30080
-  HTTPS 30443
-となるので注意
+conkan_program は、9002ポートにてHTTPプロトコルを受け付ける
 
-dockerコンテナの起動により、nginx,conkan自体も自動的に起動する。
+なお、./run.sh product と起動した場合、
+稼働サーバのconkan_program本体(<repo>/app)ではなく、
+conkan_programコンテナイメージ内のconkan_program本体(./build.sh時の<repo>/app)を使用する。
 
 conkan初期化処理
 ====
 
 1. 初期化アクセス
 
-https://<conkanトップURL>/ にアクセスする。
+<conkanトップURL>/ にアクセスする。
 初回のみ、【conkan初期化ページ】 が表示される。
 
 すべての値を設定し、「初期化実行」をクリックすると、conkan初期化処理を実施する。
@@ -175,6 +207,8 @@ DBサーバ | データベースサーバのFQDNまたはIPアドレス
 DB名 | データベース設定で使用した DB名
 DBユーザ | データベース設定で使用した 管理ユーザ名
 DBパスワード | データベース設定で使用した パスワード
+表示切り替え時刻 | 00:00をまたがったスケジュールを可能にする時のシフト時間
+公開URIプレフィックス| リバースプロキシによるURI変更時のパス
 コンシュマートークンキー | CybozuLiveアプリケーション登録 で取得した ConsumerKey
 コンシュマーシークレット | CybozuLiveアプリケーション登録 で取得した ConsumerSecret
 グループ | 登録可否を判断するCybozuLiveグループ名
@@ -187,12 +221,9 @@ DBパスワード | データベース設定で使用した パスワード
 
 **注意**
 初期deploy時、DBに複数の接続を実施することになり、
-DB側の同時接続数が4だと、login表示のタイミングでエラー(接続数オーバー)になる
+DB側の同時接続数が4以下だと、login表示のタイミングでエラー(接続数オーバー)になる
 ことがある
 その場合は、しばらく時間を置いてから画面をリロードすれば良い
-(同時接続数を増やせばよいのだが、Azureが用意しているmysqlサーバ(cleanDB)の
- 無料プランでは、接続数は4固定。
- 有料プランはBizParkサブスクリプションでは購入できないっぽい)
 
 1. 最初の管理者登録
 

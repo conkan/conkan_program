@@ -13,7 +13,7 @@
           $http( {
             method  : 'GET',
             headers : { 'If-Modifired-Since' : (new Date(0)).toUTCString() },
-            url     : '/config/cast/listget'
+            url     : uriprefix + '/config/cast/listget'
           } )
           .success(function(data) {
             if ( data.status === 'ok' ) {
@@ -132,7 +132,7 @@
         angular.element('#valerr').text('');
         $http({
           method  : 'GET',
-          url     : '/config/cast/' + params.editCastId
+          url     : uriprefix + '/config/cast/' + params.editCastId
         })
         .success(function(data) {
           if ( data.status === 'ok' ) {
@@ -164,7 +164,7 @@
           // バリデーション
           //    現在なし
           // 実行
-          doJsonPost( $http, '/config/cast/' + $scope.cast.castid + '/edit',
+          doJsonPost( $http, uriprefix + '/config/cast/' + $scope.cast.castid + '/edit',
                       $.param($scope.cast), $uibModalInstance, $uibModal,
                       function() { $scope.getCastList(); } );
         };
@@ -173,7 +173,7 @@
           // 二重クリック回避
           angular.element('#castapplybtn').attr('disabled', 'disabled');
           angular.element('#castdelbtn').attr('disabled', 'disabled');
-          doJsonPost( $http, '/config/cast/' + $scope.cast.castid + '/del',
+          doJsonPost( $http, uriprefix + '/config/cast/' + $scope.cast.castid + '/del',
                       undefined, $uibModalInstance, $uibModal,
                       function() { $scope.getCastList(); } );
         };

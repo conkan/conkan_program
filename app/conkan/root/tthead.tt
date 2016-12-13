@@ -35,9 +35,11 @@
   <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.14.3/ui-bootstrap-tpls.min.js"></script>
 [%- END %]
 <!-- conkan-common -->
-<script type="text/javascript" src="/static/js/conkan_common.js"></script>
-<link rel="stylesheet" href="/static/css/conkan-common.css" />
+<script type="text/javascript">var uriprefix="[% uriprefix %]";</script>
+<script type="text/javascript" src="[% uriprefix %]/static/js/conkan_common.js"></script>
+<link rel="stylesheet" href="[% uriprefix %]/static/css/conkan-common.css" />
 <!-- END of script/css include -->
+<link rel="shortcut icon" type="image/x-icon" href="[% uriprefix %]/static/favicon.ico" />
 </head>
 
 <body style="padding-top:200px;">
@@ -53,23 +55,23 @@
     <div class="navbar-collapse" id="navbar-collapse">
       <ul class="nav nav-tabs">
         [% IF addstaff != 1 %]
-          <li id="mypage"><a href="/mypage">MyPage</a></li>
+          <li id="mypage"><a href="[% uriprefix %]/mypage">MyPage</a></li>
         [% END %]
         [%- IF addroot != 1 -%]
           [%- IF acname != 'admin' %]
             [% IF addstaff != 1 %]
-              <li id="program_list"><a href="/program/list">企画一覧</a></li>
-              <li id="timetable"><a href="/timetable">タイムテーブル</a></li>
+              <li id="program_list"><a href="[% uriprefix %]/program/list">企画一覧</a></li>
+              <li id="timetable"><a href="[% uriprefix %]/timetable">タイムテーブル</a></li>
             [% END %]
           [% END %]
           [%- IF cuRole == 'ROOT' || cuRole == 'ADMIN' %]
-            <li id="config_staff"><a href="/config/staff/list">スタッフ管理</a></li>
+            <li id="config_staff"><a href="[% uriprefix %]/config/staff/list">スタッフ管理</a></li>
           [% END %]
           [%- IF cuRole == 'ROOT' || cuRole == 'PG' %]
-            <li id="config_cast"><a href="/config/cast/list">出演者管理</a></li>
-            <li id="config_room"><a href="/config/room/list">部屋管理</a></li>
-            <li id="config_equip"><a href="/config/equip/list">機材管理</a></li>
-            <li id="config_csv"><a href="/config/csvout">CSV出力</a></li>
+            <li id="config_cast"><a href="[% uriprefix %]/config/cast/list">出演者管理</a></li>
+            <li id="config_room"><a href="[% uriprefix %]/config/room/list">部屋管理</a></li>
+            <li id="config_equip"><a href="[% uriprefix %]/config/equip/list">機材管理</a></li>
+            <li id="config_csv"><a href="[% uriprefix %]/config/csvout">CSV出力</a></li>
           [%- END -%]
           [%- IF pglistsel == 'ACT' %]
             <!-- 企画選択ツール -->
@@ -79,7 +81,7 @@
               </select></a>
             </li>
           [%- END -%]
-          <li class="pull-right"><a href="/logout" class="btn btn-info">
+          <li class="pull-right"><a href="[% uriprefix %]/logout" class="btn btn-info">
             [%- IF addstaff != 1 -%]
               logout
             [%- ELSE -%]
@@ -87,7 +89,7 @@
             [%- END -%]
           </a></li>
         [%- ELSE -%]
-          <li id="mypage_profile"><a href="/addstaff">システム管理者登録</a></li>
+          <li id="mypage_profile"><a href="[% uriprefix %]/addstaff">システム管理者登録</a></li>
         [%- END %]
       </ul>
     </div>

@@ -1,4 +1,0 @@
-#!/bin/sh
-exec 2>&1
-cd /root/app/conkan
-exec setuidgid root starman conkan.psgi --p 8080 --workers 20 --max-requests 500 --preload-app --interval=1 --disable-keepalive

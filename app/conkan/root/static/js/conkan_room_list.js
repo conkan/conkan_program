@@ -74,7 +74,7 @@
           $http( {
             method  : 'GET',
             headers : { 'If-Modifired-Since' : (new Date(0)).toUTCString() },
-            url     : '/config/room/listget'
+            url     : uriprefix + '/config/room/listget'
           })
           .success(function(data) {
             if ( data.status === 'ok' ) {
@@ -118,7 +118,7 @@
         angular.element('#valerr').text('');
         $http({
           method  : 'GET',
-          url     : '/config/room/' + params.editRoomId
+          url     : uriprefix + '/config/room/' + params.editRoomId
         })
         .success(function(data) {
           if ( data.status === 'ok' ) {
@@ -158,7 +158,7 @@
           // バリデーション
           //    現在なし
           // 実行
-          doJsonPost( $http, '/config/room/' + $scope.room.roomid + '/edit',
+          doJsonPost( $http, uriprefix + '/config/room/' + $scope.room.roomid + '/edit',
                       $.param($scope.room), $uibModalInstance, $uibModal,
                       function() { $scope.getRoomList(); } );
         };
@@ -167,7 +167,7 @@
           // 二重クリック回避
           angular.element('#roomapplybtn').attr('disabled', 'disabled');
           angular.element('#roomdelbtn').attr('disabled', 'disabled');
-          doJsonPost( $http, '/config/room/' + $scope.room.roomid + '/del',
+          doJsonPost( $http, uriprefix + '/config/room/' + $scope.room.roomid + '/del',
                       undefined, $uibModalInstance, $uibModal,
                       function() { $scope.getRoomList(); } );
         };

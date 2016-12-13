@@ -24,7 +24,7 @@
       </colgroup>
       <tbody>
         <tr> <!-- 企画情報ダウンロード -->
-          <FORM method="POST" action="/program/csvdownload">
+          <FORM method="POST" action="[% uriprefix %]/program/csvdownload">
             <td class="text-center">
               <button type="submit" id="prgcsvbtn" class="btn fitbtn">
                 企画情報CSVダウンロード
@@ -65,7 +65,7 @@
         </tr>
         <tr> <!-- TimeTableダウンロード -->
           <td class="text-center">
-            <a href="/timetable/csvdownload">
+            <a href="[% uriprefix %]/timetable/csvdownload">
               <button name="timetablebtn" class="btn fitbtn" id="timetablebtn">
                 タイムテーブル用CSVダウンロード
               </button>
@@ -86,7 +86,7 @@
         </tr>
         <tr> <!-- スタッフ一覧ダウンロード -->
           <td class="text-center">
-            <a href="/config/staffcsvdownload">
+            <a href="[% uriprefix %]/config/staffcsvdownload">
               <button name="staffdlbtn" class="btn fitbtn" id="staffdlbtn">
                 スタッフ一覧CSVダウンロード
               </button>
@@ -103,7 +103,7 @@
         </tr>
         <tr> <!-- 出演者一覧ダウンロード -->
           <td class="text-center">
-            <a href="/config/castcsvdownload">
+            <a href="[% uriprefix %]/config/castcsvdownload">
               <button name="castdlbtn" class="btn fitbtn" id="castdlbtn">
                 出演者一覧CSVダウンロード
               </button>
@@ -120,7 +120,7 @@
         </tr>
         <tr> <!-- 部屋一覧ダウンロード -->
           <td class="text-center">
-            <a href="/config/roomcsvdownload">
+            <a href="[% uriprefix %]/config/roomcsvdownload">
               <button name="roomdlbtn" class="btn fitbtn" id="roomdlbtn">
                 部屋一覧CSVダウンロード
               </button>
@@ -137,7 +137,7 @@
         </tr>
         <tr> <!-- 機材一覧ダウンロード -->
           <td class="text-center">
-            <a href="/config/equipcsvdownload">
+            <a href="[% uriprefix %]/config/equipcsvdownload">
               <button name="equipdlbtn" class="btn fitbtn" id="equipdlbtn">
                 機材一覧CSVダウンロード
               </button>
@@ -169,7 +169,7 @@
       </colgroup>
       <tbody>
         <tr> <!-- 出演者への企画案内書用差しこみデータダウンロード -->
-          <FORM method="POST" action="/config/csvdownload/invitate">
+          <FORM method="POST" action="[% uriprefix %]/config/csvdownload/invitate">
             <td class="text-center">
               <button name="invitatebtn" class="btn fitbtn" id="invitatebtn">
                 出演者への企画案内書用差しこみ用CSVダウンロード
@@ -180,7 +180,7 @@
               [% conf.act_status_str %]
               である企画案内用データをダウンロードする。<br/>
               ラベル屋さんフォーマットは
-              <a href="/static/lcx/invitate.lcx">
+              <a href="[% uriprefix %]/static/lcx/invitate.lcx">
                 企画時間案内.lcx
               </a><br/>
               出力内容は
@@ -207,7 +207,7 @@
         </tr>
         <tr> <!--企画部屋紙用差しこみデータダウンロード -->
           <td class="text-center">
-            <a href="/config/csvdownload/forroom">
+            <a href="[% uriprefix %]/config/csvdownload/forroom">
               <button name="forroombtn" class="btn fitbtn" id="forroombtn">
                 企画部屋紙用差しこみデータ用CSVダウンロード
               </button>
@@ -217,9 +217,9 @@
             実行ステータスが[% conf.act_status_str %]である企画の、
             部屋案内用データをダウンロードする。<br/>
             ラベル屋さんフォーマットは
-            <a href="/static/lcx/forroomv.lcx">企画部屋紙縦.lcx</a>
+            <a href="[% uriprefix %]/static/lcx/forroomv.lcx">企画部屋紙縦.lcx</a>
             または
-            <a href="/static/lcx/forroomh.lcx">企画部屋紙横.lcx</a><br/>
+            <a href="[% uriprefix %]/static/lcx/forroomh.lcx">企画部屋紙横.lcx</a><br/>
             出力内容は
             <div class="well csvwell">
               企画名, 企画番号, 実施日, 開始時刻, 場所名
@@ -227,7 +227,7 @@
           </td>
         </tr>
         <tr> <!-- 出演者前垂用差しこみデータダウンロード -->
-          <FORM method="POST" action="/config/csvdownload/forcast">
+          <FORM method="POST" action="[% uriprefix %]/config/csvdownload/forcast">
             <td class="text-center">
               <button name="forcastbtn" class="btn fitbtn" id="forcastbtn">
                 出演者前垂用差しこみデータ用CSVダウンロード
@@ -238,7 +238,7 @@
               [% conf.act_status_str %]
               である企画の前垂れ用データをダウンロードする。<br/>
               ラベル屋さんフォーマットは
-              <a href="/static/lcx/forcast.lcx">
+              <a href="[% uriprefix %]/static/lcx/forcast.lcx">
                 出演者前垂.lcx</a><br/>
               出力内容は
               <div class="well csvwell">
@@ -264,7 +264,7 @@
         </tr>
         <tr> <!-- 企画別人数用差しこみデータダウンロード -->
           <td class="text-center">
-            <a href="/config/csvdownload/memcnt">
+            <a href="[% uriprefix %]/config/csvdownload/memcnt">
               <button name="memcntbtn" class="btn fitbtn" id="memcntbtn">
                 企画別人数用差しこみデータ用CSVダウンロード
               </button>
@@ -274,7 +274,7 @@
             実行ステータスが[% conf.act_status_str %]である企画の、
             企画別人数用データをダウンロードする。<br/>
             ラベル屋さんフォーマットは
-            <a href="/static/lcx/memcnt.lcx">企画別人数.lcx</a><br/>
+            <a href="[% uriprefix %]/static/lcx/memcnt.lcx">企画別人数.lcx</a><br/>
             出力内容は
             <div class="well csvwell">
               企画名 企画番号, 実施日, 開始時刻, 部屋名, 内線番号, 出演人数, 裏方人数, 客席人数, 通訳人数 (ただし、内線番号は空白)
@@ -283,7 +283,7 @@
         </tr>
         <tr> <!-- 企画別出演者用差しこみデータダウンロード -->
           <td class="text-center">
-            <a href="/config/csvdownload/castbyprg">
+            <a href="[% uriprefix %]/config/csvdownload/castbyprg">
               <button name="castbyprgbtn" class="btn fitbtn" id="castbyprgbtn">
                 企画別出演者用差しこみデータ用CSVダウンロード
               </button>
@@ -293,7 +293,7 @@
             実行ステータスが[% conf.act_status_str %]である企画の、
             企画別出演者用データをダウンロードする。<br/>
             ラベル屋さんフォーマットは
-            <a href="/static/lcx/castbyprg.lcx">企画別出演.lcx</a><br/>
+            <a href="[% uriprefix %]/static/lcx/castbyprg.lcx">企画別出演.lcx</a><br/>
             出力内容は
             <div class="well csvwell">
               企画名, 企画番号, 実施日, 開始時刻, 部屋名, 内線番号, 複数の出演者と出演ステータス (ただし、内線番号は空白)
