@@ -23,7 +23,7 @@
   再度入力してください<br>
 
   <div class="well">
-    <FORM method="POST" action="[% uriprefix %]/">
+    <FORM method="POST" action="./">
       <button type="submit" class="btn btn-primary btn-large" id="initbtn">
         再設定
       </button>

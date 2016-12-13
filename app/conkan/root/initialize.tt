@@ -15,7 +15,7 @@
 
   <!-- 初期化パラメータ入力ページ -->
   <div class="well" id="init">
-    <FORM method="POST" action="[% uriprefix %]/initialprocess">
+    <FORM method="POST" action="./initialprocess">
       <div>
         <label>adminパスワード</label><br/>
         <input type="password" name="adpw" class="col-sm-3 input-small" placeholder="Password">
