@@ -1,2 +1,6 @@
 .git
 app/conkan/ttctmp
+app/conkan/conkan.yml
+app/conkan/conkan.yml_sv
+app/backup
+app/.ssh
