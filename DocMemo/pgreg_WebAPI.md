@@ -28,7 +28,7 @@ POSTDATA: Content_Type => 'form-data',
 <パラメータ>は、下記 javascript Object をJSON化した値
 webAPI = {
     'WebAPI_VERSION'    :   '2.0',      // 固定値
-    'regdate'           :   ,           // 申込日時
+    'prog_no'           :   ,           // 企画ID (基本的には未指定)
     'p1_name'           :   ,           // 申込者氏名                
     'email'             :   ,           // 申込者メールアドレス      
     'reg_num'           :   ,           // 申込者登録番号            
@@ -84,14 +84,92 @@ RESPONCEは
 
 1. logout
 
-prog_regist上のパラメータとWebAPI JSONキーの関係表
+prog_regist上のParam名とその値の関係表
+=====
+
++------------------+------------------------------------------------+
+|Param名           | 値                                             |
++------------------+------------------------------------------------+
+|'p1_name'         | 値自体 申込者氏名                              |
+|'email'           | 値自体 申込者メールアドレス                    |
+|'reg_num'         | 値自体 申込者登録番号                          |
+|'tel'             | 値自体 申込者電話番号                          |
+|'fax'             | 値自体 申込者FAX番号                           |
+|'cellphone'       | 値自体 申込者携帯番号                          |
+|'pg_name'         | 値自体 企画名                                  |
+|'pg_name_f'       | 値自体 企画名フリガナ                          |
+|'pg_kind'         | pgregdef:@pg_kind_aryのVAL 企画種別            |
+|'pg_kind2'        | 値自体 企画種別その他内容                      |
+|'pg_place'        | pgregdef:@pg_place_aryのVAL 希望場所           |
+|'pg_place2'       | 値自体 希望場所その他内容                      |
+|'pg_layout'       | pgregdef:@pg_layout_aryのVAL 希望レイアウト    |
+|'pg_layout2'      | 値自体 希望レイアウトその他内容                |
+|'pg_time'         | pgregdef:@pg_time_aryのVAL 希望時刻            |
+|'pg_time2'        | 値自体 希望時刻その他内容                      |
+|'pg_koma'         | pgregdef:@pg_koma_aryのVAL 希望コマ数          |
+|'pg_koma2'        | 値自体 希望コマ数その他内容                    |
+|'pg_ninzu'        | pgregdef:@pg_ninzu_aryのVAL 予想人数           |
+|'pg_naiyou'       | 値自体 企画内容                                |
+|'pg_naiyou_k'     | pgregdef:@pg_naiyou_k_aryのVAL 内容事前公開    |
+|'pg_kiroku_kb'    | pgregdef:@pg_kiroku_aryのVAL リアルタイム公開  |
+|'pg_kiroku_ka'    | pgregdef:@pg_kiroku_aryのVAL 事後公開          |
+|'pg_pggen'        | pgregdef:@pg_kafuka_aryのVAL 一般公開可否      |
+|'pg_pgu18'        | pgregdef:@pg_kafuka_aryのVAL 未成年参加可否    |
+|'pg_badprog'      | 値自体 重なると困る企画                        |
+|'pg_enquete'      | pgregdef:@pg_enquete_aryのVAL 企画経験         |
+|'fc_comment'      | 値自体 備考                                    |
+|'phonetime'       | 値自体 連絡可能時間帯                          |
++------------------+------------------------------------------------+
+|'wbd'             | 'on' 提供機材 ホワイトボード 使用              |
+|'mon'             | 'on' 提供機材 モニタ 使用                      |
+|'dvd'             | 'on' 提供機材 DVD 使用                         |
+|'syo'             | 'on' 提供機材 書画カメラ 使用                  |
++------------------+------------------------------------------------+
+|'fc_other_naiyou' | 値自体 その他提供機材                          |
+|'fc_mochikomi'    | 値自体 その他持ち込み機材                      |
++------------------+------------------------------------------------+
+|'mic'             | 'on' 提供機材 壇上マイク 使用                  |
+|'miccnt'          | 値自体 壇上マイク本数                          |
+|'mic2'            | 'on' 提供機材 客席マイク 使用                  |
+|'miccnt2'         | 値自体 客席マイク本数                          |
++------------------+------------------------------------------------+
+|'fc_vid'          | pgregdef:@motikomi_aryのVAL 持ち込み映像機器   |
+|'av-v'            | pgregdef:@av_v_aryのVAL 映像機器映像接続       |
+|'av-v_velse'      | 値自体 映像機器映像接続その他内容              |
+|'av-a'            | pgregdef:@av_a_aryのVAL 映像機器音声接続       |
+|'av-a_velse'      | 値自体 映像機器音声接続その他内容              |
++------------------+------------------------------------------------+
+|'fc_pc'           | pgregdef:@motikomi_aryのVAL 持ち込みPC         |
+|'pc-v'            | pgregdef:@pc_v_aryのVAL PC映像接続             |
+|'pc-v_velse'      | 値自体 PC映像接続その他内容                    |
+|'pc-a'            | pgregdef:@pc_a_aryのVAL PC音声接続             |
+|'pc-a_velse'      | 値自体 PC音声接続その他内容                    |
+|'lan'             | pgregdef:@lan_aryのVAL PC LAN接続              |
+|'pc-l_velse'      | 値自体 PC LAN接続その他内容                    |
+|'lanreason'       | 値自体 PC  LAN利用目的                         |
++------------------+------------------------------------------------+
+|'youdo'           | pgregdef:@ppn_youdo_aryのVAL 申込者出演        |
+|'py_name'         | 値自体 申込者企画ネーム                        |
+|'py_name_f'       | 値自体 申込者企画ネームフリガナ                |
+|'py_title'        | 値自体 申込者肩書                              |
++------------------+------------------------------------------------+
+|'pp_cnt'          | 値自体 出演者数(申込者除く)                    |
+|'pp<n>_name'      | 値自体 出演者名                                |
+|'pp<n>_name_f'    | 値自体 出演者名フリガナ                        |
+|'pp<n>_title'     | 値自体 出演者肩書                              |
+|'pp<n>_con'       | pgregdef:@ppn_con_aryのVAL 出演交渉            |
+|'pp<n>_grq'       | pgregdef:@ppn_grq_aryのVAL ゲスト申請          |
++------------------+------------------------------------------------+
+
+prog_regist上のParam名とWebAPI JSONキーの関係表
 =====
 
 +------------------+---------------------------+----------------------------+
 |Param名           | =>  JSONキー              | 説明                       |
 +------------------+---------------------------+----------------------------+
 |                  | => 'WebAPI_VERSION'       | WebAPIバージョン('2.0'固定)|
-|'regdate'         | => 'regdate'              | 申込日時                   |
+|'prog_no'         | => 'prog_no'              | 企画ID(原則未指定)         |
+|'regdate'         | => 'regdate'              | 申込み日付                 |
 |'p1_name'         | => 'p1_name'              | 申込者氏名                 |
 |'email'           | => 'email'                | 申込者メールアドレス       |
 |'reg_num'         | => 'reg_num'              | 申込者登録番号             |
@@ -146,7 +224,7 @@ prog_regist上のパラメータとWebAPI JSONキーの関係表
 |                  | => casts[]                | 出演者情報                 |
 |                  |        {                  |                            |
 |*'p1_name'        |            'name'         | 出演者登録名               |
-|'reg_num'         |            'entrantregno' | 出演者登録番号             |
+|*'reg_num'        |            'entrantregno' | 出演者登録番号             |
 |'py_name'         |            'pgname'       | 企画ネーム                 |
 |'py_name_f'       |            'pgnamef'      | 企画ネームフリガナ         |
 |'py_title'        |            'pgtitle'      | 肩書                       |
@@ -167,14 +245,15 @@ prog_regist上のパラメータとWebAPI JSONキーの関係表
 WebAPI JSONキーとDataBase登録先との関係表
 ====
 
-注: prog_no はクライアントからではなく、PgRegProgram登録時にAutoIndentして得る
+注: prog_noはAPIデータに存在しなかった場合、conkan_programで生成し戻す
+注: regdate は常にクライアントからではなく、prog_registで生成
 +------------------------+-----------------------+
 |  JSONキー              | schema                |
 |                        | => column             |
 +------------------------+-----------------------+
 |                        | PgRegProgram          |
-| 'prog_no'              | => regpgid(AutoIndent)|
-| 'regdate'              | => regdate            | 
+| 'prog_no'              | => regpgid            |
+| 'regdate'              | => regdate(localtime) |
 | 'p1_name'              | => regname            | 
 | 'email'                | => regma              | 
 | 'reg_num'              | => regno              | 
@@ -241,7 +320,7 @@ JSONキー 'WebAPI_VERSION' が存在しない場合Ver.0 とみなす
 +------------------+--------------------------------+-----------------------+
 |                  |                                | PgRegProgram          |
 |'prog_no'         | => '企画ID'                    | => regpgid            |
-|'regdate'         | => '申し込み日付'              | => regdate            |
+|'regdate'         | => '申込み日付'                | => regdate            |
 |'p1_name'         | => '申込者名'                  | => regname            |
 |'email'           | => 'メールアドレス'            | => regma              |
 |'reg_num'         | => '参加番号'                  | => regno              |
