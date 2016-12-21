@@ -1,5 +1,6 @@
-企画登録WebAPI
-==============
+# 企画登録WebAPI
+
+## WebAPI利用フロー
 
 1. conkan programにadminとしてlogin
 
@@ -84,8 +85,7 @@ RESPONCEは
 
 1. logout
 
-prog_regist上のParam名とその値の関係表
-=====
+## prog_regist上のParam名とその値の関係表
 
 +------------------+------------------------------------------------+
 |Param名           | 値                                             |
@@ -161,8 +161,7 @@ prog_regist上のParam名とその値の関係表
 |'pp<n>_grq'       | pgregdef:@ppn_grq_aryのVAL ゲスト申請          |
 +------------------+------------------------------------------------+
 
-prog_regist上のParam名とWebAPI JSONキーの関係表
-=====
+## prog_regist上のParam名とWebAPI JSONキーの関係表
 
 +------------------+---------------------------+----------------------------+
 |Param名           | =>  JSONキー              | 説明                       |
@@ -242,11 +241,11 @@ prog_regist上のParam名とWebAPI JSONキーの関係表
 |                  |        }                  |                            |
 +------------------+---------------------------+----------------------------+
 
-WebAPI JSONキーとDataBase登録先との関係表
-====
+## WebAPI JSONキーとDataBase登録先との関係表
 
 注: prog_noはAPIデータに存在しなかった場合、conkan_programで生成し戻す
 注: regdate は常にクライアントからではなく、prog_registで生成
+
 +------------------------+-----------------------+
 |  JSONキー              | schema                |
 |                        | => column             |
@@ -306,8 +305,8 @@ WebAPI JSONキーとDataBase登録先との関係表
 +------------------------+-----------------------+
 
 
-*参考* Ver.0 API
-======
+#### Ver 1.0 API
+
 (ConkanProgram V1.0.0以前のWebAPI)
 
 V1.0.0以前では、深度1のオブジェクトJSONしか使っていない
@@ -423,3 +422,5 @@ JSONキー 'WebAPI_VERSION' が存在しない場合Ver.0 とみなす
 |'pp<n>_con'       | => '出演交渉<n>'               | => needreq            |
 |'pp<n>_grq'       | => 'ゲスト申請<n>'             | => needguest          |
 +------------------+--------------------------------+-----------------------+
+
+EOF
