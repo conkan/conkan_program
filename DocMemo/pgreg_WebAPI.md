@@ -298,7 +298,11 @@ JSONキー              | schema<br/> => column
  pg_badprog           | => avoiddup
  pg_enquete           | => experience
  fc_comment           | => comment
-                      |                       
+                      | 
+                      | PgProgram
+ _prog_no_            | => regpgid
+ pg_name              | => name
+                      |
                       | PgRegEquip
  _prog_no_            | => regpgid
  equips[].name        | => name
