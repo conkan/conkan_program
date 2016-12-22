@@ -95,8 +95,8 @@ webAPI = {
 <a href="/program/{内部企画ID}&amp;prog_id={企画ID}">
 ```
 なので、これを解析して企画IDを取り出す。(申込者の通知に利用)  
-内部企画IDも取り出せるが、これは登録時に意味はない。
-_将来的にWebAPIで既存申込みの更新が必要になった場合、使うかもしれない_
+内部企画IDも取り出せるが、これはWebAPIでの登録時に意味はない。  
+_JSONファイルをアップロードして登録する場合、登録した企画詳細画面にジャンプするために存在する_
 
 ### 4. logout
 
@@ -185,7 +185,7 @@ pp<n>_grq       | pgregdef:@ppn_grq_aryのVAL ゲスト申請
 ### prog_regist上のParam名とWebAPI JSONキーの関係表
 
 注: **prog_no**は原則としてAPIデータとしては指定せず、conkan_programで生成する  
-(特殊な場合_登録済企画の上書き登録_の場合のみ使用するが、そのユースケースは提供していない)  
+    特殊な場合(_企画IDを指定したい場合_)のみ使用するが、そのユースケースは提供していない  
 注: **regdate** は常にクライアント(ブラウザ)からではなく、prog_registで生成して設定する
 
 Param名        | JSONキー             | 説明
@@ -267,8 +267,10 @@ pp<n>_grq      |         needguest    | ゲスト申請
 ### WebAPI JSONキーとDataBase登録先との関係表
 
 注: **prog_no**は原則としてAPIデータとしては指定せず、conkan_programでPgRegProgram登録時に生成する(AutoIncriment)  
-(特殊な場合_登録済企画の上書き登録_の場合のみ使用するが、そのユースケースは提供していない)  
-注: PgRegProgram以外で使用する _prog_no_ は、conkan_programで生成した値を意味する。(APIで指定された場合はその値)
+    特殊な場合(_企画IDを指定したい場合_)のみ使用するが、そのユースケースは提供していない  
+    すでに登録済みの値を指定した場合、登録エラーとなる  
+注: PgRegProgram以外で使用する _prog_no_ は、conkan_programで生成した値を意味する。(APIで指定された場合はその値)  
+注: PgCastで使用する _pgid_ と _castid_ は、conkan_programで生成した値を意味する。(別表への登録時に生成)
 
 JSONキー              | schema<br/> => column
 --------------------- | ----------------------
@@ -328,7 +330,14 @@ JSONキー              | schema<br/> => column
                       | PgAllCast
  casts[].pgname       | => name
  casts[].pgnamef      | => namef
-
+                      |
+                      | PgCast
+ _pgid_               | => pgid
+ _castid_             | => castid
+ casts[].pgname       | => name
+ casts[].pgnamef      | => namef
+ casts[].pgtitle      | => title
+ casts[].needreq      | => status
 
 # 参考 WebAPI Ver 1.0
 
