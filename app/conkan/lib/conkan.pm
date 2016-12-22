@@ -35,7 +35,7 @@ use Catalyst qw/
     Authentication
 /;
 
-our $VERSION = '1.0.0';
+our $VERSION = '1.2.0';
 
 # Configure the application.
 #
@@ -47,6 +47,9 @@ our $VERSION = '1.0.0';
 # local deployment.
 #
 # conkan.yml は Plugin::ConfigLoaderが自動で読み込むので、それ以外を指定
+#   regist.yml は2.0.0Fix時には不要となる
+#   (大会ごとで変化する部分は、prog_registで吸収するので、
+#    定義ではなく埋め込みでよい)
 
 __PACKAGE__->config( {
     'config_file'   =>  [ 'regist.yml', ],

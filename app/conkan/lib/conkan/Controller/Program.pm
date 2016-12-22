@@ -59,89 +59,25 @@ sub add :Local {
         } 
 
         my $pgid;
+        my $prog_id;
         foreach my $pginfo (@{$aPginfo}) {
-            my $regcnf;
-            my $hval;
-
-            # $c->config->{Regist}->{RegProgram}の内容を元にpginfoの内容を登録
-            ## regPgIDが未設定の場合autoincにより決定
-            ## {RegProgram}のitem数は1つであり、loopmax定義はない
-            $regcnf = $c->config->{'Regist'}->{'RegProgram'};
-            $hval = __PACKAGE__->ParseRegist(
-                            $pginfo, $regcnf->{'items'}->[0], undef, ''  );
-            if ( ref($hval) eq 'HASH' ) {
-                my $regpgid = $hval->{'regpgid'};
-                if ( $regpgid &&
-                     $c->model('ConkanDB::' . $regcnf->{'schema'})->find( $regpgid ) ) {
-                    die 'regpgid duplicate ' . $hval->{'name'} . ' [' . $regpgid . ']';
-                    $hval->{'regpgid'} = undef;
-                }
-                my $row =
-                    $c->model('ConkanDB::' . $regcnf->{'schema'})->create( $hval );
-$c->log->debug('>>>> add reg_program:name [' . $hval->{'name'} . ']');
-$c->log->debug('>>>> add reg_program:regpgid [' . $row->regpgid . ']');
-                ## $pginfo->{企画ID}の値を再設定 (autoinc対応)
-                $pginfo->{'企画ID'} = $row->regpgid;
+            unless ( defined($pginfo->{'WebAPI_VERSION'}) ) {
+                # WebAPI 1.0 >>>>
+                #   ConkanProgram 2.0.0 Fix時には例外発生
+                ( $pgid, $prog_id ) = __PACKAGE__->_WebAPI_1_0( $c, $pginfo );
+                next;
             }
-            elsif ( $hval ) {
-                die 'input Format Error /or/ regist.yml Format Error';
+            ## PgRegProgramへの登録
+            $prog_id = _crtRegProgram( $c, $pginfo );
+            ## PgProgramへの登録
+            $pgid = _crtProgram( $c, $prog_id, $pginfo );
+            ## PgRegCast, PgAllCast, PgCastへの登録
+            foreach my $cast (@{$pginfo->{'casts'}}) {
+                _crtCast( $c, $prog_id, $pgid, $cast );
             }
-    
-            # $c->config->{Regist}->{Program}の内容を元にpginfoの内容を登録
-            ## {Program}のitem数は1つであり、loopmax定義はない
-            $regcnf = $c->config->{Regist}->{Program};
-            $hval = __PACKAGE__->ParseRegist(
-                            $pginfo, $regcnf->{items}->[0], undef, ''  );
-            if ( ref($hval) eq 'HASH' ) {
-                my $row =
-                    $c->model('ConkanDB::' . $regcnf->{schema})->create( $hval );
-                ## 企画内部IDの値を設定 (登録時にautoincで決定)
-                $pgid = $row->pgid;
-            }
-            elsif ( $hval ) {
-                die 'input Format Error /or/ regist.yml Format Error';
-            }
-
-            # $c->config->{Regist}->{RegCast}の内容を元にpginfoの内容を登録
-            ## 同時にPgAllCastにも登録する
-            ## {RegCast}のitem数は複数あり、さらにloopmax定義がある
-            $regcnf = $c->config->{Regist}->{RegCast};
-            foreach my $item (@{$regcnf->{items}}) {
-                if ( defined($item->{loopmax}) ) {
-                    foreach my $cnt (1..$item->{loopmax}+1) {
-                        # 申込者本人が出演する場合があるので、+1
-                        $hval = __PACKAGE__->ParseRegist(
-                                        $pginfo, $item, undef, $cnt );
-                        if ( ref($hval) eq 'HASH' ) {
-                            __PACKAGE__->_addCast( $c, $hval, $pgid );
-                        }
-                        elsif ( $hval ) {
-                            die 'input Format Error /or/ regist.yml Format Error';
-                        }
-                    }
-                }
-                else {
-                    $hval = __PACKAGE__->ParseRegist( $pginfo, $item, undef, '');
-                    if ( ref($hval) eq 'HASH' ) {
-                        __PACKAGE__->_addCast( $c, $hval, $pgid );
-                    }
-                    elsif ( $hval ) {
-                        die 'input Format Error /or/ regist.yml Format Error';
-                    }
-                }
-            }
-
-            # $c->config->{Regist}->{RegEquip}の内容を元にpginfoの内容をDBに登録
-            ## {RegEquip}のitem数は複数あるが、loopmax定義はない
-            $regcnf = $c->config->{Regist}->{RegEquip};
-            foreach my $item (@{$regcnf->{items}}) {
-                $hval = __PACKAGE__->ParseRegist( $pginfo, $item, undef, '');
-                if ( ref($hval) eq 'HASH' ) {
-                    $c->model('ConkanDB::' . $regcnf->{schema})->create( $hval )
-                }
-                elsif ( $hval ) {
-                    die 'input Format Error /or/ regist.yml Format Error';
-                }
+            ## PgRegEquipへの登録
+            foreach my $equip (@{$pginfo->{'equips'}}) {
+                _crtRegEquip( $c, $prog_id, $equip );
             }
         }
         # 1件のみ登録の場合、登録した企画詳細表示にリダイレクト
@@ -149,7 +85,7 @@ $c->log->debug('>>>> add reg_program:regpgid [' . $row->regpgid . ']');
             $nextURLtail = $pgid;
             # 登録者がadminの場合(WebAPI) 企画IDを追加
             if ( $c->user->get('name') eq 'admin' ) {
-                $nextURLtail .= '&prog_id=' . $json_info->{'企画ID'};
+                $nextURLtail .= '&prog_id=' . $prog_id;
             }
         }
     } catch {
@@ -186,8 +122,316 @@ sub regcastadd :Local {
     $c->forward('conkan::View::JSON');
 };
 
+=head2 _crtRegProgram
+
+PgRegProgramへの登録
+
+戻り値 $prog_id 企画ID(もとの値またはAI値)
+
+=cut
+
+sub _crtRegProgram :Private {
+    my ( $self, $c,
+         $pginfo,       # 入力申込情報ハッシュ
+       ) = @_;
+    my $prog_id;
+
+    my $model = $c->model('ConkanDB::PgRegProgram');
+    $prog_id = $pginfo->{'prog_no'};
+    if ( $prog_id && $model->find( $prog_id ) ) {
+        # 登録済の企画IDが指定されていたら、die
+        # (将来的には上書きするかもだけど)
+        die 'regpgid duplicate ' . $pginfo->{'pg_name'} . ' [' . $prog_id . ']';
+    }
+
+    # 登録情報生成
+    # 必須の値が設定済みであることは、prog_registで確認済みなので、
+    # ここでは未定義の場合DB初期値を使う
+    my $val = {};
+    my $p = $pginfo;
+    $val->{'regpgid'}    = $p->{'prog_no'}      if defined $p->{'prog_no'};
+    $val->{'regdate'}    = $p->{'regdate'}      if defined $p->{'regdate'};
+    $val->{'regname'}    = $p->{'p1_name'}      if defined $p->{'p1_name'};
+    $val->{'regma'}      = $p->{'email'}        if defined $p->{'email'};
+    $val->{'regno'}      = $p->{'reg_num'}      if defined $p->{'reg_num'};
+    $val->{'telno'}      = $p->{'tel'}          if defined $p->{'tel'};
+    $val->{'faxno'}      = $p->{'fax'}          if defined $p->{'fax'};
+    $val->{'celno'}      = $p->{'cellphone'}    if defined $p->{'cellphone'};
+    $val->{'name'}       = $p->{'pg_name'}      if defined $p->{'pg_name'};
+    $val->{'namef'}      = $p->{'pg_name_f'}    if defined $p->{'pg_name_f'};
+    $val->{'type'}       = $p->{'pg_kind'}      if defined $p->{'pg_kind'};
+    $val->{'place'}      = $p->{'pg_place'}     if defined $p->{'pg_place'};
+    $val->{'layout'}     = $p->{'pg_layout'}    if defined $p->{'pg_layout'};
+    $val->{'date'}       = $p->{'pg_time'}      if defined $p->{'pg_time'};
+    $val->{'classlen'}   = $p->{'pg_koma'}      if defined $p->{'pg_koma'};
+    $val->{'expmaxcnt'}  = $p->{'pg_ninzu'}     if defined $p->{'pg_ninzu'};
+    $val->{'content'}    = $p->{'pg_naiyou'}    if defined $p->{'pg_naiyou'};
+    $val->{'contentpub'} = $p->{'pg_naiyou_k'}  if defined $p->{'pg_naiyou_k'};
+    $val->{'realpub'}    = $p->{'pg_kiroku_kb'} if defined $p->{'pg_kiroku_kb'};
+    $val->{'afterpub'}   = $p->{'pg_kiroku_ka'} if defined $p->{'pg_kiroku_ka'};
+    $val->{'openpg'}     = $p->{'pg_pggen'}     if defined $p->{'pg_pggen'};
+    $val->{'restpg'}     = $p->{'pg_pgu18'}     if defined $p->{'pg_pgu18'};
+    $val->{'avoiddup'}   = $p->{'pg_badprog'}   if defined $p->{'pg_badprog'};
+    $val->{'experience'} = $p->{'pg_enquete'}   if defined $p->{'pg_enquete'};
+    $val->{'comment'}    = $p->{'fc_comment'}   if defined $p->{'fc_comment'};
+    # 登録実施
+    my $row = $model->create( $val );
+    $prog_id = $row->regpgid; # 登録時autoincriment値取得
+
+    return $prog_id;
+}
+
+=head2 _crtProgram
+
+PgProgramへの登録
+
+戻り値 $pgid 企画内部ID(AI値)
+
+=cut
+
+sub _crtProgram :Private {
+    my ( $self, $c,
+         $prog_id,      # 企画ID
+         $pginfo,       # 入力申込情報ハッシュ
+       ) = @_;
+    my $pgid;
+
+    my $model = $c->model('ConkanDB::PgProgram');
+    # 登録情報生成
+    # 必須の値が設定済みであることは、prog_registで確認済みなので、
+    # ここでは未定義の場合DB初期値を使う
+    my $val = {};
+    my $p = $pginfo;
+    $val->{'regpgid'}   = $prog_id;   # 必ず存在する
+    $val->{'name'}      = $pginfo->{'pg_name'} if defined $pginfo->{'pg_name'};
+    # 登録実施
+    my $row = $model->create( $val );
+    $pgid = $row->pgid; # 登録時autoincriment値取得
+
+    return $pgid;
+}
+
+=head2 _crtCast
+
+PgRegCast, PgAllCast, PgCastへの登録
+
+戻り値 なし
+
+=cut
+
+sub _crtCast :Private {
+    my ( $self, $c,
+         $prog_id,      # 企画ID
+         $pgid,         # 企画内部ID
+         $cast,         # 出演者入力申込情報ハッシュ
+       ) = @_;
+
+    my $p = $cast;
+    # PgRegCastへの登録
+    my $model = $c->model('ConkanDB::PgRegCast');
+    # 登録情報生成
+    # 必須の値が設定済みであることは、prog_registで確認済みなので、
+    # ここでは未定義の場合DB初期値を使う
+    my $val = {};
+    $val->{'regpgid'}   = $prog_id;   # 必ず存在する
+    $val->{'name'}      = $p->{'pgname'}    if defined $p->{'pgname'};
+    $val->{'namef'}     = $p->{'pgnamef'}   if defined $p->{'pgnamef'};
+    $val->{'title'}     = $p->{'pgtitle'}   if defined $p->{'pgtitle'};
+    $val->{'needreq'}   = $p->{'needreq'}   if defined $p->{'needreq'};
+    $val->{'needguest'} = $p->{'needgues'}  if defined $p->{'needgues'};
+    # 登録実施
+    my $row = $model->create( $val );
+        
+    # PgAllCastへの登録
+    $model = $c->model('ConkanDB::PgAllCast');
+    my $cond = {};
+    $cond->{'rmdate'} = \'IS NULL';
+    if ( defined $p->{'entrantregno'} ) {
+        # 出演者参加番号があれば、その人を探す
+        $cond->{'regno'} = $p->{'entrantregno'};
+    }
+    else {
+        # 名前とフリガナが一致する人を探す
+        #   名前は、$p->{'name'}を優先
+        #   $p->{'name'}がある場合はフリガナは検索条件外
+        if ( defined $p->{'name'} ) {
+            $cond->{'name'}   = $p->{'name'}        
+        }
+        else {
+            $cond->{'name'}   = $p->{'pgname'}  if defined $p->{'pgname'};
+            $cond->{'namef'}  = $p->{'pgnamef'} if defined $p->{'pgnamef'};
+        }
+    }
+    $row = ($model->search( $cond ) )[0];
+    unless ( $row ) {
+        # 見つからなければ新規登録
+        # 必須の値が設定済みであることは、prog_registで確認済みなので、
+        # ここでは未定義の場合DB初期値を使う
+        #   nameへの登録は、$p->{'name'}を優先
+        #   ただし、その場合フリガナは登録しない
+        $val = {};
+        if ( defined $p->{'name'} ) {
+            $val->{'name'}   = $p->{'name'};
+        }
+        else {
+            $val->{'name'}   = $p->{'pgname'}   if defined $p->{'pgname'};
+            $val->{'namef'}  = $p->{'pgnamef'}  if defined $p->{'pgnamef'};
+        }
+        $val->{'regno'}  = $p->{'entrantregno'} if defined $p->{'entrantregno'};
+        $row = $model->create( $val );
+    }
+    my $castid = $row->castid(); # 見つかった/登録した 出演者IDを取得
+
+    # PgCastへの登録
+    $model = $c->model('ConkanDB::PgCast');
+    $val = {};
+    $val->{'pgid'}   = $pgid,                  # 必ず存在する
+    $val->{'castid'} = $castid,                # 必ず存在する
+    $val->{'name'}   = $p->{'pgname'}   if defined $p->{'pgname'};
+    $val->{'namef'}  = $p->{'pgnamef'}  if defined $p->{'pgnamef'};
+    $val->{'title'}  = $p->{'pgtitle'}  if defined $p->{'pgtitle'};
+    $val->{'status'} = $p->{'needreq'}  if defined $p->{'needreq'};
+    $row = $model->create( $val );
+}
+
+=head2 _crtRegEquip
+
+PgRegEquipへの登録
+
+戻り値 なし
+
+=cut
+
+sub _crtRegEquip :Private {
+    my ( $self, $c,
+         $prog_id,      # 企画ID
+         $equip,        # 機材入力申込情報ハッシュ
+       ) = @_;
+
+    my $model = $c->model('ConkanDB::PgRegEquip');
+    # 登録情報生成
+    # 必須の値が設定済みであることは、prog_registで確認済みなので、
+    # ここでは未定義の場合DB初期値を使う
+    my $val = {};
+    my $p = $equip;
+    $val->{'regpgid'}   = $prog_id;   # 必ず存在する
+    $val->{'name'}      = $p->{'name'}      if defined $p->{'name'};
+    $val->{'count'}     = $p->{'count'}     if defined $p->{'count'};
+    $val->{'vif'}       = $p->{'vif'}       if defined $p->{'vif'};
+    $val->{'aif'}       = $p->{'aif'}       if defined $p->{'aif'};
+    $val->{'eif'}       = $p->{'eif'}       if defined $p->{'eif'};
+    $val->{'intende'}   = $p->{'intende'}   if defined $p->{'intende'};
+    # 登録実施
+    my $row = $model->create( $val );
+}
+
+#============================================================================
+# WebAPI 1.0 >>>>
+#   ConkanProgram 2.0.0 Fix時には削除
+
+=head2 old_WebAPI_1_0
+
+WebAPI 1.0 企画登録
+
+戻り値 ( $pgid : 企画内部ID $prog_id : 企画ID )
+
+=cut
+
+sub _WebAPI_1_0 :Private {
+    my ( $self, $c,
+         $pginfo,       # 入力申込情報ハッシュ
+       ) = @_;
+
+    my $pgid;
+    my $regcnf;
+    my $hval;
+
+    # $c->config->{Regist}->{RegProgram}の内容を元にpginfoの内容を登録
+    ## regPgIDが未設定の場合autoincにより決定
+    ## {RegProgram}のitem数は1つであり、loopmax定義はない
+    $regcnf = $c->config->{'Regist'}->{'RegProgram'};
+    $hval = __PACKAGE__->ParseRegist(
+                    $pginfo, $regcnf->{'items'}->[0], undef, ''  );
+    if ( ref($hval) eq 'HASH' ) {
+        my $regpgid = $hval->{'regpgid'};
+        if ( $regpgid &&
+             $c->model('ConkanDB::' . $regcnf->{'schema'})->find( $regpgid ) ) {
+            die 'regpgid duplicate ' . $hval->{'name'} . ' [' . $regpgid . ']';
+            $hval->{'regpgid'} = undef;
+        }
+        my $row =
+            $c->model('ConkanDB::' . $regcnf->{'schema'})->create( $hval );
+$c->ug('>>>> add reg_program:name [' . $hval->{'name'} . ']');
+$c->ug('>>>> add reg_program:regpgid [' . $row->regpgid . ']');
+        ## $pginfo->{企画ID}の値を再設定 (autoinc対応)
+        $pginfo->{'企画ID'} = $row->regpgid;
+    }
+    elsif ( $hval ) {
+        die 'input Format Error /or/ regist.yml Format Error';
+    }
+    
+    # $c->config->{Regist}->{Program}の内容を元にpginfoの内容を登録
+    ## {Program}のitem数は1つであり、loopmax定義はない
+    $regcnf = $c->config->{Regist}->{Program};
+    $hval = __PACKAGE__->ParseRegist(
+                    $pginfo, $regcnf->{items}->[0], undef, ''  );
+    if ( ref($hval) eq 'HASH' ) {
+        my $row =
+            $c->model('ConkanDB::' . $regcnf->{schema})->create( $hval );
+        ## 企画内部IDの値を設定 (登録時にautoincで決定)
+        $pgid = $row->pgid;
+    }
+    elsif ( $hval ) {
+        die 'input Format Error /or/ regist.yml Format Error';
+    }
+
+    # $c->config->{Regist}->{RegCast}の内容を元にpginfoの内容を登録
+    ## 同時にPgAllCastにも登録する
+    ## {RegCast}のitem数は複数あり、さらにloopmax定義がある
+    $regcnf = $c->config->{Regist}->{RegCast};
+    foreach my $item (@{$regcnf->{items}}) {
+        if ( defined($item->{loopmax}) ) {
+            foreach my $cnt (1..$item->{loopmax}+1) {
+                # 申込者本人が出演する場合があるので、+1
+                $hval = __PACKAGE__->ParseRegist(
+                                $pginfo, $item, undef, $cnt );
+                if ( ref($hval) eq 'HASH' ) {
+                    __PACKAGE__->_addCast( $c, $hval, $pgid );
+                }
+                elsif ( $hval ) {
+                    die 'input Format Error /or/ regist.yml Format Error';
+                }
+            }
+        }
+        else {
+            $hval = __PACKAGE__->ParseRegist( $pginfo, $item, undef, '');
+            if ( ref($hval) eq 'HASH' ) {
+                __PACKAGE__->_addCast( $c, $hval, $pgid );
+            }
+            elsif ( $hval ) {
+                die 'input Format Error /or/ regist.yml Format Error';
+            }
+        }
+    }
+
+    # $c->config->{Regist}->{RegEquip}の内容を元にpginfoの内容をDBに登録
+    ## {RegEquip}のitem数は複数あるが、loopmax定義はない
+    $regcnf = $c->config->{Regist}->{RegEquip};
+    foreach my $item (@{$regcnf->{items}}) {
+        $hval = __PACKAGE__->ParseRegist( $pginfo, $item, undef, '');
+        if ( ref($hval) eq 'HASH' ) {
+            $c->model('ConkanDB::' . $regcnf->{schema})->create( $hval )
+        }
+        elsif ( $hval ) {
+            die 'input Format Error /or/ regist.yml Format Error';
+        }
+    }
+    return ( $pgid, $pginfo->{'企画ID'} );
+}
+
 =head2 ParseRegist
 
+WebAPI 1.0
 Regist情報に基づく申込情報(pginfo)パース
 
 戻り値 パース後のハッシュ(1レコード分)
@@ -311,6 +555,10 @@ sub _addCast :Private {
         },
     );
 }
+
+# <<< WebAPI 1.0
+#   ConkanProgram 2.0.0 Fix時には削除
+#============================================================================
 
 =head2 progress
 -----------------------------------------------------------------------------
