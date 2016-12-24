@@ -68,16 +68,16 @@ sub add :Local {
                 next;
             }
             ## PgRegProgramへの登録
-            $prog_id = _crtRegProgram( $c, $pginfo );
+            $prog_id = __PACKAGE__->_crtRegProgram( $c, $pginfo );
             ## PgProgramへの登録
-            $pgid = _crtProgram( $c, $prog_id, $pginfo );
+            $pgid = __PACKAGE__->_crtProgram( $c, $prog_id, $pginfo );
             ## PgRegCast, PgAllCast, PgCastへの登録
             foreach my $cast (@{$pginfo->{'casts'}}) {
-                _crtCast( $c, $prog_id, $pgid, $cast );
+                __PACKAGE__->_crtCast( $c, $prog_id, $pgid, $cast );
             }
             ## PgRegEquipへの登録
             foreach my $equip (@{$pginfo->{'equips'}}) {
-                _crtRegEquip( $c, $prog_id, $equip );
+                __PACKAGE__->_crtRegEquip( $c, $prog_id, $equip );
             }
         }
         # 1件のみ登録の場合、登録した企画詳細表示にリダイレクト
@@ -203,7 +203,7 @@ sub _crtProgram :Private {
     my $val = {};
     my $p = $pginfo;
     $val->{'regpgid'}   = $prog_id;   # 必ず存在する
-    $val->{'name'}      = $pginfo->{'pg_name'} if defined $pginfo->{'pg_name'};
+    $val->{'sname'}     = $pginfo->{'pg_name'} if defined $pginfo->{'pg_name'};
     # 登録実施
     my $row = $model->create( $val );
     $pgid = $row->pgid; # 登録時autoincriment値取得
@@ -238,7 +238,7 @@ sub _crtCast :Private {
     $val->{'namef'}     = $p->{'pgnamef'}   if defined $p->{'pgnamef'};
     $val->{'title'}     = $p->{'pgtitle'}   if defined $p->{'pgtitle'};
     $val->{'needreq'}   = $p->{'needreq'}   if defined $p->{'needreq'};
-    $val->{'needguest'} = $p->{'needgues'}  if defined $p->{'needgues'};
+    $val->{'needguest'} = $p->{'needguest'} if defined $p->{'needguest'};
     # 登録実施
     my $row = $model->create( $val );
         
