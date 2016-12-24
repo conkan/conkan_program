@@ -340,7 +340,7 @@ END -%]
               <td>[% item.vif     | html %]</td>
               <td>[% item.aif     | html %]</td>
               <td>[% item.eif     | html %]</td>
-              <td>[% item.intendE | html %]</td>
+              <td>[% item.intende | html %]</td>
             </tr>
           [% END %]
         </tbody>

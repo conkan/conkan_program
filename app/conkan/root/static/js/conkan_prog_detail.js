@@ -512,7 +512,7 @@
         $scope.prog = params;
         $http({
           method  : 'GET',
-          url     : '/program/' + params.pgid + '/equip/' + params.editEquipId,
+          url     : uriprefix + '/program/' + params.pgid + '/equip/' + params.editEquipId,
         })
         .success(function(data) {
           if ( data.status === 'ok' ) {
@@ -662,12 +662,12 @@
         ];
         var getPage = function( newPage ) {
           var pgid    = angular.element('#init_pgid').val();
-          var url = '/program/' + pgid + '/progress/'
+          var url = uriprefix + '/program/' + pgid + '/progress/'
                       + newPage + '/' + pageSize + '/';
           $http( {
             method  : 'GET',
             headers : { 'If-Modifired-Since' : (new Date(0)).toUTCString() },
-            url     : uriprefix + url
+            url     : url
           } )
           .success(function(data) {
             if ( data.status === 'ok' ) {
