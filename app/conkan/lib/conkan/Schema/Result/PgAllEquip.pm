@@ -63,7 +63,20 @@ __PACKAGE__->table("pg_all_equip");
   is_nullable: 1
   size: 64
 
+=head2 roomid
+
+  data_type: 'integer'
+  extra: {unsigned => 1}
+  is_foreign_key: 1
+  is_nullable: 1
+
 =head2 comment
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 64
+
+=head2 suppliers
 
   data_type: 'varchar'
   is_nullable: 1
@@ -97,7 +110,16 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 0, size => 64 },
   "spec",
   { data_type => "varchar", is_nullable => 1, size => 64 },
+  "roomid",
+  {
+    data_type => "integer",
+    extra => { unsigned => 1 },
+    is_foreign_key => 1,
+    is_nullable => 1,
+  },
   "comment",
+  { data_type => "varchar", is_nullable => 1, size => 64 },
+  "suppliers",
   { data_type => "varchar", is_nullable => 1, size => 64 },
   "updateflg",
   { data_type => "varchar", is_nullable => 1, size => 64 },
@@ -152,9 +174,29 @@ __PACKAGE__->has_many(
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
+=head2 roomid
 
-# Created by DBIx::Class::Schema::Loader v0.07043 @ 2016-01-17 19:12:31
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:C8OZCQbnaLrH0F6YibM+IA
+Type: belongs_to
+
+Related object: L<conkan::Schema::Result::PgRoom>
+
+=cut
+
+__PACKAGE__->belongs_to(
+  "roomid",
+  "conkan::Schema::Result::PgRoom",
+  { roomid => "roomid" },
+  {
+    is_deferrable => 1,
+    join_type     => "LEFT",
+    on_delete     => "NO ACTION",
+    on_update     => "NO ACTION",
+  },
+);
+
+
+# Created by DBIx::Class::Schema::Loader v0.07046 @ 2017-01-14 14:18:48
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:vXuB6G4C9UhJSjTkfEivNA
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
