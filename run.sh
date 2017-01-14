@@ -39,7 +39,7 @@ if [ $1 ]; then
     fi
     # デバッグ時はconkan_server.plを起動
     if [ $1 = "debug" ] ; then
-        RUNCMD='/root/app/conkan/script/conkan_server.pl -r -d -p 9002'
+        RUNCMD='cd /root/app/conkan;/root/app/conkan/script/conkan_server.pl -r -d -p 9002'
     fi
 fi
 # 開発時 存在しない場合、conkan.ymlを初期化(でないと起動失敗する)

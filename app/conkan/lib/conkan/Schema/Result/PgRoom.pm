@@ -219,9 +219,24 @@ __PACKAGE__->has_many(
   { cascade_copy => 0, cascade_delete => 0 },
 );
 
+=head2 pgs_all_equip
 
-# Created by DBIx::Class::Schema::Loader v0.07042 @ 2015-05-17 00:24:12
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:59rQOG0UiEPdYuL8vjxUjw
+Type: has_many
+
+Related object: L<conkan::Schema::Result::PgAllEquip>
+
+=cut
+
+__PACKAGE__->has_many(
+  "pgs_all_equip",
+  "conkan::Schema::Result::PgAllEquip",
+  { "foreign.roomid" => "self.roomid" },
+  { cascade_copy => 0, cascade_delete => 0 },
+);
+
+
+# Created by DBIx::Class::Schema::Loader v0.07046 @ 2017-01-14 14:18:48
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:zYeGPWS7/obq570jFHyFLw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
