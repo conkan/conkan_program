@@ -33,6 +33,13 @@
             </td>
           </tr>
           <tr>
+          </tr>
+            <th>設置場所</th>
+            <td colspan="3">
+              <select name="roomid" class="col-sm-12" ng-model="equip.roomid"
+                ng-options="i.id as i.val  for i in conf.roomlist"></select>
+            </td>
+          <tr>
             <th>仕様</th>
             <td colspan="3">
               <textarea name="spec" class="col-sm-12" rows="2"
@@ -44,6 +51,13 @@
             <td colspan="3">
               <textarea name="comment" class="col-sm-12" rows="2"
                ng-model="equip.comment"></textarea>
+            </td>
+          </tr>
+          <tr>
+            <th>調達先</th>
+            <td colspan="3">
+              <input type="text" name="suppliers" class="col-sm-12"
+                ng-model="equip.suppliers"/>
             </td>
           </tr>
         </tbody>

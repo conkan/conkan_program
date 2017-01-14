@@ -102,6 +102,18 @@
   conkanAppModule.controller( 'allequipFormController',
     [ '$scope', '$http', '$uibModal', '$uibModalInstance', 'params',
       function( $scope, $http, $uibModal, $uibModalInstance, params ) {
+        // 選択肢取得
+        $http.get(uriprefix + '/config/confget')
+        .success(function(data) {
+          if ( data.status === 'ok' ) {
+            $scope.conf = ConfDataCnv( data, $scope.conf );
+          }
+          else {
+            openDialog( data.status );
+          }
+        })
+        .error( function() { httpfailDlg( $uibModal ); } );
+
         // 初期値設定
         angular.element('#valerr').text('');
         $http({
@@ -115,8 +127,10 @@
               equipid : data.json.equipid,
               name    : data.json.name,
               equipno : data.json.equipno,
+              roomid  : data.json.roomid,
               spec    : data.json.spec,
               comment : data.json.comment,
+              suppliers : data.json.suppliers,
               rmdate  : data.json.rmdate,
             };
           }

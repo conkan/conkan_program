@@ -4,6 +4,8 @@ BEGIN {
     $ENV{CATALYST_SCRIPT_GEN} = 40;
 }
 
+use File::Basename;
+chdir( dirname($0) . '/..' );
 use Catalyst::ScriptRunner;
 Catalyst::ScriptRunner->run('conkan', 'Server');
 

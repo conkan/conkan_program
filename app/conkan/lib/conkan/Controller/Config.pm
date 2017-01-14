@@ -1107,12 +1107,19 @@ sub equip_detail : Chained('equip_show') : PathPart('') : Args(0) {
             $rs->update( { 
                 'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
             } );
+                
+$c->log->debug('>>>> equip_detail roomid value ' . $rs->roomid->roomid() )
+    if ( $rs->roomid() );
+$c->log->debug('>>>> equip_detail suppliers value ' . $rs->suppliers() )
+    if ( $rs->suppliers() );
             $c->stash->{'json'} = {
                 equipid => $equipid,
                 name    => $rs->name(),
                 equipno => $rs->equipno(),
+                roomid  => ( $rs->roomid() ) ? $rs->roomid->roomid() : undef,
                 spec    => $rs->spec(),
                 comment => $rs->comment(),
+                suppliers => $rs->suppliers(),
                 rmdate  => $rs->rmdate(),
             };
         }
@@ -1146,7 +1153,7 @@ sub equip_edit : Chained('equip_show') : PathPart('edit') : Args(0) {
     }
     try {
         die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
-        my $items = [ qw/ name equipno spec comment / ];
+        my $items = [ qw/ name equipno roomid spec comment suppliers / ];
         my $uniqitems = [ qw/ equipno / ];
         $c->forward( '_updatecreate', [ $equipid, $items, $uniqitems ] );
         die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );

@@ -21,11 +21,14 @@ extends 'Catalyst';
 # starmanでのデバッグ時には
 #   -Debug
 # を追加し、
+#   -Log=info
+# を
 #   -Log=debug
 # に変更すること
 
 use Catalyst qw/
-    -Log=info
+    -Debug
+    -Log=debug
     ConfigLoader
     Config::YAML
     Static::Simple
