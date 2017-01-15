@@ -39,12 +39,19 @@
         $scope.equipgrid.columnDefs = [
           { name : '名称', field: 'name',
                 headerCellClass: 'gridheader',
-                width: "32%",
+                width: "30%",
                 cellClass: function(grid, row)
                     { return uiGetCellCls(row.entity.rmdate); },
                 enableHiding: false,
           },
           { name : '機材番号', field: 'equipno',
+              headerCellClass: 'gridheader',
+              width: "12%",
+              cellClass: function(grid, row)
+                  { return uiGetCellCls(row.entity.rmdate); },
+              enableHiding: false,
+          },
+          { name : '配置場所', field: 'room',
               headerCellClass: 'gridheader',
               width: "24%",
               cellClass: function(grid, row)
@@ -53,7 +60,7 @@
           },
           { name : '仕様', field: 'spec',
               headerCellClass: 'gridheader',
-              width: "32%",
+              width: "30%",
               cellClass: function(grid, row)
                   { return uiGetCellCls(row.entity.rmdate); },
               enableHiding: false,

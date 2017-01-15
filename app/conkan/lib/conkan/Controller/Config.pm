@@ -1052,7 +1052,10 @@ sub equip_listget : Chained('equip_base') : PathPart('listget') : Args(0) {
         my @data;
         my $rows = [ $c->model('ConkanDB::PgAllEquip')->search(
                         { },
-                        { 'order_by' => { '-asc' => 'equipno' } }
+                        {
+                            'prefetch' => [ 'roomid' ],
+                            'order_by' => { '-asc' => 'equipno' },
+                        }
                     )
                 ];
         for my $row (@$rows) {
@@ -1065,6 +1068,7 @@ sub equip_listget : Chained('equip_base') : PathPart('listget') : Args(0) {
                 'name'     => $row->name(),
                 'equipno'  => $equipno,
                 'spec'     => $row->spec(),
+                'room'    => ( $row->roomid() ) ? $row->roomid->name() : undef,
                 'equipid'  => $row->equipid(),
                 'rmdate'   => +( defined( $rm ) ? $rm->strftime('%F %T') : '' ),
             } );
@@ -1201,23 +1205,30 @@ sub equipcsvdownload :Local {
     # 無効でない
     my $rows =
         [ $c->model('ConkanDB::PgAllEquip')->search(
-            { 'rmdate' => \'IS NULL' },
-            { 'order_by' => { '-asc' => 'equipno' } }
+            { 'me.rmdate' => \'IS NULL' },
+            {
+                'prefetch' => [ 'roomid' ],
+                'order_by' => { '-asc' => 'equipno' },
+            }
         ) ];
     my @data = (
         [
             '機材番号',
             '名前',
+            '配置場所',
             '仕様',
             '備考',
+            '調達先',
         ]
     );
     foreach my $row ( @$rows ) {
         push ( @data, [
             $row->equipno(),                # 機材番号
             $row->name(),                   # 名前
+            ($row->roomid()) ? $row->roomid->name() : undef,    # 配置場所
             $row->spec(),                   # 仕様
             $row->comment(),                # 備考
+            $row->suppliers(),              # 調達先
         ]);
     }
 
