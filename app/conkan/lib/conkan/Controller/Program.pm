@@ -1306,7 +1306,10 @@ sub pgup_equip : Chained('pgup_equiptop') : PathPart('') : Args(0) {
                 $c->stash->{'json'}->{'intende'} = $rowprof->intende();
             }
             my $equips = [ $c->model('ConkanDB::PgAllEquip')->search(
-                        { 'rmdate' => \'IS NULL' },
+                        { 
+                            'roomid' => \'IS NULL',
+                            'rmdate' => \'IS NULL'
+                        },
                         { 'order_by' => { '-asc' => 'equipno' } }
                     ) ];
             my @equiplist;
