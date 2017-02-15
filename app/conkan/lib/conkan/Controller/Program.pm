@@ -1203,6 +1203,32 @@ sub program_equiplist : Chained('program_show') : PathPart('equiplist') : Args(0
     my ( $self, $c ) = @_;
     my $pgid = $c->stash->{'pgid'};
     try {
+        # 場所コード設定済みか確認
+        my @list = ();
+        my $prog = $c->model('ConkanDB::PgProgram')->find($pgid);
+        my $roomid = $prog->roomid->roomid(); 
+        if ( $roomid ) {
+            # 場所固定の機材をリストアップ
+            my $rows =
+                [ $c->model('ConkanDB::PgAllEquip')->search(
+                            {
+                                'roomid' => $roomid,
+                                'rmdate' => \'IS NULL',
+                            },
+                            {
+                                'order_by' => { '-asc' => 'equipno' },
+                            }
+                        ) ];
+            foreach my $row ( @$rows ) {
+                my $equip = {
+                    'id'        => '',
+                    'name'      => $row->name(),
+                    'equipno'   => $row->equipno(),
+                    'spec'      => $row->spec(),
+                };
+                push @list, $equip;
+            }
+        }
         my $rows =
             [ $c->model('ConkanDB::PgEquip')->search(
                         { pgid => $pgid },
@@ -1211,7 +1237,6 @@ sub program_equiplist : Chained('program_show') : PathPart('equiplist') : Args(0
                             'order_by' => { '-asc' => 'id' },
                         }
                     ) ];
-        my @list = ();
         foreach my $row ( @$rows ) {
             my $equip = {
                 'id'        => $row->id(),
