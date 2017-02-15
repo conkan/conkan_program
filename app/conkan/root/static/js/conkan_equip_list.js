@@ -39,12 +39,19 @@
         $scope.equipgrid.columnDefs = [
           { name : '名称', field: 'name',
                 headerCellClass: 'gridheader',
-                width: "32%",
+                width: "30%",
                 cellClass: function(grid, row)
                     { return uiGetCellCls(row.entity.rmdate); },
                 enableHiding: false,
           },
           { name : '機材番号', field: 'equipno',
+              headerCellClass: 'gridheader',
+              width: "12%",
+              cellClass: function(grid, row)
+                  { return uiGetCellCls(row.entity.rmdate); },
+              enableHiding: false,
+          },
+          { name : '配置場所', field: 'room',
               headerCellClass: 'gridheader',
               width: "24%",
               cellClass: function(grid, row)
@@ -53,7 +60,7 @@
           },
           { name : '仕様', field: 'spec',
               headerCellClass: 'gridheader',
-              width: "32%",
+              width: "30%",
               cellClass: function(grid, row)
                   { return uiGetCellCls(row.entity.rmdate); },
               enableHiding: false,
@@ -102,6 +109,18 @@
   conkanAppModule.controller( 'allequipFormController',
     [ '$scope', '$http', '$uibModal', '$uibModalInstance', 'params',
       function( $scope, $http, $uibModal, $uibModalInstance, params ) {
+        // 選択肢取得
+        $http.get(uriprefix + '/config/confget')
+        .success(function(data) {
+          if ( data.status === 'ok' ) {
+            $scope.conf = ConfDataCnv( data, $scope.conf );
+          }
+          else {
+            openDialog( data.status );
+          }
+        })
+        .error( function() { httpfailDlg( $uibModal ); } );
+
         // 初期値設定
         angular.element('#valerr').text('');
         $http({
@@ -115,8 +134,10 @@
               equipid : data.json.equipid,
               name    : data.json.name,
               equipno : data.json.equipno,
+              roomid  : data.json.roomid,
               spec    : data.json.spec,
               comment : data.json.comment,
+              suppliers : data.json.suppliers,
               rmdate  : data.json.rmdate,
             };
           }

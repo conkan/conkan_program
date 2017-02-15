@@ -32,3 +32,4 @@ app/.ssh/cert*.*
 app/backup/
 supervise/
 ttctmp/
+*_wk.pdf
