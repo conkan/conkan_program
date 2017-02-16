@@ -67,6 +67,7 @@
             },
             { name : '出演企画数', field: 'pgcnt',
                 headerCellClass: 'gridheader',
+                type: 'number',
                 width: "8%",
                 cellClass: function(grid, row)
                     { return uiGetCellCls(row.entity.rmdate); },
