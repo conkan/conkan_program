@@ -1158,7 +1158,7 @@ sub equip_edit : Chained('equip_show') : PathPart('edit') : Args(0) {
     try {
         die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
         my $items = [ qw/ name equipno roomid spec comment suppliers / ];
-        my $uniqitems = [ qw/ equipno / ];
+        my $uniqitems = [ qw/ equipno roomid / ];
         $c->forward( '_updatecreate', [ $equipid, $items, $uniqitems ] );
         die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
     } catch {
@@ -1297,7 +1297,7 @@ sub _updatecreate :Private {
         $value->{$item} =~ s/\s+$// if defined( $value->{$item} );
     }
     for my $item (@{$uniqitems}) {
-        delete $value->{$item}
+        $value->{$item} = undef
             if ( defined( $value->{$item} ) && ( $value->{$item} eq '' ) );
     }
 $c->log->debug('>>>> _updatecreate value ' . Dumper( $value ) );
