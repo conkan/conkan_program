@@ -1,4 +1,4 @@
 #!/bin/sh
 exec 2>&1
 cd /root/app/conkan
-exec starman conkan.psgi --p 9002 --workers 20 --max-requests 500 --preload-app --interval=1 --disable-keepalive
+exec starman conkan.psgi --p 9002 --workers 10 --max-requests 300 --preload-app --interval=1 --disable-keepalive
