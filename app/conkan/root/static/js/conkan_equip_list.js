@@ -114,6 +114,8 @@
         .success(function(data) {
           if ( data.status === 'ok' ) {
             $scope.conf = ConfDataCnv( data, $scope.conf );
+            // 指定なしの選択肢を追加
+            $scope.conf.roomlist.unshift({'id': '', 'val': ''});
           }
           else {
             openDialog( data.status );
