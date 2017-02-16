@@ -1297,7 +1297,6 @@ sub _updatecreate :Private {
         $value->{$item} =~ s/\s+$// if defined( $value->{$item} );
     }
     for my $item (@{$uniqitems}) {
-        #delete $value->{$item}
         $value->{$item} = undef
             if ( defined( $value->{$item} ) && ( $value->{$item} eq '' ) );
     }
