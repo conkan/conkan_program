@@ -17,6 +17,11 @@
   <div class="well" id="init">
     <FORM method="POST" action="./initialprocess">
       <div>
+        <label>ヘッダ表示文字列</label><br/>
+        <input name="headerlogo" class="col-sm-3" placeholder="Conkan">
+      </div>
+      <HR/>
+      <div>
         <label>adminパスワード</label><br/>
         <input type="password" name="adpw" class="col-sm-3 input-small" placeholder="Password">
         <span class="col-sm-4 help-inline"> 緊急用アカウントのパスワード</span>

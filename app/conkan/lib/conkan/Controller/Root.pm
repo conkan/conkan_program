@@ -95,6 +95,7 @@ sub auto :Private {
     }
     $c->stash->{cver} = Catalyst->version();
     $c->stash->{ver} = $conkan::VERSION;
+    $c->stash->{headerlogo} = $c->config->{headerlogo};
     $c->config->{time_origin} = 0 unless (exists($c->config->{time_origin}));
     # login->login ループ回避
     if ( $c->action->reverse eq 'login' ) {
@@ -308,6 +309,7 @@ sub initialprocess :Local {
         return;
     }
 
+    my $logo = $c->request->body_params->{headerlogo} || 'Conkan';
     my $adpw = $c->request->body_params->{adpw};
     my $dbnm = $c->request->body_params->{dbnm};
     my $dbsv = $c->request->body_params->{dbsv};
@@ -328,7 +330,7 @@ sub initialprocess :Local {
     }
 
     $c->detach( '/_doInitialProc',
-                [ $adpw, $dbnm, $dbsv, $dbus, $dbpw,
+                [ $logo, $adpw, $dbnm, $dbsv, $dbus, $dbpw,
                   $adrt, $torg, $urip, $oakey, $oasec, $cygr ],
               );
 }
@@ -341,6 +343,7 @@ Doing Initialize
 
 sub _doInitialProc :Private {
     my ( $self, $c, 
+         $logo,     # ヘッダ表示文字列
          $adpw,     # adminパスワード
          $dbnm,     # DB名
          $dbsv,     # DBサーバ
@@ -426,6 +429,7 @@ sub _doInitialProc :Private {
         # conkan.ymlを書き出す(必要な物だけ)
         my $conkan_yml_f = $c->config->{home} . '/conkan.yml';
         my $conkan_yml = {
+            'headerlogo' => $logo,
             'name' => 'conkan',
             'inited' => 1,
             'disable_component_resolution_regex_fallback' => 1,
