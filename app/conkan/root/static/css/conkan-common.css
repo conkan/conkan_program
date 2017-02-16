@@ -47,6 +47,11 @@
     margin-bottom: 0px;
 }
 
+.header {
+    font-size: 20px;
+    font-style: italic;
+}
+
 .footer {
     text-align: right;
 }

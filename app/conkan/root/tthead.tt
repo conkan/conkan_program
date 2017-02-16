@@ -45,10 +45,7 @@
 <body style="padding-top:200px;">
 <div class="navbar navbar-default navbar-fixed-top" id="navbar">
   <div class="container-fluid">
-    <header class="header">
-      <h1>コンベンション管理システム Conkan</h1>
-      <p class="lead">汎用コンベンション運営管理システム</p>
-    </header>
+    <header class="header">[% headerlogo %]</header>
     <div class="navbar-header">
       <a class="navbar-brand" href="#">[% acname | html %]</a>
     </div>
