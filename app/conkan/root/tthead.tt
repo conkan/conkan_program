@@ -29,8 +29,8 @@
 <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/angularjs/1.4.3/angular.min.js"></script>
 [%- IF useUiGrid %]
   <!-- angular ui grid-->
-  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-grid/3.1.1/ui-grid.min.js"></script>
-  <link href="//cdnjs.cloudflare.com/ajax/libs/angular-ui-grid/3.1.1/ui-grid.min.css" rel="stylesheet" type="text/css" />
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-grid/4.0.2/ui-grid.min.js"></script>
+  <link href="//cdnjs.cloudflare.com/ajax/libs/angular-ui-grid/4.0.2/ui-grid.min.css" rel="stylesheet" type="text/css" />
   <!-- ui-bootstrap -->
   <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.14.3/ui-bootstrap-tpls.min.js"></script>
 [%- END %]
