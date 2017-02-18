@@ -96,7 +96,7 @@ sub add :Local {
 
 =head2 regcastadd
 
-企画管理 regcastadd  : 要望出演者追加 (Chain外)
+企画管理 regcastadd  : 予定出演者追加 (Chain外)
 
 =cut
 
@@ -1022,7 +1022,7 @@ sub pgup_regprog : Chained('program_show') : PathPart('regprogram') : Args(0) {
 
 =head2 program/*/regcastlist
 ---------------------------------------------
-企画管理 pgdt_regcastlist  : 要望出演者リスト取得
+企画管理 pgdt_regcastlist  : 予定出演者リスト取得
 
 =cut
 

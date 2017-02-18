@@ -38,7 +38,7 @@
           pgid    : init_pgid
         };
       // 表示データ取得メソッド群
-        // 要望出演者リスト取得
+        // 予定出演者リスト取得
         $scope.getRegCast = function () {
           $http({
             method  : 'GET',
@@ -150,7 +150,7 @@
           });
         };
 
-        // 要望出演者追加ダイアログ
+        // 予定出演者追加ダイアログ
         $scope.openRegCastForm = function() {
           $uibModal.open({
             templateUrl : 'T_pgup_regcast',
@@ -366,7 +366,7 @@
     ]
   );
 
-  // 要望出演者追加ダイアログコントローラ
+  // 予定出演者追加ダイアログコントローラ
   ConkanAppModule.controller( 'regcastFormController',
     [ '$scope', '$http', '$uibModal', '$uibModalInstance', 'params',
       function( $scope, $http, $uibModal, $uibModalInstance, params ) {

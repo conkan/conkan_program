@@ -24,7 +24,7 @@ END -%]
       <a href="#reg_program"><h5>企画概要</h5></a>
     </div>
     <div class="col-sm-2 [% bgcolor.reg_cast %] text-center">
-      <a href="#reg_cast"><h5>要望出演者</h5></a>
+      <a href="#reg_cast"><h5>予定出演者</h5></a>
     </div>
     <div class="col-sm-2 [% bgcolor.cast %] text-center">
       <a href="#cast"><h5>決定出演者</h5></a>
@@ -202,7 +202,7 @@ END -%]
         </tbody>
       </table>
     </div> <!-- END of 企画概要 -->
-    <!-- 要望出演者 -->
+    <!-- 予定出演者 -->
     <div class="well" id="reg_cast">
       [% subtag( { 'reg_cast' => 'bg-info' } ) %]
       <table class="table table-bordered table-condensed"
@@ -245,7 +245,7 @@ END -%]
           [% END %]
         </tbody>
       </table>
-    </div> <!-- END of 要望出演者 -->
+    </div> <!-- END of 予定出演者 -->
     <!-- 決定出演者 -->
     <div class="well" id="cast">
       [% subtag( { 'cast' => 'bg-info' } ) %]
