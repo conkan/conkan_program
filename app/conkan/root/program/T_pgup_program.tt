@@ -38,69 +38,81 @@
             <th>担当スタッフ</th>
             <td>
               <select class="col-sm-12" name="staffid"
-                  ng-model="prog.staffid"
-                  ng-options="i.id as i.val for i in conf.stafflist">
-              [%- IF urole == 'NORM' -%]
-                <option>ngReadonly</option>
-              [%- END -%]
-              </select>
+                ng-model="prog.staffid"
+                ng-options="i.id as i.val for i in conf.stafflist"
+                ng-disabled = "prog.noteditable"></select>
             </td> 
             <th>実行ステータス</th>
             <td>
-              <select class="col-sm-12" ng-model="prog.status"
-                ng-options="i for i in conf.status"></select>
+              <select class="col-sm-12" name="status"
+                ng-model="prog.status"
+                ng-options="i for i in conf.status"
+                ng-disabled = "prog.noteditable"></select>
             </td>
             <td>
               <input type="text" name="memo" class="col-sm-12"
-                ng-model="prog.memo"/>
+                ng-model="prog.memo"
+                ng-disabled = "prog.noteditable"></select>
             </td>
           </tr>
           <tr>
             <th>日時1</th>
             <td>
               <select class="col-sm-12" name="dh1date" ng-model="prog.date1"
-                ng-options="i for i in conf.dates"></select>
+                ng-options="i for i in conf.dates"
+                ng-disabled = "prog.noteditable"></select>
             </td>
             <td colspan="3">
               <select class="col-sm-2" name="dh1date" ng-model="prog.shour1"
-                ng-options="i for i in conf.hours1"></select>
+                ng-options="i for i in conf.hours1"
+                ng-disabled = "prog.noteditable"></select>
               <select class="col-sm-2" name="dh1date" ng-model="prog.smin1"
-                ng-options="i for i in conf.mins"></select>
+                ng-options="i for i in conf.mins"
+                ng-disabled = "prog.noteditable"></select>
               <div align="center" class="col-sm-1"> - </div>
               <select class="col-sm-2" name="dh1date" ng-model="prog.ehour1"
-                ng-options="i for i in conf.hours1"></select>
+                ng-options="i for i in conf.hours1"
+                ng-disabled = "prog.noteditable"></select>
               <select class="col-sm-2" name="dh1date" ng-model="prog.emin1"
-                ng-options="i for i in conf.mins"></select>
+                ng-options="i for i in conf.mins"
+                ng-disabled = "prog.noteditable"></select>
             </td>
           </tr>
           <tr>
             <th>日時2</th>
             <td>
               <select class="col-sm-12" name="dh2date" ng-model="prog.date2"
-                ng-options="i for i in conf.dates"></select>
+                ng-options="i for i in conf.dates"
+                ng-disabled = "prog.noteditable"></select>
             </td>
             <td colspan="3">
               <select class="col-sm-2" name="dh2date" ng-model="prog.shour2"
-                ng-options="i for i in conf.hours2"></select>
+                ng-options="i for i in conf.hours2"
+                ng-disabled = "prog.noteditable"></select>
               <select class="col-sm-2" name="dh2date" ng-model="prog.smin2"
-                ng-options="i for i in conf.mins"></select>
+                ng-options="i for i in conf.mins"
+                ng-disabled = "prog.noteditable"></select>
               <div align="center" class="col-sm-1"> - </div>
               <select class="col-sm-2" name="dh2date" ng-model="prog.ehour2"
-                ng-options="i for i in conf.hours2"></select>
+                ng-options="i for i in conf.hours2"
+                ng-disabled = "prog.noteditable"></select>
               <select class="col-sm-2" name="dh2date" ng-model="prog.emin2"
-                ng-options="i for i in conf.mins"></select>
+                ng-options="i for i in conf.mins"
+                ng-disabled = "prog.noteditable"></select>
             </td>
           </tr>
           <tr>
             <th>場所</th>
             <td colspan="2">
               <select class="col-sm-12" name="roomid" ng-model="prog.roomid"
-                ng-options="i.id as i.val for i in conf.roomlist"></select>
+                ng-options="i.id as i.val for i in conf.roomlist"
+                ng-disabled = "prog.noteditable"></select>
             </td>
             <th>表示順序</th>
             <td>
               <select class="col-sm-4" name="layerno" ng-model="prog.layerno"
-                ng-options="i for i in conf.nos"></select>
+                ng-options="i for i in conf.nos"
+                ng-disabled = "prog.noteditable"></select>
             </td>
           </tr>
           <tr>
