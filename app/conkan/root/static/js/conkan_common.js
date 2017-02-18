@@ -162,8 +162,7 @@ var ProgDataCnv = function( data, prog ) {
   prog.progressprp = data.progressprp;
   prog.noteditable = 
       (   ( data.crole == 'ROOT' )
-         || ( data.crole == 'PG' ) 
-         || ( data.staffid == data.csid ) ) ? false : true;
+         || ( data.crole == 'PG' ) ) ? false : true;
 };
 
 // 企画時刻バリデーション

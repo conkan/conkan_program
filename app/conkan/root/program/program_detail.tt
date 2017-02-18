@@ -374,7 +374,7 @@ END -%]
               <div ng-switch="equip.id">
                 <div ng-switch-when="">部屋付属</div>
                 <div ng-switch-default>
-                  [%- IF editable %]
+                  [%- IF editable && urole != 'NORM' %]
                     <button type="button" class="btn btn-warning btn-xs"
                         ng-click="openEquipForm( equip.id )">
                     編集
@@ -384,7 +384,7 @@ END -%]
               </div>
             </td>
           </tr>
-          [%- IF editable %]
+          [%- IF editable && urole != 'NORM' %]
             <tr>
               <td align="center">
                 <button type="button" class="btn btn-warning btn-xs"
