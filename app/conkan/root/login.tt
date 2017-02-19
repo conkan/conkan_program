@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="[% uriprefix %]/static/css/conkan-common.css" />
 <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+<link rel="shortcut icon" type="image/x-icon" href="[% uriprefix %]/static/favicon.ico" />
 </head>
 <body>
 <div class="container">
