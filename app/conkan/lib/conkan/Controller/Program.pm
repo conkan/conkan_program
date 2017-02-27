@@ -307,16 +307,10 @@ sub _addAllCast :Private {
 
     my $model = $c->model('ConkanDB::PgAllCast');
     my $cond = {};
+    # 無効化されていなくて、名前とフリガナ(フリガナ指定時)が一致する人を探す
     $cond->{'rmdate'} = \'IS NULL';
-    if ( defined $cast->{'regno'} ) {
-        # 出演者参加番号があれば、その人を探す
-        $cond->{'regno'} = $cast->{'regno'};
-    }
-    else {
-        # 名前とフリガナが一致する人を探す
-        $cond->{'name'}   = $castname;        
-        $cond->{'namef'}  = $cast->{'namef'} if defined $cast->{'namef'};
-    }
+    $cond->{'name'}   = $castname;        
+    $cond->{'namef'}  = $cast->{'namef'} if defined $cast->{'namef'};
     my $row = ($model->search( $cond ) )[0];
     unless ( $row ) {
         # 見つからなければ新規登録
@@ -1773,8 +1767,8 @@ sub _autoProgress :Private {
                         $rowval = '';
                     }
                     if ( defined( $val ) && ($rowval ne $val ) ) {
-                        my $maskval = +( exists($mask_items{$key}) ? 'xxxxxx'
-                                                                   : $val );
+                        my $maskval = exists($mask_items{$key}) ? 'xxxxxx'
+                                                                : $val;
                         if ( $addstr eq '' ) {
                             $addstrlog = 'Update ';
                             $addstr    = 'Update ';
@@ -1799,9 +1793,8 @@ sub _autoProgress :Private {
             my $addstrlog = 'Create ';
             my $addstr    = 'Create ';
             for my $key (@{$itemkeys}) {
-                my $val = +( exists($value->{$key}) ? $value->{$key} : '' );
-                my $maskval = +( exists($mask_items{$key}) ? 'xxxxxx'
-                                                           : $val );
+                my $val = exists($value->{$key}) ? $value->{$key} || '' : '';
+                my $maskval = exists($mask_items{$key}) ? 'xxxxxx' : $val;
                 $addstrlog .= $key . ':' . $val . ' ';
                 $addstr    .= $key . ':' . $maskval . ' ';
             }
