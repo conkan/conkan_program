@@ -107,7 +107,16 @@ sub regcastadd :Local {
     my $hval = $c->forward('/program/_trnReq2Hash', [ [ @$ckt, @$items ] ], );
 
     try{
-        __PACKAGE__->_addCast( $c, $hval, $hval->{'pgid'} );
+        my $prog_id = $hval->{'regpgid'};
+        my $pgid    = $hval->{'pgid'};
+        my $cast    = {
+            'pgname'    => $hval->{'name'},
+            'pgnamef'   => $hval->{'namef'},
+            'pgtitle'   => $hval->{'title'},
+            'needreq'   => $hval->{'needreq'},
+            'needguest' => $hval->{'needguest'},
+        };
+        __PACKAGE__->_crtCast( $c, $prog_id, $pgid, $cast );
         $c->forward('/program/_autoProgress',
             [ $hval->{'regpgid'}, 'regcast', $items, undef, $hval ] );
         $c->stash->{'status'} = 'add';
@@ -243,44 +252,17 @@ sub _crtCast :Private {
     my $row = $model->create( $val );
         
     # PgAllCastへの登録
-    $model = $c->model('ConkanDB::PgAllCast');
-    my $cond = {};
-    $cond->{'rmdate'} = \'IS NULL';
-    if ( defined $p->{'entrantregno'} ) {
-        # 出演者参加番号があれば、その人を探す
-        $cond->{'regno'} = $p->{'entrantregno'};
+    my $allcastval = {};
+    #   名前は、$cast->{'name'}を優先だが、その場合フリガナは未指定
+    if ( defined $cast->{'name'} ) {
+        $allcastval->{'name'}   = $p->{'name'};
     }
     else {
-        # 名前とフリガナが一致する人を探す
-        #   名前は、$p->{'name'}を優先
-        #   $p->{'name'}がある場合はフリガナは検索条件外
-        if ( defined $p->{'name'} ) {
-            $cond->{'name'}   = $p->{'name'}        
-        }
-        else {
-            $cond->{'name'}   = $p->{'pgname'}  if defined $p->{'pgname'};
-            $cond->{'namef'}  = $p->{'pgnamef'} if defined $p->{'pgnamef'};
-        }
+        $allcastval->{'name'}   = $p->{'pgname'};
+        $allcastval->{'namef'}  = $p->{'pgnamef'};
     }
-    $row = ($model->search( $cond ) )[0];
-    unless ( $row ) {
-        # 見つからなければ新規登録
-        # 必須の値が設定済みであることは、prog_registで確認済みなので、
-        # ここでは未定義の場合DB初期値を使う
-        #   nameへの登録は、$p->{'name'}を優先
-        #   ただし、その場合フリガナは登録しない
-        $val = {};
-        if ( defined $p->{'name'} ) {
-            $val->{'name'}   = $p->{'name'};
-        }
-        else {
-            $val->{'name'}   = $p->{'pgname'}   if defined $p->{'pgname'};
-            $val->{'namef'}  = $p->{'pgnamef'}  if defined $p->{'pgnamef'};
-        }
-        $val->{'regno'}  = $p->{'entrantregno'} if defined $p->{'entrantregno'};
-        $row = $model->create( $val );
-    }
-    my $castid = $row->castid(); # 見つかった/登録した 出演者IDを取得
+    $allcastval->{'regno'}  = $p->{'entrantregno'}; 
+    my $castid = $c->forward('/program/_addAllCast', [ $allcastval ], );
 
     # PgCastへの登録
     $model = $c->model('ConkanDB::PgCast');
@@ -292,6 +274,64 @@ sub _crtCast :Private {
     $val->{'title'}  = $p->{'pgtitle'}  if defined $p->{'pgtitle'};
     $val->{'status'} = $p->{'needreq'}  if defined $p->{'needreq'};
     $row = $model->create( $val );
+}
+
+=head2 _addAllCast
+
+PgAllCastへの登録
+
+戻り値: 見つかった/登録した 出演者IDを返却
+
+=cut
+
+sub _addAllCast :Private {
+    my ( $self, $c, 
+         $cast,     # 追加する出演者情報
+                    # name, namef, regno, status, memo, restdate
+       ) = @_;
+
+    # # 氏名の正規化
+    # # 空白前後の文字がASCIIの時は、空白を挿入
+    # # そうでない時は空白を詰める
+    # my $castname = '';
+    # my @names = split(/\s/, $cast->{'name'});
+    # my $maxcnt = scalar(@names);
+    # for ( my $cnt=0; $cnt< $maxcnt; $cnt++ ) {
+    #     $castname .= $names[$cnt];
+    #     if (   ( substr($castname, -1, 1) =~ /^[\x20-\x7E]+$/ )
+    #         && ( $cnt+1 < $maxcnt )
+    #         && ( substr($names[$cnt+1], 0, 1) =~ /^[\x20-\x7E]+$/ ) ) {
+    #             $castname .= ' '
+    #     }
+    # }
+    my $castname = $cast->{'name'};
+
+    my $model = $c->model('ConkanDB::PgAllCast');
+    my $cond = {};
+    $cond->{'rmdate'} = \'IS NULL';
+    if ( defined $cast->{'regno'} ) {
+        # 出演者参加番号があれば、その人を探す
+        $cond->{'regno'} = $cast->{'regno'};
+    }
+    else {
+        # 名前とフリガナが一致する人を探す
+        $cond->{'name'}   = $castname;        
+        $cond->{'namef'}  = $cast->{'namef'} if defined $cast->{'namef'};
+    }
+    my $row = ($model->search( $cond ) )[0];
+    unless ( $row ) {
+        # 見つからなければ新規登録
+        #   ただし、regnoは登録しない
+        my $val = {};
+        $val->{'name'}   = $castname;
+        $val->{'namef'}  = $cast->{'namef'}  if defined $cast->{'namef'};
+        $val->{'status'} = $cast->{'status'} if defined $cast->{'status'};
+        $val->{'memo'}   = $cast->{'memo'} if defined $cast->{'memo'};
+        $val->{'restdate'} = $cast->{'restdate'} if defined $cast->{'restdate'};
+
+        $row = $model->create( $val );
+    }
+    return $row->castid(); # 見つかった/登録した 出演者IDを返却
 }
 
 =head2 _crtRegEquip
@@ -335,7 +375,7 @@ WebAPI 1.0 企画登録
 
 戻り値 ( $pgid : 企画内部ID $prog_id : 企画ID )
 
-=cut
+ =cut old_WebAPI_1_0
 
 sub _WebAPI_1_0 :Private {
     my ( $self, $c,
@@ -361,8 +401,8 @@ sub _WebAPI_1_0 :Private {
         }
         my $row =
             $c->model('ConkanDB::' . $regcnf->{'schema'})->create( $hval );
-$c->ug('>>>> add reg_program:name [' . $hval->{'name'} . ']');
-$c->ug('>>>> add reg_program:regpgid [' . $row->regpgid . ']');
+ $c->ug('>>>> add reg_program:name [' . $hval->{'name'} . ']');
+ $c->ug('>>>> add reg_program:regpgid [' . $row->regpgid . ']');
         ## $pginfo->{企画ID}の値を再設定 (autoinc対応)
         $pginfo->{'企画ID'} = $row->regpgid;
     }
@@ -436,7 +476,7 @@ Regist情報に基づく申込情報(pginfo)パース
 
 戻り値 パース後のハッシュ(1レコード分)
 
-=cut
+ =cut old_WebAPI_1_0
 
 sub ParseRegist :Private {
     my ( $self,
@@ -485,7 +525,7 @@ sub ParseRegist :Private {
 出演者受付に加え、全出演者、出演者管理 にも登録
 DBエラー発生時は、例外発生するので呼び出し側で処理すること
 
-=cut
+ =cut old_WebAPI_1_0
 
 sub _addCast :Private {
     my ( $self,
@@ -559,6 +599,8 @@ sub _addCast :Private {
 # <<< WebAPI 1.0
 #   ConkanProgram 2.0.0 Fix時には削除
 #============================================================================
+
+=cut
 
 =head2 progress
 -----------------------------------------------------------------------------
