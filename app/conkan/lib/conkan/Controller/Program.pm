@@ -290,21 +290,20 @@ sub _addAllCast :Private {
                     # name, namef, regno, status, memo, restdate
        ) = @_;
 
-    # # 氏名の正規化
-    # # 空白前後の文字がASCIIの時は、空白を挿入
-    # # そうでない時は空白を詰める
-    # my $castname = '';
-    # my @names = split(/\s/, $cast->{'name'});
-    # my $maxcnt = scalar(@names);
-    # for ( my $cnt=0; $cnt< $maxcnt; $cnt++ ) {
-    #     $castname .= $names[$cnt];
-    #     if (   ( substr($castname, -1, 1) =~ /^[\x20-\x7E]+$/ )
-    #         && ( $cnt+1 < $maxcnt )
-    #         && ( substr($names[$cnt+1], 0, 1) =~ /^[\x20-\x7E]+$/ ) ) {
-    #             $castname .= ' '
-    #     }
-    # }
-    my $castname = $cast->{'name'};
+    # 氏名の正規化
+    # 空白前後の文字がASCIIの時は、空白を挿入
+    # そうでない時は空白を詰める
+    my $castname = '';
+    my @names = split(/\s/, $cast->{'name'});
+    my $maxcnt = scalar(@names);
+    for ( my $cnt=0; $cnt< $maxcnt; $cnt++ ) {
+        $castname .= $names[$cnt];
+        if (   ( substr($castname, -1, 1) =~ /^[\x20-\x7E]+$/ )
+            && ( $cnt+1 < $maxcnt )
+            && ( substr($names[$cnt+1], 0, 1) =~ /^[\x20-\x7E]+$/ ) ) {
+                $castname .= ' '
+        }
+    }
 
     my $model = $c->model('ConkanDB::PgAllCast');
     my $cond = {};
