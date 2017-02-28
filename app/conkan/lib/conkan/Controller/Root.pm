@@ -94,7 +94,7 @@ sub auto :Private {
         }
     }
     $c->stash->{cver} = Catalyst->version();
-    $c->stash->{ver} = $conkan::VERSION;
+    $c->stash->{ver} = conkan->getversion();
     $c->stash->{headerlogo} = $c->config->{headerlogo};
     $c->config->{time_origin} = 0 unless (exists($c->config->{time_origin}));
     # login->login ループ回避

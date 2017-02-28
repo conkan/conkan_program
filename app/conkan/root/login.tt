@@ -14,7 +14,7 @@
 </head>
 <body>
 <div class="container">
-  <H1>conkan loginページ</H1>
+  <H1>[% headerlogo %] loginページ</H1>
 
   [%- IF! c.user_exists %]
   <!-- パスワードlogin -->
