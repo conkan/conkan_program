@@ -60,6 +60,21 @@ ConkanAppModule.value( 'pglistValue', {
             },
         [%- END %]
     ], 
+    // 機材別企画リスト
+    equipprglist : [
+        [%- FOREACH prg = equipProgram %]
+            {
+                equip : '[[% prg.equipno %]] [% prg.equipname | xml %]',
+                prgname  : {
+                    name: '[% prg.regpgid | format('%04d') %]([% prg.subno | format('%01d') %]) [% prg.sname | xml %]',
+                    pgid    : '[% prg.pgid %]',
+                },
+                room     : '[% prg.roomno %] [% prg.roomname | xml %]',
+                doperiod : '[% prg.doperiod %]',
+                status :   '[% prg.status %]'
+            },
+        [%- END %]
+    ], 
 });
 </script>
 <!-- # Region tttimeselval.tt -->

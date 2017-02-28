@@ -53,15 +53,16 @@
     min-width: 480px;
 }
 
-#timetable_room {
+#timetable_room, #timetable_cast, #timetable_equip {
     background: lightgray;
     position: absolute;
+}
+
+#timetable_room {
     visibility: visible;
 }
 
-#timetable_cast {
-    background: lightgray;
-    position: absolute;
+#timetable_cast, #timetable_equip {
     visibility: hidden;
 }
 
