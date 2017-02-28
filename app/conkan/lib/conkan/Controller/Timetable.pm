@@ -112,7 +112,7 @@ sub index :Path :Args(0) {
                 {
                     'prefetch' => [ 'pg_casts', { 'pg_casts' => 'castid' }, 'regpgid', 'roomid' ],
                     'order_by' => { '-asc' =>
-                        [ 'castid.regno', 'castid.name', 'date1', 'stime1' ] },
+                        [ 'castid.regno', 'me.pgid', 'me.subno', 'date1', 'stime1' ] },
                 } )
             ];
         my @castlist = ();
@@ -136,6 +136,45 @@ sub index :Path :Args(0) {
             }
         }
         $c->stash->{'castProgram'} = \@castlist;
+        # 機材別企画リスト
+        my $equipPgmlist =
+            [ $c->model('ConkanDB::PgProgram')->search(
+                { 'me.roomid' => \'IS NOT NULL',
+                    'date1'  => \'IS NOT NULL', 
+                    'stime1' => \'IS NOT NULL', 
+                    'etime1' => \'IS NOT NULL' 
+                },
+                {
+                    'prefetch' => [ 'pgs_equip', { 'pgs_equip' => 'equipid' }, 'regpgid', 'roomid' ],
+                    'order_by' => { '-asc' =>
+                        [ 'equipid.equipno', 'me.pgid', 'me.subno', 'date1', 'stime1' ] },
+                } )
+            ];
+        my @equiplist = ();
+        foreach my $pgm ( @$equipPgmlist ) {
+            my $doperiod = $c->forward('/timetable/createPeriod', [ $pgm, ], );
+            my $pgname = $pgm->sname() || $pgm->regpgid->name();
+            $pgname =~ s/\n//g;
+            foreach my $equip ( $pgm->pgs_equip->all() ) {
+                # 持ち込み映像機器、持ち込みPCはタイムテーブル表示対象外
+                my $equipno = $equip->equipid->equipno();
+                next if (    ( $equipno eq 'bring-AV' )
+                          || ( $equipno eq 'bring-PC' ) );
+                push @equiplist, {
+                    'equipno'       => $equipno,
+                    'equipname'     => $equip->equipid->name(),
+                    'regpgid'       => $pgm->regpgid->regpgid(),
+                    'pgid'          => $pgm->pgid(),
+                    'subno'         => $pgm->subno(),
+                    'sname'         => $pgname,
+                    'roomno'        => $pgm->roomid->roomno(),
+                    'roomname'      => $pgm->roomid->name(),
+                    'doperiod'      => $doperiod,
+                    'status'        => $pgm->status(),
+                };
+            }
+        }
+        $c->stash->{'equipProgram'} = \@equiplist;
     } catch {
         $c->detach( '_dberror', [ shift ] );
     };

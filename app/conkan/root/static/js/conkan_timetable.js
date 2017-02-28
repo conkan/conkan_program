@@ -33,8 +33,10 @@
     w = timewrap.width();
     angular.element("#timetable_room").width(w);
     angular.element("#timetable_cast").width(w);
+    angular.element("#timetable_equip").width(w);
     angular.element("#timetable_room").height('auto');
     angular.element("#timetable_cast").height('auto');
+    angular.element("#timetable_equip").height('auto');
   });
 
   // conkanTimeTableモジュールの取得(生成済のもの)
@@ -139,6 +141,7 @@
           return wkstr;
         };
 
+        // 部屋別グリッド定義
         $scope.ttgridbyroom = {
           enableFiltering: false,
           enableSorting: false,
@@ -176,6 +179,7 @@
         ];
         $scope.ttgridbyroom.data = pglistValue.roomprglist;
 
+        // 出演者別グリッド定義
         $scope.ttgridbycast= {
           enableFiltering: false,
           enableSorting: false,
@@ -213,17 +217,67 @@
         ];
         $scope.ttgridbycast.data = pglistValue.castprglist;
 
+        // 機材別グリッド定義
+        $scope.ttgridbyequip= {
+          enableFiltering: false,
+          enableSorting: false,
+          treeRowHeaderAlwaysVisible: false,
+          enableColumnResizing: true,
+          enableGridMenu: false,
+          onRegisterApi: function(gridApi) {
+            $scope.grEquipApi = gridApi;
+            $scope.grEquipApi.grid.registerDataChangeCallback(function() {
+              $scope.grEquipApi.treeBase.expandAllRows();
+            });
+          }
+        };
+        $scope.ttgridbyequip.columnDefs = [
+          { name : '機材', field: 'equip',
+            headerCellClass: 'gridheader',
+            grouping: { groupPriority: 0 },
+            sort: { priority: 0, direction: uiGridConstants.ASC },
+            cellTemplate: '<div><div ng-if="!col.grouping || col.grouping.groupPriority === undefined || col.grouping.groupPriority === null || ( row.groupHeader && col.grouping.groupPriority === row.treeLevel )" class="ui-grid-cell-contents" title="TOOLTIP">{{COL_FIELD CUSTOM_FILTERS}}</div></div>'
+          },
+          { name : '企画名', field: 'prgname',
+            headerCellClass: 'gridheader',
+            cellTooltip: true,
+            cellTemplate: '<div ng-if="!row.groupHeader"><div class="ganttRow ui-grid-cell-contents" title="{{row.entity.status}}"><button class="btn primary prgcell" ng-click="grid.appScope.pgmclick(row.entity.prgname.pgid)"><div ng-bind-html="grid.appScope.__crPgBtn(row.entity.prgname.name, row.entity.status)"></div></button></div></div>'
+          },
+          { name : '期間',
+            headerCellTemplate: pglistValue.ganttConst.ganttHeader,
+            sort: { priority: 1, direction: uiGridConstants.ASC },
+            width: $scope.__getGanttWidth(),
+            field: 'doperiod',
+            pinnedRight:true,
+            cellTooltip: true,
+            cellTemplate: '<div ng-if="!row.groupHeader"><div class="ganttRow ui-grid-cell-contents" title="TOOLTIP" ng-bind-html="grid.appScope.__crGanttCell(row.entity.doperiod, row.entity.status)"></div></div>'
+          }
+        ];
+        $scope.ttgridbyequip.data = pglistValue.equipprglist;
+
         $scope.showbyroom = function( ) {
           angular.element("#timetable_room").css( 'visibility', 'visible');
           angular.element("#roombtn").addClass( 'showbtnon' );
           angular.element("#timetable_cast").css( 'visibility', 'hidden');
           angular.element("#castbtn").removeClass( 'showbtnon' );
+          angular.element("#timetable_equip").css( 'visibility', 'hidden');
+          angular.element("#equipbtn").removeClass( 'showbtnon' );
         };
         $scope.showbycast = function( ) {
           angular.element("#timetable_room").css( 'visibility', 'hidden');
           angular.element("#roombtn").removeClass( 'showbtnon' );
           angular.element("#timetable_cast").css( 'visibility', 'visible');
           angular.element("#castbtn").addClass( 'showbtnon' );
+          angular.element("#timetable_equip").css( 'visibility', 'hidden');
+          angular.element("#equipbtn").removeClass( 'showbtnon' );
+        };
+        $scope.showbyequip = function( ) {
+          angular.element("#timetable_room").css( 'visibility', 'hidden');
+          angular.element("#roombtn").removeClass( 'showbtnon' );
+          angular.element("#timetable_cast").css( 'visibility', 'hidden');
+          angular.element("#castbtn").removeClass( 'showbtnon' );
+          angular.element("#timetable_equip").css( 'visibility', 'visible');
+          angular.element("#equipbtn").addClass( 'showbtnon' );
         };
         $scope.pgmclick = function( pgid ) {
           currentprgService.query( pgid );

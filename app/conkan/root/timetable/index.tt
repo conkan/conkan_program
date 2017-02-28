@@ -35,14 +35,18 @@ END -%]
     <div id="timetable_wrap" class="col-sm-10" ng-controller="timetableController">
       <div class="row" id="roomcastsel">
           <div class="col-sm-6"></div>
-          <div class="showbtnon showbtn col-sm-3" id="roombtn" ng-click="showbyroom()">部屋別</div>
-          <div class="showbtn col-sm-3" id="castbtn" ng-click="showbycast()">出演者別</div>
+          <div class="showbtnon showbtn col-sm-2" id="roombtn" ng-click="showbyroom()">部屋別</div>
+          <div class="showbtn col-sm-2" id="castbtn" ng-click="showbycast()">出演者別</div>
+          <div class="showbtn col-sm-2" id="equipbtn" ng-click="showbyequip()">機材別</div>
       </div>
       <!-- Main: タイムテーブル表示: 部屋別 -->
       <div id="timetable_room" ui-grid="ttgridbyroom" class="grid" ui-grid-resize-columns ui-grid-pinning ui-grid-grouping>
       </div>
       <!-- Main: タイムテーブル表示: 出演者別 -->
       <div id="timetable_cast" ui-grid="ttgridbycast" class="grid" ui-grid-resize-columns ui-grid-pinning ui-grid-grouping>
+      </div>
+      <!-- Main: タイムテーブル表示: 機材別 -->
+      <div id="timetable_equip" ui-grid="ttgridbyequip" class="grid" ui-grid-resize-columns ui-grid-pinning ui-grid-grouping>
       </div>
     </div>
   </div> <!-- End of timetable_up -->
