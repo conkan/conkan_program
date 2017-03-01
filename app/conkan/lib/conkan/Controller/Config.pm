@@ -113,7 +113,7 @@ sub setting :Local {
             my @items = qw/
                 dates               start_hours         end_hours
                 pg_status_vals      pg_status_color     pg_active_status
-                cast_status_vals    contact_status_vals
+                cast_status_vals    contact_status_vals def_regEquip
             /;
             foreach my $item ( @items ) {
                 $c->stash->{'json'}->{$item} = $pHconf->{$item};
@@ -142,9 +142,6 @@ $c->log->debug('>>> ' . 'code : ' . $code . ' val : ' . $pHwk->pg_conf_value() )
                 # めったにないので毎回設定
                 my $ganttStrs = $c->forward('/config/_crGntStr', [ $param, ], );
                 while ( my ( $key, $val ) = each( %GantConfHash ) ) {
-$c->log->debug('>>> ' . 'key : ' . $key . ' val : ' . $val );
-$c->log->debug('>>> ' . 'value : ' . $ganttStrs->[0] );
-$c->log->debug('>>> ' . 'value : ' . $ganttStrs->[$val] );
                     $sysconM->update_or_create( {
                         pg_conf_code => $key,
                         pg_conf_name => $key . '(cache)',

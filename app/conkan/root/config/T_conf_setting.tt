@@ -75,6 +75,13 @@
                ng-model="conf.contact_status_vals.pg_conf_value"></textarea>
             </td>
           </tr>
+          <tr>
+            <th>{{conf.def_regEquip.pg_conf_name}}</th>
+            <td>
+              <textarea name="def_regEquip" class="col-sm-12" required
+               ng-model="conf.def_regEquip.pg_conf_value"></textarea>
+            </td>
+          </tr>
         </tbody>
       </table>
     </FORM>

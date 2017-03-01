@@ -127,6 +127,7 @@ var ConfDataCnv = function( data ) {
   wkcnf.nos         = [ '0', '1', '2', '3', '4' ];
   wkcnf.status      = angular.fromJson(data.json.pg_status_vals);
   wkcnf.cast_status = angular.fromJson(data.json.cast_status_vals);
+  wkcnf.def_regEquip = angular.fromJson(data.json.def_regEquip);
   wkcnf.yesno       = [ 'する', 'しない' ];
   wkcnf.dates.unshift(''); // 日付初期化用
 
