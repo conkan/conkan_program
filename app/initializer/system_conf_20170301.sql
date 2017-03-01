@@ -1,0 +1,1 @@
+INSERT INTO pg_system_conf (pg_conf_code,pg_conf_name,pg_conf_value) VALUES("def_regEquip","要望機材定義情報","{\"ホワイトボード\":\"provide\",\"壇上マイク\":\"multi\",\"客席マイク\":\"multi\",\"モニタ/スクリーン\":\"provide\",\"BD/DVDプレイヤー\":\"provide\",\"書画カメラ\":\"provide\",\"持ち込み映像機器\":\"bring-av\",\"持ち込みPC\":\"bring-pc\"}");
