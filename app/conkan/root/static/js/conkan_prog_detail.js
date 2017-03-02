@@ -192,6 +192,28 @@
           });
         };
 
+        // 要望機材更新追加ダイアログ
+        $scope.openRegEquipForm = function( regequipid ) {
+          $uibModal.open({
+            templateUrl : 'T_pgup_regequip',
+            controller  : 'regequipFormController',
+            backdrop    : 'static',
+            scope       : $scope,
+            size        : 'lg',
+            resolve     :
+              { params: function() {
+                return {
+                  regpgid : init_regpgid,
+                  subno   : init_subno,
+                  pgid    : init_pgid,
+                  name    : init_name,
+                  editEquipId : regequipid,
+                  editEquipBtnLbl : ( regequipid === 0 ) ? '追加' : '更新',
+                };
+              }},
+          });
+        };
+
         // 決定機材更新追加ダイアログ
         $scope.openEquipForm = function( equipid ) {
           $uibModal.open({
@@ -502,6 +524,116 @@
   a2h( IfOptions.avvif.concat(IfOptions.pcvif).concat([undefined]), IfOptions.vifH );
   a2h( IfOptions.aif.concat([undefined]), IfOptions.aifH );
   a2h( IfOptions.eif.concat([undefined]), IfOptions.eifH );
+
+  // 要望機材更新追加ダイアログコントローラ
+  ConkanAppModule.controller( 'regequipFormController',
+    [ '$scope', '$http', '$uibModal', '$uibModalInstance', 'params',
+      function( $scope, $http, $uibModal, $uibModalInstance, params ) {
+        // 選択肢取得
+        $http.get(uriprefix + '/config/confget')
+        .success(function(data) {
+          if ( data.status === 'ok' ) {
+            $scope.conf = ConfDataCnv( data, $scope.conf );
+            $scope.defRegEquip = $scope.conf.def_regEquip;
+          }
+          else {
+            openDialog( data.status );
+          }
+        })
+        .error( function() { httpfailDlg( $uibModal ); } );
+
+        // 初期値設定
+        angular.element('#valerr').text('');
+        $scope.prog = params;
+        $scope.regequip = {
+          id            : params.editEquipId,
+          applyBtnLbl   : params.editEquipBtnLbl,
+          regpgid       : params.regpgid,
+        };
+        $scope.avviflist = IfOptions.avvif;
+        $scope.pcviflist = IfOptions.pcvif;
+        $scope.aiflist   = IfOptions.aif;
+        $scope.eiflist   = IfOptions.eif;
+        if ( params.editEquipId != 0 ) {
+          $http({
+            method  : 'GET',
+            url     : uriprefix + '/program/' + params.regpgid + '/regequip/' + params.editEquipId,
+          })
+          .success(function(data) {
+            if ( data.status === 'ok' ) {
+              $scope.regequip.name    = data.json.name;
+              $scope.regequip.count   = data.json.count;
+              $scope.regequip.intende = data.json.intende;
+              if ( data.json.vif in IfOptions.vifH ) {
+                $scope.regequip.vif = data.json.vif;
+              }
+              else {
+                $scope.regequip.vif = 'その他';
+                $scope.regequip.ovif = data.json.vif;
+              }
+              if ( data.json.aif in IfOptions.aifH ) {
+                $scope.regequip.aif = data.json.aif;
+              }
+              else {
+                $scope.regequip.aif = 'その他';
+                $scope.regequip.oaif = data.json.aif;
+              }
+              if ( data.json.eif in IfOptions.eifH ) {
+                $scope.regequip.eif = data.json.eif;
+              }
+              else {
+                $scope.regequip.eif = 'その他';
+                $scope.regequip.oeif = data.json.eif;
+              }
+            }
+            else {
+              openDialog( data.status );
+            }
+          })
+          .error( function() { httpfailDlg( $uibModal ); } )
+          .finally( dialogResizeDrag);
+        }
+
+        // 更新実施
+        $scope.regequipDoApply = function() {
+          var regpgid = $scope.regequip.regpgid;
+          var itemid  = $scope.regequip.id;
+          // 二重クリック回避
+          angular.element('#regequipapplybtn').attr('disabled', 'disabled');
+          angular.element('#regequipdelbtn').attr('disabled', 'disabled');
+          // その他 の内容置き換え
+          if ( $scope.regequip.vif == 'その他' ) {
+            $scope.regequip.vif = $scope.regequip.ovif;
+          }
+          if ( $scope.regequip.aif == 'その他' ) {
+            $scope.regequip.aif = $scope.regequip.oaif;
+          }
+          if ( $scope.regequip.eif == 'その他' ) {
+            $scope.regequip.eif = $scope.regequip.oeif;
+          }
+          // 実行
+          doJsonPost( $http, uriprefix + '/program/' + regpgid + '/regequip/' + itemid,
+            $.param($scope.regequip), $uibModalInstance, $uibModal,
+            function() {
+              $scope.progReload(); // 更新した進捗を表示
+            } );
+        };
+        // 削除実施
+        $scope.regequipDoDel = function() {
+          var regpgid = $scope.regequip.regpgid;
+          var itemid  = $scope.regequip.id;
+          // 二重クリック回避
+          angular.element('#regequipapplybtn').attr('disabled', 'disabled');
+          angular.element('#regequipdelbtn').attr('disabled', 'disabled');
+          doJsonPost( $http, uriprefix + '/program/' + regpgid + '/regequip/' + itemid + '/del/',
+            undefined, $uibModalInstance, $uibModal,
+            function() {
+              $scope.progReload(); // 更新した進捗を表示
+            } );
+        };
+      }
+    ]
+  );
 
   // 決定機材更新追加ダイアログコントローラ
   ConkanAppModule.controller( 'equipFormController',
