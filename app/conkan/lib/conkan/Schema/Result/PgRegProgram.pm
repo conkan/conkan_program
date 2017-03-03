@@ -186,6 +186,17 @@ __PACKAGE__->table("pg_reg_program");
   data_type: 'text'
   is_nullable: 1
 
+=head2 originaljson
+
+  data_type: 'text'
+  is_nullable: 1
+
+=head2 cloudtag
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 128
+
 =head2 updateflg
 
   data_type: 'varchar'
@@ -250,6 +261,10 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 0, size => 64 },
   "comment",
   { data_type => "text", is_nullable => 1 },
+  "originaljson",
+  { data_type => "text", is_nullable => 1 },
+  "cloudtag",
+  { data_type => "varchar", is_nullable => 1, size => 128 },
   "updateflg",
   { data_type => "varchar", is_nullable => 1, size => 64 },
 );
@@ -329,8 +344,8 @@ __PACKAGE__->has_many(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07043 @ 2016-01-17 19:12:31
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:iPjyBq+GxJ6bf76mHZ3ZLg
+# Created by DBIx::Class::Schema::Loader v0.07046 @ 2017-03-03 21:49:28
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:EzNyMEqQ0ZMDGx45gjhMZw
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration

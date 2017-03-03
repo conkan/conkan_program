@@ -89,6 +89,12 @@ __PACKAGE__->table("pg_reg_equip");
   is_nullable: 1
   size: 64
 
+=head2 updateflg
+
+  data_type: 'varchar'
+  is_nullable: 1
+  size: 64
+
 =cut
 
 __PACKAGE__->add_columns(
@@ -123,6 +129,8 @@ __PACKAGE__->add_columns(
   { data_type => "varchar", is_nullable => 1, size => 64 },
   "intende",
   { data_type => "varchar", is_nullable => 1, size => 64 },
+  "updateflg",
+  { data_type => "varchar", is_nullable => 1, size => 64 },
 );
 
 =head1 PRIMARY KEY
@@ -155,8 +163,8 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07045 @ 2016-04-24 21:29:35
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:RTxRjFONsEOT0FztEp0Kbg
+# Created by DBIx::Class::Schema::Loader v0.07046 @ 2017-03-03 21:49:28
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:cq3VWSXRP9o7QXihkUmhsg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
