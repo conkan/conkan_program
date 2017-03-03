@@ -1341,6 +1341,15 @@ sub pgup_regequip : Chained('pgup_regequiptop') : PathPart('') : Args(0) {
                 $c->stash->{'json'}->{'eif'}     = $rowprof->eif();
                 $c->stash->{'json'}->{'intende'} = $rowprof->intende();
             }
+            # 提供要望機材情報
+            my $defregstr = $c->model('ConkanDB::PgSystemConf')
+                            ->find('def_regEquip')->pg_conf_value();
+            my $pdefReg = from_json( $defregstr );
+            my @regEquiplist = map { keys(%$_) } @$pdefReg;
+            push ( @regEquiplist, ( 'その他要望機材', 'その他持ち込み機材' ) );
+            my %defRegEquip  = map { each(%$_) } @$pdefReg;
+            $c->stash->{'json'}->{'defRegEquip'} = \%defRegEquip;
+            $c->stash->{'json'}->{'regEquiplist'} = \@regEquiplist;
         }
         $c->forward( '_pgupdate', [ 'regequip', $rowprof, $up_items ] );
     } catch {

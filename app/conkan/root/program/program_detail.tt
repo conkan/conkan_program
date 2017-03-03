@@ -346,7 +346,7 @@ END -%]
               <td align="center">
                 [%- IF editable  %]
                   <button type="button" class="btn btn-warning btn-xs"
-                      ng-click="openRegEquipForm( item.id )">
+                      ng-click="openRegEquipForm( [% item.id %] )">
                   編集
                   </button>
                 [% END %]

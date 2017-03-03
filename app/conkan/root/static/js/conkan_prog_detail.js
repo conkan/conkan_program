@@ -564,19 +564,6 @@
   ConkanAppModule.controller( 'regequipFormController',
     [ '$scope', '$http', '$uibModal', '$uibModalInstance', 'params',
       function( $scope, $http, $uibModal, $uibModalInstance, params ) {
-        // 選択肢取得
-        $http.get(uriprefix + '/config/confget')
-        .success(function(data) {
-          if ( data.status === 'ok' ) {
-            $scope.conf = ConfDataCnv( data, $scope.conf );
-            $scope.defRegEquip = $scope.conf.def_regEquip;
-          }
-          else {
-            openDialog( data.status );
-          }
-        })
-        .error( function() { httpfailDlg( $uibModal ); } );
-
         // 初期値設定
         angular.element('#valerr').text('');
         $scope.prog = params;
@@ -590,16 +577,14 @@
               id            : params.editEquipId,
               applyBtnLbl   : params.editEquipBtnLbl,
               regpgid       : params.regpgid,
+              pgid          : params.pgid,
               name          : data.json.name,
               count         : data.json.count,
               intende       : data.json.intende,
             };
             // 選択肢設定
-            $scope.regequiplist = [];
-            for ( equipname in  $scope.defRegEquip ) {
-              $scope.regequiplist.push( equipname );
-            }
-            $scope.regequiplist.push( 'その他要望機材', 'その他持ち込み機材' );
+            $scope.defRegEquip  = data.json.defRegEquip;
+            $scope.regequiplist = data.json.regEquiplist;
             // 接続オプション設定
             ifOptionSet( data, $scope.regequip, $scope );
           }
@@ -610,14 +595,38 @@
         .error( function() { httpfailDlg( $uibModal ); } )
         .finally( dialogResizeDrag);
 
+        // 監視設定
+        $scope.$watch('regequip.name', function( n, o, scope ) {
+          if ( angular.isDefined(n) ) {
+            if ( n in scope.defRegEquip ) {
+              scope.eqtype = scope.defRegEquip[n]
+              if ( scope.eqtype == 'bring-pc' || scope.eqtype == 'bring-av' ) {
+                // 映像機器とPCでは映像IFの選択値が違うので一旦クリア
+                scope.regequip.vif = undefined;
+              }
+            }
+            else {
+              scope.eqtype = 'other';
+            }
+          }
+        });
+
         // 更新実施
         $scope.regequipDoApply = function() {
-          var regpgid = $scope.regequip.regpgid;
-          var itemid  = $scope.regequip.id;
+          var pgid   = $scope.regequip.pgid;
+          var itemid = $scope.regequip.id;
           // 二重クリック回避
           angular.element('#regequipapplybtn').attr('disabled', 'disabled');
           angular.element('#regequipdelbtn').attr('disabled', 'disabled');
           // その他 の内容置き換え
+          if (!( $scope.regequip.name in $scope.defRegEquip )) {
+              if ( $scope.regequip.name == 'その他要望機材' ) {
+                $scope.regequip.name = $scope.regequip.oname + '(要望)';
+              }
+              else {
+                $scope.regequip.name = $scope.regequip.oname + '(持ち込み)';
+              }
+          }
           ifOptionOtherSet( $scope.regequip );
           // 実行
           doJsonPost( $http,
@@ -626,8 +635,8 @@
         };
         // 削除実施
         $scope.regequipDoDel = function() {
-          var regpgid = $scope.regequip.regpgid;
-          var itemid  = $scope.regequip.id;
+          var pgid   = $scope.regequip.pgid;
+          var itemid = $scope.regequip.id;
           // 二重クリック回避
           angular.element('#regequipapplybtn').attr('disabled', 'disabled');
           angular.element('#regequipdelbtn').attr('disabled', 'disabled');
