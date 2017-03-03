@@ -1298,6 +1298,91 @@ sub program_equiplist : Chained('program_show') : PathPart('equiplist') : Args(0
     $c->forward('conkan::View::JSON');
 }
 
+=head2 program/*/regequip/*
+---------------------------------------------
+企画管理 pgup_regequiptop  : 要望機材追加/更新/削除 起点
+
+=cut
+sub pgup_regequiptop : Chained('program_show') : PathPart('regequip') : CaptureArgs(1) {
+    my ( $self, $c, $id ) = @_;
+    $c->stash->{'id'} = $id;
+    $c->stash->{'M'} = $c->model('ConkanDB::PgRegEquip');
+}
+
+=head2 program/*/regequip/*/
+
+企画管理 pgup_regequip  : 要望機材追加/更新
+
+=cut
+sub pgup_regequip : Chained('pgup_regequiptop') : PathPart('') : Args(0) {
+    my ( $self, $c ) = @_;
+    my $up_items = [ qw/
+                    name count vif aif eif intende
+                    / ];
+    my $pgid = $c->stash->{'pgid'};
+    my $regpgid = $c->stash->{'regpgid'};
+    my $id = $c->stash->{'id'};
+    try {
+        my $rowprof = undef;
+        if ( $id == 0 ) {   # 追加
+            push @$up_items, qw/regpgid/;
+        }
+        else {              # 更新
+            $rowprof = $c->stash->{'M'}->find( $id );
+        }
+        if ( $c->request->method eq 'GET' ) {
+            $c->stash->{'json'} = {};
+            $c->stash->{'json'}->{'regpgid'} = $regpgid;
+            if ( $rowprof ) {
+                $c->stash->{'json'}->{'name'}    = $rowprof->name();
+                $c->stash->{'json'}->{'count'}   = $rowprof->count();
+                $c->stash->{'json'}->{'vif'}     = $rowprof->vif();
+                $c->stash->{'json'}->{'aif'}     = $rowprof->aif();
+                $c->stash->{'json'}->{'eif'}     = $rowprof->eif();
+                $c->stash->{'json'}->{'intende'} = $rowprof->intende();
+            }
+        }
+        $c->forward( '_pgupdate', [ 'regequip', $rowprof, $up_items ] );
+    } catch {
+        my $e = shift;
+        $c->log->error('program/' . $pgid . ' /regequip/ ' . $id . '/ error '
+            . localtime() . ' dbexp : ' . Dumper($e) );
+        $c->stash->{'status'} = 'dbfail';
+    };
+    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
+    $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
+    $c->forward('conkan::View::JSON');
+}
+
+=head2 program/*/regequip/*/del
+
+企画管理 pgup_regequipdel  : 要望機材削除
+
+=cut
+sub pgup_regequipdel : Chained('pgup_regequiptop') : PathPart('del') : Args(0) {
+    my ( $self, $c ) = @_;
+
+    my $up_items = [ qw/
+                    id
+                    / ];
+
+    my $pgid = $c->stash->{'pgid'};
+    my $regpgid = $c->stash->{'regpgid'};
+    my $id   = $c->stash->{'id'};
+
+    # あり得ないが念のため
+    if ( ( $c->request->method eq 'GET' ) || ( $c->stash->{'id'} == 0 ) ) {
+        $c->detach(
+            '/program/' . $c->stash->{'pgid'} . '/regequip/' . $c->stash->{'id'}
+        );
+    }
+
+    $c->forward( '_pgdelete', [ 'regequip', $up_items ] );
+    $c->log->info( localtime() . ' status:' . $c->stash->{'status'} );
+    $c->component('View::JSON')->{expose_stash} = [ 'status' ];
+    $c->forward('conkan::View::JSON');
+}
+
 =head2 program/*/equip/*
 ---------------------------------------------
 企画管理 pgup_equiptop  : 決定機材追加/更新/削除 起点
