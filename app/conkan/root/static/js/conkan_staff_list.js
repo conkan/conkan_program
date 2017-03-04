@@ -19,7 +19,7 @@
               $scope.staffgrid.data = data.json;
             }
             else {
-              openDialog( data.status );
+              openDialog( data.status, data.json, $uibModal );
             }
           })
           .error( function() { httpfailDlg( $uibModal ); } );

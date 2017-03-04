@@ -219,6 +219,7 @@ var ProgTimeValid = function( prog, scale_hash ) {
   return retval;
 };
 
+// UI部品有効化/無効化
 var elmSetValid = function( obj, valid ) {
   if ( valid ) {
     angular.element(obj).removeClass('ng-invalid');
@@ -230,6 +231,33 @@ var elmSetValid = function( obj, valid ) {
     angular.element(obj).addClass('ng-invalid');
     angular.element(obj).$invalid = true;
   }
+};
+
+// JSON POST汎用実施
+var doJsonPost = function( $http, url, data, $uibModalInstance, $uibModal,
+                           finalcallback ) {
+  $http( {
+    method  : 'POST',
+    url     : url,
+    headers : { 'Content-Type':
+                  'application/x-www-form-urlencoded; charset=UTF-8' },
+    data: data
+  })
+  .success(function(data) {
+    if ( data.status != 'nodlgok' ) {
+      openDialog( data.status, data.json, $uibModal,
+                  $uibModalInstance, finalcallback );
+    }
+  })
+  .error(function(data) {
+    openDialog( '', data.json, $uibModal,
+                $uibModalInstance, finalcallback );
+  })
+  .finally( function() {
+    if ( !$uibModalInstance && finalcallback ) {
+      finalcallback();
+    }
+  });
 };
 
 // 共通のHTTPエラー時ダイアログ表示
@@ -281,73 +309,48 @@ var dialogResizeDrag = function() {
   body.css( 'height', vh );
 };
 
-// JSON POST汎用実施
-var doJsonPost = function( $http, url, data, $uibModalInstance, $uibModal,
-                           finalcallback ) {
-  $http( {
-    method  : 'POST',
-    url     : url,
-    headers : { 'Content-Type':
-                  'application/x-www-form-urlencoded; charset=UTF-8' },
-    data: data
-  })
-  .success(function(data) {
-    if ( data.status != 'nodlgok' ) {
-      openDialog( data.status, data.json );
+// HTTP後のエラーダイアログ表示( statがエラーの場合も含む )
+var openDialog = function ( stat, json, uibModal, uibInstance, finalcb ) {
+  if ( uibInstance ) {
+    uibInstance.close('done');
+  }
+  var resultDlg = uibModal.open(
+    {
+      templateUrl : getTemplate( stat ),
+      backdrop    : 'static',
     }
-  })
-  .error(function(data) {
-    openDialog( '', data.json );
-  })
-  .finally( function() {
-    if ( !$uibModalInstance && finalcallback ) {
-      finalcallback();
+  );
+  resultDlg.rendered.then( function() {
+    angular.element('.modal-dialog').draggable({handle: '.modal-header'});
+    if ( stat === 'dupl' ) {
+      angular.element('#dupkey').text(json.dupkey);
+      angular.element('#dupval').text(json.dupval);
     }
   });
-
-  var openDialog = function ( stat, json ) {
-    if ( $uibModalInstance ) {
-      $uibModalInstance.close('done');
+  resultDlg.result.then( function() {
+    if ( finalcb ) {
+      finalcb();
     }
-    var resultDlg = $uibModal.open(
-      {
-        templateUrl : getTemplate( stat ),
-        backdrop    : 'static',
-      }
-    );
-    resultDlg.rendered.then( function() {
-      angular.element('.modal-dialog').draggable({handle: '.modal-header'});
-      if ( stat === 'dupl' ) {
-        angular.element('#dupkey').text(json.dupkey);
-        angular.element('#dupval').text(json.dupval);
-      }
-    });
-    resultDlg.result.then( function() {
-      if ( $uibModalInstance ) {
-        if ( finalcallback ) {
-          finalcallback();
-        }
-        else {
-          location.reload();
-        }
-      }
-    });
-  };
+    else {
+      location.reload();
+    }
+  });
 };
 
 // JSON POST後のstatusからtemplate名を得る
 var getTemplate = function( stat ) {
   var templateTbl = {
-    'update'    : 'T_result_update',
-    'fail'      : 'T_result_fail',
-    'add'       : 'T_result_add',
-    'del'       : 'T_result_del',
-    'delfail'   : 'T_result_delfail',
-    'ipdupfail' : 'T_result_ipdup',
-    'dbfail'    : 'T_result_dberr',
-    'inuse'     : 'T_result_inuse',
-    'dupl'      : 'T_result_dupl',
-    ''          : 'T_httpget_fail',
+    'update'    : 'T_result_update',    // 更新成功
+    'fail'      : 'T_result_fail',      // 更新失敗
+    'add'       : 'T_result_add',       // 追加成功
+    'del'       : 'T_result_del',       // 削除成功
+    'delfail'   : 'T_result_delfail',   // 削除失敗
+    'ipdupfail' : 'T_result_ipdup',     // 更新失敗(企画番号重複)
+    'dbfail'    : 'T_result_dberr',     // 更新失敗(DBエラー)
+    'inuse'     : 'T_result_inuse',     // 更新失敗(使用中)
+    'dupl'      : 'T_result_dupl',      // 更新失敗(重複)
+    'noexist'   : 'T_result_noexist',   // 取得失敗(対象削除済)
+    ''          : 'T_httpget_fail',     // データ取得失敗(詳細不明)
   };
   var retval = templateTbl[stat] || 'T_httpget_fail'; // デフォルト値
   return retval;

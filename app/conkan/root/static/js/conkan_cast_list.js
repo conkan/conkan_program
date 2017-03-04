@@ -20,7 +20,7 @@
               $scope.castgrid.data = data.json;
             }
             else {
-              openDialog( data.status );
+              openDialog( data.status, data.json, $uibModal );
             }
           })
           .error( function() { httpfailDlg( $uibModal ); } );
@@ -151,7 +151,7 @@
             $scope.statlist = data.json.statlist;
           }
           else {
-            openDialog( data.status );
+            openDialog( data.status, data.json, $uibModal );
           }
         })
         .error( function() { httpfailDlg( $uibModal ); } )

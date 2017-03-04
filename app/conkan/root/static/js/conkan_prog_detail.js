@@ -50,7 +50,7 @@
               $scope.regcastlist = data.json;
             }
             else {
-              openDialog( data.status );
+              openDialog( data.status, data.json, $uibModal );
             }
           })
           .error( function() { httpfailDlg( $uibModal ); } );
@@ -80,7 +80,7 @@
               }
             }
             else {
-              openDialog( data.status );
+              openDialog( data.status, data.json, $uibModal );
             }
           })
           .error( function() { httpfailDlg( $uibModal ); } );
@@ -109,7 +109,7 @@
               }
             }
             else {
-              openDialog( data.status );
+              openDialog( data.status, data.json, $uibModal );
             }
           })
           .error( function() { httpfailDlg( $uibModal ); } );
@@ -307,7 +307,7 @@
             };
           }
           else {
-            openDialog( data.status );
+            openDialog( data.status, data.json, $uibModal );
           }
         })
         .error( function() { httpfailDlg( $uibModal); } )
@@ -336,7 +336,7 @@
             $scope.conf = ConfDataCnv( data, $scope.conf );
           }
           else {
-            openDialog( data.status );
+            openDialog( data.status, data.json, $uibModal );
           }
         })
         .error( function() { httpfailDlg( $uibModal ); } );
@@ -353,7 +353,7 @@
             ProgDataCnv( data.json, $scope.prog );
           }
           else {
-            openDialog( data.status );
+            openDialog( data.status, data.json, $uibModal );
           }
         })
         .error( function() { httpfailDlg( $uibModal); } )
@@ -408,7 +408,7 @@
             $scope.conf = ConfDataCnv( data, $scope.conf );
           }
           else {
-            openDialog( data.status );
+            openDialog( data.status, data.json, $uibModal );
           }
         })
         .error( function() { httpfailDlg( $uibModal ); } )
@@ -458,7 +458,7 @@
             $scope.statlist = data.json.statlist;
           }
           else {
-            openDialog( data.status );
+            openDialog( data.status, data.json, $uibModal );
           }
         })
         .error( function() { httpfailDlg( $uibModal ); } )
@@ -589,7 +589,7 @@
             ifOptionSet( data, $scope.regequip, $scope );
           }
           else {
-            openDialog( data.status );
+            openDialog( data.status, data.json, $uibModal );
           }
         })
         .error( function() { httpfailDlg( $uibModal ); } )
@@ -678,7 +678,7 @@
             ifOptionSet( data, $scope.equip, $scope );
           }
           else {
-            openDialog( data.status );
+            openDialog( data.status, data.json, $uibModal );
           }
         })
         .error( function() { httpfailDlg( $uibModal ); } )
@@ -790,7 +790,7 @@
               $scope.progressgrid.data = data.json;
             }
             else {
-              openDialog( data.status );
+              openDialog( data.status, data.json, $uibModal );
             }
           })
           .error( function() { httpfailDlg( $uibModal ); } );
@@ -834,7 +834,7 @@
             $scope.pgdetailsel = pgid;
           }
           else {
-            openDialog( data.status );
+            openDialog( data.status, data.json, $uibModal );
           }
         })
         .error( function () { httpfailDlg( $uibModal ); } );
