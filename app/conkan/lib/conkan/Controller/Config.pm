@@ -392,6 +392,7 @@ sub staff_detail : Chained('staff_show') : PathPart('') : Args(0) {
         if ( $c->stash->{'status'} eq 'dbfail' ) {
             $c->forward( '_dberror', [ $c->stash->{'dbexp'}, $errmsg ] );
         }
+        $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
         $c->forward('conkan::View::JSON');
         return;
     }
@@ -428,6 +429,7 @@ sub staff_detail : Chained('staff_show') : PathPart('') : Args(0) {
         my $e = shift;
         $c->forward( '_dberror', [ $e, $errmsg ] );
     };
+    $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
 
@@ -451,6 +453,7 @@ sub staff_edit : Chained('staff_show') : PathPart('edit') : Args(0) {
         if ( $c->stash->{'status'} eq 'dbfail' ) {
             $c->forward( '_dberror', [ $c->stash->{'dbexp'}, $errmsg ] );
         }
+        $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
         $c->forward('conkan::View::JSON');
         return;
     }
@@ -486,6 +489,7 @@ sub staff_edit : Chained('staff_show') : PathPart('edit') : Args(0) {
         my $e = shift;
         $c->forward( '_dberror', [ $e, $errmsg ] );
     };
+    $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
 
@@ -508,6 +512,7 @@ sub staff_del : Chained('staff_show') : PathPart('del') : Args(0) {
         if ( $c->stash->{'status'} eq 'dbfail' ) {
             $c->forward( '_dberror', [ $c->stash->{'dbexp'}, $errmsg ] );
         }
+        $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
         $c->forward('conkan::View::JSON');
         return;
     }
@@ -519,6 +524,7 @@ sub staff_del : Chained('staff_show') : PathPart('del') : Args(0) {
         my $e = shift;
         $c->forward( '_dberror', [ $e, $errmsg ] );
     };
+    $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
 
@@ -663,6 +669,7 @@ sub room_detail : Chained('room_show') : PathPart('') : Args(0) {
         if ( $c->stash->{'status'} eq 'dbfail' ) {
             $c->forward( '_dberror', [ $c->stash->{'dbexp'}, $errmsg ] );
         }
+        $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
         $c->forward('conkan::View::JSON');
         return;
     }
@@ -699,6 +706,7 @@ sub room_detail : Chained('room_show') : PathPart('') : Args(0) {
         my $e = shift;
         $c->forward( '_dberror', [ $e, $errmsg ] );
     };
+    $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
 
@@ -723,6 +731,7 @@ sub room_edit : Chained('room_show') : PathPart('edit') : Args(0) {
         if ( $c->stash->{'status'} eq 'dbfail' ) {
             $c->forward( '_dberror', [ $c->stash->{'dbexp'}, $errmsg ] );
         }
+        $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
         $c->forward('conkan::View::JSON');
         return;
     }
@@ -739,6 +748,7 @@ sub room_edit : Chained('room_show') : PathPart('edit') : Args(0) {
         my $e = shift;
         $c->forward( '_dberror', [ $e, $errmsg ] );
     };
+    $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
 
@@ -761,6 +771,7 @@ sub room_del : Chained('room_show') : PathPart('del') : Args(0) {
         if ( $c->stash->{'status'} eq 'dbfail' ) {
             $c->forward( '_dberror', [ $c->stash->{'dbexp'}, $errmsg ] );
         }
+        $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
         $c->forward('conkan::View::JSON');
         return;
     }
@@ -772,6 +783,7 @@ sub room_del : Chained('room_show') : PathPart('del') : Args(0) {
         my $e = shift;
         $c->forward( '_dberror', [ $e, $errmsg ] );
     };
+    $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
 
@@ -927,6 +939,7 @@ sub cast_detail : Chained('cast_show') : PathPart('') : Args(0) {
         if ( $c->stash->{'status'} eq 'dbfail' ) {
             $c->forward( '_dberror', [ $c->stash->{'dbexp'}, $errmsg ] );
         }
+        $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
         $c->forward('conkan::View::JSON');
         return;
     }
@@ -963,6 +976,7 @@ sub cast_detail : Chained('cast_show') : PathPart('') : Args(0) {
         my $e = shift;
         $c->forward( '_dberror', [ $e, $errmsg ] );
     };
+    $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
 
@@ -987,6 +1001,7 @@ sub cast_edit : Chained('cast_show') : PathPart('edit') : Args(0) {
         if ( $c->stash->{'status'} eq 'dbfail' ) {
             $c->forward( '_dberror', [ $c->stash->{'dbexp'}, $errmsg ] );
         }
+        $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
         $c->forward('conkan::View::JSON');
         return;
     }
@@ -999,6 +1014,7 @@ sub cast_edit : Chained('cast_show') : PathPart('edit') : Args(0) {
         my $e = shift;
         $c->forward( '_dberror', [ $e, $errmsg ] );
     };
+    $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
 
@@ -1021,6 +1037,7 @@ sub cast_del : Chained('cast_show') : PathPart('del') : Args(0) {
         if ( $c->stash->{'status'} eq 'dbfail' ) {
             $c->forward( '_dberror', [ $c->stash->{'dbexp'}, $errmsg ] );
         }
+        $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
         $c->forward('conkan::View::JSON');
         return;
     }
@@ -1031,6 +1048,7 @@ sub cast_del : Chained('cast_show') : PathPart('del') : Args(0) {
         my $e = shift;
         $c->forward( '_dberror', [ $e, $errmsg ] );
     };
+    $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
 
@@ -1167,6 +1185,7 @@ sub equip_detail : Chained('equip_show') : PathPart('') : Args(0) {
         if ( $c->stash->{'status'} eq 'dbfail' ) {
             $c->forward( '_dberror', [ $c->stash->{'dbexp'}, $errmsg ] );
         }
+        $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
         $c->forward('conkan::View::JSON');
         return;
     }
@@ -1202,6 +1221,7 @@ $c->log->debug('>>>> equip_detail suppliers value ' . $rs->suppliers() )
         my $e = shift;
         $c->forward( '_dberror', [ $e, $errmsg ] );
     };
+    $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
 
@@ -1226,6 +1246,7 @@ sub equip_edit : Chained('equip_show') : PathPart('edit') : Args(0) {
         if ( $c->stash->{'status'} eq 'dbfail' ) {
             $c->forward( '_dberror', [ $c->stash->{'dbexp'}, $errmsg ] );
         }
+        $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
         $c->forward('conkan::View::JSON');
         return;
     }
@@ -1238,6 +1259,7 @@ sub equip_edit : Chained('equip_show') : PathPart('edit') : Args(0) {
         my $e = shift;
         $c->forward( '_dberror', [ $e, $errmsg ] );
     };
+    $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
 
@@ -1260,6 +1282,7 @@ sub equip_del : Chained('equip_show') : PathPart('del') : Args(0) {
         if ( $c->stash->{'status'} eq 'dbfail' ) {
             $c->forward( '_dberror', [ $c->stash->{'dbexp'}, $errmsg ] );
         }
+        $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
         $c->forward('conkan::View::JSON');
         return;
     }
@@ -1270,6 +1293,7 @@ sub equip_del : Chained('equip_show') : PathPart('del') : Args(0) {
         my $e = shift;
         $c->forward( '_dberror', [ $e, $errmsg ] );
     };
+    $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
 
@@ -1337,7 +1361,6 @@ sub _showCommon : Private {
     # 対象テーブルに対応したmodelオブジェクト取得
     $c->stash->{'M'}   = $c->model('ConkanDB::' . $table);
     $c->stash->{'json'} = {};
-    $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     try {
         my $row;
         if ( $id != 0 ) {

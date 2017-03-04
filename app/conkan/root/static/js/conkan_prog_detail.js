@@ -307,7 +307,8 @@
             };
           }
           else {
-            openDialog( data.status, data.json, $uibModal );
+            openDialog( data.status, data.json, $uibModal,
+                        $uibModalInstance );
           }
         })
         .error( function() { httpfailDlg( $uibModal); } )
@@ -336,7 +337,8 @@
             $scope.conf = ConfDataCnv( data, $scope.conf );
           }
           else {
-            openDialog( data.status, data.json, $uibModal );
+            openDialog( data.status, data.json, $uibModal,
+                        $uibModalInstance );
           }
         })
         .error( function() { httpfailDlg( $uibModal ); } );
@@ -353,7 +355,8 @@
             ProgDataCnv( data.json, $scope.prog );
           }
           else {
-            openDialog( data.status, data.json, $uibModal );
+            openDialog( data.status, data.json, $uibModal,
+                        $uibModalInstance );
           }
         })
         .error( function() { httpfailDlg( $uibModal); } )
@@ -408,7 +411,8 @@
             $scope.conf = ConfDataCnv( data, $scope.conf );
           }
           else {
-            openDialog( data.status, data.json, $uibModal );
+            openDialog( data.status, data.json, $uibModal,
+                        $uibModalInstance );
           }
         })
         .error( function() { httpfailDlg( $uibModal ); } )
@@ -458,7 +462,8 @@
             $scope.statlist = data.json.statlist;
           }
           else {
-            openDialog( data.status, data.json, $uibModal );
+            openDialog( data.status, data.json, $uibModal,
+                        $uibModalInstance, function() { $scope.getCast(); } );
           }
         })
         .error( function() { httpfailDlg( $uibModal ); } )
@@ -589,7 +594,8 @@
             ifOptionSet( data, $scope.regequip, $scope );
           }
           else {
-            openDialog( data.status, data.json, $uibModal );
+            openDialog( data.status, data.json, $uibModal,
+                        $uibModalInstance );
           }
         })
         .error( function() { httpfailDlg( $uibModal ); } )
@@ -600,9 +606,13 @@
           if ( angular.isDefined(n) ) {
             if ( n in scope.defRegEquip ) {
               scope.eqtype = scope.defRegEquip[n]
-              if ( scope.eqtype == 'bring-pc' || scope.eqtype == 'bring-av' ) {
-                // 映像機器とPCでは映像IFの選択値が違うので一旦クリア
+              if ( angular.isDefined(o)
+                  && (   scope.eqtype == 'bring-pc'
+                      || scope.eqtype == 'bring-av' ) ) {
+                // 初期表示ではなく持ち込みAV/PCが選択された場合
+                // 共通で使っているIFの値を一旦クリア
                 scope.regequip.vif = undefined;
+                scope.regequip.aif = undefined;
               }
             }
             else {
@@ -678,7 +688,8 @@
             ifOptionSet( data, $scope.equip, $scope );
           }
           else {
-            openDialog( data.status, data.json, $uibModal );
+            openDialog( data.status, data.json, $uibModal,
+                        $uibModalInstance, function() { $scope.getEquip(); } );
           }
         })
         .error( function() { httpfailDlg( $uibModal ); } )
@@ -689,6 +700,12 @@
           if ( angular.isDefined(n) ) {
             if ( scope.bringid[n] ) {
               scope.eqtype = scope.bringid[n];
+              if ( angular.isDefined(o) ) {
+                // 初期表示ではなく持ち込みAV/PCが選択された場合
+                // 共通で使っているIFの値を一旦クリア
+                scope.equip.vif = undefined;
+                scope.equip.aif = undefined;
+              }
             }
             else {
               scope.eqtype = 'served';
