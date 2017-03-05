@@ -85,6 +85,23 @@
           })
           .error( function() { httpfailDlg( $uibModal ); } );
         }; 
+        // 要望機材リスト取得
+        $scope.getRegEquip = function() {
+          $http({
+            method  : 'GET',
+            headers : { 'If-Modifired-Since' : (new Date(0)).toUTCString() },
+            url     : uriprefix + '/program/' + init_pgid + '/regequiplist'
+          })
+          .success(function(data) {
+            if ( data.status === 'ok' ) {
+              $scope.regequiplist = data.json;
+            }
+            else {
+              openDialog( data.status, data.json, $uibModal );
+            }
+          })
+          .error( function() { httpfailDlg( $uibModal ); } );
+        };
         // 決定機材リスト取得
         $scope.getEquip = function() {
           $http({
@@ -99,11 +116,15 @@
                 var equip = $scope.equiplist[i];
                 if (   ( equip.equipno == 'bring-AV' )
                     || ( equip.equipno == 'bring-PC' ) ) {
-                  $scope.equiplist[i].spec = '映像:' + equip.vif
-                                           + ' 音声:' + equip.aif;
+                  $scope.equiplist[i].spec =
+                            '映像:' + equip.vif + ' 音声:' + equip.aif;
                   if ( equip.equipno == 'bring-PC' ) {
-                    $scope.equiplist[i].spec += ' LAN:' + equip.eif
-                                             + ' LAN利用目的:' + equip.intende;
+                    $scope.equiplist[i].spec +=
+                            ' LAN:' + equip.eif;
+                    if ( equip.intende ) {
+                      $scope.equiplist[i].spec +=
+                            ' LAN利用目的:' + equip.intende;
+                    }
                   }
                 }
               }
@@ -259,6 +280,7 @@
         // 初期値設定
         $scope.getRegCast();
         $scope.getCast();
+        $scope.getRegEquip();
         $scope.getEquip();
       }
     ]
@@ -584,7 +606,7 @@
               regpgid       : params.regpgid,
               pgid          : params.pgid,
               name          : data.json.name,
-              count         : data.json.count,
+              count         : data.json.count || 1,
               intende       : data.json.intende,
             };
             // 選択肢設定
@@ -595,7 +617,7 @@
           }
           else {
             openDialog( data.status, data.json, $uibModal,
-                        $uibModalInstance );
+                        $uibModalInstance, function() { $scope.getRegEquip(); } );
           }
         })
         .error( function() { httpfailDlg( $uibModal ); } )
@@ -606,17 +628,17 @@
           if ( angular.isDefined(n) ) {
             if ( n in scope.defRegEquip ) {
               scope.eqtype = scope.defRegEquip[n]
-              if ( angular.isDefined(o)
-                  && (   scope.eqtype == 'bring-pc'
-                      || scope.eqtype == 'bring-av' ) ) {
-                // 初期表示ではなく持ち込みAV/PCが選択された場合
-                // 共通で使っているIFの値を一旦クリア
-                scope.regequip.vif = undefined;
-                scope.regequip.aif = undefined;
-              }
             }
             else {
               scope.eqtype = 'other';
+            }
+            if ( angular.isDefined(o) ) {
+              // 初期表示ではなかったら、付帯情報の値をクリア
+              scope.regequip.count = 1;
+              scope.regequip.vif = undefined;
+              scope.regequip.aif = undefined;
+              scope.regequip.eif = undefined;
+              scope.regequip.eintende = undefined;
             }
           }
         });
@@ -641,7 +663,11 @@
           // 実行
           doJsonPost( $http,
             uriprefix + '/program/' + pgid + '/regequip/' + itemid,
-            $.param($scope.regequip), $uibModalInstance, $uibModal );
+            $.param($scope.regequip), $uibModalInstance, $uibModal,
+            function() {
+              $scope.getRegEquip();
+              $scope.progReload(); // 更新した進捗を表示
+            } );
         };
         // 削除実施
         $scope.regequipDoDel = function() {
@@ -652,7 +678,11 @@
           angular.element('#regequipdelbtn').attr('disabled', 'disabled');
           doJsonPost( $http,
             uriprefix + '/program/' + pgid + '/regequip/' + itemid + '/del/',
-            undefined, $uibModalInstance, $uibModal );
+            undefined, $uibModalInstance, $uibModal,
+            function() {
+              $scope.getRegEquip();
+              $scope.progReload(); // 更新した進捗を表示
+            } );
         };
       }
     ]
@@ -674,6 +704,7 @@
             $scope.equip = {
               id            : params.editEquipId,
               applyBtnLbl   : params.editEquipBtnLbl,
+              name    : data.json.name,
               pgid    : data.json.pgid,
               equipid : data.json.equipid,
               intende : data.json.intende,
@@ -700,17 +731,18 @@
           if ( angular.isDefined(n) ) {
             if ( scope.bringid[n] ) {
               scope.eqtype = scope.bringid[n];
-              if ( angular.isDefined(o) ) {
-                // 初期表示ではなく持ち込みAV/PCが選択された場合
-                // 共通で使っているIFの値を一旦クリア
-                scope.equip.vif = undefined;
-                scope.equip.aif = undefined;
-              }
             }
             else {
               scope.eqtype = 'served';
               scope.equip.spec    = scope.equipdata[n].spec;
               scope.equip.comment = scope.equipdata[n].comment;
+            }
+            if ( angular.isDefined(o) ) {
+              // 初期表示ではなかったら、付帯情報の値をクリア
+              scope.equip.vif = undefined;
+              scope.equip.aif = undefined;
+              scope.equip.eif = undefined;
+              scope.equip.eintende = undefined;
             }
           }
         });
@@ -724,7 +756,8 @@
           // その他 の内容置き換え
           ifOptionOtherSet( $scope.equip );
           // 実行
-          doJsonPost( $http, uriprefix + '/program/' + pgid + '/equip/' + itemid,
+          doJsonPost( $http,
+            uriprefix + '/program/' + pgid + '/equip/' + itemid,
             $.param($scope.equip), $uibModalInstance, $uibModal,
             function() {
               $scope.getEquip();
@@ -738,7 +771,8 @@
           // 二重クリック回避
           angular.element('#equipapplybtn').attr('disabled', 'disabled');
           angular.element('#equipdelbtn').attr('disabled', 'disabled');
-          doJsonPost( $http, uriprefix + '/program/' + pgid + '/equip/' + itemid + '/del/',
+          doJsonPost( $http,
+            uriprefix + '/program/' + pgid + '/equip/' + itemid + '/del/',
             undefined, $uibModalInstance, $uibModal,
             function() {
               $scope.getEquip();
