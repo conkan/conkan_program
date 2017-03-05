@@ -29,8 +29,14 @@
           <tr>
             <th>機材名</th>
             <td>
-              <select name="equipid" ng-model="equip.equipid"
-                ng-options="i.id as i.val for i in equiplist"></select>
+              <div ng-switch="equip.id">
+                <div ng-switch-when=0>
+                  <select name="equipid" ng-model="equip.equipid"
+                    class="col-sm-12"
+                    ng-options="i.id as i.val for i in equiplist"></select>
+                </div>
+                <div ng-switch-default>{{equip.name}}</div>
+              </div>
             </td> 
           </tr>
         </tbody>
@@ -60,9 +66,9 @@
       <div ng-if="eqtype == 'bring-AV' || eqtype == 'bring-PC'">
         <table class="table table-bordered table-condensed">
           <colgroup>
-            <col class="col-sm-2">
+            <col class="col-sm-3">
             <col class="col-sm-4">
-            <col class="col-sm-6">
+            <col class="col-sm-5">
           </colgroup>
           <tbody>
             <tr>
@@ -129,10 +135,12 @@
       ng-click="equipDoDel()">
       削除
     </button>
-    <button class="btn btn-primary" id="equipapplybtn"
-      ng-disabled="equipform.$invalid || equipform.$pristine"
-      ng-click="equipDoApply()">
-      {{equip.applyBtnLbl}}
-    </button>
+    <span ng-if="equip.id == 0 || eqtype != 'served'">
+      <button class="btn btn-primary" id="equipapplybtn"
+        ng-disabled="equipform.$invalid || equipform.$pristine"
+        ng-click="equipDoApply()">
+        {{equip.applyBtnLbl}}
+      </button>
+    </span>
   </div>
 </script>

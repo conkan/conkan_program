@@ -113,7 +113,7 @@ sub setting :Local {
             my @items = qw/
                 dates               start_hours         end_hours
                 pg_status_vals      pg_status_color     pg_active_status
-                cast_status_vals    contact_status_vals
+                cast_status_vals    contact_status_vals def_regEquip
             /;
             foreach my $item ( @items ) {
                 $c->stash->{'json'}->{$item} = $pHconf->{$item};
@@ -142,9 +142,6 @@ $c->log->debug('>>> ' . 'code : ' . $code . ' val : ' . $pHwk->pg_conf_value() )
                 # めったにないので毎回設定
                 my $ganttStrs = $c->forward('/config/_crGntStr', [ $param, ], );
                 while ( my ( $key, $val ) = each( %GantConfHash ) ) {
-$c->log->debug('>>> ' . 'key : ' . $key . ' val : ' . $val );
-$c->log->debug('>>> ' . 'value : ' . $ganttStrs->[0] );
-$c->log->debug('>>> ' . 'value : ' . $ganttStrs->[$val] );
                     $sysconM->update_or_create( {
                         pg_conf_code => $key,
                         pg_conf_name => $key . '(cache)',
@@ -389,13 +386,17 @@ sub staff_show : Chained('staff_base') :PathPart('') :CaptureArgs(1) {
 
 sub staff_detail : Chained('staff_show') : PathPart('') : Args(0) {
     my ( $self, $c ) = @_;
-    if ( $c->stash->{'status'} eq 'accessdeny' ) {
-        $c->component('View::JSON')->{expose_stash} = [ 'status' ];
+    my $errmsg = 'config/staff';
+    # _showCommonでのエラー対応
+    if ( $c->stash->{'status'} ne 'ok' ) {
+        if ( $c->stash->{'status'} eq 'dbfail' ) {
+            $c->forward( '_dberror', [ $c->stash->{'dbexp'}, $errmsg ] );
+        }
+        $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
         $c->forward('conkan::View::JSON');
         return;
     }
     try {
-        die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
         my $rs = $c->stash->{'rs'};
         $c->session->{'updtic'} = time;
         $rs->update( { 
@@ -426,7 +427,7 @@ sub staff_detail : Chained('staff_show') : PathPart('') : Args(0) {
         }
     } catch {
         my $e = shift;
-        $c->forward( '_dberror', [ $e, 'config/staff' ] );
+        $c->forward( '_dberror', [ $e, $errmsg ] );
     };
     $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
@@ -446,8 +447,17 @@ sub staff_edit : Chained('staff_show') : PathPart('edit') : Args(0) {
     if ( $c->request->method eq 'GET' ) {
         $c->go->( '/config/staff/' . $staffid ); # goなので帰ってこない
     }
+    my $errmsg = 'config/staff/' . $staffid . '/edit';
+    # _showCommonでのエラー対応
+    if ( $c->stash->{'status'} ne 'ok' ) {
+        if ( $c->stash->{'status'} eq 'dbfail' ) {
+            $c->forward( '_dberror', [ $c->stash->{'dbexp'}, $errmsg ] );
+        }
+        $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
+        $c->forward('conkan::View::JSON');
+        return;
+    }
     try {
-        die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
         # 更新実施 パスワード処理があるため、__updatecreate は使えない
         my $rs = $c->stash->{'rs'};
         if ( $rs->updateflg eq 
@@ -477,7 +487,7 @@ sub staff_edit : Chained('staff_show') : PathPart('edit') : Args(0) {
         }
     } catch {
         my $e = shift;
-        $c->forward( '_dberror', [ $e, 'config/staff/' . $staffid . '/edit' ] );
+        $c->forward( '_dberror', [ $e, $errmsg ] );
     };
     $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
@@ -496,15 +506,25 @@ sub staff_del : Chained('staff_show') : PathPart('del') : Args(0) {
     if ( $c->request->method eq 'GET' ) {
         $c->go->( '/config/staff/' . $staffid ); # goなので帰ってこない
     }
+    my $errmsg = 'config/staff/' . $staffid . '/del';
+    # _showCommonでのエラー対応
+    if ( $c->stash->{'status'} ne 'ok' ) {
+        if ( $c->stash->{'status'} eq 'dbfail' ) {
+            $c->forward( '_dberror', [ $c->stash->{'dbexp'}, $errmsg ] );
+        }
+        $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
+        $c->forward('conkan::View::JSON');
+        return;
+    }
     try {
-        die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
+        die if ( $c->stash->{'status'} ne 'ok' );
         $c->forward( '_delete', [ $staffid, 'PgProgram', 'staffid' ] );
         die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
     } catch {
         my $e = shift;
-        $c->forward( '_dberror', [ $e, 'config/staff/' . $staffid . '/del' ] );
+        $c->forward( '_dberror', [ $e, $errmsg ] );
     };
-    $c->component('View::JSON')->{expose_stash} = [ 'status' ];
+    $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
 
@@ -643,8 +663,17 @@ sub room_show : Chained('room_base') :PathPart('') :CaptureArgs(1) {
 sub room_detail : Chained('room_show') : PathPart('') : Args(0) {
     my ( $self, $c ) = @_;
     my $roomid = $c->stash->{'roomid'};
+    my $errmsg = 'config/room/' . $roomid;
+    # _showCommonでのエラー対応
+    if ( $c->stash->{'status'} ne 'ok' ) {
+        if ( $c->stash->{'status'} eq 'dbfail' ) {
+            $c->forward( '_dberror', [ $c->stash->{'dbexp'}, $errmsg ] );
+        }
+        $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
+        $c->forward('conkan::View::JSON');
+        return;
+    }
     try {
-        die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
         my $rs = $c->stash->{'rs'};
         if ( $roomid != 0 ) {
             $c->session->{'updtic'} = time;
@@ -675,7 +704,7 @@ sub room_detail : Chained('room_show') : PathPart('') : Args(0) {
         }
     } catch {
         my $e = shift;
-        $c->forward( '_dberror', [ $e, 'config/room/' . $roomid ] );
+        $c->forward( '_dberror', [ $e, $errmsg ] );
     };
     $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
@@ -696,8 +725,18 @@ sub room_edit : Chained('room_show') : PathPart('edit') : Args(0) {
     if ( $c->request->method eq 'GET' ) {
         $c->go->( '/config/room/' . $roomid ); # goなので帰ってこない
     }
+    my $errmsg = 'config/room/' . $roomid . '/edit';
+    # _showCommonでのエラー対応
+    if ( $c->stash->{'status'} ne 'ok' ) {
+        if ( $c->stash->{'status'} eq 'dbfail' ) {
+            $c->forward( '_dberror', [ $c->stash->{'dbexp'}, $errmsg ] );
+        }
+        $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
+        $c->forward('conkan::View::JSON');
+        return;
+    }
     try {
-        die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
+        die if ( $c->stash->{'status'} ne 'ok' );
         my $items = [ qw/
                         name roomno max type size tablecnt
                         chaircnt equips useabletime net comment
@@ -707,7 +746,7 @@ sub room_edit : Chained('room_show') : PathPart('edit') : Args(0) {
         die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
     } catch {
         my $e = shift;
-        $c->forward( '_dberror', [ $e, 'config/room/' . $roomid . '/edit' ] );
+        $c->forward( '_dberror', [ $e, $errmsg ] );
     };
     $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
@@ -726,15 +765,25 @@ sub room_del : Chained('room_show') : PathPart('del') : Args(0) {
     if ( $c->request->method eq 'GET' ) {
         $c->go->( '/config/room/' . $roomid ); # goなので帰ってこない
     }
+    my $errmsg = 'config/room/' . $roomid . '/del';
+    # _showCommonでのエラー対応
+    if ( $c->stash->{'status'} ne 'ok' ) {
+        if ( $c->stash->{'status'} eq 'dbfail' ) {
+            $c->forward( '_dberror', [ $c->stash->{'dbexp'}, $errmsg ] );
+        }
+        $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
+        $c->forward('conkan::View::JSON');
+        return;
+    }
     try {
-        die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
+        die if ( $c->stash->{'status'} ne 'ok' );
         $c->forward( '_delete', [ $roomid, 'PgProgram', 'roomid' ] );
         die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
     } catch {
         my $e = shift;
-        $c->forward( '_dberror', [ $e, 'config/room/' . $roomid . '/del' ] );
+        $c->forward( '_dberror', [ $e, $errmsg ] );
     };
-    $c->component('View::JSON')->{expose_stash} = [ 'status' ];
+    $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
 
@@ -884,8 +933,17 @@ sub cast_show : Chained('cast_base') :PathPart('') :CaptureArgs(1) {
 sub cast_detail : Chained('cast_show') : PathPart('') : Args(0) {
     my ( $self, $c ) = @_;
     my $castid = $c->stash->{'castid'};
+    my $errmsg = 'config/cast/' . $castid;
+    # _showCommonでのエラー対応
+    if ( $c->stash->{'status'} ne 'ok' ) {
+        if ( $c->stash->{'status'} eq 'dbfail' ) {
+            $c->forward( '_dberror', [ $c->stash->{'dbexp'}, $errmsg ] );
+        }
+        $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
+        $c->forward('conkan::View::JSON');
+        return;
+    }
     try {
-        die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
         my $rs = $c->stash->{'rs'};
         if ( $castid != 0 ) {
             $c->session->{'updtic'} = time;
@@ -916,7 +974,7 @@ sub cast_detail : Chained('cast_show') : PathPart('') : Args(0) {
         $c->stash->{'json'}->{'statlist'} = $statlist;
     } catch {
         my $e = shift;
-        $c->forward( '_dberror', [ $e, 'config/cast/' . $castid ] );
+        $c->forward( '_dberror', [ $e, $errmsg ] );
     };
     $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
@@ -937,15 +995,24 @@ sub cast_edit : Chained('cast_show') : PathPart('edit') : Args(0) {
     if ( $c->request->method eq 'GET' ) {
         $c->go->( '/config/cast/' . $castid ); # goなので帰ってこない
     }
+    my $errmsg = 'config/cast/' . $castid . '/edit';
+    # _showCommonでのエラー対応
+    if ( $c->stash->{'status'} ne 'ok' ) {
+        if ( $c->stash->{'status'} eq 'dbfail' ) {
+            $c->forward( '_dberror', [ $c->stash->{'dbexp'}, $errmsg ] );
+        }
+        $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
+        $c->forward('conkan::View::JSON');
+        return;
+    }
     try {
-        die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
         my $items = [ qw/ regno name namef status memo restdate / ];
         my $uniqitems = [ qw/ regno / ];
         $c->forward( '_updatecreate', [ $castid, $items, $uniqitems ] );
         die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
     } catch {
         my $e = shift;
-        $c->forward( '_dberror', [ $e, 'config/cast/' . $castid . '/edit' ] );
+        $c->forward( '_dberror', [ $e, $errmsg ] );
     };
     $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
@@ -964,15 +1031,24 @@ sub cast_del : Chained('cast_show') : PathPart('del') : Args(0) {
     if ( $c->request->method eq 'GET' ) {
         $c->go->( '/config/cast/' . $castid ); # goなので帰ってこない
     }
+    my $errmsg = 'config/cast/' . $castid . '/del';
+    # _showCommonでのエラー対応
+    if ( $c->stash->{'status'} ne 'ok' ) {
+        if ( $c->stash->{'status'} eq 'dbfail' ) {
+            $c->forward( '_dberror', [ $c->stash->{'dbexp'}, $errmsg ] );
+        }
+        $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
+        $c->forward('conkan::View::JSON');
+        return;
+    }
     try {
-        die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
         $c->forward( '_delete', [ $castid, 'PgCast', 'castid' ] );
         die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
     } catch {
         my $e = shift;
-        $c->forward( '_dberror', [ $e, 'config/cast/' . $castid . '/del' ] );
+        $c->forward( '_dberror', [ $e, $errmsg ] );
     };
-    $c->component('View::JSON')->{expose_stash} = [ 'status' ];
+    $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
 
@@ -1103,8 +1179,17 @@ sub equip_show : Chained('equip_base') :PathPart('') :CaptureArgs(1) {
 sub equip_detail : Chained('equip_show') : PathPart('') : Args(0) {
     my ( $self, $c ) = @_;
     my $equipid = $c->stash->{'equipid'};
+    my $errmsg = 'config/equip/' . $equipid;
+    # _showCommonでのエラー対応
+    if ( $c->stash->{'status'} ne 'ok' ) {
+        if ( $c->stash->{'status'} eq 'dbfail' ) {
+            $c->forward( '_dberror', [ $c->stash->{'dbexp'}, $errmsg ] );
+        }
+        $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
+        $c->forward('conkan::View::JSON');
+        return;
+    }
     try {
-        die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
         my $rs = $c->stash->{'rs'};
         if ( $equipid != 0 ) {
             $c->session->{'updtic'} = time;
@@ -1134,7 +1219,7 @@ $c->log->debug('>>>> equip_detail suppliers value ' . $rs->suppliers() )
         }
     } catch {
         my $e = shift;
-        $c->forward( '_dberror', [ $e, 'config/equip/' . $equipid ] );
+        $c->forward( '_dberror', [ $e, $errmsg ] );
     };
     $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
@@ -1155,15 +1240,24 @@ sub equip_edit : Chained('equip_show') : PathPart('edit') : Args(0) {
     if ( $c->request->method eq 'GET' ) {
         $c->go->( '/config/equip/' . $equipid ); # goなので帰ってこない
     }
+    my $errmsg = 'config/equip/' . $equipid . '/edit';
+    # _showCommonでのエラー対応
+    if ( $c->stash->{'status'} ne 'ok' ) {
+        if ( $c->stash->{'status'} eq 'dbfail' ) {
+            $c->forward( '_dberror', [ $c->stash->{'dbexp'}, $errmsg ] );
+        }
+        $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
+        $c->forward('conkan::View::JSON');
+        return;
+    }
     try {
-        die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
         my $items = [ qw/ name equipno roomid spec comment suppliers / ];
         my $uniqitems = [ qw/ equipno roomid / ];
         $c->forward( '_updatecreate', [ $equipid, $items, $uniqitems ] );
         die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
     } catch {
         my $e = shift;
-        $c->forward( '_dberror', [ $e, 'config/equip/' . $equipid . '/edit' ] );
+        $c->forward( '_dberror', [ $e, $errmsg ] );
     };
     $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
@@ -1182,15 +1276,24 @@ sub equip_del : Chained('equip_show') : PathPart('del') : Args(0) {
     if ( $c->request->method eq 'GET' ) {
         $c->go->( '/config/equip/' . $equipid ); # goなので帰ってこない
     }
+    my $errmsg = 'config/equip/' . $equipid . '/del';
+    # _showCommonでのエラー対応
+    if ( $c->stash->{'status'} ne 'ok' ) {
+        if ( $c->stash->{'status'} eq 'dbfail' ) {
+            $c->forward( '_dberror', [ $c->stash->{'dbexp'}, $errmsg ] );
+        }
+        $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
+        $c->forward('conkan::View::JSON');
+        return;
+    }
     try {
-        die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
         $c->forward( '_delete', [ $equipid, 'PgEquip', 'equipid' ] );
         die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
     } catch {
         my $e = shift;
-        $c->forward( '_dberror', [ $e, 'config/equip/' . $equipid . '/del' ] );
+        $c->forward( '_dberror', [ $e, $errmsg ] );
     };
-    $c->component('View::JSON')->{expose_stash} = [ 'status' ];
+    $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
     $c->forward('conkan::View::JSON');
 }
 
@@ -1270,7 +1373,7 @@ sub _showCommon : Private {
         }
         $c->stash->{'rs'} = $row;
         $c->stash->{$idstr} = $id;
-        $c->stash->{'status'} = 'ok';
+        $c->stash->{'status'} = ( $row ) ? 'ok' : 'noexist';
     } catch {
         my $e = shift;
         $c->stash->{'status'} = 'dbfail';

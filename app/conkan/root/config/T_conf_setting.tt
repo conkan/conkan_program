@@ -71,8 +71,15 @@
           <tr>
             <th>{{conf.contact_status_vals.pg_conf_name}}</th>
             <td>
-              <textarea name="contact_status_vals" class="col-sm-12" required
+              <textarea name="contact_status_vals" class="col-sm-12" rows="5" required
                ng-model="conf.contact_status_vals.pg_conf_value"></textarea>
+            </td>
+          </tr>
+          <tr>
+            <th>{{conf.def_regEquip.pg_conf_name}}</th>
+            <td>
+              <textarea name="def_regEquip" class="col-sm-12" rows="3" required
+               ng-model="conf.def_regEquip.pg_conf_value"></textarea>
             </td>
           </tr>
         </tbody>

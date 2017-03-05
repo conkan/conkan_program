@@ -50,7 +50,7 @@
               $scope.regcastlist = data.json;
             }
             else {
-              openDialog( data.status );
+              openDialog( data.status, data.json, $uibModal );
             }
           })
           .error( function() { httpfailDlg( $uibModal ); } );
@@ -80,11 +80,28 @@
               }
             }
             else {
-              openDialog( data.status );
+              openDialog( data.status, data.json, $uibModal );
             }
           })
           .error( function() { httpfailDlg( $uibModal ); } );
         }; 
+        // 要望機材リスト取得
+        $scope.getRegEquip = function() {
+          $http({
+            method  : 'GET',
+            headers : { 'If-Modifired-Since' : (new Date(0)).toUTCString() },
+            url     : uriprefix + '/program/' + init_pgid + '/regequiplist'
+          })
+          .success(function(data) {
+            if ( data.status === 'ok' ) {
+              $scope.regequiplist = data.json;
+            }
+            else {
+              openDialog( data.status, data.json, $uibModal );
+            }
+          })
+          .error( function() { httpfailDlg( $uibModal ); } );
+        };
         // 決定機材リスト取得
         $scope.getEquip = function() {
           $http({
@@ -99,17 +116,21 @@
                 var equip = $scope.equiplist[i];
                 if (   ( equip.equipno == 'bring-AV' )
                     || ( equip.equipno == 'bring-PC' ) ) {
-                  $scope.equiplist[i].spec = '映像:' + equip.vif
-                                           + ' 音声:' + equip.aif;
+                  $scope.equiplist[i].spec =
+                            '映像:' + equip.vif + ' 音声:' + equip.aif;
                   if ( equip.equipno == 'bring-PC' ) {
-                    $scope.equiplist[i].spec += ' LAN:' + equip.eif
-                                             + ' LAN利用目的:' + equip.intende;
+                    $scope.equiplist[i].spec +=
+                            ' LAN:' + equip.eif;
+                    if ( equip.intende ) {
+                      $scope.equiplist[i].spec +=
+                            ' LAN利用目的:' + equip.intende;
+                    }
                   }
                 }
               }
             }
             else {
-              openDialog( data.status );
+              openDialog( data.status, data.json, $uibModal );
             }
           })
           .error( function() { httpfailDlg( $uibModal ); } );
@@ -192,6 +213,28 @@
           });
         };
 
+        // 要望機材更新追加ダイアログ
+        $scope.openRegEquipForm = function( regequipid ) {
+          $uibModal.open({
+            templateUrl : 'T_pgup_regequip',
+            controller  : 'regequipFormController',
+            backdrop    : 'static',
+            scope       : $scope,
+            size        : 'lg',
+            resolve     :
+              { params: function() {
+                return {
+                  regpgid : init_regpgid,
+                  subno   : init_subno,
+                  pgid    : init_pgid,
+                  name    : init_name,
+                  editEquipId : regequipid,
+                  editEquipBtnLbl : ( regequipid === 0 ) ? '追加' : '更新',
+                };
+              }},
+          });
+        };
+
         // 決定機材更新追加ダイアログ
         $scope.openEquipForm = function( equipid ) {
           $uibModal.open({
@@ -237,6 +280,7 @@
         // 初期値設定
         $scope.getRegCast();
         $scope.getCast();
+        $scope.getRegEquip();
         $scope.getEquip();
       }
     ]
@@ -285,7 +329,8 @@
             };
           }
           else {
-            openDialog( data.status );
+            openDialog( data.status, data.json, $uibModal,
+                        $uibModalInstance );
           }
         })
         .error( function() { httpfailDlg( $uibModal); } )
@@ -314,7 +359,8 @@
             $scope.conf = ConfDataCnv( data, $scope.conf );
           }
           else {
-            openDialog( data.status );
+            openDialog( data.status, data.json, $uibModal,
+                        $uibModalInstance );
           }
         })
         .error( function() { httpfailDlg( $uibModal ); } );
@@ -331,7 +377,8 @@
             ProgDataCnv( data.json, $scope.prog );
           }
           else {
-            openDialog( data.status );
+            openDialog( data.status, data.json, $uibModal,
+                        $uibModalInstance );
           }
         })
         .error( function() { httpfailDlg( $uibModal); } )
@@ -386,7 +433,8 @@
             $scope.conf = ConfDataCnv( data, $scope.conf );
           }
           else {
-            openDialog( data.status );
+            openDialog( data.status, data.json, $uibModal,
+                        $uibModalInstance );
           }
         })
         .error( function() { httpfailDlg( $uibModal ); } )
@@ -436,7 +484,8 @@
             $scope.statlist = data.json.statlist;
           }
           else {
-            openDialog( data.status );
+            openDialog( data.status, data.json, $uibModal,
+                        $uibModalInstance, function() { $scope.getCast(); } );
           }
         })
         .error( function() { httpfailDlg( $uibModal ); } )
@@ -503,6 +552,142 @@
   a2h( IfOptions.aif.concat([undefined]), IfOptions.aifH );
   a2h( IfOptions.eif.concat([undefined]), IfOptions.eifH );
 
+  // 接続オプション設定
+  var ifOptionSet = function( data, equip, scope ) {
+    if ( data.json.vif in IfOptions.vifH ) {
+      equip.vif = data.json.vif;
+    }
+    else {
+      equip.vif = 'その他';
+      equip.ovif = data.json.vif;
+    }
+    if ( data.json.aif in IfOptions.aifH ) {
+      equip.aif = data.json.aif;
+    }
+    else {
+      equip.aif = 'その他';
+      equip.oaif = data.json.aif;
+    }
+    if ( data.json.eif in IfOptions.eifH ) {
+      equip.eif = data.json.eif;
+    }
+    else {
+      equip.eif = 'その他';
+      equip.oeif = data.json.eif;
+    }
+    scope.avviflist = IfOptions.avvif;
+    scope.pcviflist = IfOptions.pcvif;
+    scope.aiflist   = IfOptions.aif;
+    scope.eiflist   = IfOptions.eif;
+  };
+  // 接続オプションその他 の内容置き換え
+  var ifOptionOtherSet = function ( equip ) {
+    if ( equip.vif == 'その他' ) { equip.vif = equip.ovif; }
+    if ( equip.aif == 'その他' ) { equip.aif = equip.oaif; }
+    if ( equip.eif == 'その他' ) { equip.eif = equip.oeif; }
+  };
+
+  // 要望機材更新追加ダイアログコントローラ
+  ConkanAppModule.controller( 'regequipFormController',
+    [ '$scope', '$http', '$uibModal', '$uibModalInstance', 'params',
+      function( $scope, $http, $uibModal, $uibModalInstance, params ) {
+        // 初期値設定
+        angular.element('#valerr').text('');
+        $scope.prog = params;
+        $http({
+          method  : 'GET',
+          url     : uriprefix + '/program/' + params.pgid + '/regequip/' + params.editEquipId,
+        })
+        .success(function(data) {
+          if ( data.status === 'ok' ) {
+            $scope.regequip = {
+              id            : params.editEquipId,
+              applyBtnLbl   : params.editEquipBtnLbl,
+              regpgid       : params.regpgid,
+              pgid          : params.pgid,
+              name          : data.json.name,
+              count         : data.json.count || 1,
+              intende       : data.json.intende,
+            };
+            // 選択肢設定
+            $scope.defRegEquip  = data.json.defRegEquip;
+            $scope.regequiplist = data.json.regEquiplist;
+            // 接続オプション設定
+            ifOptionSet( data, $scope.regequip, $scope );
+          }
+          else {
+            openDialog( data.status, data.json, $uibModal,
+                        $uibModalInstance, function() { $scope.getRegEquip(); } );
+          }
+        })
+        .error( function() { httpfailDlg( $uibModal ); } )
+        .finally( dialogResizeDrag);
+
+        // 監視設定
+        $scope.$watch('regequip.name', function( n, o, scope ) {
+          if ( angular.isDefined(n) ) {
+            if ( n in scope.defRegEquip ) {
+              scope.eqtype = scope.defRegEquip[n]
+            }
+            else {
+              scope.eqtype = 'other';
+            }
+            if ( angular.isDefined(o) ) {
+              // 初期表示ではなかったら、付帯情報の値をクリア
+              scope.regequip.count = 1;
+              scope.regequip.vif = undefined;
+              scope.regequip.aif = undefined;
+              scope.regequip.eif = undefined;
+              scope.regequip.eintende = undefined;
+            }
+          }
+        });
+
+        // 更新実施
+        $scope.regequipDoApply = function() {
+          var pgid   = $scope.regequip.pgid;
+          var itemid = $scope.regequip.id;
+          // 二重クリック回避
+          angular.element('#regequipapplybtn').attr('disabled', 'disabled');
+          angular.element('#regequipdelbtn').attr('disabled', 'disabled');
+          // その他 の内容置き換え
+          if (!( $scope.regequip.name in $scope.defRegEquip )) {
+              if ( $scope.regequip.name == 'その他要望機材' ) {
+                $scope.regequip.name = $scope.regequip.oname + '(要望)';
+              }
+              else {
+                $scope.regequip.name = $scope.regequip.oname + '(持ち込み)';
+              }
+          }
+          ifOptionOtherSet( $scope.regequip );
+          // 実行
+          doJsonPost( $http,
+            uriprefix + '/program/' + pgid + '/regequip/' + itemid,
+            $.param($scope.regequip), $uibModalInstance, $uibModal,
+            function() {
+              $scope.getRegEquip();
+              $scope.progReload(); // 更新した進捗を表示
+            } );
+        };
+        // 削除実施
+        $scope.regequipDoDel = function() {
+          var pgid   = $scope.regequip.pgid;
+          var itemid = $scope.regequip.id;
+          // 二重クリック回避
+          angular.element('#regequipapplybtn').attr('disabled', 'disabled');
+          angular.element('#regequipdelbtn').attr('disabled', 'disabled');
+          doJsonPost( $http,
+            uriprefix + '/program/' + pgid + '/regequip/' + itemid + '/del/',
+            undefined, $uibModalInstance, $uibModal,
+            function() {
+              $scope.getRegEquip();
+              $scope.progReload(); // 更新した進捗を表示
+            } );
+        };
+      }
+    ]
+  );
+
   // 決定機材更新追加ダイアログコントローラ
   ConkanAppModule.controller( 'equipFormController',
     [ '$scope', '$http', '$uibModal', '$uibModalInstance', 'params',
@@ -519,43 +704,23 @@
             $scope.equip = {
               id            : params.editEquipId,
               applyBtnLbl   : params.editEquipBtnLbl,
+              name    : data.json.name,
               pgid    : data.json.pgid,
               equipid : data.json.equipid,
               intende : data.json.intende,
               spec    : '',
               comment : '',
             };
-            if ( data.json.vif in IfOptions.vifH ) {
-              $scope.equip.vif = data.json.vif;
-            }
-            else {
-              $scope.equip.vif = 'その他';
-              $scope.equip.ovif = data.json.vif;
-            }
-            if ( data.json.aif in IfOptions.aifH ) {
-              $scope.equip.aif = data.json.aif;
-            }
-            else {
-              $scope.equip.aif = 'その他';
-              $scope.equip.oaif = data.json.aif;
-            }
-            if ( data.json.eif in IfOptions.eifH ) {
-              $scope.equip.eif = data.json.eif;
-            }
-            else {
-              $scope.equip.eif = 'その他';
-              $scope.equip.oeif = data.json.eif;
-            }
+            // 選択肢設定
             $scope.equiplist = data.json.equiplist;
             $scope.equipdata = data.json.equipdata;
             $scope.bringid   = data.json.bringid;
-            $scope.avviflist = IfOptions.avvif;
-            $scope.pcviflist = IfOptions.pcvif;
-            $scope.aiflist   = IfOptions.aif;
-            $scope.eiflist   = IfOptions.eif;
+            // 接続オプション設定
+            ifOptionSet( data, $scope.equip, $scope );
           }
           else {
-            openDialog( data.status );
+            openDialog( data.status, data.json, $uibModal,
+                        $uibModalInstance, function() { $scope.getEquip(); } );
           }
         })
         .error( function() { httpfailDlg( $uibModal ); } )
@@ -572,6 +737,13 @@
               scope.equip.spec    = scope.equipdata[n].spec;
               scope.equip.comment = scope.equipdata[n].comment;
             }
+            if ( angular.isDefined(o) ) {
+              // 初期表示ではなかったら、付帯情報の値をクリア
+              scope.equip.vif = undefined;
+              scope.equip.aif = undefined;
+              scope.equip.eif = undefined;
+              scope.equip.eintende = undefined;
+            }
           }
         });
         // 更新実施
@@ -582,17 +754,10 @@
           angular.element('#equipapplybtn').attr('disabled', 'disabled');
           angular.element('#equipdelbtn').attr('disabled', 'disabled');
           // その他 の内容置き換え
-          if ( $scope.equip.vif == 'その他' ) {
-            $scope.equip.vif = $scope.equip.ovif;
-          }
-          if ( $scope.equip.aif == 'その他' ) {
-            $scope.equip.aif = $scope.equip.oaif;
-          }
-          if ( $scope.equip.eif == 'その他' ) {
-            $scope.equip.eif = $scope.equip.oeif;
-          }
+          ifOptionOtherSet( $scope.equip );
           // 実行
-          doJsonPost( $http, uriprefix + '/program/' + pgid + '/equip/' + itemid,
+          doJsonPost( $http,
+            uriprefix + '/program/' + pgid + '/equip/' + itemid,
             $.param($scope.equip), $uibModalInstance, $uibModal,
             function() {
               $scope.getEquip();
@@ -606,7 +771,8 @@
           // 二重クリック回避
           angular.element('#equipapplybtn').attr('disabled', 'disabled');
           angular.element('#equipdelbtn').attr('disabled', 'disabled');
-          doJsonPost( $http, uriprefix + '/program/' + pgid + '/equip/' + itemid + '/del/',
+          doJsonPost( $http,
+            uriprefix + '/program/' + pgid + '/equip/' + itemid + '/del/',
             undefined, $uibModalInstance, $uibModal,
             function() {
               $scope.getEquip();
@@ -675,7 +841,7 @@
               $scope.progressgrid.data = data.json;
             }
             else {
-              openDialog( data.status );
+              openDialog( data.status, data.json, $uibModal );
             }
           })
           .error( function() { httpfailDlg( $uibModal ); } );
@@ -719,7 +885,7 @@
             $scope.pgdetailsel = pgid;
           }
           else {
-            openDialog( data.status );
+            openDialog( data.status, data.json, $uibModal );
           }
         })
         .error( function () { httpfailDlg( $uibModal ); } );

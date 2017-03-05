@@ -68,7 +68,7 @@
             angular.element('*[name=' + key + ']').each(function() {
               try {
                 checkHash[key] = angular.fromJson( val.pg_conf_value );
-                if ( angular.isArray( checkHash[key] ) ) {
+                if ( angular.isObject( checkHash[key] ) ) {
                   elmSetValid( this, true );
                 }
                 else {

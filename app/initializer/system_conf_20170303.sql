@@ -1,0 +1,1 @@
+UPDATE pg_system_conf SET pg_conf_value='[{\"ホワイトボード\":\"provide\"},{\"壇上マイク\":\"multi\"},{\"客席マイク\":\"multi\"},{\"モニタ/スクリーン\":\"provide\"},{\"BD/DVDプレイヤー\":\"provide\"},{\"書画カメラ\":\"provide\"},{\"持ち込み映像機器\":\"bring-av\"},{\"持ち込みPC\":\"bring-pc\"}]' where pg_conf_code='def_regEquip';

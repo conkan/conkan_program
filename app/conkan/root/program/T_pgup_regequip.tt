@@ -1,0 +1,149 @@
+<!-- 要望機材編集追加ダイアログ -->
+<script type="text/ng-template" id="T_pgup_regequip">
+  <div class="modal-header">
+    <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
+    <h4 class="modal-title">要望機材</h4>
+  </div>
+  <div class="modal-body">
+    <FORM method="POST" name="regequipform" class="form-horizontal" role="form" id="regequipform" novalidate>
+      <div style="COLOR:Red;" id="valerr"></div>
+      <div class="form-group">
+        <input type="hidden" name="regpgid" id="regpgid" ng-model="prog.regpgid">
+        <input type="hidden" name="pgid" id="pgid"   ng-model="prog.pgid">
+        <input type="hidden" name="id" id="id"   ng-model="regequip.id">
+      </div>
+      <table class="table table-bordered table-condensed">
+        <colgroup>
+          <col class="col-sm-2">
+          <col class="col-sm-8">
+        </colgroup>
+        <tbody>
+          <tr>
+            <th style="background-color:#FFcc66">
+              企画ID: <span ng-cloak>{{prog.regpgid}}({{prog.subno}})</span>
+            </th>
+            <th style="background-color:#FFcc66" colspan="3">
+              <span ng-cloak>{{prog.name}}</span>
+            </th>
+          </tr>
+          <tr>
+            <th>機材名</th>
+            <td>
+              <div ng-switch="regequip.id">
+                <div ng-switch-when=0>
+                  <select name="regequipname" ng-model="regequip.name"
+                    class="col-sm-12"
+                    ng-options="i as i for i in regequiplist"></select>
+                </div>
+                <div ng-switch-default>{{regequip.name}}</div>
+              </div>
+            </td> 
+          </tr>
+          <tr ng-if="regequip.id == 0 && eqtype == 'other'">
+            <th></th>
+            <td>
+              <input type="text" name="oequipname" class="col-sm-12"
+                ng-required="true" ng-model="regequip.oname"/>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div ng-if="eqtype == 'multi'">
+        <table class="table table-bordered table-condensed">
+          <colgroup>
+            <col class="col-sm-2">
+            <col class="col-sm-8">
+          </colgroup>
+          <tbody>
+            <tr>
+              <th>数量</th>
+              <td>
+                <input type="number" string-to-number name="equipcount" min="1"
+                     size="10" style="ime-mode: inactive;" ng-required="true"
+                     ng-model="regequip.count"/>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div ng-if="eqtype == 'bring-av' || eqtype == 'bring-pc'">
+        <table class="table table-bordered table-condensed">
+          <colgroup>
+            <col class="col-sm-3">
+            <col class="col-sm-4">
+            <col class="col-sm-5">
+          </colgroup>
+          <tbody>
+            <tr>
+              <th>映像接続形式</th>
+              <td>
+                <span ng-if="eqtype == 'bring-av'">
+                  <select name="vif" ng-model="regequip.vif" ng-required="true"
+                    ng-options="i for i in avviflist"></select>
+                </span>
+                <span ng-if="eqtype == 'bring-pc'">
+                  <select name="vif" ng-model="regequip.vif" ng-required="true"
+                    ng-options="i for i in pcviflist"></select>
+                </span>
+              </td> 
+              <td>
+                <span ng-if="regequip.vif == 'その他'">
+                  <input type="text" name="ovif" class="col-sm-12" ng-required="true"
+                    ng-model="regequip.ovif"/>
+                </span>
+              </td> 
+            </tr>
+            <tr>
+              <th>音声接続形式</th>
+              <td>
+                <select name="aif" ng-model="regequip.aif" ng-required="true"
+                  ng-options="i for i in aiflist"></select>
+              </td> 
+              <td>
+                <span ng-if="regequip.aif == 'その他'">
+                  <input type="text" name="oaif" class="col-sm-12" ng-required="true"
+                    ng-model="regequip.oaif"/>
+                </span>
+              </td> 
+            </tr>
+            <tr ng-if="eqtype == 'bring-pc'">
+              <th>インタネット接続形式</th>
+              <td>
+                <select name="eif" ng-model="regequip.eif" ng-required="true"
+                  ng-options="i for i in eiflist"></select>
+              </td> 
+              <td>
+                <span ng-if="regequip.eif == 'その他'">
+                  <input type="text" name="oeif" class="col-sm-12" ng-required="true"
+                    ng-model="regequip.oeif"/>
+                </span>
+              </td> 
+            </tr>
+            <tr ng-if="eqtype == 'bring-pc' && regequip.eif != '接続しない'">
+              <th>インタネット利用方法</th>
+              <td colspan="2">
+                <textarea name="intende" class="col-sm-12" rows="2" ng-required="true"
+                    ng-model="regequip.intende"></textarea>
+                </td> 
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </FORM>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-default" ng-click="$close()">閉じる</button>
+    <button ng-if="regequip.id" class="btn " id="regequipdelbtn"
+      ng-disabled="!regequipform.$pristine"
+      ng-click="regequipDoDel()">
+      削除
+    </button>
+    <span ng-if="regequip.id == 0 || eqtype != 'provide' && eqtype != 'other'">
+      <button class="btn btn-primary" id="regequipapplybtn"
+        ng-disabled="regequipform.$invalid || regequipform.$pristine"
+        ng-click="regequipDoApply()">
+        {{regequip.applyBtnLbl}}
+      </button>
+    </span>
+  </div>
+</script>

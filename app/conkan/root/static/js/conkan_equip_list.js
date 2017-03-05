@@ -21,7 +21,7 @@
               $scope.equipgrid.data = data.json;
             }
             else {
-              openDialog( data.status );
+              openDialog( data.status, data.json, $uibModal );
             }
           })
           .error( function() { httpfailDlg( $uibModal ); } );
@@ -118,7 +118,8 @@
             $scope.conf.roomlist.unshift({'id': '', 'val': ''});
           }
           else {
-            openDialog( data.status );
+            openDialog( data.status, data.json, $uibModal,
+                        $uibModalInstance );
           }
         })
         .error( function() { httpfailDlg( $uibModal ); } );
@@ -144,11 +145,13 @@
             };
           }
           else {
-            openDialog( data.status );
+            openDialog( data.status, data.json, $uibModal,
+                        $uibModalInstance,
+                        function() { $scope.getEquipList(); } );
           }
         })
         .error( function() { httpfailDlg( $uibModal ); } )
-        .finally( dialogResizeDrag);
+        .finally( dialogResizeDrag );
 
         // 更新実施
         $scope.equipDoApply = function() {
