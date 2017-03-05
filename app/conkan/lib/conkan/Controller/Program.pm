@@ -1149,7 +1149,7 @@ sub program_equiplist : Chained('program_show') : PathPart('equiplist') : Args(0
         # 場所コード設定済みか確認
         my @list = ();
         my $prog = $c->model('ConkanDB::PgProgram')->find($pgid);
-        my $roomid = $prog->roomid->roomid(); 
+        my $roomid = ( $prog->roomid ) ? $prog->roomid->roomid() : undef; 
         if ( $roomid ) {
             # 場所固定の機材をリストアップ
             my $rows =
