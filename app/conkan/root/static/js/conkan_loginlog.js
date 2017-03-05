@@ -34,14 +34,10 @@
             $scope.lloggrid.data = data.json;
           }
           else {
-            openDialog( data.status );
+            openDialog( data.status, data.json, $uibModal );
           }
         })
-        .error(function(data) {
-          var modalinstance = $uibModal.open(
-            { templateUrl : 'T_httpget_fail' }
-          );
-        });
+        .error( function() { httpfailDlg( $uibModal ); } );
       }
     ]
   );

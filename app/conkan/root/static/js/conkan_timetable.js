@@ -44,7 +44,7 @@
 
   // 現在操作中企画サービス
   ConkanAppModule.factory( 'currentprgService',
-    function( $http, $sce ) {
+    function( $http, $sce, $uibModal ) {
       var currentval = {
         regpgid : '', subno :  '', pgid :  '',
         sname :   '', name :   '', status :  '',
@@ -63,7 +63,7 @@
               ProgDataCnv( data.json, currentval );
             }
             else {
-              openDialog( data.status );
+              openDialog( data.status, data.json, $uibModal );
             }
           })
           .error( function() { httpfailDlg( $uibModal ); } );
@@ -312,7 +312,7 @@
             $scope.conf = ConfDataCnv( data, $scope.conf );
           }
           else {
-            openDialog( data.status );
+            openDialog( data.status, data.json, $uibModal );
           }
         })
         .error( function() { httpfailDlg( $uibModal ); } );

@@ -81,7 +81,7 @@
               $scope.roomgrid.data = data.json;
             }
             else {
-              openDialog( data.status );
+              openDialog( data.status, data.json, $uibModal );
             }
           })
           .error( function() { httpfailDlg( $uibModal ); } );
@@ -144,7 +144,9 @@
             ];
           }
           else {
-            openDialog( data.status );
+            openDialog( data.status, data.json, $uibModal,
+                        $uibModalInstance,
+                        function() { $scope.getRoomList(); } );
           }
         })
         .error( function() { httpfailDlg( $uibModal ); } )

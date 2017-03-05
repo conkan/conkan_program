@@ -103,20 +103,6 @@
     <button class="btn btn-danger" ng-click="$close()">閉じる</button>
   </div>
 </script>
-<!--  データ取得失敗ダイアログ -->
-<script type="text/ng-template" id="T_httpget_fail">
-  <div class="modal-header">
-    <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
-  </div>
-  <div class="modal-body">
-    <H3><strong>エラー発生</strong></H3>
-    データ取得できませんでした<br/>
-    システム管理者に連絡してください
-  </div>
-  <div class="modal-footer">
-    <button class="btn btn-danger" ng-click="$close()">閉じる</button>
-  </div>
-</script>
 <!--  更新失敗(重複) -->
 <script type="text/ng-template" id="T_result_dupl">
   <div class="modal-header">
@@ -127,6 +113,34 @@
     一意でなければならない【<span id="dupkey"></span>】の値
     【<span id="dupval"></span>】 が重複しています。<BR/>
     別の値で再設定してください。
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-danger" ng-click="$close()">閉じる</button>
+  </div>
+</script>
+<!--  取得失敗(対象削除済) -->
+<script type="text/ng-template" id="T_result_noexist">
+  <div class="modal-header">
+    <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
+  </div>
+  <div class="modal-body">
+    <H3><strong>取得失敗</strong></H3>
+    編集対象が存在しません。<br/>
+    他スタッフが削除した可能性があります。
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-danger" ng-click="$close()">閉じる</button>
+  </div>
+</script>
+<!--  データ取得失敗(詳細不明) -->
+<script type="text/ng-template" id="T_httpget_fail">
+  <div class="modal-header">
+    <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
+  </div>
+  <div class="modal-body">
+    <H3><strong>エラー発生</strong></H3>
+    データ取得できませんでした<br/>
+    システム管理者に連絡してください
   </div>
   <div class="modal-footer">
     <button class="btn btn-danger" ng-click="$close()">閉じる</button>
