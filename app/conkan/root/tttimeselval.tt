@@ -41,7 +41,8 @@ ConkanAppModule.value( 'pglistValue', {
                     pgid    : '[% prg.pgid %]',
                 },
                 doperiod : '[% prg.doperiod %]',
-                status :   '[% prg.status %]'
+                status :   '[% prg.status %]',
+                dupl :     '[% prg.dupl %]'
             },
         [%- END %]
     ], 
@@ -56,7 +57,8 @@ ConkanAppModule.value( 'pglistValue', {
                 },
                 room     : '[% prg.roomno %] [% prg.roomname | xml %]',
                 doperiod : '[% prg.doperiod %]',
-                status :   '[% prg.status %]'
+                status :   '[% prg.status %]',
+                dupl :     '[% prg.dupl %]'
             },
         [%- END %]
     ], 
@@ -71,7 +73,8 @@ ConkanAppModule.value( 'pglistValue', {
                 },
                 room     : '[% prg.roomno %] [% prg.roomname | xml %]',
                 doperiod : '[% prg.doperiod %]',
-                status :   '[% prg.status %]'
+                status :   '[% prg.status %]',
+                dupl :     '[% prg.dupl %]'
             },
         [%- END %]
     ], 
