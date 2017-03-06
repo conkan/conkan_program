@@ -130,6 +130,7 @@ var ConfDataCnv = function( data ) {
   wkcnf.def_regEquip = angular.fromJson(data.json.def_regEquip);
   wkcnf.yesno       = [ 'する', 'しない' ];
   wkcnf.dates.unshift(''); // 日付初期化用
+  wkcnf.roomlist.unshift({id:'',val:''}); // 部屋初期化用
 
   return wkcnf;
 };

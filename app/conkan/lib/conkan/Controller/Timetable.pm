@@ -41,6 +41,7 @@ sub index :Path :Args(0) {
             'shift_hour'        => $c->config->{time_origin},
         };
         $c->stash->{'syscon'} = $syscon;
+        $c->stash->{'scale_hash'} = from_json( $syscon->{'gantt_scale_str'} );
         # 未設定企画リスト
         my $unsetPgmlist =
             [ $c->model('ConkanDB::PgProgram')->search(
@@ -84,12 +85,14 @@ sub index :Path :Args(0) {
                 } )
             ];
         my @roomlist = ();
+        my %roomduplchk = ();
         foreach my $pgm ( @$roomPgmlist ) {
-            my $doperiod = $c->forward('/timetable/createPeriod', [ $pgm, ], );
+            my $doperiod = __PACKAGE__->_createPeriod( $c, $pgm );
             my $pgname = $pgm->sname() || $pgm->regpgid->name();
             $pgname =~ s/\n//g;
-            push @roomlist, {
-                'roomid'        => $pgm->roomid->roomid(),
+            my $roomid = $pgm->roomid->roomid(); # roomidがあるもののみ抽出すみ
+            my $pgitem = {
+                'roomid'        => $roomid,
                 'roomname'      => $pgm->roomid->name(),
                 'roomno'        => $pgm->roomid->roomno(),
                 'regpgid'       => $pgm->regpgid->regpgid(),
@@ -99,7 +102,10 @@ sub index :Path :Args(0) {
                 'doperiod'      => $doperiod,
                 'status'        => $pgm->status(),
             };
+            __PACKAGE__->_setDuplchkHash( $c, \%roomduplchk, $roomid, $pgitem );
+            push @roomlist, $pgitem;
         }
+        __PACKAGE__->_setDuplFlg( $c, %roomduplchk );
         $c->stash->{'roomProgram'} = \@roomlist;
         # 出演者別企画リスト
         my $castPgmlist =
@@ -116,12 +122,14 @@ sub index :Path :Args(0) {
                 } )
             ];
         my @castlist = ();
+        my %castduplchk = ();
         foreach my $pgm ( @$castPgmlist ) {
-            my $doperiod = $c->forward('/timetable/createPeriod', [ $pgm, ], );
+            my $doperiod = __PACKAGE__->_createPeriod( $c, $pgm );
             my $pgname = $pgm->sname() || $pgm->regpgid->name();
             $pgname =~ s/\n//g;
             foreach my $cast ( $pgm->pg_casts->all() ) {
-                push @castlist, {
+                my $castid = $cast->castid->castid(); # castidは必ずある
+                my $pgitem = {
                     'regno'         => $cast->castid->regno(),
                     'castname'      => $cast->name() || $cast->castid->name(),
                     'regpgid'       => $pgm->regpgid->regpgid(),
@@ -133,8 +141,11 @@ sub index :Path :Args(0) {
                     'doperiod'      => $doperiod,
                     'status'        => $pgm->status(),
                 };
+                __PACKAGE__->_setDuplchkHash( $c, \%castduplchk, $castid, $pgitem );
+                push @castlist, $pgitem;
             }
         }
+        __PACKAGE__->_setDuplFlg( $c, %castduplchk );
         $c->stash->{'castProgram'} = \@castlist;
         # 機材別企画リスト
         my $equipPgmlist =
@@ -151,16 +162,17 @@ sub index :Path :Args(0) {
                 } )
             ];
         my @equiplist = ();
+        my %equipduplchk = ();
         foreach my $pgm ( @$equipPgmlist ) {
-            my $doperiod = $c->forward('/timetable/createPeriod', [ $pgm, ], );
+            my $doperiod = __PACKAGE__->_createPeriod( $c, $pgm );
             my $pgname = $pgm->sname() || $pgm->regpgid->name();
             $pgname =~ s/\n//g;
             foreach my $equip ( $pgm->pgs_equip->all() ) {
                 # 持ち込み映像機器、持ち込みPCはタイムテーブル表示対象外
-                my $equipno = $equip->equipid->equipno();
+                my $equipno = $equip->equipid->equipno(); # equipidは必ずある
                 next if (    ( $equipno eq 'bring-AV' )
                           || ( $equipno eq 'bring-PC' ) );
-                push @equiplist, {
+                my $pgitem = {
                     'equipno'       => $equipno,
                     'equipname'     => $equip->equipid->name(),
                     'regpgid'       => $pgm->regpgid->regpgid(),
@@ -172,15 +184,89 @@ sub index :Path :Args(0) {
                     'doperiod'      => $doperiod,
                     'status'        => $pgm->status(),
                 };
+                __PACKAGE__->_setDuplchkHash( $c, \%equipduplchk, $equipno, $pgitem );
+                push @equiplist, $pgitem;
             }
         }
+        __PACKAGE__->_setDuplFlg( $c, %equipduplchk );
         $c->stash->{'equipProgram'} = \@equiplist;
     } catch {
         $c->detach( '_dberror', [ shift ] );
     };
 }
 
-=head2 createPeriod
+=head2 _setDuplchkHash
+
+重複チェック用ハッシュ値設定
+
+戻り値 なし
+
+=cut
+
+sub _setDuplchkHash :Private {
+    my ( $self, $c,
+         $pHdupchk, # 重複チェック用ハッシュ
+                    #   key: チェック対象のid (roomid, castid, equipid)
+                    #   val: 企画参照配列参照の配列参照
+                    #           添字 時刻変換値
+                    #           値 企画参照(企画リストの要素)の配列参照
+         $key,      # チェック対象のハッシュキー
+         $pprg,     # チェック対象の企画参照(企画リストの要素)
+    ) = @_;
+    #  時刻変換値 = 時刻(分) + 前日までの全企画時間(分) - 当日全企画開始時刻(分)
+    #   ex. 1日目の10:00 [前日までの全企画時間:0 当日企画開始時刻:10:00]
+    #       時刻変換値 = 600 + 0 - 600 = 0
+    #   ex. 1日目の11:30 [前日までの全企画時間:0 当日企画開始時刻:10:00]
+    #       時刻変換値 = 690 + 0 - 600 = 90
+    #   ex. 2日目の10:00 [前日までの全企画時間:420 当日企画開始時刻:09:00]
+    #       時刻変換値 = 600 + 420 - 540 = 480
+
+    # 指定キーのレコードがなかったら初期化
+    $pHdupchk->{$key} = [] unless ( exists($pHdupchk->{$key} ) );
+    # $pprg->{'doperiod'} に基いて重複チェック用ハッシュの値設定
+    my @periodDatas = split( / /, $pprg->{'doperiod'} );
+    for ( my $cnt=0; $cnt<scalar(@periodDatas); $cnt+=2 ) {
+        my $date  = $periodDatas[$cnt];
+        my $curscale = $c->stash->{'scale_hash'}->{$date};
+        my @times = split( /[:-]/, $periodDatas[$cnt+1] );
+        my $bias  = ( $curscale->[2] * 60 ) - $curscale->[0];
+        my $start = ( ( $times[0] * 60 ) + $times[1] ) + $bias;
+        my $end   = ( ( $times[2] * 60 ) + $times[3] ) + $bias;
+        for ( my $tick=$start; $tick<$end; $tick++ ) {
+            push ( @{$pHdupchk->{$key}->[$tick]}, $pprg );
+        }
+    }
+}
+
+=head2 _setDuplFlg
+
+重複している企画のduplフラグを立てる
+
+戻り値 なし
+
+=cut
+
+sub _setDuplFlg :Private {
+    my ( $self, $c,
+         %dupchk,   # 重複チェック用ハッシュ
+                    #   key: チェック対象のid (roomid, castid, equipid)
+                    #   val: 企画参照配列参照の配列参照
+                    #           添字 時刻変換値
+                    #           値 企画参照(企画リストの要素)の配列参照
+    ) = @_;
+
+    foreach my $papapprg (values(%dupchk)) {
+        foreach my $papprg ( @$papapprg ) {
+            if ( defined($papprg) && ( scalar(@$papprg) > 1 ) ) {
+                foreach my $pprg ( @$papprg ) {
+                    $pprg->{'dupl'} = 1;
+                }
+            }
+        }
+    }
+}
+
+=head2 _createPeriod
 
 企画実施日時を変換する
 
@@ -188,7 +274,7 @@ sub index :Path :Args(0) {
 
 =cut
         
-sub createPeriod :Private {
+sub _createPeriod :Private {
     my ( $self, $c,
          $pgm,  # DBレコードオブジェクト
        ) = @_;

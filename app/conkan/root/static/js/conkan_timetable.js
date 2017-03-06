@@ -165,7 +165,7 @@
           { name : '企画名', field: 'prgname',
             headerCellClass: 'gridheader',
             cellTooltip: true,
-            cellTemplate: '<div ng-if="!row.groupHeader"><div class="ganttRow ui-grid-cell-contents" title="{{row.entity.status}}"><button class="btn primary prgcell" ng-click="grid.appScope.pgmclick(row.entity.prgname.pgid)"><div ng-bind-html="grid.appScope.__crPgBtn(row.entity.prgname.name, row.entity.status)"></div></button></div></div>'
+            cellTemplate: '<div ng-if="!row.groupHeader"><div class="ganttRow ui-grid-cell-contents" title="{{row.entity.status}}"><button class="btn primary prgcell" ng-class="{duplprg : row.entity.dupl}" ng-click="grid.appScope.pgmclick(row.entity.prgname.pgid)"><div ng-bind-html="grid.appScope.__crPgBtn(row.entity.prgname.name, row.entity.status)"></div></button></div></div>'
           },
           { name : '期間',
             headerCellTemplate: pglistValue.ganttConst.ganttHeader,
@@ -203,7 +203,7 @@
           { name : '企画名', field: 'prgname',
             headerCellClass: 'gridheader',
             cellTooltip: true,
-            cellTemplate: '<div ng-if="!row.groupHeader"><div class="ganttRow ui-grid-cell-contents" title="{{row.entity.status}}"><button class="btn primary prgcell" ng-click="grid.appScope.pgmclick(row.entity.prgname.pgid)"><div ng-bind-html="grid.appScope.__crPgBtn(row.entity.prgname.name, row.entity.status)"></div></button></div></div>'
+            cellTemplate: '<div ng-if="!row.groupHeader"><div class="ganttRow ui-grid-cell-contents" title="{{row.entity.status}}"><button class="btn primary prgcell" ng-class="{duplprg : row.entity.dupl}" ng-click="grid.appScope.pgmclick(row.entity.prgname.pgid)"><div ng-bind-html="grid.appScope.__crPgBtn(row.entity.prgname.name, row.entity.status)"></div></button></div></div>'
           },
           { name : '期間',
             headerCellTemplate: pglistValue.ganttConst.ganttHeader,
@@ -241,7 +241,7 @@
           { name : '企画名', field: 'prgname',
             headerCellClass: 'gridheader',
             cellTooltip: true,
-            cellTemplate: '<div ng-if="!row.groupHeader"><div class="ganttRow ui-grid-cell-contents" title="{{row.entity.status}}"><button class="btn primary prgcell" ng-click="grid.appScope.pgmclick(row.entity.prgname.pgid)"><div ng-bind-html="grid.appScope.__crPgBtn(row.entity.prgname.name, row.entity.status)"></div></button></div></div>'
+            cellTemplate: '<div ng-if="!row.groupHeader"><div class="ganttRow ui-grid-cell-contents" title="{{row.entity.status}}"><button class="btn primary prgcell" ng-class="{duplprg : row.entity.dupl}" ng-click="grid.appScope.pgmclick(row.entity.prgname.pgid)"><div ng-bind-html="grid.appScope.__crPgBtn(row.entity.prgname.name, row.entity.status)"></div></button></div></div>'
           },
           { name : '期間',
             headerCellTemplate: pglistValue.ganttConst.ganttHeader,

@@ -40,6 +40,10 @@
         /* ui-Gridのデフォルト行高さと同値にすること */
 }
 
+.duplprg {
+    background-color: red;
+}
+
 .prgcell p {
     margin-top: 2px;
     margin-bottom: 2px;

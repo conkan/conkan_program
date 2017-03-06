@@ -1894,7 +1894,13 @@ sub _trnReq2Hash :Private {
             }
         }
         else {
-            $value->{$item} = $c->request->body_params->{$item};
+            if ( defined($c->request->body_params->{$item}) &&
+                 ( $c->request->body_params->{$item} ne '' ) ) {
+                $value->{$item} = $c->request->body_params->{$item};
+            }
+            else {
+                $value->{$item} = undef;
+            }
         }
         if ( defined( $value->{$item} ) ) {
             $value->{$item} =~ s/\s+$//;
