@@ -67,9 +67,9 @@
   <div class="modal-footer">
     <button class="btn btn-default" ng-click="$close()">閉じる</button>
     <button ng-if="equip.equipid" class="btn " id="equipdelbtn"
-      ng-disabled="!equipform.$pristine"
+      ng-disabled="!equipform.$pristine || equip.roomid"
       ng-click="equipDoDel()">
-      無効化
+      削除
     </button>
     <button class="btn btn-primary" id="equipapplybtn"
       ng-disabled="equipform.$invalid || equipform.$pristine"

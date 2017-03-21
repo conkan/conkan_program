@@ -11,7 +11,7 @@
     <button class="btn btn-danger" ng-click="$close()">閉じる</button>
   </div>
 </script>
-<!--  更新失敗 -->
+<!--  更新失敗(排他) -->
 <script type="text/ng-template" id="T_result_fail">
   <div class="modal-header">
     <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
@@ -19,44 +19,6 @@
   <div class="modal-body">
     <H3><strong>更新できませんでした</strong></H3>
     更新対象を、他スタッフが変更した可能性があります<br/>
-    対象の内容を確認してください。
-  </div>
-  <div class="modal-footer">
-    <button class="btn btn-danger" ng-click="$close()">閉じる</button>
-  </div>
-</script>
-<!--  追加成功 -->
-<script type="text/ng-template" id="T_result_add">
-  <div class="modal-header">
-    <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
-  </div>
-  <div class="modal-body">
-    <H3><strong>追加しました</strong></H3>
-  </div>
-  <div class="modal-footer">
-    <button class="btn btn-danger" ng-click="$close()">閉じる</button>
-  </div>
-</script>
-<!--  削除成功 -->
-<script type="text/ng-template" id="T_result_del">
-  <div class="modal-header">
-    <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
-  </div>
-  <div class="modal-body">
-    <H3><strong>削除しました</strong></H3>
-  </div>
-  <div class="modal-footer">
-    <button class="btn btn-danger" ng-click="$close()">閉じる</button>
-  </div>
-</script>
-<!--  削除失敗 -->
-<script type="text/ng-template" id="T_result_delfail">
-  <div class="modal-header">
-    <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
-  </div>
-  <div class="modal-body">
-    <H3><strong>削除できませんでした</strong></H3>
-    削除対象を他スタッフが更新した可能性があります。<br/>
     対象の内容を確認してください。
   </div>
   <div class="modal-footer">
@@ -91,18 +53,6 @@
     <button class="btn btn-danger" ng-click="$close()">閉じる</button>
   </div>
 </script>
-<!--  更新失敗(使用中) -->
-<script type="text/ng-template" id="T_result_inuse">
-  <div class="modal-header">
-    <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
-  </div>
-  <div class="modal-body">
-    <H1>使用中なので無効にできません</H1>
-  </div>
-  <div class="modal-footer">
-    <button class="btn btn-danger" ng-click="$close()">閉じる</button>
-  </div>
-</script>
 <!--  更新失敗(重複) -->
 <script type="text/ng-template" id="T_result_dupl">
   <div class="modal-header">
@@ -118,7 +68,69 @@
     <button class="btn btn-danger" ng-click="$close()">閉じる</button>
   </div>
 </script>
-<!--  取得失敗(対象削除済) -->
+<!--  追加成功 -->
+<script type="text/ng-template" id="T_result_add">
+  <div class="modal-header">
+    <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
+  </div>
+  <div class="modal-body">
+    <H3><strong>追加しました</strong></H3>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-danger" ng-click="$close()">閉じる</button>
+  </div>
+</script>
+<!--  削除成功 -->
+<script type="text/ng-template" id="T_result_del">
+  <div class="modal-header">
+    <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
+  </div>
+  <div class="modal-body">
+    <H3><strong>削除しました</strong></H3>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-danger" ng-click="$close()">閉じる</button>
+  </div>
+</script>
+<!--  削除失敗(排他) -->
+<script type="text/ng-template" id="T_result_delfail">
+  <div class="modal-header">
+    <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
+  </div>
+  <div class="modal-body">
+    <H3><strong>削除できませんでした</strong></H3>
+    削除対象を他スタッフが更新した可能性があります。<br/>
+    対象の内容を確認してください。
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-danger" ng-click="$close()">閉じる</button>
+  </div>
+</script>
+<!--  削除失敗(使用中) -->
+<script type="text/ng-template" id="T_result_inuse">
+  <div class="modal-header">
+    <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
+  </div>
+  <div class="modal-body">
+    <H1>使用中なので削除できません</H1>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-danger" ng-click="$close()">閉じる</button>
+  </div>
+</script>
+<!--  削除失敗(部屋設置中) -->
+<script type="text/ng-template" id="T_result_inroom">
+  <div class="modal-header">
+    <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
+  </div>
+  <div class="modal-body">
+    <H1>部屋に設置しているため削除できません</H1>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-danger" ng-click="$close()">閉じる</button>
+  </div>
+</script>
+<!--  データ取得失敗(対象削除済) -->
 <script type="text/ng-template" id="T_result_noexist">
   <div class="modal-header">
     <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>

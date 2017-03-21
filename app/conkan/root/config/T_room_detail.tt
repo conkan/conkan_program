@@ -96,7 +96,7 @@
     <button ng-if="room.roomid" class="btn " id="roomdelbtn"
       ng-disabled="!roomform.$pristine"
       ng-click="roomDoDel()">
-      無効化
+      削除
     </button>
     <button class="btn btn-primary" id="roomapplybtn"
       ng-disabled="roomform.$invalid || roomform.$pristine"

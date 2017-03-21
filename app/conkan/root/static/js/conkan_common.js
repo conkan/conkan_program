@@ -342,15 +342,16 @@ var openDialog = function ( stat, json, uibModal, uibInstance, finalcb ) {
 var getTemplate = function( stat ) {
   var templateTbl = {
     'update'    : 'T_result_update',    // 更新成功
-    'fail'      : 'T_result_fail',      // 更新失敗
-    'add'       : 'T_result_add',       // 追加成功
-    'del'       : 'T_result_del',       // 削除成功
-    'delfail'   : 'T_result_delfail',   // 削除失敗
+    'fail'      : 'T_result_fail',      // 更新失敗(排他)
     'ipdupfail' : 'T_result_ipdup',     // 更新失敗(企画番号重複)
     'dbfail'    : 'T_result_dberr',     // 更新失敗(DBエラー)
-    'inuse'     : 'T_result_inuse',     // 更新失敗(使用中)
     'dupl'      : 'T_result_dupl',      // 更新失敗(重複)
-    'noexist'   : 'T_result_noexist',   // 取得失敗(対象削除済)
+    'add'       : 'T_result_add',       // 追加成功
+    'del'       : 'T_result_del',       // 削除成功
+    'delfail'   : 'T_result_delfail',   // 削除失敗(排他)
+    'inuse'     : 'T_result_inuse',     // 削除失敗(使用中)
+    'inroom'    : 'T_result_inroom',    // 削除失敗(部屋設置中)
+    'noexist'   : 'T_result_noexist',   // データ取得失敗(対象削除済)
     ''          : 'T_httpget_fail',     // データ取得失敗(詳細不明)
   };
   var retval = templateTbl[stat] || 'T_httpget_fail'; // デフォルト値
