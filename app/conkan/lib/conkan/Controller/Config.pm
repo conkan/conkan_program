@@ -1196,11 +1196,10 @@ sub equip_detail : Chained('equip_show') : PathPart('') : Args(0) {
             $rs->update( { 
                 'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
             } );
-                
-$c->log->debug('>>>> equip_detail roomid value ' . $rs->roomid->roomid() )
-    if ( $rs->roomid() );
-$c->log->debug('>>>> equip_detail suppliers value ' . $rs->suppliers() )
-    if ( $rs->suppliers() );
+            $c->log->debug('>>>> equip_detail roomid value '
+                . $rs->roomid->roomid() ) if ( $rs->roomid() );
+            $c->log->debug('>>>> equip_detail suppliers value '
+                . $rs->suppliers() ) if ( $rs->suppliers() );
             $c->stash->{'json'} = {
                 equipid => $equipid,
                 name    => $rs->name(),
@@ -1287,8 +1286,13 @@ sub equip_del : Chained('equip_show') : PathPart('del') : Args(0) {
         return;
     }
     try {
-        $c->forward( '_delete', [ $equipid, 'PgEquip', 'equipid' ] );
-        die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
+        if ( $c->stash->{'rs'}->roomid() ) {
+            $c->stash->{'status'} = 'inroom';
+        }
+        else {
+            $c->forward( '_delete', [ $equipid, 'PgEquip', 'equipid' ] );
+            die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
+        }
     } catch {
         my $e = shift;
         $c->forward( '_dberror', [ $e, $errmsg ] );
@@ -1403,7 +1407,7 @@ sub _updatecreate :Private {
         $value->{$item} = undef
             if ( defined( $value->{$item} ) && ( $value->{$item} eq '' ) );
     }
-$c->log->debug('>>>> _updatecreate value ' . Dumper( $value ) );
+    $c->log->debug('>>>> _updatecreate value ' . Dumper( $value ) );
     try {
         if ( $id != 0 ) { # 更新
             my $row = $c->stash->{'rs'};
@@ -1451,7 +1455,7 @@ sub _delete :Private {
                 $c->stash->{'status'} = 'inuse';
             }
             else {
-                $row->update( { 'rmdate'   => \'NOW()', } );
+                $row->delete();
                 $c->stash->{'status'} = 'del';
             }
         }

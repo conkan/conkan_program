@@ -121,7 +121,7 @@
     <button ng-if="[% currentSU %]" class="btn" id="profdelbtn"
       ng-disabled="!profform.$pristine"
       ng-click="profDoDel()">
-      無効化
+      削除
     </button>
     <button class="btn btn-primary" id="profapplybtn"
       ng-disabled="profform.$invalid || profform.$pristine"
