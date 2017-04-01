@@ -36,8 +36,18 @@
           </tr>
             <th>設置場所</th>
             <td colspan="3">
-              <select name="roomid" class="col-sm-12" ng-model="equip.roomid"
-                ng-options="i.id as i.val  for i in conf.roomlist"></select>
+              <div ng-switch="equip.usecnt">
+                <div ng-switch-when=0>
+                  <select name="roomid" class="col-sm-12"
+                   ng-model="equip.roomid"
+                   ng-options="i.id as i.val  for i in conf.roomlist"></select>
+                </div>
+                <div ng-switch-default>
+                  <div class="rubytext">
+                    決定機材として使用中のため設置場所指定不可
+                  </div>
+                </div>
+              </div>
             </td>
           <tr>
             <th>仕様</th>

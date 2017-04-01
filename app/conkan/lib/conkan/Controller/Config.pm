@@ -1168,6 +1168,23 @@ sub equip_listget : Chained('equip_base') : PathPart('listget') : Args(0) {
 sub equip_show : Chained('equip_base') :PathPart('') :CaptureArgs(1) {
     my ( $self, $c, $equipid ) = @_;
     $c->forward( '_showCommon', [ $equipid, 'equipid', 'PgAllEquip' ] );
+    if ( $c->stash->{'status'} eq 'ok' ) {
+        try {
+            if ( $equipid != 0 ) {
+                # 決定機材として使用している企画数を取得
+                $c->stash->{'usecnt'} =
+                    $c->model('ConkanDB::PgEquip')->search(
+                        { 'equipid' => $equipid } )->count;
+            }
+            else {
+                $c->stash->{'usecnt'} = 0;
+            }
+        } catch {
+            my $e = shift;
+            $c->stash->{'status'} = 'dbfail';
+            $c->stash->{'dbexp'} = $e;
+        };
+    }
 }
 
 =head2 equip/*
@@ -1209,6 +1226,7 @@ sub equip_detail : Chained('equip_show') : PathPart('') : Args(0) {
                 comment => $rs->comment(),
                 suppliers => $rs->suppliers(),
                 rmdate  => $rs->rmdate(),
+                usecnt  => $c->stash->{'usecnt'},
             };
         }
         else {
@@ -1245,6 +1263,14 @@ sub equip_edit : Chained('equip_show') : PathPart('edit') : Args(0) {
         if ( $c->stash->{'status'} eq 'dbfail' ) {
             $c->forward( '_dberror', [ $c->stash->{'dbexp'}, $errmsg ] );
         }
+        $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
+        $c->forward('conkan::View::JSON');
+        return;
+    }
+    # 決定機材として登録されていたら、設置場所を変更できない
+    if ( ( $c->stash->{'usecnt'} > 0 ) &&
+         $c->request->body_params->{'roomid'} ) {
+        $c->stash->{'status'} = 'pguse';
         $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
         $c->forward('conkan::View::JSON');
         return;

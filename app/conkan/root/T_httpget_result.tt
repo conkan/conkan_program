@@ -68,6 +68,19 @@
     <button class="btn btn-danger" ng-click="$close()">閉じる</button>
   </div>
 </script>
+<!--  更新失敗(使用中) -->
+<script type="text/ng-template" id="T_result_pguse">
+  <div class="modal-header">
+    <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
+  </div>
+  <div class="modal-body">
+    <H1><strong>更新できませんでした</strong></H1>
+    決定機材として使用中の機材の設置場所は設定できません。
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-danger" ng-click="$close()">閉じる</button>
+  </div>
+</script>
 <!--  追加成功 -->
 <script type="text/ng-template" id="T_result_add">
   <div class="modal-header">

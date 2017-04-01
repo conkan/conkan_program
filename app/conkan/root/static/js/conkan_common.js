@@ -346,6 +346,7 @@ var getTemplate = function( stat ) {
     'ipdupfail' : 'T_result_ipdup',     // 更新失敗(企画番号重複)
     'dbfail'    : 'T_result_dberr',     // 更新失敗(DBエラー)
     'dupl'      : 'T_result_dupl',      // 更新失敗(重複)
+    'pguse'     : 'T_result_pguse',     // 更新失敗(使用中)
     'add'       : 'T_result_add',       // 追加成功
     'del'       : 'T_result_del',       // 削除成功
     'delfail'   : 'T_result_delfail',   // 削除失敗(排他)
