@@ -142,6 +142,7 @@
               comment : data.json.comment,
               suppliers : data.json.suppliers,
               rmdate  : data.json.rmdate,
+              usecnt  : data.json.usecnt,
             };
           }
           else {
