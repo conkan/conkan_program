@@ -10,6 +10,12 @@
     [ '$scope', '$sce', '$http', '$uibModal',
       function( $scope, $sce, $http, $uibModal ) {
 
+        $scope.__getRoomname = function( roomid, name ) {
+          var cont = '<a href="' + roomid + '">' + name + '</a>';
+          var wkstr = $sce.trustAsHtml( cont );
+          return wkstr;
+        };
+
         $scope.roomgrid = {
           enableFiltering: false,
           enableSorting: true,
@@ -19,53 +25,49 @@
         };
 
         $scope.roomgrid.columnDefs = [
-          { name : '部屋名', field: 'name',
-            headerCellClass: 'gridheader',
-            width: "24%",
-            cellClass: function(grid, row) {
-              return uiGetCellCls(row.entity.rmdate);
-            },
-            enableHiding: false,
-          },
           { name : '部屋番号', field: 'roomno',
             headerCellClass: 'gridheader',
-            width: "16%",
-            cellClass: function(grid, row) {
-              return uiGetCellCls(row.entity.rmdate);
-            },
+            width: "8%",
+            cellClass: 'ui-grid-vcenter',
+            enableHiding: false,
+          },
+          { name : '部屋名', field: 'roomid',
+            headerCellClass: 'gridheader',
+            cellClass: 'ui-grid-vcenter',
+            enableHiding: false,
+            cellTemplate: '<div ng-bind-html="grid.appScope.__getRoomname'
+                        + '(row.entity.roomid, row.entity.name)"></div>',
+          },
+          { name : '定員', field: 'max',
+            headerCellClass: 'gridheader',
+            width: "8%",
+            cellClass: 'ui-grid-vcenter',
             enableHiding: false,
           },
           { name : '形式', field: 'type',
             headerCellClass: 'gridheader',
-            width: "24%",
-            cellClass: function(grid, row) {
-              return uiGetCellCls(row.entity.rmdate);
-            },
+            width: "14%",
+            cellClass: 'ui-grid-vcenter',
             enableHiding: false,
           },
           { name : '面積', field: 'size',
             headerCellClass: 'gridheader',
-            width: "16%",
-            cellClass: function(grid, row) {
-              return uiGetCellCls(row.entity.rmdate);
-            },
+            width: "8%",
+            cellClass: 'ui-grid-vcenter',
             enableHiding: false,
           },
-          { name : '', field: 'roomid',
-            headerCellClass: 'gridheader nogridmenu',
-            cellClass: function(grid, row) {
-              return uiGetCellCls(row.entity.rmdate);
-            },
-            enableSorting: false,
+          { name : 'インタネット回線', field: 'net',
+            headerCellClass: 'gridheader',
+            width: "16%",
+            cellClass: 'ui-grid-vcenter',
             enableHiding: false,
-            cellTemplate: '<div class="gridcelbtn">'
-                          + '<button ng-if="row.entity.rmdate"'
-                          +   'type="button" class="btn btn-xs">無効</button>'
-                          + '<button ng-if="!row.entity.rmdate"'
-                          +   'type="button" class="btn btn-xs btn-primary" '
-                          +   'ng-click="grid.appScope.openAllRoomForm'
-                          +   '(row.entity.roomid)">編集</button>'
-                          + '</div>'
+          },
+          { name : '実施企画数', field: 'pgcnt',
+            headerCellClass: 'gridheader',
+            type: 'number',
+            width: "10%",
+            cellClass: 'ui-grid-vcenter',
+            enableHiding: false,
           },
         ];
         

@@ -602,6 +602,12 @@ sub room_base : Chained('') : PathPart('config/room') : CaptureArgs(0) {
 
 =cut
 
+my %NetTrn = (
+    'NORM'  => '無',
+    'W'     => '無線',
+    'E'     => '有線',
+);
+
 sub room_list : Chained('room_base') : PathPart('list') : Args(0) {
     my ( $self, $c ) = @_;
 }
@@ -619,17 +625,26 @@ sub room_listget : Chained('room_base') : PathPart('listget') : Args(0) {
         my @data;
         my $rows = [ $c->model('ConkanDB::PgRoom')->search(
                         { },
-                        { 'order_by' => { '-asc' => 'roomno' } }
+                        {
+                          'join'     => 'pg_programs',
+                          'distinct' => 1,
+                          '+select'  => [ { count => 'pg_programs.roomid' } ],
+                          '+as'      => [qw/pgcnt/],
+                          'order_by' => { '-asc' => 'roomno' }
+                        }
                     )
                 ];
         for my $row (@$rows) {
             my $rm  = $row->rmdate();
             push ( @data, {
-                'name'     => $row->name(),
                 'roomno'   => $row->roomno(),
+                'roomid'   => $row->roomid(),
+                'name'     => $row->name(),
+                'max'      => $row->max(),
                 'type'     => $row->type(),
                 'size'     => $row->size(),
-                'roomid'   => $row->roomid(),
+                'net'      => $NetTrn{$row->net()},
+                'pgcnt'    => $row->get_column('pgcnt'),
                 'rmdate'   => +( defined( $rm ) ? $rm->strftime('%F %T') : '' ),
             } );
         }
@@ -791,12 +806,6 @@ sub room_del : Chained('room_show') : PathPart('del') : Args(0) {
 部屋管理 roomcsvdownload : CSVダウンロード
 
 =cut
-
-my %NetTrn = (
-    'NORM'  => '無',
-    'W'     => '無線',
-    'E'     => '有線',
-);
 
 sub roomcsvdownload :Local {
     my ( $self, $c ) = @_;
