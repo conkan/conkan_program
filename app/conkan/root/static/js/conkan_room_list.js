@@ -89,7 +89,9 @@
           .error( function() { httpfailDlg( $uibModal ); } );
         };
 
-        $scope.getRoomList();
+        if ( typeof dontgetroomlist === "undefined" ) {
+            $scope.getRoomList();
+        }
 
         // 部屋更新追加ダイアログ
         $scope.openAllRoomForm = function( roomid ) {
