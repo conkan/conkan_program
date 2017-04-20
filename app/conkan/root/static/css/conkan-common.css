@@ -134,6 +134,14 @@
     vertical-align:bottom;
 }
 
+.relinfotitle {
+    background-color:#f8f8f8;
+}
+
+.relinfotitle th {
+    text-align:center;
+}
+
 select:disabled, input:disabled {
     border-width: 0px;
     background-color:   inherit;

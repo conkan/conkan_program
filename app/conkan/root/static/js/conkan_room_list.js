@@ -122,7 +122,7 @@
         angular.element('#valerr').text('');
         $http({
           method  : 'GET',
-          url     : uriprefix + '/config/room/' + params.editRoomId
+          url     : uriprefix + '/config/room/' + params.editRoomId + '/edit'
         })
         .success(function(data) {
           if ( data.status === 'ok' ) {
@@ -165,8 +165,7 @@
           //    現在なし
           // 実行
           doJsonPost( $http, uriprefix + '/config/room/' + $scope.room.roomid + '/edit',
-                      $.param($scope.room), $uibModalInstance, $uibModal,
-                      function() { $scope.getRoomList(); } );
+                      $.param($scope.room), $uibModalInstance, $uibModal);
         };
         // 削除実施
         $scope.roomDoDel = function() {
