@@ -89,7 +89,7 @@
           .error( function() { httpfailDlg( $uibModal ); } );
         };
 
-        if ( typeof dontgetroomlist === "undefined" ) {
+        if ( location.toString().split('/').pop() == 'list' ) {
             $scope.getRoomList();
         }
 
@@ -164,17 +164,33 @@
           // バリデーション
           //    現在なし
           // 実行
+          var finalcb;
+          if ( location.toString().split('/').pop() == 'list' ) {
+            finalcb = function() { $scope.getRoomList(); };
+          }
           doJsonPost( $http, uriprefix + '/config/room/' + $scope.room.roomid + '/edit',
-                      $.param($scope.room), $uibModalInstance, $uibModal);
+                      $.param($scope.room), $uibModalInstance, $uibModal,
+                      finalcb );
         };
         // 削除実施
         $scope.roomDoDel = function() {
           // 二重クリック回避
           angular.element('#roomapplybtn').attr('disabled', 'disabled');
           angular.element('#roomdelbtn').attr('disabled', 'disabled');
+          var finalcb;
+          if ( location.toString().split('/').pop() == 'list' ) {
+            finalcb = function() { $scope.getRoomList(); };
+          }
+          else {
+            finalcb = function(stat) {
+                if ( stat === 'del' ) {
+                    location = uriprefix + '/config/room/list';
+                }
+            };
+          }
           doJsonPost( $http, uriprefix + '/config/room/' + $scope.room.roomid + '/del',
                       undefined, $uibModalInstance, $uibModal,
-                      function() { $scope.getRoomList(); } );
+                      finalcb );
         };
       }
     ]

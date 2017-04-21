@@ -134,7 +134,6 @@ sub setting :Local {
                     my $val = $param->{$code . '[pg_conf_value]'};
                     $val =~ s/\s+$//;
                     $pHwk->pg_conf_value( $val );
-$c->log->debug('>>> ' . 'code : ' . $code . ' val : ' . $pHwk->pg_conf_value() );
                     $pHwk->update();
                 }
                 # タイムテーブルガントチャート表示用固定値算出設定
@@ -689,6 +688,8 @@ sub room_detail : Chained('room_show') : PathPart('') : Args(0) {
     try {
         # 部屋情報
         $c->stash->{'RoomInfo'} = $c->stash->{'rs'};
+        $c->stash->{'RoomInfo'}->{'netJ'}
+            = $NetTrn{$c->stash->{'RoomInfo'}->net()};
         # その部屋に設置されている機材情報
         $c->stash->{'InstEquip'} = 
             [ $c->model('ConkanDB::PgAllEquip')->search(
@@ -813,8 +814,16 @@ sub room_del : Chained('room_show') : PathPart('del') : Args(0) {
     }
     try {
         die if ( $c->stash->{'status'} ne 'ok' );
-        $c->forward( '_delete', [ $roomid, 'PgProgram', 'roomid' ] );
-        die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
+        my $eqcnt = $c->model('ConkanDB::PgAllEquip')->search(
+                        { 'roomid' => $roomid } )->count;
+        $c->log->debug('>>>> room_del equip cont value ' . $eqcnt);
+        if ( $eqcnt > 0 ) {
+            $c->stash->{'status'} = 'inuse';
+        }
+        else {
+            $c->forward( '_delete', [ $roomid, 'PgProgram', 'roomid' ] );
+            die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
+        }
     } catch {
         my $e = shift;
         $c->forward( '_dberror', [ $e, $errmsg ] );
@@ -1243,10 +1252,6 @@ sub equip_detail : Chained('equip_show') : PathPart('') : Args(0) {
             $rs->update( { 
                 'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
             } );
-            $c->log->debug('>>>> equip_detail roomid value '
-                . $rs->roomid->roomid() ) if ( $rs->roomid() );
-            $c->log->debug('>>>> equip_detail suppliers value '
-                . $rs->suppliers() ) if ( $rs->suppliers() );
             $c->stash->{'json'} = {
                 equipid => $equipid,
                 name    => $rs->name(),
@@ -1262,6 +1267,7 @@ sub equip_detail : Chained('equip_show') : PathPart('') : Args(0) {
         else {
             $c->stash->{'json'} = {
                 equipid => 0,
+                usecnt  => 0,
             };
         }
     } catch {

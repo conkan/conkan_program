@@ -52,7 +52,7 @@
             <th>附属設備</th>
             <td colspan="3">[% RoomInfo.equips %]</td>
             <th>インタネット回線</th>
-            <td>[% RoomInfo.net %]</td>
+            <td>[% RoomInfo.netJ %]</td>
           </tr>
           <tr>
             <th>備考</th>
@@ -187,7 +187,6 @@
 </div> <!-- End of container ng-app "conkanRoomList -->
 [%- PROCESS 'tttail.tt' -%]
 <script type="text/javascript">var uriprefix="[% uriprefix %]";</script>
-<script type="text/javascript">var dontgetroomlist=1;</script>
 <script type="text/javascript" src="[% uriprefix %]/static/js/conkan_room_list.js"></script>
 </body>
 </html>
