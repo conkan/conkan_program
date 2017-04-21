@@ -725,7 +725,7 @@ sub program_show : Chained('program_base') :PathPart('') :CaptureArgs(1) {
 
 =head2 program/*/
 
-企画管理program_detail  : 企画情報更新表示
+企画管理program_detail  : 企画情報詳細表示
 
 =cut
 
@@ -994,10 +994,10 @@ sub pgup_castdel : Chained('pgup_casttop') : PathPart('del') : Args(0) {
 }
 
 #============================================================================
-#   要望機材処理
+#   機材要望処理
 =head2 program/*/regequiplist
 ---------------------------------------------
-企画管理 program_regequiplist  : 要望機材リスト取得
+企画管理 program_regequiplist  : 機材要望リスト取得
 
 =cut
 sub program_regequiplist : Chained('program_show') : PathPart('regequiplist') : Args(0) {
@@ -1037,7 +1037,7 @@ sub program_regequiplist : Chained('program_show') : PathPart('regequiplist') : 
 
 =head2 program/*/regequip/*
 ---------------------------------------------
-企画管理 pgup_regequiptop  : 要望機材追加/更新/削除 起点
+企画管理 pgup_regequiptop  : 機材要望追加/更新/削除 起点
 
 =cut
 sub pgup_regequiptop : Chained('program_show') : PathPart('regequip') : CaptureArgs(1) {
@@ -1048,7 +1048,7 @@ sub pgup_regequiptop : Chained('program_show') : PathPart('regequip') : CaptureA
 
 =head2 program/*/regequip/*/
 
-企画管理 pgup_regequip  : 要望機材追加/更新
+企画管理 pgup_regequip  : 機材要望追加/更新
 
 =cut
 sub pgup_regequip : Chained('pgup_regequiptop') : PathPart('') : Args(0) {
@@ -1085,7 +1085,7 @@ sub pgup_regequip : Chained('pgup_regequiptop') : PathPart('') : Args(0) {
                 $c->stash->{'json'}->{'eif'}     = $rowprof->eif();
                 $c->stash->{'json'}->{'intende'} = $rowprof->intende();
             }
-            # 提供要望機材情報
+            # 提供機材要望情報
             my $defregstr = $c->model('ConkanDB::PgSystemConf')
                             ->find('def_regEquip')->pg_conf_value();
             my $pdefReg = from_json( $defregstr );
@@ -1109,7 +1109,7 @@ sub pgup_regequip : Chained('pgup_regequiptop') : PathPart('') : Args(0) {
 
 =head2 program/*/regequip/*/del
 
-企画管理 pgup_regequipdel  : 要望機材削除
+企画管理 pgup_regequipdel  : 機材要望削除
 
 =cut
 sub pgup_regequipdel : Chained('pgup_regequiptop') : PathPart('del') : Args(0) {

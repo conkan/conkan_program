@@ -330,7 +330,7 @@ var openDialog = function ( stat, json, uibModal, uibInstance, finalcb ) {
   });
   resultDlg.result.then( function() {
     if ( finalcb ) {
-      finalcb();
+      finalcb(stat);
     }
     else {
       location.reload();

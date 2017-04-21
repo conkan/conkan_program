@@ -134,7 +134,6 @@ sub setting :Local {
                     my $val = $param->{$code . '[pg_conf_value]'};
                     $val =~ s/\s+$//;
                     $pHwk->pg_conf_value( $val );
-$c->log->debug('>>> ' . 'code : ' . $code . ' val : ' . $pHwk->pg_conf_value() );
                     $pHwk->update();
                 }
                 # タイムテーブルガントチャート表示用固定値算出設定
@@ -602,6 +601,12 @@ sub room_base : Chained('') : PathPart('config/room') : CaptureArgs(0) {
 
 =cut
 
+my %NetTrn = (
+    'NORM'  => '無',
+    'W'     => '無線',
+    'E'     => '有線',
+);
+
 sub room_list : Chained('room_base') : PathPart('list') : Args(0) {
     my ( $self, $c ) = @_;
 }
@@ -619,17 +624,26 @@ sub room_listget : Chained('room_base') : PathPart('listget') : Args(0) {
         my @data;
         my $rows = [ $c->model('ConkanDB::PgRoom')->search(
                         { },
-                        { 'order_by' => { '-asc' => 'roomno' } }
+                        {
+                          'join'     => 'pg_programs',
+                          'distinct' => 1,
+                          '+select'  => [ { count => 'pg_programs.roomid' } ],
+                          '+as'      => [qw/pgcnt/],
+                          'order_by' => { '-asc' => 'roomno' }
+                        }
                     )
                 ];
         for my $row (@$rows) {
             my $rm  = $row->rmdate();
             push ( @data, {
-                'name'     => $row->name(),
                 'roomno'   => $row->roomno(),
+                'roomid'   => $row->roomid(),
+                'name'     => $row->name(),
+                'max'      => $row->max(),
                 'type'     => $row->type(),
                 'size'     => $row->size(),
-                'roomid'   => $row->roomid(),
+                'net'      => $NetTrn{$row->net()},
+                'pgcnt'    => $row->get_column('pgcnt'),
                 'rmdate'   => +( defined( $rm ) ? $rm->strftime('%F %T') : '' ),
             } );
         }
@@ -656,7 +670,7 @@ sub room_show : Chained('room_base') :PathPart('') :CaptureArgs(1) {
 
 =head2 room/*
 
-部屋管理room_detail  : 部屋情報更新表示
+部屋管理room_detail  : 部屋情報詳細表示
 
 =cut
 
@@ -669,45 +683,38 @@ sub room_detail : Chained('room_show') : PathPart('') : Args(0) {
         if ( $c->stash->{'status'} eq 'dbfail' ) {
             $c->forward( '_dberror', [ $c->stash->{'dbexp'}, $errmsg ] );
         }
-        $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
-        $c->forward('conkan::View::JSON');
         return;
     }
     try {
-        my $rs = $c->stash->{'rs'};
-        if ( $roomid != 0 ) {
-            $c->session->{'updtic'} = time;
-            $rs->update( { 
-                'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
-            } );
-            $c->stash->{'json'} = {
-                roomid      => $roomid,
-                name        => $rs->name(),
-                roomno      => $rs->roomno(),
-                max         => $rs->max(),
-                type        => $rs->type(),
-                size        => $rs->size(),
-                tablecnt    => $rs->tablecnt(),
-                chaircnt    => $rs->chaircnt(),
-                equips      => $rs->equips(),
-                useabletime => $rs->useabletime(),
-                net         => $rs->net(),
-                comment     => $rs->comment(),
-            };
-        }
-        else {
-            $c->stash->{'json'} = {
-                roomid      => 0,
-                type        => '洋室',
-                net         => 'W',
-            };
-        }
+        # 部屋情報
+        $c->stash->{'RoomInfo'} = $c->stash->{'rs'};
+        $c->stash->{'RoomInfo'}->{'netJ'}
+            = $NetTrn{$c->stash->{'RoomInfo'}->net()};
+        # その部屋に設置されている機材情報
+        $c->stash->{'InstEquip'} = 
+            [ $c->model('ConkanDB::PgAllEquip')->search(
+                        { 'roomid' => $roomid },
+                        { 'order_by' => { '-asc' => 'equipno' }, }
+                )
+            ];
+        # その部屋で実施する企画の企画情報 機材要望情報 決定機材情報
+        $c->stash->{'ExProgram'} = 
+            [ $c->model('ConkanDB::PgProgram')->search(
+                    { 'me.roomid' => $roomid },
+                    { 
+                        'prefetch' => [ { 'pgs_equip' => 'equipid' }, 
+                                        { 'regpgid' => 'pg_regs_equip' },
+                                      ],
+                        'order_by' => { '-asc' => ['date1', 'stime1'] },
+                    }
+                )
+            ];
+        # 企画開始終了時刻変換
+        $c->forward('/program/_trnSEtime', [ $c->stash->{'ExProgram'}, ], );
     } catch {
         my $e = shift;
         $c->forward( '_dberror', [ $e, $errmsg ] );
     };
-    $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
-    $c->forward('conkan::View::JSON');
 }
 
 =head2 room/*/edit
@@ -721,10 +728,6 @@ sub room_edit : Chained('room_show') : PathPart('edit') : Args(0) {
 
     my $roomid = $c->stash->{'roomid'};
 
-    # GETはおそらく直打ちとかなので再度
-    if ( $c->request->method eq 'GET' ) {
-        $c->go->( '/config/room/' . $roomid ); # goなので帰ってこない
-    }
     my $errmsg = 'config/room/' . $roomid . '/edit';
     # _showCommonでのエラー対応
     if ( $c->stash->{'status'} ne 'ok' ) {
@@ -737,13 +740,47 @@ sub room_edit : Chained('room_show') : PathPart('edit') : Args(0) {
     }
     try {
         die if ( $c->stash->{'status'} ne 'ok' );
-        my $items = [ qw/
-                        name roomno max type size tablecnt
-                        chaircnt equips useabletime net comment
-                        / ];
-        my $uniqitems = [ qw/ name roomno / ];
-        $c->forward( '_updatecreate', [ $roomid, $items, $uniqitems ] );
-        die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
+        if ( $c->request->method eq 'GET' ) {
+            # 更新のための情報設定
+            my $rs = $c->stash->{'rs'};
+            if ( $roomid != 0 ) {
+                $c->session->{'updtic'} = time;
+                $rs->update( { 
+                    'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
+                } );
+                $c->stash->{'json'} = {
+                    roomid      => $roomid,
+                    name        => $rs->name(),
+                    roomno      => $rs->roomno(),
+                    max         => $rs->max(),
+                    type        => $rs->type(),
+                    size        => $rs->size(),
+                    tablecnt    => $rs->tablecnt(),
+                    chaircnt    => $rs->chaircnt(),
+                    equips      => $rs->equips(),
+                    useabletime => $rs->useabletime(),
+                    net         => $rs->net(),
+                    comment     => $rs->comment(),
+                };
+            }
+            else {
+                $c->stash->{'json'} = {
+                    roomid      => 0,
+                    type        => '洋室',
+                    net         => 'W',
+                };
+            }
+        }
+        else {
+            # 更新実施
+            my $items = [ qw/
+                            name roomno max type size tablecnt
+                            chaircnt equips useabletime net comment
+                            / ];
+            my $uniqitems = [ qw/ name roomno / ];
+            $c->forward( '_updatecreate', [ $roomid, $items, $uniqitems ] );
+            die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
+        }
     } catch {
         my $e = shift;
         $c->forward( '_dberror', [ $e, $errmsg ] );
@@ -777,8 +814,16 @@ sub room_del : Chained('room_show') : PathPart('del') : Args(0) {
     }
     try {
         die if ( $c->stash->{'status'} ne 'ok' );
-        $c->forward( '_delete', [ $roomid, 'PgProgram', 'roomid' ] );
-        die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
+        my $eqcnt = $c->model('ConkanDB::PgAllEquip')->search(
+                        { 'roomid' => $roomid } )->count;
+        $c->log->debug('>>>> room_del equip cont value ' . $eqcnt);
+        if ( $eqcnt > 0 ) {
+            $c->stash->{'status'} = 'inuse';
+        }
+        else {
+            $c->forward( '_delete', [ $roomid, 'PgProgram', 'roomid' ] );
+            die $c->stash->{'dbexp'} if ( $c->stash->{'status'} eq 'dbfail' );
+        }
     } catch {
         my $e = shift;
         $c->forward( '_dberror', [ $e, $errmsg ] );
@@ -791,12 +836,6 @@ sub room_del : Chained('room_show') : PathPart('del') : Args(0) {
 部屋管理 roomcsvdownload : CSVダウンロード
 
 =cut
-
-my %NetTrn = (
-    'NORM'  => '無',
-    'W'     => '無線',
-    'E'     => '有線',
-);
 
 sub roomcsvdownload :Local {
     my ( $self, $c ) = @_;
@@ -1213,10 +1252,6 @@ sub equip_detail : Chained('equip_show') : PathPart('') : Args(0) {
             $rs->update( { 
                 'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
             } );
-            $c->log->debug('>>>> equip_detail roomid value '
-                . $rs->roomid->roomid() ) if ( $rs->roomid() );
-            $c->log->debug('>>>> equip_detail suppliers value '
-                . $rs->suppliers() ) if ( $rs->suppliers() );
             $c->stash->{'json'} = {
                 equipid => $equipid,
                 name    => $rs->name(),
@@ -1232,6 +1267,7 @@ sub equip_detail : Chained('equip_show') : PathPart('') : Args(0) {
         else {
             $c->stash->{'json'} = {
                 equipid => 0,
+                usecnt  => 0,
             };
         }
     } catch {

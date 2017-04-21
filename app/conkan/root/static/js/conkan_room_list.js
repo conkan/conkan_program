@@ -10,6 +10,12 @@
     [ '$scope', '$sce', '$http', '$uibModal',
       function( $scope, $sce, $http, $uibModal ) {
 
+        $scope.__getRoomname = function( roomid, name ) {
+          var cont = '<a href="' + roomid + '">' + name + '</a>';
+          var wkstr = $sce.trustAsHtml( cont );
+          return wkstr;
+        };
+
         $scope.roomgrid = {
           enableFiltering: false,
           enableSorting: true,
@@ -19,53 +25,49 @@
         };
 
         $scope.roomgrid.columnDefs = [
-          { name : '部屋名', field: 'name',
-            headerCellClass: 'gridheader',
-            width: "24%",
-            cellClass: function(grid, row) {
-              return uiGetCellCls(row.entity.rmdate);
-            },
-            enableHiding: false,
-          },
           { name : '部屋番号', field: 'roomno',
             headerCellClass: 'gridheader',
-            width: "16%",
-            cellClass: function(grid, row) {
-              return uiGetCellCls(row.entity.rmdate);
-            },
+            width: "8%",
+            cellClass: 'ui-grid-vcenter',
+            enableHiding: false,
+          },
+          { name : '部屋名', field: 'roomid',
+            headerCellClass: 'gridheader',
+            cellClass: 'ui-grid-vcenter',
+            enableHiding: false,
+            cellTemplate: '<div ng-bind-html="grid.appScope.__getRoomname'
+                        + '(row.entity.roomid, row.entity.name)"></div>',
+          },
+          { name : '定員', field: 'max',
+            headerCellClass: 'gridheader',
+            width: "8%",
+            cellClass: 'ui-grid-vcenter',
             enableHiding: false,
           },
           { name : '形式', field: 'type',
             headerCellClass: 'gridheader',
-            width: "24%",
-            cellClass: function(grid, row) {
-              return uiGetCellCls(row.entity.rmdate);
-            },
+            width: "14%",
+            cellClass: 'ui-grid-vcenter',
             enableHiding: false,
           },
           { name : '面積', field: 'size',
             headerCellClass: 'gridheader',
-            width: "16%",
-            cellClass: function(grid, row) {
-              return uiGetCellCls(row.entity.rmdate);
-            },
+            width: "8%",
+            cellClass: 'ui-grid-vcenter',
             enableHiding: false,
           },
-          { name : '', field: 'roomid',
-            headerCellClass: 'gridheader nogridmenu',
-            cellClass: function(grid, row) {
-              return uiGetCellCls(row.entity.rmdate);
-            },
-            enableSorting: false,
+          { name : 'インタネット回線', field: 'net',
+            headerCellClass: 'gridheader',
+            width: "16%",
+            cellClass: 'ui-grid-vcenter',
             enableHiding: false,
-            cellTemplate: '<div class="gridcelbtn">'
-                          + '<button ng-if="row.entity.rmdate"'
-                          +   'type="button" class="btn btn-xs">無効</button>'
-                          + '<button ng-if="!row.entity.rmdate"'
-                          +   'type="button" class="btn btn-xs btn-primary" '
-                          +   'ng-click="grid.appScope.openAllRoomForm'
-                          +   '(row.entity.roomid)">編集</button>'
-                          + '</div>'
+          },
+          { name : '実施企画数', field: 'pgcnt',
+            headerCellClass: 'gridheader',
+            type: 'number',
+            width: "10%",
+            cellClass: 'ui-grid-vcenter',
+            enableHiding: false,
           },
         ];
         
@@ -87,7 +89,9 @@
           .error( function() { httpfailDlg( $uibModal ); } );
         };
 
-        $scope.getRoomList();
+        if ( location.toString().split('/').pop() == 'list' ) {
+            $scope.getRoomList();
+        }
 
         // 部屋更新追加ダイアログ
         $scope.openAllRoomForm = function( roomid ) {
@@ -118,7 +122,7 @@
         angular.element('#valerr').text('');
         $http({
           method  : 'GET',
-          url     : uriprefix + '/config/room/' + params.editRoomId
+          url     : uriprefix + '/config/room/' + params.editRoomId + '/edit'
         })
         .success(function(data) {
           if ( data.status === 'ok' ) {
@@ -160,18 +164,33 @@
           // バリデーション
           //    現在なし
           // 実行
+          var finalcb;
+          if ( location.toString().split('/').pop() == 'list' ) {
+            finalcb = function() { $scope.getRoomList(); };
+          }
           doJsonPost( $http, uriprefix + '/config/room/' + $scope.room.roomid + '/edit',
                       $.param($scope.room), $uibModalInstance, $uibModal,
-                      function() { $scope.getRoomList(); } );
+                      finalcb );
         };
         // 削除実施
         $scope.roomDoDel = function() {
           // 二重クリック回避
           angular.element('#roomapplybtn').attr('disabled', 'disabled');
           angular.element('#roomdelbtn').attr('disabled', 'disabled');
+          var finalcb;
+          if ( location.toString().split('/').pop() == 'list' ) {
+            finalcb = function() { $scope.getRoomList(); };
+          }
+          else {
+            finalcb = function(stat) {
+                if ( stat === 'del' ) {
+                    location = uriprefix + '/config/room/list';
+                }
+            };
+          }
           doJsonPost( $http, uriprefix + '/config/room/' + $scope.room.roomid + '/del',
                       undefined, $uibModalInstance, $uibModal,
-                      function() { $scope.getRoomList(); } );
+                      finalcb );
         };
       }
     ]
