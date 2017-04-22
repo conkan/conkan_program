@@ -135,10 +135,18 @@
 }
 
 .relinfotitle {
-    background-color:#f8f8f8;
+    background-color:#f3f3f3;
 }
 
 .relinfotitle th {
+    text-align:center;
+}
+
+.relinfosubtitle {
+    background-color:#fafafa;
+    font-size:0.8em;
+}
+.relinfosubtitle th {
     text-align:center;
 }
 

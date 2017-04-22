@@ -109,16 +109,14 @@
           <col class="col-sm-2">
           <col class="col-sm-2">
         </colgroup>
-        <thead>
-          <tr class="relinfotitle">
-            <th>企画ID</th>
-            <th>企画名</th>
-            <th colspan="4">実施日時</th>
-          </tr>
-        </thead>
         [% USE date = date(format = '%Y/%m/%d') %]
         <tbody>
           [% FOREACH prog = ExProgram %]
+            <tr class="relinfotitle">
+              <th>企画ID</th>
+              <th>企画名</th>
+              <th colspan="4">実施日時</th>
+            </tr>
             <tr>
               <td>[% prog.regpgid.regpgid %]</td>
               <td><a href="[% uriprefix %]/program/[% prog.pgid %]">
@@ -141,7 +139,7 @@
                 [% END %]
               </td>
             </tr>
-            <tr class="relinfotitle">
+            <tr class="relinfosubtitle">
               <th style="text-align:right;">機材要望</th>
               <th>機材名</th>
               <th>数量</th>
@@ -159,7 +157,7 @@
                 <td>[% regequip.eif %]</td>
               </tr>
             [% END %]
-            <tr class="relinfotitle">
+            <tr class="relinfosubtitle">
               <th style="text-align:right;">決定機材</th>
               <th>機材名</th>
               <th>機材番号</th>
