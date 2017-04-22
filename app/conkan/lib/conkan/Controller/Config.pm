@@ -602,7 +602,7 @@ sub room_base : Chained('') : PathPart('config/room') : CaptureArgs(0) {
 =cut
 
 my %NetTrn = (
-    'NORM'  => '無',
+    'NONE'  => '無',
     'W'     => '無線',
     'E'     => '有線',
 );
@@ -710,7 +710,9 @@ sub room_detail : Chained('room_show') : PathPart('') : Args(0) {
                 )
             ];
         # 企画開始終了時刻変換
-        $c->forward('/program/_trnSEtime', [ $c->stash->{'ExProgram'}, ], );
+        foreach my $prg ( @{$c->stash->{'ExProgram'}} ) {
+            $c->forward('/program/_trnSEtime', [ $prg, ], );
+        }
     } catch {
         my $e = shift;
         $c->forward( '_dberror', [ $e, $errmsg ] );
