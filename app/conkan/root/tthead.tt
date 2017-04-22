@@ -42,7 +42,7 @@
 <link rel="shortcut icon" type="image/x-icon" href="[% uriprefix %]/static/favicon.ico" />
 </head>
 
-<body style="padding-top:200px;">
+<body style="padding-top:109px;">
 <div class="navbar navbar-default navbar-fixed-top" id="navbar">
   <div class="container-fluid">
     <header class="header">[% headerlogo %]</header>
