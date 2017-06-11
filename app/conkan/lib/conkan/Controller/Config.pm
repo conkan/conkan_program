@@ -1291,10 +1291,9 @@ sub equip_detail : Chained('equip_show') : PathPart('') : Args(0) {
             my $equipid = $rs->equipid();
             $c->stash->{'ExProgram'} = 
                 [ $c->model('ConkanDB::PgProgram')->search(
-                        { 'me.pgid' => 'pgs_equip.pgid' },
+                        { 'pgs_equip.equipid' => $equipid },
                         { 
-                            'join'      => 'pgs_equip',
-                            '+having'   => { 'pgs_equip.equipid' => $equipid },
+                            'join'  => 'pgs_equip',
                             'order_by' => { '-asc' => ['date1', 'stime1'] },
                         }
                     )
