@@ -1287,7 +1287,6 @@ sub equip_detail : Chained('equip_show') : PathPart('') : Args(0) {
             $c->stash->{'EquipInfo'} ->{'roomname'} = undef;
             # 設置場所未指定時は
             # この機材を決定機材にしている企画一覧
-            # !!! うーん 二段階にするか・・・
             my $equipid = $rs->equipid();
             $c->stash->{'ExProgram'} = 
                 [ $c->model('ConkanDB::PgProgram')->search(
