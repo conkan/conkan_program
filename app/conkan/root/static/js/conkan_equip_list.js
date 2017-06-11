@@ -9,7 +9,59 @@
   conkanAppModule.controller( 'equipListController',
     [ '$scope', '$sce', '$http', '$uibModal',
       function( $scope, $sce, $http, $uibModal ) {
-        // 初期値設定
+
+        $scope.__getEquipname = function( equipid, name ) {
+          var cont = '<a href="' + equipid + '">' + name + '</a>';
+          var wkstr = $sce.trustAsHtml( cont );
+          return wkstr;
+        };
+        $scope.equipgrid = {
+          enableFiltering: false,
+          enableSorting: true,
+          treeRowHeaderAlwaysVisible: false,
+          enableColumnResizing: true,
+          enableGridMenu: false,
+        };
+
+        $scope.equipgrid.columnDefs = [
+          { name : '名称', field: 'equipid',
+                headerCellClass: 'gridheader',
+                cellClass: 'ui-grid-vcenter',
+                width: "30%",
+                enableHiding: false,
+                cellTemplate: '<div ng-bind-html="grid.appScope.__getEquipname'
+                        + '(row.entity.equipid, row.entity.name)"></div>',
+          },
+          { name : '機材番号', field: 'equipno',
+              headerCellClass: 'gridheader',
+              cellClass: function(grid, row)
+                  { return uiGetCellCls(row.entity.rmdate); },
+              enableHiding: false,
+          },
+          { name : '配置場所', field: 'room',
+              headerCellClass: 'gridheader',
+              width: "24%",
+              cellClass: function(grid, row)
+                  { return uiGetCellCls(row.entity.rmdate); },
+              enableHiding: false,
+          },
+              // 配置場所未指定の場合、決定機材にしている企画の数
+              // 配置場所指定の場合、その場所を実施場所にしている企画数
+          { name : '使用企画数', field: 'progcnt',
+              headerCellClass: 'gridheader',
+              cellClass: function(grid, row)
+                  { return uiGetCellCls(row.entity.rmdate); },
+              enableHiding: false,
+          },
+          { name : '仕様', field: 'spec',
+              headerCellClass: 'gridheader',
+              width: "24%",
+              cellClass: function(grid, row)
+                  { return uiGetCellCls(row.entity.rmdate); },
+              enableHiding: false,
+          },
+        ];
+        // 機材一覧取得
         $scope.getEquipList = function() {
           $http( {
             method  : 'GET',
@@ -26,61 +78,10 @@
           })
           .error( function() { httpfailDlg( $uibModal ); } );
         };
-        $scope.getEquipList();
 
-        $scope.equipgrid = {
-          enableFiltering: false,
-          enableSorting: true,
-          treeRowHeaderAlwaysVisible: false,
-          enableColumnResizing: true,
-          enableGridMenu: false,
-        };
-
-        $scope.equipgrid.columnDefs = [
-          { name : '名称', field: 'name',
-                headerCellClass: 'gridheader',
-                width: "30%",
-                cellClass: function(grid, row)
-                    { return uiGetCellCls(row.entity.rmdate); },
-                enableHiding: false,
-          },
-          { name : '機材番号', field: 'equipno',
-              headerCellClass: 'gridheader',
-              width: "12%",
-              cellClass: function(grid, row)
-                  { return uiGetCellCls(row.entity.rmdate); },
-              enableHiding: false,
-          },
-          { name : '配置場所', field: 'room',
-              headerCellClass: 'gridheader',
-              width: "24%",
-              cellClass: function(grid, row)
-                  { return uiGetCellCls(row.entity.rmdate); },
-              enableHiding: false,
-          },
-          { name : '仕様', field: 'spec',
-              headerCellClass: 'gridheader',
-              width: "30%",
-              cellClass: function(grid, row)
-                  { return uiGetCellCls(row.entity.rmdate); },
-              enableHiding: false,
-          },
-          { name : '', field: 'equipid',
-              headerCellClass: 'gridheader nogridmenu',
-              cellClass: function(grid, row)
-                  { return uiGetCellCls(row.entity.rmdate); },
-              enableSorting: false,
-              enableHiding: false,
-              cellTemplate: '<div class="gridcelbtn">'
-                          + '<button ng-if="row.entity.rmdate"'
-                          +   'type="button" class="btn btn-xs">無効</button>'
-                          + '<button ng-if="!row.entity.rmdate"'
-                          +   'type="button" class="btn btn-xs btn-primary" '
-                          +   'ng-click="grid.appScope.openAllEquipForm'
-                          +   '(row.entity.equipid)">編集</button>'
-                          + '</div>'
-          },
-        ];
+        if ( location.toString().split('/').pop() == 'list' ) {
+            $scope.getEquipList();
+        }
 
         // 機材詳細更新追加ダイアログ
         $scope.openAllEquipForm = function( equipid ) {

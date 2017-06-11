@@ -30,7 +30,7 @@ END -%]
       <a href="#cast"><h5>決定出演者</h5></a>
     </div>
     <div class="col-sm-2 [% bgcolor.reg_equip %] text-center">
-      <a href="#reg_equip"><h5>要望機材</h5></a>
+      <a href="#reg_equip"><h5>機材要望</h5></a>
     </div>
     <div class="col-sm-2 [% bgcolor.equip %] text-center">
       <a href="#equip"><h5>決定機材</h5></a>
@@ -309,7 +309,7 @@ END -%]
         </tbody>
       </table>
     </div> <!-- END of 決定出演者 -->
-    <!-- 要望機材 -->
+    <!-- 機材要望 -->
     <div class="well" id="reg_equip">
       [% subtag( { 'reg_equip' => 'bg-info' } ) %]
       <table class="table table-bordered table-condensed"
@@ -365,7 +365,7 @@ END -%]
           [% END %]
         </tbody>
       </table>
-    </div> <!-- END of 要望機材 -->
+    </div> <!-- END of 機材要望 -->
     <!-- 決定機材 -->
     <div class="well" id="equip">
       [% subtag( { 'equip' => 'bg-info' } ) %]

@@ -1,8 +1,8 @@
-<!-- 要望機材編集追加ダイアログ -->
+<!-- 機材要望編集追加ダイアログ -->
 <script type="text/ng-template" id="T_pgup_regequip">
   <div class="modal-header">
     <button type="button" class="close" ng-click="$close()" aria-hidden="true">×</button>
-    <h4 class="modal-title">要望機材</h4>
+    <h4 class="modal-title">機材要望</h4>
   </div>
   <div class="modal-body">
     <FORM method="POST" name="regequipform" class="form-horizontal" role="form" id="regequipform" novalidate>

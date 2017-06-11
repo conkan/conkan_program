@@ -67,7 +67,7 @@
           [%- IF cuRole == 'ROOT' || cuRole == 'PG' %]
             <li id="config_cast"><a href="[% uriprefix %]/config/cast/list">出演者管理</a></li>
             <li id="config_room"><a href="[% uriprefix %]/config/room/list">部屋一覧</a></li>
-            <li id="config_equip"><a href="[% uriprefix %]/config/equip/list">機材管理</a></li>
+            <li id="config_equip"><a href="[% uriprefix %]/config/equip/list">機材一覧</a></li>
             <li id="config_csv"><a href="[% uriprefix %]/config/csvout">CSV出力</a></li>
           [%- END -%]
           [%- IF pglistsel == 'ACT' %]

@@ -1181,12 +1181,27 @@ sub equip_listget : Chained('equip_base') : PathPart('listget') : Args(0) {
                      || ( $equipno eq 'bring-PC' )
             );
             my $rm  = $row->rmdate();
+            my $roomid =  $row->roomid();
+            my $equipid = $row->equipid();
+            my $room;
+            my $progcnt;
+            if ( $roomid ) {
+                $room = $row->roomid->name();
+                $progcnt = $c->model('ConkanDB::PgProgram')->search(
+                        { 'roomid' => $roomid->roomid } )->count;
+            }
+            else {
+                $room = undef;
+                $progcnt = $c->model('ConkanDB::PgEquip')->search(
+                        { 'equipid' => $equipid } )->count;
+            }
             push ( @data, {
                 'name'     => $row->name(),
                 'equipno'  => $equipno,
                 'spec'     => $row->spec(),
-                'room'    => ( $row->roomid() ) ? $row->roomid->name() : undef,
-                'equipid'  => $row->equipid(),
+                'room'     => $room,
+                'progcnt'  => $progcnt,
+                'equipid'  => $equipid,
                 'rmdate'   => +( defined( $rm ) ? $rm->strftime('%F %T') : '' ),
             } );
         }
