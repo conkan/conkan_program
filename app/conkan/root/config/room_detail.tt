@@ -115,7 +115,8 @@
             <tr class="relinfotitle">
               <th>企画ID</th>
               <th>企画名</th>
-              <th colspan="4">実施日時</th>
+              <th>ステータス</th>
+              <th colspan="3">実施日時</th>
             </tr>
             <tr>
               <td>[% prog.regpgid.regpgid %]</td>
@@ -126,7 +127,8 @@
                 prog.regpgid.name;
               END %]
               </a></td>
-              <td colspan="4">
+              <td>[% prog.status %]</td>
+              <td colspan="3">
                 [% IF prog.date1 %]
                   [% date.format(prog.date1) %]
                   [% prog.shour1 %]:[% prog.smin1 %]-
