@@ -1263,36 +1263,51 @@ sub equip_detail : Chained('equip_show') : PathPart('') : Args(0) {
         return;
     }
     try {
+        # 機材情報
         my $rs = $c->stash->{'rs'};
-        if ( $equipid != 0 ) {
-            $c->session->{'updtic'} = time;
-            $rs->update( { 
-                'updateflg' =>  $c->sessionid . $c->session->{'updtic'}
-            } );
-            $c->stash->{'json'} = {
-                equipid => $equipid,
-                name    => $rs->name(),
-                equipno => $rs->equipno(),
-                roomid  => ( $rs->roomid() ) ? $rs->roomid->roomid() : undef,
-                spec    => $rs->spec(),
-                comment => $rs->comment(),
-                suppliers => $rs->suppliers(),
-                rmdate  => $rs->rmdate(),
-                usecnt  => $c->stash->{'usecnt'},
-            };
+        my $roomid = $rs->roomid();
+        $c->stash->{'EquipInfo'} = $rs;
+        if ( $roomid ) {
+            $c->stash->{'EquipInfo'} ->{'roomname'} = $rs->roomid->name();
+            # 設置場所指定時は
+            # 設置場所が実施場所になっている企画一覧
+            $c->stash->{'ExProgram'} = 
+                [ $c->model('ConkanDB::PgProgram')->search(
+                        { 'me.roomid' => $rs->roomid->roomid() },
+                        { 
+                            'prefetch' => [ { 'pgs_equip' => 'equipid' }, 
+                                            { 'regpgid' => 'pg_regs_equip' },
+                                          ],
+                            'order_by' => { '-asc' => ['date1', 'stime1'] },
+                        }
+                    )
+                ];
         }
         else {
-            $c->stash->{'json'} = {
-                equipid => 0,
-                usecnt  => 0,
-            };
+            $c->stash->{'EquipInfo'} ->{'roomname'} = undef;
+            # 設置場所未指定時は
+            # この機材を決定機材にしている企画一覧
+            # !!! うーん 二段階にするか・・・
+            my $equipid = $rs->equipid();
+            $c->stash->{'ExProgram'} = 
+                [ $c->model('ConkanDB::PgProgram')->search(
+                        { 'me.pgid' => 'pgs_equip.pgid' },
+                        { 
+                            'join'      => 'pgs_equip',
+                            '+having'   => { 'pgs_equip.equipid' => $equipid },
+                            'order_by' => { '-asc' => ['date1', 'stime1'] },
+                        }
+                    )
+                ];
+        }
+        # 企画開始終了時刻変換
+        foreach my $prg ( @{$c->stash->{'ExProgram'}} ) {
+            $c->forward('/program/_trnSEtime', [ $prg, ], );
         }
     } catch {
         my $e = shift;
         $c->forward( '_dberror', [ $e, $errmsg ] );
     };
-    $c->component('View::JSON')->{expose_stash} = [ 'json', 'status' ];
-    $c->forward('conkan::View::JSON');
 }
 
 =head2 equip/*/edit
