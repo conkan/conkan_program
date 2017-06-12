@@ -129,7 +129,7 @@
         angular.element('#valerr').text('');
         $http({
           method  : 'GET',
-          url     : uriprefix + '/config/equip/' + params.editEquipId
+          url     : uriprefix + '/config/equip/' + params.editEquipId + '/edit'
         })
         .success(function(data) {
           if ( data.status === 'ok' ) {
@@ -147,9 +147,12 @@
             };
           }
           else {
+            var finalcb;
+            if ( location.toString().split('/').pop() == 'list' ) {
+              finalcb = function() { $scope.getEquipList(); };
+            }
             openDialog( data.status, data.json, $uibModal,
-                        $uibModalInstance,
-                        function() { $scope.getEquipList(); } );
+                        $uibModalInstance, finalcb );
           }
         })
         .error( function() { httpfailDlg( $uibModal ); } )
@@ -163,18 +166,32 @@
           // バリデーション
           //    現在なし
           // 実行
+          var finalcb;
+          if ( location.toString().split('/').pop() == 'list' ) {
+            finalcb = function() { $scope.getEquipList(); };
+          }
           doJsonPost( $http, uriprefix + '/config/equip/' + $scope.equip.equipid + '/edit',
                       $.param($scope.equip), $uibModalInstance, $uibModal,
-                      function() { $scope.getEquipList(); } );
+                      finalcb );
         };
         // 削除実施
         $scope.equipDoDel = function() {
           // 二重クリック回避
           angular.element('#equipapplybtn').attr('disabled', 'disabled');
           angular.element('#equipdelbtn').attr('disabled', 'disabled');
+          var finalcb;
+          if ( location.toString().split('/').pop() == 'list' ) {
+            finalcb = function() { $scope.getEquipList(); };
+          }
+          else {
+            finalcb = function(stat) {
+                if ( stat === 'del' ) {
+                    location = uriprefix + '/config/equip/list';
+                }
+            };
+          }
           doJsonPost( $http, uriprefix + '/config/equip/' + $scope.equip.equipid + '/del',
-                      undefined, $uibModalInstance, $uibModal,
-                      function() { $scope.getEquipList(); } );
+                      undefined, $uibModalInstance, $uibModal, finalcb );
         };
       }
     ]

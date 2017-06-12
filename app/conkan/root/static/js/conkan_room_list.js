@@ -148,9 +148,12 @@
             ];
           }
           else {
+            var finalcb;
+            if ( location.toString().split('/').pop() == 'list' ) {
+              finalcb = function() { $scope.getRoomList(); };
+            }
             openDialog( data.status, data.json, $uibModal,
-                        $uibModalInstance,
-                        function() { $scope.getRoomList(); } );
+                        $uibModalInstance, finalcb );
           }
         })
         .error( function() { httpfailDlg( $uibModal ); } )
@@ -189,8 +192,7 @@
             };
           }
           doJsonPost( $http, uriprefix + '/config/room/' + $scope.room.roomid + '/del',
-                      undefined, $uibModalInstance, $uibModal,
-                      finalcb );
+                      undefined, $uibModalInstance, $uibModal, finalcb );
         };
       }
     ]
