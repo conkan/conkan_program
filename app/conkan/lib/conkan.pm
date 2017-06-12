@@ -1,4 +1,4 @@
-package conkan;
+Package conkan;
 use Moose;
 use namespace::autoclean;
 
