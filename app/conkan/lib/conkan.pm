@@ -1,4 +1,4 @@
-package conkan;
+Package conkan;
 use Moose;
 use namespace::autoclean;
 
@@ -38,7 +38,7 @@ use Catalyst qw/
     Authentication
 /;
 
-our $VERSION = '1.2.17';
+our $VERSION = '1.2.18';
 
 sub getversion { return $VERSION }
 

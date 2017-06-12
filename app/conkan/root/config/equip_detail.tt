@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ja" ng-app="conkanEquipList">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="conkan Equip Detail">
+<meta name="author" content="Studio REM">
+<title>Conkan Equip Detail</title>
+[%- SET self_li_id = 'config_equip' -%]
+[%- SET useUiGrid  = 1 -%]
+[%- PROCESS 'tthead.tt' -%]
+<div class="container" ng-controller="equipListController">
+  <div id="detailwrap">
+    <!-- 機材情報 -->
+    <div class="well" id="equip_info">
+      <div class="h4 col-sm-2 text-center">機材情報</div>
+      <table class="table table-bordered table-condensed"
+       style="background-color:white;">
+        <colgroup>
+          <col class="col-sm-1">
+          <col class="col-sm-5">
+          <col class="col-sm-1">
+          <col class="col-sm-5">
+        </colgroup>
+        <tbody class="ral">
+          <tr>
+            <th>名称</th>
+            <td>[% EquipInfo.name %]</td>
+            <th>機材番号</th>
+            <td>[% EquipInfo.equipno %]</td>
+          </tr>
+          <tr>
+            <th>設置場所</th>
+                <!-- 指定していない場合は空白 -->
+            <td colspan="3">[% EquipInfo.roomname %]</td>
+          <tr>
+            <th>仕様</th>
+            <td colspan="3">[% EquipInfo.spec %]</td>
+          </tr>
+          <tr>
+            <th>補足</th>
+            <td colspan="3">[% EquipInfo.comment %]</td>
+          </tr>
+          <tr>
+            <th>調達先</th>
+            <td colspan="2">[% EquipInfo.suppliers %]</td>
+            <td align="center">
+              <button type="button" class="btn btn-primary"
+                data-toggle="modal" data-target="#editEquip"
+                ng-click="openAllEquipForm( [% EquipInfo.equipid %])">
+                編集
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <!-- 使用企画 -->
+        <!-- 設置場所 未指定時
+                 この機材を決定機材にしている企画一覧
+             設置場所 指定時
+                 設置場所が実施場所になっている企画一覧 -->
+    <div class="well" id="ex_program">
+      <div class="h4 bold col-sm-2 text-center">使用企画</div>
+      <table class="table table-bordered table-condensed"
+       style="background-color:white;">
+        <colgroup>
+          <col class="col-sm-1">
+          <col class="col-sm-3">
+          <col class="col-sm-2">
+          <col class="col-sm-2">
+          <col class="col-sm-2">
+          <col class="col-sm-2">
+        </colgroup>
+        [% USE date = date(format = '%Y/%m/%d') %]
+        <tbody>
+          [% FOREACH prog = ExProgram %]
+            <tr class="relinfotitle">
+              <th>企画ID</th>
+              <th>企画名</th>
+              <th>ステータス</th>
+              <th colspan="3">実施日時</th>
+            </tr>
+            <tr>
+              <td>[% prog.regpgid.regpgid %]</td>
+              <td><a href="[% uriprefix %]/program/[% prog.pgid %]">
+              [% IF prog.sname;
+                prog.sname;
+              ELSE;
+                prog.regpgid.name;
+              END %]
+              </a></td>
+              <td>[% prog.status %]</td>
+              <td colspan="3">
+                [% IF prog.date1 %]
+                  [% date.format(prog.date1) %]
+                  [% prog.shour1 %]:[% prog.smin1 %]-
+                  [% prog.ehour1 %]:[% prog.emin1 %]
+                [% END %]
+                [% IF prog.date2 %]
+                  [% date.format(prog.date2) %]
+                  [% prog.shour2 %]:[% prog.smin2 %]-
+                  [% prog.ehour2 %]:[% prog.emin2 %]
+                [% END %]
+              </td>
+            </tr>
+            <tr class="relinfosubtitle">
+              <th style="text-align:right;">機材要望</th>
+              <th>機材名</th>
+              <th>数量</th>
+              <th>映像接続</th>
+              <th>音声接続</th>
+              <th>LAN接続</th>
+            </tr>
+            [% FOREACH regequip = prog.regpgid.pg_regs_equip %]
+              <tr>
+                <td></td>
+                <td>[% regequip.name %]</td>
+                <td>[% regequip.count %]</td>
+                <td>[% regequip.vif %]</td>
+                <td>[% regequip.aif %]</td>
+                <td>[% regequip.eif %]</td>
+              </tr>
+            [% END %]
+          [% END %]
+        </tbody>
+      </table>
+    </div> <!-- END of 使用企画 -->
+  </div>
+  [%- PROCESS 'config/T_equip_detail.tt' -%]
+  [%- PROCESS 'T_httpget_result.tt' -%]
+</div> <!-- End of container ng-app "conkanEquipList -->
+[%- PROCESS 'tttail.tt' -%]
+<script type="text/javascript">var uriprefix="[% uriprefix %]";</script>
+<script type="text/javascript" src="[% uriprefix %]/static/js/conkan_equip_list.js"></script>
+</body>
+</html>
