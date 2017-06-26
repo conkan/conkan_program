@@ -878,7 +878,7 @@
                 name = name.substring(0, 19) + '...';
               }
               $scope.pgsellist[i] = {
-                'id'  : data.json[i].pgid,
+                'id'  : "" + data.json[i].pgid + "", // 選択肢が文字列となる
                 'val' : name,
               };
             }
