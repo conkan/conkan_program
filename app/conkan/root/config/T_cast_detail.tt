@@ -15,8 +15,8 @@
       <table class="table table-bordered table-condensed">
         <colgroup>
           <col class="col-sm-2">
-          <col class="col-sm-4">
-          <col class="col-sm-2">
+          <col class="col-sm-3">
+          <col class="col-sm-3">
           <col class="col-sm-4">
         </colgroup>
         <tbody class="ral">

@@ -1007,6 +1007,44 @@ sub cast_detail : Chained('cast_show') : PathPart('') : Args(0) {
                 restdate    => $rs->restdate(),
                 rmdate      => $rs->rmdate(),
             };
+            # 出演する企画
+            my $castrows = [
+                $c->model('ConkanDB::PgCast')->search(
+                    { 'me.castid'    => $castid, },
+                    {
+                        'prefetch'     => [ { 'pgid' => 'roomid' },
+                                            { 'pgid' => 'regpgid' },],
+                        'order_by'     => { '-asc' => 'pgid.regpgid' }
+                    }
+                )
+            ];
+            my @pglist;
+            for my $castrow (@$castrows) {
+                my $pgdate = '';
+                my $dtmH = $c->forward('/program/_trnDateTime4csv',
+                        [ $castrow->pgid, ], );
+                if ( $dtmH->{'dates'} ) {
+                    for ( my $i=0; $i<scalar(@{$dtmH->{'dates'}}); $i++ ) {
+                        $pgdate .= ' ' if $pgdate;
+                        $pgdate .= $dtmH->{'dates'}->[$i] . ' '
+                                . +( $dtmH->{'stms'}->[$i] )
+                                . '-'
+                                . +( $dtmH->{'etms'}->[$i] );
+                    }
+                }
+                my $room = $castrow->pgid->roomid
+                            ? $castrow->pgid->roomid->name()
+                            : '';
+                push( @pglist, {
+                        'pgno'   => $castrow->pgid->regpgid->regpgid(),
+                        'pgname' => $castrow->pgid->regpgid->name(),
+                        'status' => $castrow->pgid->status() || '',
+                        'room'   => $room,
+                        'date'   => $pgdate,
+                    }
+                );
+            }
+            $c->stash->{'json'}->{'pglist'} = \@pglist;
         }
         else {
             $c->stash->{'json'} = {
