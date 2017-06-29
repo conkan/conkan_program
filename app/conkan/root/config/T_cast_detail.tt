@@ -60,6 +60,37 @@
         </tbody>
       </table>
     </FORM>
+    <div class="well" id="ex_program">
+      <div class="h4 bold col-sm-2 text-center">出演企画</div>
+      <table class="table table-bordered table-condensed"
+       style="background-color:white;">
+        <colgroup>
+          <col class="col-sm-1">
+          <col class="col-sm-4">
+          <col class="col-sm-2">
+          <col class="col-sm-2">
+          <col class="col-sm-3">
+        </colgroup>
+        <tbody>
+          <tr class="relinfotitle">
+            <th>企画ID</th>
+            <th>企画名</th>
+            <th>ステータス</th>
+            <th>場所</th>
+            <th>実施日時</th>
+          </tr>
+          <tr ng-repeat="prog in pglist">
+            <td>{{prog.pgno}}</td>
+            <td><a href="[% uriprefix %]/program/{{prog.pgid}}">
+              {{prog.pgname}}
+            </a></td>
+            <td>{{prog.status}}</td>
+            <td>{{prog.room}}</td>
+            <td>{{prog.date}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div> <!-- END of 使用企画 -->
   </div>
   <div class="modal-footer">
     <button class="btn btn-default" ng-click="$close()">閉じる</button>

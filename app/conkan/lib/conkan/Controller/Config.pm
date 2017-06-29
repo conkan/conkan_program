@@ -1035,9 +1035,14 @@ sub cast_detail : Chained('cast_show') : PathPart('') : Args(0) {
                 my $room = $castrow->pgid->roomid
                             ? $castrow->pgid->roomid->name()
                             : '';
+
+                my $pgname = $castrow->pgid->sname()
+                          || $castrow->pgid->regpgid->name();
+
                 push( @pglist, {
+                        'pgid'   => $castrow->pgid->pgid(),
                         'pgno'   => $castrow->pgid->regpgid->regpgid(),
-                        'pgname' => $castrow->pgid->regpgid->name(),
+                        'pgname' => $pgname,
                         'status' => $castrow->pgid->status() || '',
                         'room'   => $room,
                         'date'   => $pgdate,
