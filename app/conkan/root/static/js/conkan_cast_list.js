@@ -149,6 +149,7 @@
               rmdate    : data.json.rmdate,
             };
             $scope.statlist = data.json.statlist;
+            $scope.pglist   = data.json.pglist;
           }
           else {
             openDialog( data.status, data.json, $uibModal );
