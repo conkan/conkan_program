@@ -1725,12 +1725,11 @@ sub csvout :Local {
     $conf->{'pg_status'} = from_json($M->find('pg_status_vals')->pg_conf_value());
     $conf->{'ct_status'} = from_json($M->find('contact_status_vals')->pg_conf_value());
     $conf->{'cast_status'} = from_json($M->find('cast_status_vals')->pg_conf_value());
+    $conf->{'cast_actstat'} = from_json($M->find('cast_active_status')->pg_conf_value());
+    my %cast_actchk = map { $_ => 1 } @{$conf->{'cast_actstat'}};
     $conf->{'func_is_guest'} = sub { return $_[0] =~ $QR_GUEST };
     $conf->{'func_need_plate'} = sub { return (
-                $_[0] =~ $QR_SYUTUEN
-             || $_[0] =~ $QR_URAKATA
-             || $_[0] =~ $QR_KYAKSKI
-             || $_[0] =~ $QR_TRANCE
+                $cast_actchk{$_[0]}
          )};
     $c->stash->{'conf'} = $conf;
 }
@@ -1758,8 +1757,10 @@ sub invitate : Chained('csvdl_base') : PathPart('invitate') : Args(0) {
               
     my $condval = $c->request->body_params->{'ct_status'};
     my $get_status = ( ref($condval) eq 'ARRAY' ) ? $condval : [ $condval ];
-    push ( @$get_status, \'IS NULL' )
-        if exists( $c->request->body_params->{'ct_null_stat'} );
+    if ( exists( $c->request->body_params->{'ct_null_stat'} ) ) {
+        push ( @$get_status, \'IS NULL' );
+        push ( @$get_status, '' );
+    }
     # 指定のコンタクトステータスで抽出
     my $rows = [
         $c->model('ConkanDB::PgAllCast')->search(
@@ -1788,6 +1789,13 @@ $c->log->debug('>>> ' . 'cast cnt : ' . scalar(@$rows) );
         $c->model('ConkanDB::PgSystemConf')->find('pg_active_status')
             ->pg_conf_value()
     );
+    my $castactval = $c->request->body_params->{'cast_status'};
+    my $cast_status = ( ref($castactval) eq 'ARRAY' ) ? $castactval
+                                                      : [ $castactval ];
+    if ( exists( $c->request->body_params->{'cast_null_stat'} ) ) {
+        push ( @$cast_status, \'IS NULL' );
+        push ( @$cast_status, '' );
+    }
     for my $row (@$rows) {
        next unless  $row->get_column('pgcnt'),
 
@@ -1799,6 +1807,7 @@ $c->log->debug('>>> ' . 'cast cnt : ' . scalar(@$rows) );
                {
                  'me.castid'    => $castid,
                  'pgid.status'  => $actpgsts,
+                 'me.status'    => $cast_status,
                },
                {
                  'prefetch'     => [ { 'pgid' => 'roomid' },
@@ -1809,6 +1818,7 @@ $c->log->debug('>>> ' . 'cast cnt : ' . scalar(@$rows) );
         ];
         next unless scalar(@$castrows);
 
+$c->log->debug('>>> ' . 'cast name : ' . $castname );
         my @onedata = ( $castname . $__DEARSTR__ );
         for my $castrow (@$castrows) {
             my $pgname = $__PGNAMESTR__
@@ -2173,6 +2183,10 @@ $c->log->debug('>>> ' . 'program cnt : ' . scalar(@$rows) );
             '出演者<ステータス>',
         ]
     );
+    
+    my $M = $c->model('ConkanDB::PgSystemConf');
+    my %cast_actstatchk =
+        map { $_ => 1 } @{from_json($M->find('cast_active_status')->pg_conf_value())};
     for my $row (@$rows) {
         my $pgname = $row->regpgid->name();
         my $regpgid = $row->regpgid->regpgid();
@@ -2196,10 +2210,7 @@ $c->log->debug('>>> ' . 'program cnt : ' . scalar(@$rows) );
             my $cast_name = $castrow->name() || $castrow->castid->name();
             my $cast_stat = $castrow->status();
             next unless ( $cast_stat );
-            if (    $cast_stat =~ $QR_SYUTUEN
-                ||  $cast_stat =~ $QR_URAKATA
-                ||  $cast_stat =~ $QR_KYAKSKI
-                ||  $cast_stat =~ $QR_TRANCE ) {
+            if ( $cast_actstatchk{$cast_stat} ) {
                 $castdata .= "\r\n" if ( $castdata );
                 $castdata .= $cast_name . '<' . $cast_stat . '>';
             }
