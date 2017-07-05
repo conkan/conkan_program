@@ -114,7 +114,8 @@ sub setting :Local {
             my @items = qw/
                 dates               start_hours         end_hours
                 pg_status_vals      pg_status_color     pg_active_status
-                cast_status_vals    contact_status_vals def_regEquip
+                cast_status_vals    cast_active_status  contact_status_vals
+                def_regEquip
             /;
             foreach my $item ( @items ) {
                 $c->stash->{'json'}->{$item} = $pHconf->{$item};

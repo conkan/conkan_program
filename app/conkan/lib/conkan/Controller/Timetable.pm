@@ -42,6 +42,8 @@ sub index :Path :Args(0) {
         };
         $c->stash->{'syscon'} = $syscon;
         $c->stash->{'scale_hash'} = from_json( $syscon->{'gantt_scale_str'} );
+        $c->stash->{'cast_active_stat'} =
+                from_json( $M->find('cast_active_status')->pg_conf_value() );
         # 未設定企画リスト
         my $unsetPgmlist =
             [ $c->model('ConkanDB::PgProgram')->search(
@@ -123,12 +125,16 @@ sub index :Path :Args(0) {
             ];
         my @castlist = ();
         my %castduplchk = ();
+        my %cast_actchk = map { $_ => 1 } @{$c->stash->{'cast_active_stat'}};
         foreach my $pgm ( @$castPgmlist ) {
             my $doperiod = __PACKAGE__->_createPeriod( $c, $pgm );
             my $pgname = $pgm->sname() || $pgm->regpgid->name();
             $pgname =~ s/\n//g;
             foreach my $cast ( $pgm->pg_casts->all() ) {
                 my $castid = $cast->castid->castid(); # castidは必ずある
+                my $caststat = $cast->status();
+                next unless $caststat;
+                next unless $cast_actchk{$caststat};
                 my $pgitem = {
                     'regno'         => $cast->castid->regno(),
                     'castname'      => $cast->name() || $cast->castid->name(),
