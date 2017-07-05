@@ -38,7 +38,7 @@ use Catalyst qw/
     Authentication
 /;
 
-our $VERSION = '1.2.20';
+our $VERSION = '1.2.21';
 
 sub getversion { return $VERSION }
 
