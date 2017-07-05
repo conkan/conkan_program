@@ -64,8 +64,15 @@
           <tr>
             <th>{{conf.cast_status_vals.pg_conf_name}}</th>
             <td>
-              <textarea name="cast_status_vals" class="col-sm-12" required
+              <textarea name="cast_status_vals" class="col-sm-12" rows="3" required
                ng-model="conf.cast_status_vals.pg_conf_value"></textarea>
+            </td>
+          </tr>
+          <tr>
+            <th>{{conf.cast_active_status.pg_conf_name}}</th>
+            <td>
+              <textarea name="cast_active_status" class="col-sm-12" required
+               ng-model="conf.cast_active_status.pg_conf_value"></textarea>
             </td>
           </tr>
           <tr>
